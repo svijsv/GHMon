@@ -1,0 +1,14 @@
+/*
+* Voltage-to-temperature (Fahrenheit) lookup table
+* Valid for any thermistor with a beta coefficient of 3950 and a series
+* resistor equal to it's resistance at the reference temperature
+*/
+{ .min = 871, .max = 2689, .Vref = 3300, .scale = 100, .table = {
+   // min: 871.42mV max: 2689.42mV step: 202.00mV scale: 100.00
+   // Tref: 298.15C Rref: 10000.00R beta: 3950.00
+   // Vcc: 3300mV Rseries: 10000.00R
+   12200 /* 871.42mV*/,  10827 /* 1073.42mV*/,   9639 /* 1275.42mV*/,   8564 /* 1477.42mV*/,
+    7555 /* 1679.42mV*/,   6580 /* 1881.42mV*/,   5605 /* 2083.42mV*/,   4600 /* 2285.42mV*/,
+    3520 /* 2487.42mV*/,   2298 /* 2689.42mV*/,
+ }
+},

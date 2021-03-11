@@ -1,0 +1,3 @@
+FatFS is modified to use C string.h functions when USE_CLIB_STRING is set
+
+xprintf is modified to export xvfprintf() and to not use C string.h functions unless USE_CLIB_STRING is set

@@ -1,0 +1,9 @@
+{
+	"name": "ulib",
+	"version": "1.0.0",
+	"description": "Library of basic functions",
+	"build": {
+		"flags": "-DUSE_MONOLITHIC_ULIB=0 -DUSE_XPRINTF_PRINTF=1 -I../../src",
+		"srcFilter": "+<*> -<*/monolith.c>"
+	}
+}

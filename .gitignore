@@ -1,0 +1,12 @@
+.pio
+platformio-device-monitor-*
+*.sch-bak
+
+/todo
+/temp
+
+/config/config.h
+/config/advanced.h
+/config/sensors.c
+/config/tables.c
+/config/controllers.c
