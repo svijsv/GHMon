@@ -3,7 +3,7 @@ import subprocess
 from datetime import datetime
 
 try:
-	version = subprocess.check_output(["git", "describe", "--always"]).strip()
+	version = subprocess.check_output(["git", "describe", "--tags", "--always"]).strip()
 except:
 	version = "0000000"
 
