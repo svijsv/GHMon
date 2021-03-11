@@ -17,8 +17,8 @@
 *                                                                      *
 *                                                                      *
 ***********************************************************************/
-// adc.h
-// Manage the ADC peripheral
+// time.h
+// Manage the time-keeping peripherals
 // NOTES:
 //   Prototypes for most of the related functions are in interface.h
 //
@@ -26,8 +26,8 @@
 #ifdef __cplusplus
  extern "C" {
 #endif
-#ifndef _PLATFORM_STSTM32_ADC_H
-#define _PLATFORM_STSTM32_ADC_H
+#ifndef _PLATFORM_CMSIS_TIME_H
+#define _PLATFORM_CMSIS_TIME_H
 
 /*
 * Includes
@@ -39,7 +39,17 @@
 /*
 * Static values
 */
+// Set the number of ticks per millisecond for 16 bit timers
+// At PCLK1 speeds >~65MHz with a PCLK1 prescaler of 1 or PCLK1 speeds >~32MHz
+// with any other PCLK1 prescaler the 16 bit timer prescaler would overflow if
+// the ratio were kept at 1.
+// Increasing this decreases the maximum duration proportionately.
+// Must be at least 1.
+#define TIM_MS_PERIOD 1
 
+// The EXTI line used for the RTC alarm; 17 on STM32F103
+#define RTC_ALARM_EXTI_LINE_Pos 17
+#define RTC_ALARM_EXTI_LINE (1 << RTC_ALARM_EXTI_LINE_Pos)
 
 /*
 * Types
@@ -47,27 +57,23 @@
 
 
 /*
-* Variable declarations (defined in adc.c)
+* Variable declarations (defined in time.c)
 */
-// Frequency of the ADC bus
-extern uint32_t G_freq_ADC;
 
 
 /*
-* Function prototypes (defined in adc.c)
+* Function prototypes (defined in time.c)
 */
-// Initialize the ADC peripheral
-void adc_init(void);
+// Initialize the time-keeping peripherals
+void time_init(void);
 
-// Return the analog voltage reference value and the MCU's internal temperature
-// sensor
-// vref is measured in millivolts
-// tempCx10 is measured in degrees celsius * 10
-// The internal temperature sensor isn't very accurate; the reference manual
-// claims it varies by 45C between chips due to process differences.
-// If ADCx isn't ADC1, this will always return 3300V and 0C.
-// Both arguments are mandatory.
-// void adc_read_internals(int16_t *vref, int16_t *tempCx10);
+// Set the sleep alarm
+void set_sleep_alarm(uint16_t ms);
+void stop_sleep_alarm(void);
+// Set the RTC alarm
+// time is the number or seconds in the future when the alarm is triggered
+void set_RTC_alarm(utime_t time);
+void stop_RTC_alarm(void);
 
 
 /*
@@ -75,7 +81,7 @@ void adc_init(void);
 */
 
 
-#endif // _PLATFORM_STSTM32_ADC_H
+#endif // _PLATFORM_CMSIS_TIME_H
 #ifdef __cplusplus
  }
 #endif

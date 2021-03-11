@@ -17,8 +17,8 @@
 *                                                                      *
 *                                                                      *
 ***********************************************************************/
-// uart.h
-// Manage the UART peripheral
+// spi.h
+// Manage the SPI peripheral
 // NOTES:
 //   Prototypes for most of the related functions are in interface.h
 //
@@ -26,8 +26,8 @@
 #ifdef __cplusplus
  extern "C" {
 #endif
-#ifndef _PLATFORM_STSTM32_UART_H
-#define _PLATFORM_STSTM32_UART_H
+#ifndef _PLATFORM_CMSIS_SPI_H
+#define _PLATFORM_CMSIS_SPI_H
 
 /*
 * Includes
@@ -36,11 +36,14 @@
 #include "stm32f103.h"
 
 
-#if USE_SERIAL
-
 /*
 * Static values
 */
+// Target speed of the SPI bus; it will generally be somewhat higher due to
+// limitations on choices available.
+// Try to hit ~100KHz; speed's not overly important to us and the wiring isn't
+// necessarily reliable.
+#define SPI_SPEED 100000
 
 
 /*
@@ -49,17 +52,19 @@
 
 
 /*
-* Variable declarations (defined in uart.c)
+* Variable declarations (defined in spi.c)
 */
 
 
 /*
-* Function prototypes (defined in uart.c)
+* Function prototypes (defined in spi.c)
 */
-// Initialize the UART interface at the chosen baud rate
-// The interface is always configured as 8 data bits with 1 stop bit and no
-// parity bit with a baud rate of UART_BAUDRATE.
-err_t uart_init(void);
+#if USE_SPI
+// Initialize the SPI peripheral
+void spi_init(void);
+#else
+#define spi_init() ((void )0U)
+#endif
 
 
 /*
@@ -67,11 +72,7 @@ err_t uart_init(void);
 */
 
 
-#else // !USE_SERIAL
-# define uart_init() ((void )0U)
-#endif // USE_SERIAL
-
-#endif // _PLATFORM_STSTM32_UART_H
+#endif // _PLATFORM_CMSIS_SPI_H
 #ifdef __cplusplus
  }
 #endif

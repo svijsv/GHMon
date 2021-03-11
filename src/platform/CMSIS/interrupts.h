@@ -17,17 +17,16 @@
 *                                                                      *
 *                                                                      *
 ***********************************************************************/
-// spi.h
-// Manage the SPI peripheral
+// interrupts.h
+// Manage system IRQs
 // NOTES:
-//   Prototypes for most of the related functions are in interface.h
 //
 
 #ifdef __cplusplus
  extern "C" {
 #endif
-#ifndef _PLATFORM_STSTM32_SPI_H
-#define _PLATFORM_STSTM32_SPI_H
+#ifndef _PLATFORM_CMSIS_INTERRUPTS_H
+#define _PLATFORM_CMSIS_INTERRUPTS_H
 
 /*
 * Includes
@@ -39,11 +38,6 @@
 /*
 * Static values
 */
-// Target speed of the SPI bus; it will generally be somewhat higher due to
-// limitations on choices available.
-// Try to hit ~100KHz; speed's not overly important to us and the wiring isn't
-// necessarily reliable.
-#define SPI_SPEED 100000
 
 
 /*
@@ -52,19 +46,22 @@
 
 
 /*
-* Variable declarations (defined in spi.c)
+* Variable declarations (defined in interrupts.c)
 */
 
 
 /*
-* Function prototypes (defined in spi.c)
+* Function prototypes (defined in interrupts.c)
 */
-#if USE_SPI
-// Initialize the SPI peripheral
-void spi_init(void);
-#else
-#define spi_init() ((void )0U)
-#endif
+void NMI_Handler(void);
+void HardFault_Handler(void);
+void MemManage_Handler(void);
+void BusFault_Handler(void);
+void UsageFault_Handler(void);
+void SVC_Handler(void);
+void DebugMon_Handler(void);
+void PendSV_Handler(void);
+// void SysTick_Handler(void);
 
 
 /*
@@ -72,7 +69,7 @@ void spi_init(void);
 */
 
 
-#endif // _PLATFORM_STSTM32_SPI_H
+#endif // _PLATFORM_CMSIS_INTERRUPTS_H
 #ifdef __cplusplus
  }
 #endif

@@ -17,17 +17,17 @@
 *                                                                      *
 *                                                                      *
 ***********************************************************************/
-// gpio.h
-// Manage the GPIO peripheral
+// system.h
+// General platform initialization
 // NOTES:
-//   Prototypes for most of the related functions are in interface.h
+//   Prototypes for some of the related functions are in interface.h
 //
 
 #ifdef __cplusplus
  extern "C" {
 #endif
-#ifndef _PLATFORM_STSTM32_GPIO_H
-#define _PLATFORM_STSTM32_GPIO_H
+#ifndef _PLATFORM_CMSIS_SYSTEM_H
+#define _PLATFORM_CMSIS_SYSTEM_H
 
 /*
 * Includes
@@ -39,31 +39,43 @@
 /*
 * Static values
 */
+// Oscillator frequencies, named to mesh with the bus frequency variables
+// The reference manual gives a range of 30KHz-60KHz for the LSI
+#define G_freq_LSI 40000
+#define G_freq_HSI 8000000
+#define G_freq_HSE HSE_VALUE
+#define G_freq_LSE LSE_VALUE
 
 
 /*
 * Types
 */
-//
-// Most associated types are defined in interface.h
-//
 
 
 /*
-* Variable declarations (defined in gpio.c)
+* Variable declarations (defined in system.c)
 */
+// Bus frequencies
+extern uint32_t G_freq_HCLK;
+extern uint32_t G_freq_PCLK1;
+extern uint32_t G_freq_PCLK2;
 
 
 /*
-* Function prototypes (defined in gpio.c)
+* Function prototypes (defined in system.c)
 */
-// Initialize the GPIO peripherals
-void gpio_init(void);
+// Initialize/Enable/Disable one or more peripheral clocks
+void clock_init(__IO uint32_t *en_reg, __IO uint32_t *rst_reg, uint32_t enable_mask);
+void clock_enable(__IO uint32_t *reg, uint32_t enable_mask);
+void clock_disable(__IO uint32_t *reg, uint32_t enable_mask);
 
-// Get the operating mode of a pin
-// GPIO_MODE_RESET is returned as GPIO_MODE_IN
-// GPIO_MODE_HiZ is returned as GPIO_MODE_AIN
-//gpio_mode_t gpio_get_mode(pin_t pin);
+// Enable/Disable writes to backup-domain registers
+void BD_write_enable(void);
+void BD_write_disable(void);
+
+// Enable/Disable writes to RTC configuration registers
+err_t RTC_cfg_enable(utime_t timeout);
+err_t RTC_cfg_disable(utime_t timeout);
 
 
 /*
@@ -71,7 +83,7 @@ void gpio_init(void);
 */
 
 
-#endif // _PLATFORM_STSTM32_GPIO_H
+#endif // _PLATFORM_CMSIS_SYSTEM_H
 #ifdef __cplusplus
  }
 #endif

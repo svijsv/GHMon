@@ -17,16 +17,17 @@
 *                                                                      *
 *                                                                      *
 ***********************************************************************/
-// interrupts.h
-// Manage system IRQs
+// uart.h
+// Manage the UART peripheral
 // NOTES:
+//   Prototypes for most of the related functions are in interface.h
 //
 
 #ifdef __cplusplus
  extern "C" {
 #endif
-#ifndef _PLATFORM_STSTM32_INTERRUPTS_H
-#define _PLATFORM_STSTM32_INTERRUPTS_H
+#ifndef _PLATFORM_CMSIS_UART_H
+#define _PLATFORM_CMSIS_UART_H
 
 /*
 * Includes
@@ -34,6 +35,8 @@
 #include "config.h"
 #include "stm32f103.h"
 
+
+#if USE_SERIAL
 
 /*
 * Static values
@@ -46,22 +49,17 @@
 
 
 /*
-* Variable declarations (defined in interrupts.c)
+* Variable declarations (defined in uart.c)
 */
 
 
 /*
-* Function prototypes (defined in interrupts.c)
+* Function prototypes (defined in uart.c)
 */
-void NMI_Handler(void);
-void HardFault_Handler(void);
-void MemManage_Handler(void);
-void BusFault_Handler(void);
-void UsageFault_Handler(void);
-void SVC_Handler(void);
-void DebugMon_Handler(void);
-void PendSV_Handler(void);
-// void SysTick_Handler(void);
+// Initialize the UART interface at the chosen baud rate
+// The interface is always configured as 8 data bits with 1 stop bit and no
+// parity bit with a baud rate of UART_BAUDRATE.
+err_t uart_init(void);
 
 
 /*
@@ -69,7 +67,11 @@ void PendSV_Handler(void);
 */
 
 
-#endif // _PLATFORM_STSTM32_INTERRUPTS_H
+#else // !USE_SERIAL
+# define uart_init() ((void )0U)
+#endif // USE_SERIAL
+
+#endif // _PLATFORM_CMSIS_UART_H
 #ifdef __cplusplus
  }
 #endif

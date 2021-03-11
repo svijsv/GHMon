@@ -17,16 +17,17 @@
 *                                                                      *
 *                                                                      *
 ***********************************************************************/
-// system_info.h
-// Return information about the running system
+// gpio.h
+// Manage the GPIO peripheral
 // NOTES:
+//   Prototypes for most of the related functions are in interface.h
 //
 
 #ifdef __cplusplus
  extern "C" {
 #endif
-#ifndef _PLATFORM_STSTM32_SYSTEM_INFO_H
-#define _PLATFORM_STSTM32_SYSTEM_INFO_H
+#ifndef _PLATFORM_CMSIS_GPIO_H
+#define _PLATFORM_CMSIS_GPIO_H
 
 /*
 * Includes
@@ -43,16 +44,26 @@
 /*
 * Types
 */
+//
+// Most associated types are defined in interface.h
+//
 
 
 /*
-* Variable declarations (defined in system_info.c)
+* Variable declarations (defined in gpio.c)
 */
 
 
 /*
-* Function prototypes (defined in system_info.c)
+* Function prototypes (defined in gpio.c)
 */
+// Initialize the GPIO peripherals
+void gpio_init(void);
+
+// Get the operating mode of a pin
+// GPIO_MODE_RESET is returned as GPIO_MODE_IN
+// GPIO_MODE_HiZ is returned as GPIO_MODE_AIN
+//gpio_mode_t gpio_get_mode(pin_t pin);
 
 
 /*
@@ -60,7 +71,7 @@
 */
 
 
-#endif // _PLATFORM_STSTM32_SYSTEM_INFO_H
+#endif // _PLATFORM_CMSIS_GPIO_H
 #ifdef __cplusplus
  }
 #endif

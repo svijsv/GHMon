@@ -17,17 +17,17 @@
 *                                                                      *
 *                                                                      *
 ***********************************************************************/
-// system.h
-// General platform initialization
+// adc.h
+// Manage the ADC peripheral
 // NOTES:
-//   Prototypes for some of the related functions are in interface.h
+//   Prototypes for most of the related functions are in interface.h
 //
 
 #ifdef __cplusplus
  extern "C" {
 #endif
-#ifndef _PLATFORM_STSTM32_SYSTEM_H
-#define _PLATFORM_STSTM32_SYSTEM_H
+#ifndef _PLATFORM_CMSIS_ADC_H
+#define _PLATFORM_CMSIS_ADC_H
 
 /*
 * Includes
@@ -39,12 +39,6 @@
 /*
 * Static values
 */
-// Oscillator frequencies, named to mesh with the bus frequency variables
-// The reference manual gives a range of 30KHz-60KHz for the LSI
-#define G_freq_LSI 40000
-#define G_freq_HSI 8000000
-#define G_freq_HSE HSE_VALUE
-#define G_freq_LSE LSE_VALUE
 
 
 /*
@@ -53,29 +47,27 @@
 
 
 /*
-* Variable declarations (defined in system.c)
+* Variable declarations (defined in adc.c)
 */
-// Bus frequencies
-extern uint32_t G_freq_HCLK;
-extern uint32_t G_freq_PCLK1;
-extern uint32_t G_freq_PCLK2;
+// Frequency of the ADC bus
+extern uint32_t G_freq_ADC;
 
 
 /*
-* Function prototypes (defined in system.c)
+* Function prototypes (defined in adc.c)
 */
-// Initialize/Enable/Disable one or more peripheral clocks
-void clock_init(__IO uint32_t *en_reg, __IO uint32_t *rst_reg, uint32_t enable_mask);
-void clock_enable(__IO uint32_t *reg, uint32_t enable_mask);
-void clock_disable(__IO uint32_t *reg, uint32_t enable_mask);
+// Initialize the ADC peripheral
+void adc_init(void);
 
-// Enable/Disable writes to backup-domain registers
-void BD_write_enable(void);
-void BD_write_disable(void);
-
-// Enable/Disable writes to RTC configuration registers
-err_t RTC_cfg_enable(utime_t timeout);
-err_t RTC_cfg_disable(utime_t timeout);
+// Return the analog voltage reference value and the MCU's internal temperature
+// sensor
+// vref is measured in millivolts
+// tempCx10 is measured in degrees celsius * 10
+// The internal temperature sensor isn't very accurate; the reference manual
+// claims it varies by 45C between chips due to process differences.
+// If ADCx isn't ADC1, this will always return 3300V and 0C.
+// Both arguments are mandatory.
+// void adc_read_internals(int16_t *vref, int16_t *tempCx10);
 
 
 /*
@@ -83,7 +75,7 @@ err_t RTC_cfg_disable(utime_t timeout);
 */
 
 
-#endif // _PLATFORM_STSTM32_SYSTEM_H
+#endif // _PLATFORM_CMSIS_ADC_H
 #ifdef __cplusplus
  }
 #endif
