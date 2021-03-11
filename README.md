@@ -1,11 +1,11 @@
-##Introduction
+## Introduction
 GHMon is a configurable low-power firmware for autonomous small-scale
 greenhouse control and data logging. At present it supports STM32F103
 bluepill and compatible devices with wired resistance- and voltage-based
 sensors.
 
 
-##Configuring
+## Configuring
 Configuration is spread over 3-5 files (depending on enabled features) in
 `config/` and examples for all the files can be found in `config/templates/`.
 `config.h` houses basic setup like enabled features and pin configuration,
@@ -16,7 +16,7 @@ tables (if a compatible sensor type is enabled). Descriptions of the settings
 are contained in each file.
 
 
-##Installing
+## Installing
 GHMon uses [PlatformIO](https://platformio.org/) for building and installing.
 
 By default flashing the firmware requires a USB-to-serial adapter with the
@@ -30,7 +30,7 @@ otherwise unpowered) pins to the device, make sure the BOOT0 jumper is set to
 upload directions. Once flashed set the BOOT0 jumper back to 0.
 
 
-##Usage
+## Usage
 The primary user interface is a button in combination with an LED.
 
 * Pressing the button briefly will wake the monitor, blink the LED once, then
@@ -55,7 +55,7 @@ A primitive serial terminal can be reached if nothing goes wrong during
 initialiation by setting `USE_TERMINAL` in `config.h`.
 
 
-##Hardware
+## Hardware
 See the schematics in `schematics/` for some typical setups.
 
 If power usage is a concern, the power LED should be removed from the
@@ -65,7 +65,7 @@ Certain SD card Arduino modules designed to interface with 5V logic circuits
 may not work.
 
 
-##Troubleshooting
+## Troubleshooting
 It's normal for the LED to blink several times at irregular intervals when
 starting up.
 
@@ -82,5 +82,5 @@ If using an SD card for logging and it isn't being recognized, [this](https://ww
 (ideally) or the internal formatter (with `USE_FDISK` set in `config.h`) may
 fix the problem.
 
-If using an SD card for logging, a FAT codepage other then the default latin1
+If using an SD card for logging, a FAT codepage other than the default latin1
 can be selected in `lib/fatfs/ffconf.h`.
