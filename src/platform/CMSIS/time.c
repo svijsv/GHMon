@@ -163,33 +163,10 @@ static void systick_init(void) {
 // TODO: Load date from backup registers? AN2821 may shed light on that.
 // TODO: Reset BDRST to allow changing RTC settings if they differ from current
 static void RTC_init(void) {
-	uint32_t period;
-	uint32_t clock;
-
-	// Try for LSE, HSE/128, or LSI clock sources in that order
-	// Only LSE will work as a wakeup from deep sleep.
-	// Period is set equal to the RTC clock frequency-1 to give 1s ticks
-	if (BIT_IS_SET(RCC->BDCR, RCC_BDCR_LSERDY)) {
-		clock = RCC_BDCR_RTCSEL_LSE;
-		period = G_freq_LSE-1;
-	} else  if (BIT_IS_SET(RCC->CR, RCC_CR_HSERDY)) {
-		clock = RCC_BDCR_RTCSEL_HSE;
-		period = (G_freq_HSE / 128)-1;
-	} else {
-		SET_BIT(RCC->CSR, RCC_CSR_LSION);
-		while (!BIT_IS_SET(RCC->CSR, RCC_CSR_LSIRDY)) {
-			// Nothing to do here
-			// TODO: Timeout?
-		}
-
-		clock = RCC_BDCR_RTCSEL_LSI;
-		period = G_freq_LSI-1;
-	}
-
 	BD_write_enable();
 	MODIFY_BITS(RCC->BDCR, RCC_BDCR_RTCSEL|RCC_BDCR_RTCEN,
-		clock          |
-		RCC_BDCR_RTCEN | // Enable the RTC
+		RCC_BDCR_RTCSEL_LSE |
+		RCC_BDCR_RTCEN      | // Enable the RTC
 		0);
 	BD_write_disable();
 
@@ -213,7 +190,7 @@ static void RTC_init(void) {
 	*/
 
 	// Set the prescaler
-	WRITE_SPLITREG(period, RTC->PRLH, RTC->PRLL);
+	WRITE_SPLITREG(G_freq_LSE-1, RTC->PRLH, RTC->PRLL);
 
 	RTC_cfg_disable(1000);
 
