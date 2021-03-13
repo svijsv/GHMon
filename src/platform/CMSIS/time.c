@@ -69,18 +69,6 @@ void SysTick_Handler(void) {
 	++G_sys_uticks;
 	return;
 }
-/*
-void RTC_IRQHandler(void) {
-	// This handler is called by both the RTC alarm and the RTC second
-	// interrupts when RTC_CRH_ALRIE is set
-	if (LIKELY(BIT_IS_SET(RTC->CRL, RTC_CRL_SECF))) {
-		++sys_sticks;
-		unSET_BIT(RTC->CRL, RTC_CRL_SECF);
-	}
-
-	return;
-}
-*/
 OPTIMIZE_FUNCTION \
 void RTC_Alarm_IRQHandler(void) {
 	NVIC_DisableIRQ(RTC_Alarm_IRQn);
@@ -103,10 +91,10 @@ void SleepAlarm_IRQHandler(void) {
 	NVIC_DisableIRQ(SLEEP_ALARM_IRQn);
 	NVIC_ClearPendingIRQ(SLEEP_ALARM_IRQn);
 
-	// CLEAR_BIT(SLEEP_ALARM_TIM->SR, TIM_SR_UIF);
+	//CLEAR_BIT(SLEEP_ALARM_TIM->SR, TIM_SR_UIF);
 	SLEEP_ALARM_TIM->SR = 0;
 	// Configured to disable itself
-	// CLEAR_BIT(SLEEP_ALARM_TIM->CR1, TIM_CR1_CEN);
+	//CLEAR_BIT(SLEEP_ALARM_TIM->CR1, TIM_CR1_CEN);
 	clock_disable(&RCC->APB1ENR, SLEEP_ALARM_CLOCKEN);
 
 	return;
@@ -130,13 +118,6 @@ static void systick_init(void) {
 
 	G_sys_uticks = 0;
 	// G_sys_sticks = 0;
-
-	/*
-	// SysTick_Config() defined in CMSIS/ARM/core_cm3.h
-	if (SysTick_Config(G_freq_HCLK / 1000U) != 0) {
-		ERROR_STATE("SysTick config");
-	}
-	*/
 
 	// Re-implement SysTick_Config() from CMSIS/ARM/core_cm3.h so we can use
 	// HCLK/8 as our clock source (but why?...)
@@ -178,26 +159,59 @@ static void RTC_init(void) {
 	}
 
 	RTC_cfg_enable(1000);
-
-	/*
-	// There's something in the reference manual about synchronizing the alarm
-	// and second counters but I didn't look into it because I'm only using the
-	// alarm right now.
-	MODIFY_BITS(RTC->CRH, RTC_CRH_SECIE|RTC_CRH_ALRIE,
-		0b1 << RTC_CRH_SECIE_Pos | // Enable the second interrupt
-		0b1 << RTC_CRH_ALRIE_Pos | // Enable the alarm interrupt
-		0);
-	*/
-
 	// Set the prescaler
 	WRITE_SPLITREG(G_freq_LSE-1, RTC->PRLH, RTC->PRLL);
-
 	RTC_cfg_disable(1000);
 
 	NVIC_SetPriority(RTC_Alarm_IRQn, RTC_ALARM_IRQp);
-	// Only need this for a seconds counter, which we aren't doing
-	// NVIC_SetPriority(RTC_IRQn, SECONDS_IRQp);
-	// NVIC_EnableIRQ(RTC_IRQn);
+
+	return;
+}
+utime_t get_RTC_seconds(void) {
+	uint32_t rtcs;
+
+	READ_SPLITREG(rtcs, RTC->CNTH, RTC->CNTL);
+
+	return rtcs;
+}
+void set_RTC_alarm(utime_t time) {
+	assert(time > 0);
+	time = get_RTC_seconds() + time;
+
+	RTC_cfg_enable(100);
+	WRITE_SPLITREG(time, RTC->ALRH, RTC->ALRL);
+
+	CLEAR_BIT(RTC->CRL, RTC_CRL_ALRF); // Clear the alarm interrupt flag
+	RTC_cfg_disable(100);
+
+	// Clear the EXTI line interrupt flag
+	// This is set to 1 to clear
+	SET_BIT(EXTI->PR, RTC_ALARM_EXTI_LINE);
+	// Enable the alarm EXTI rising-edge trigger
+	// This is mandatory to wake from stop mode
+	SET_BIT(EXTI->RTSR, RTC_ALARM_EXTI_LINE);
+	// Enable the alarm EXTI interrupt
+	SET_BIT(EXTI->IMR, RTC_ALARM_EXTI_LINE);
+
+	NVIC_ClearPendingIRQ(RTC_Alarm_IRQn);
+	NVIC_EnableIRQ(RTC_Alarm_IRQn);
+
+	return;
+}
+void stop_RTC_alarm(void) {
+	NVIC_DisableIRQ(RTC_Alarm_IRQn);
+	NVIC_ClearPendingIRQ(RTC_Alarm_IRQn);
+
+	// Clear the EXTI line interrupt flag
+	// This is set to 1 to clear
+	SET_BIT(EXTI->PR, RTC_ALARM_EXTI_LINE);
+	// Disable the alarm EXTI rising-edge trigger
+	CLEAR_BIT(EXTI->RTSR, RTC_ALARM_EXTI_LINE);
+	// Disable the alarm EXTI interrupt
+	CLEAR_BIT(EXTI->IMR, RTC_ALARM_EXTI_LINE);
+
+	// Clear the alarm interrupt flag
+	CLEAR_BIT(RTC->CRL, RTC_CRL_ALRF);
 
 	return;
 }
@@ -220,13 +234,63 @@ static void timers_init(void) {
 
 	return;
 }
+// hz is the target Hz, e.g. 1000 for 1ms timing
+static uint16_t calculate_TIM2_5_prescaler(uint16_t hz) {
+	uint16_t prescaler;
 
-utime_t get_RTC_seconds(void) {
-	uint32_t rtcs;
+	assert(((G_freq_PCLK1/hz) <= (0xFFFF/2)) || (SELECT_BITS(RCC->CFGR, RCC_CFGR_PPRE1) == 0));
 
-	READ_SPLITREG(rtcs, RTC->CNTH, RTC->CNTL);
+	// Clocks:
+	// Timers 2-7 and 12-14
+	//   PCLK1*1 if PCLK1 prescaler is 1
+	//   PCLK1*2 otherwise
+	// Timers 1 and 8-11
+	//   PCLK2*1 if PCLK2 prescaler is 1
+	//   PCLK2*2 otherwise
+	// The maximum prescaler is 0xFFFF
+	prescaler = G_freq_PCLK1 / hz;
+	if (SELECT_BITS(RCC->CFGR, RCC_CFGR_PPRE1) != 0) {
+		prescaler *= 2;
+	}
 
-	return rtcs;
+	assert(prescaler != 0);
+	// A prescaler of 0 divides by 1 so we need to adjust.
+	--prescaler;
+
+	return prescaler;
+}
+void set_sleep_alarm(uint16_t ms) {
+	assert(ms != 0);
+#if TIM_MS_PERIOD > 1
+	assert((0xFFFF/TIM_MS_PERIOD) >= ms);
+#endif // TIM_MS_PERIOD > 1
+
+	clock_enable(&RCC->APB1ENR, SLEEP_ALARM_CLOCKEN);
+
+	// Set the reload value and generate an update event to load it
+	SLEEP_ALARM_TIM->ARR = ms * TIM_MS_PERIOD;
+	SET_BIT(SLEEP_ALARM_TIM->EGR, TIM_EGR_UG);
+
+	SLEEP_ALARM_TIM->SR = 0x0000;                 // Clear all event flags
+	SET_BIT(SLEEP_ALARM_TIM->DIER, TIM_DIER_UIE); // Enable update interrupts
+	NVIC_ClearPendingIRQ(SLEEP_ALARM_IRQn);
+	NVIC_EnableIRQ(SLEEP_ALARM_IRQn);
+	SET_BIT(SLEEP_ALARM_TIM->CR1, TIM_CR1_CEN);   // Enable the timer
+
+	return;
+}
+void stop_sleep_alarm(void) {
+	NVIC_DisableIRQ(SLEEP_ALARM_IRQn);
+	NVIC_ClearPendingIRQ(SLEEP_ALARM_IRQn);
+
+	// unSET_BIT(SLEEP_ALARM_TIM->SR, TIM_SR_UIF);
+	SLEEP_ALARM_TIM->SR = 0;
+	// Configured to disable itself
+	// unSET_BIT(SLEEP_ALARM_TIM->CR1, TIM_CR1_CEN);
+
+	clock_disable(&RCC->APB1ENR, SLEEP_ALARM_CLOCKEN);
+
+	return;
 }
 
 void delay(utime_t ms) {
@@ -309,107 +373,6 @@ err_t set_date(uint8_t year, uint8_t month, uint8_t day) {
 	}
 
 	return res;
-}
-
-void set_RTC_alarm(utime_t time) {
-	assert(time > 0);
-	time = get_RTC_seconds() + time;
-
-	RTC_cfg_enable(100);
-	WRITE_SPLITREG(time, RTC->ALRH, RTC->ALRL);
-
-	CLEAR_BIT(RTC->CRL, RTC_CRL_ALRF); // Clear the alarm interrupt flag
-	RTC_cfg_disable(100);
-
-	// Clear the EXTI line interrupt flag
-	// This is set to 1 to clear
-	SET_BIT(EXTI->PR, RTC_ALARM_EXTI_LINE);
-	// Enable the alarm EXTI rising-edge trigger
-	// This is mandatory to wake from stop mode
-	SET_BIT(EXTI->RTSR, RTC_ALARM_EXTI_LINE);
-	// Enable the alarm EXTI interrupt
-	SET_BIT(EXTI->IMR, RTC_ALARM_EXTI_LINE);
-
-	NVIC_ClearPendingIRQ(RTC_Alarm_IRQn);
-	NVIC_EnableIRQ(RTC_Alarm_IRQn);
-
-	return;
-}
-void stop_RTC_alarm(void) {
-	NVIC_DisableIRQ(RTC_Alarm_IRQn);
-	NVIC_ClearPendingIRQ(RTC_Alarm_IRQn);
-
-	// Clear the EXTI line interrupt flag
-	// This is set to 1 to clear
-	SET_BIT(EXTI->PR, RTC_ALARM_EXTI_LINE);
-	// Disable the alarm EXTI rising-edge trigger
-	CLEAR_BIT(EXTI->RTSR, RTC_ALARM_EXTI_LINE);
-	// Disable the alarm EXTI interrupt
-	CLEAR_BIT(EXTI->IMR, RTC_ALARM_EXTI_LINE);
-
-	// Clear the alarm interrupt flag
-	CLEAR_BIT(RTC->CRL, RTC_CRL_ALRF);
-
-	return;
-}
-
-// hz is the target Hz, e.g. 1000 for 1ms timing
-static uint16_t calculate_TIM2_5_prescaler(uint16_t hz) {
-	uint16_t prescaler;
-
-	assert(((G_freq_PCLK1/hz) <= (0xFFFF/2)) || (SELECT_BITS(RCC->CFGR, RCC_CFGR_PPRE1) == 0));
-
-	// Clocks:
-	// Timers 2-7 and 12-14
-	//   PCLK1*1 if PCLK1 prescaler is 1
-	//   PCLK1*2 otherwise
-	// Timers 1 and 8-11
-	//   PCLK2*1 if PCLK2 prescaler is 1
-	//   PCLK2*2 otherwise
-	// The maximum prescaler is 0xFFFF
-	prescaler = G_freq_PCLK1 / hz;
-	if (SELECT_BITS(RCC->CFGR, RCC_CFGR_PPRE1) != 0) {
-		prescaler *= 2;
-	}
-
-	assert(prescaler != 0);
-	// A prescaler of 0 divides by 1 so we need to adjust.
-	--prescaler;
-
-	return prescaler;
-}
-void set_sleep_alarm(uint16_t ms) {
-	assert(ms != 0);
-#if TIM_MS_PERIOD > 1
-	assert((0xFFFF/TIM_MS_PERIOD) >= ms);
-#endif // TIM_MS_PERIOD > 1
-
-	clock_enable(&RCC->APB1ENR, SLEEP_ALARM_CLOCKEN);
-
-	// Set the reload value and generate an update event to load it
-	SLEEP_ALARM_TIM->ARR = ms * TIM_MS_PERIOD;
-	SET_BIT(SLEEP_ALARM_TIM->EGR, TIM_EGR_UG);
-
-	SLEEP_ALARM_TIM->SR = 0x0000;                 // Clear all event flags
-	SET_BIT(SLEEP_ALARM_TIM->DIER, TIM_DIER_UIE); // Enable update interrupts
-	NVIC_ClearPendingIRQ(SLEEP_ALARM_IRQn);
-	NVIC_EnableIRQ(SLEEP_ALARM_IRQn);
-	SET_BIT(SLEEP_ALARM_TIM->CR1, TIM_CR1_CEN);   // Enable the timer
-
-	return;
-}
-void stop_sleep_alarm(void) {
-	NVIC_DisableIRQ(SLEEP_ALARM_IRQn);
-	NVIC_ClearPendingIRQ(SLEEP_ALARM_IRQn);
-
-	// unSET_BIT(SLEEP_ALARM_TIM->SR, TIM_SR_UIF);
-	SLEEP_ALARM_TIM->SR = 0;
-	// Configured to disable itself
-	// unSET_BIT(SLEEP_ALARM_TIM->CR1, TIM_CR1_CEN);
-
-	clock_disable(&RCC->APB1ENR, SLEEP_ALARM_CLOCKEN);
-
-	return;
 }
 
 
