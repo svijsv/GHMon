@@ -33,7 +33,6 @@
 */
 #include "platform/interface.h"
 #include "platform.h"
-#include "config.h"
 
 #include "ulib/assert.h"
 #include "ulib/types.h"
