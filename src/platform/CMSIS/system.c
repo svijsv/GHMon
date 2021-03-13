@@ -82,7 +82,7 @@ void Button_IRQHandler(void) {
 	// at least let the user know the system is still running.
 	// NVIC_DisableIRQ(BUTTON_IRQn);
 
-	SET_BIT(G_IRQs, BUTTON_IRQ);
+	SET_BIT(G_IRQs, BUTTON_IRQf);
 
 	// Let the user know we got the interrupt even if we're not going to do
 	// anything for a while

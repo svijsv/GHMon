@@ -52,8 +52,8 @@
 
 //
 // IRQ received flags
-#define BUTTON_IRQ 0x01
-#define UART_IRQ   0x02
+#define BUTTON_IRQf 0x01
+#define UART_IRQf   0x02
 
 //
 // Configuration flags

@@ -134,13 +134,13 @@ int main(void) {
 			// set_alarms(); don't remove without a good reason.
 			LOGGER("Skipping hibernate()");
 		}
-		if (BIT_IS_SET(G_IRQs, BUTTON_IRQ)) {
-			CLEAR_BIT(G_IRQs, BUTTON_IRQ);
+		if (BIT_IS_SET(G_IRQs, BUTTON_IRQf)) {
+			CLEAR_BIT(G_IRQs, BUTTON_IRQf);
 			button_IRQHandler();
 		}
-		if (BIT_IS_SET(G_IRQs, UART_IRQ)) {
+		if (BIT_IS_SET(G_IRQs, UART_IRQf)) {
 			utime_t entry_time;
-			CLEAR_BIT(G_IRQs, UART_IRQ);
+			CLEAR_BIT(G_IRQs, UART_IRQf);
 
 			entry_time = NOW();
 			terminal();
