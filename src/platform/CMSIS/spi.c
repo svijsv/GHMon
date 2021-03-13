@@ -145,6 +145,23 @@ void spi_on(void) {
 	return;
 }
 void spi_off(void) {
+	uint16_t rx;
+
+	// Section 25.3.8 of the reference manual says the BSY flag may become
+	// unreliable if the proper procedure isn't followed before shutting an
+	// SPI interface down
+	while (BIT_IS_SET(SPIx->SR, SPI_SR_RXNE)) {
+		rx = SPIx->DR;
+		// If for whatever reason there are still bytes coming in we have no
+		// way of knowing how many so just wait until we've gone an arbitrary
+		// period of time without seeing any
+		delay(1);
+	}
+	rx = rx; // Shut the compiler up
+	while (!BIT_IS_SET(SPIx->SR, SPI_SR_TXE) || BIT_IS_SET(SPIx->SR, SPI_SR_BSY)) {
+		// Nothing to do here
+	}
+
 	gpio_set_mode(SPIx_SCK_PIN,  GPIO_MODE_HiZ, GPIO_LOW);
 	gpio_set_mode(SPIx_MOSI_PIN, GPIO_MODE_HiZ, GPIO_LOW);
 	gpio_set_mode(SPIx_MISO_PIN, GPIO_MODE_HiZ, GPIO_LOW);
@@ -220,13 +237,6 @@ err_t spi_receive_block(uint8_t *rx_buffer, uint32_t rx_size, uint8_t tx, utime_
 	rx_buffer[i] = SPIx->DR;
 
 END:
-	// Section 25.3.8 says the BSY flag may become unreliable if the proper
-	// procedure isn't followed before shutting it down, so grant an exception
-	// for the timeout.
-	while (!BIT_IS_SET(SPIx->SR, SPI_SR_TXE) || BIT_IS_SET(SPIx->SR, SPI_SR_BSY)) {
-		// Nothing to do here
-	}
-
 	return res;
 }
 err_t spi_transmit_block(const uint8_t *tx_buffer, uint32_t tx_size, utime_t timeout) {
@@ -270,13 +280,6 @@ err_t spi_transmit_block(const uint8_t *tx_buffer, uint32_t tx_size, utime_t tim
 	UNUSED(rx);
 
 END:
-	// Section 25.3.8 says the BSY flag may become unreliable if the proper
-	// procedure isn't followed before shutting it down, so grant an exception
-	// for the timeout.
-	while (!BIT_IS_SET(SPIx->SR, SPI_SR_TXE) || BIT_IS_SET(SPIx->SR, SPI_SR_BSY)) {
-		// Nothing to do here
-	}
-
 	return res;
 }
 
