@@ -70,7 +70,7 @@ void UARTx_IRQHandler(void) {
 
 	// There are no other status flags to clear for this IRQ
 
-	SET_BIT(G_IRQs, UART_IRQ);
+	SET_BIT(G_IRQs, UART_IRQf);
 
 	return;
 }

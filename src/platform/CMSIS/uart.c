@@ -69,8 +69,8 @@ void UARTx_IRQHandler(void) {
 
 	// There are no other status flags to clear for this IRQ
 
-	// UART_IRQ is the main loop's IRQ number, UARTx_IRQn is for the CMSIS
-	SET_BIT(G_IRQs, UART_IRQ);
+	// UART_IRQf is the main loop's IRQ flag, UARTx_IRQn is for the CMSIS
+	SET_BIT(G_IRQs, UART_IRQf);
 
 	return;
 }
