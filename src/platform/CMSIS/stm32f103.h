@@ -75,7 +75,7 @@
 
 //
 // Interrupt priorities
-// Range 0-16, overlap is OK
+// Range 0-15, overlap is OK
 // Lower number is higher priority
 #define SYSTICK_IRQp     1
 #define BUTTON_IRQp      2
