@@ -39,12 +39,6 @@
 /*
 * Static values
 */
-// Oscillator frequencies, named to mesh with the bus frequency variables
-// The reference manual gives a range of 30KHz-60KHz for the LSI
-#define G_freq_LSI 40000
-#define G_freq_HSI 8000000
-#define G_freq_HSE HSE_VALUE
-#define G_freq_LSE LSE_VALUE
 
 
 /*
