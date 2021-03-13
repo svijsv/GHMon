@@ -437,7 +437,7 @@ static void terminalcmd_test(char *token) {
 
 #if USE_CONTROLLERS && USE_SMALL_CONTROLLERS < 1
 	for (uiter_t i = 0; i < CONTROLLER_COUNT; ++i) {
-		serial_printf("controller %u: next check in %d minutes\r\n", (uint )i, (int )((G_controllers[i].next_check - NOW())/60));
+		serial_printf("controller %u: next check in %d minutes\r\n", (uint )i, (int )(((int32_t )G_controllers[i].next_check - (int32_t )NOW())/60));
 	}
 #endif // USE_SMALL_CONTROLLERS < 1
 
