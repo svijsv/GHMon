@@ -277,7 +277,7 @@ void delay(utime_t ms) {
 void dumb_delay(utime_t ms) {
 	uint32_t cycles;
 
-	cycles = ms * ((G_freq_HCLK/1000)/DUMB_DELAY_DIV);
+	cycles = ms * (G_freq_HCLK/(1000*DUMB_DELAY_DIV));
 
 	for (uint32_t i = 0; i < cycles; ++i) {
 		// Count some clock cycles
