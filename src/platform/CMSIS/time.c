@@ -209,7 +209,7 @@ static void timers_init(void) {
 	clock_init(&RCC->APB1ENR, &RCC->APB1RSTR, SLEEP_ALARM_CLOCKEN);
 
 	MODIFY_BITS(SLEEP_ALARM_TIM->CR1, TIM_CR1_ARPE|TIM_CR1_CMS|TIM_CR1_DIR|TIM_CR1_OPM,
-		(0b1  << TIM_CR1_ARPE_Pos) | // 0 to disable reload register buffer
+		(0b0  << TIM_CR1_ARPE_Pos) | // 0 to disable reload register buffer
 		(0b00 << TIM_CR1_CMS_Pos ) | // 0 to disable bidirectional counting
 		(0b0 << TIM_CR1_DIR_Pos  ) | // 0 to use as an upcounter
 		(0b1 << TIM_CR1_OPM_Pos  ) | // 1 to automatically disable on update events
