@@ -105,18 +105,6 @@ void Button_IRQHandler(void) {
 void platform_init(void) {
 	uint32_t remaps;
 
-#if DEBUG
-	MODIFY_BITS(SCB->CCR, SCB_CCR_DIV_0_TRP_Msk|SCB_CCR_UNALIGN_TRP_Msk,
-		0b1 << SCB_CCR_DIV_0_TRP_Pos   | // Trap divide-by-0
-		0b1 << SCB_CCR_UNALIGN_TRP_Pos | // Trap unaligned memory access
-		0);
-#else // !DEBUG
-	MODIFY_BITS(SCB->CCR, SCB_CCR_DIV_0_TRP_Msk|SCB_CCR_UNALIGN_TRP_Msk,
-		0b0 << SCB_CCR_DIV_0_TRP_Pos   | // Return 0 for divide-by-0
-		0b0 << SCB_CCR_UNALIGN_TRP_Pos | // Don't trap unaligned memory access
-		0);
-#endif // DEBUG
-
 	// Needed before anything else to allow *_delay() to work
 	update_system_clock_vars();
 
