@@ -17,7 +17,7 @@
 *                                                                      *
 *                                                                      *
 ***********************************************************************/
-// stm32f103.h
+// common.h
 // Platform-specific common header
 // NOTES:
 //
@@ -25,8 +25,8 @@
 #ifdef __cplusplus
  extern "C" {
 #endif
-#ifndef _PLATFORM_CMSIS_STM32F103_H
-#define _PLATFORM_CMSIS_STM32F103_H
+#ifndef _PLATFORM_CMSIS_COMMON_H
+#define _PLATFORM_CMSIS_COMMON_H
 
 /*
 * Includes
@@ -237,7 +237,7 @@
 #define DFLASH(t) do { gpio_toggle_state(LED_PIN); dumb_delay(t); gpio_toggle_state(LED_PIN); } while (0);
 
 
-#endif // _PLATFORM_CMSIS_STM32F103_H
+#endif // _PLATFORM_CMSIS_COMMON_H
 #ifdef __cplusplus
  }
 #endif

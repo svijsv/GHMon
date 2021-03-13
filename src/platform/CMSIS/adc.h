@@ -32,7 +32,7 @@
 /*
 * Includes
 */
-#include "stm32f103.h"
+#include "common.h"
 
 
 #if USE_ADC

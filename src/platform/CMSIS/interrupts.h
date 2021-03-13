@@ -32,7 +32,7 @@
 * Includes
 */
 #include "config.h"
-#include "stm32f103.h"
+#include "common.h"
 
 
 /*
