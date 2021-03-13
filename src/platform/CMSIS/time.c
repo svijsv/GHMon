@@ -157,15 +157,14 @@ static void systick_init(void) {
 }
 //
 // Set up RTC
+// The RTC clock is configured in the backup domain so the power interface
+// clock and the backup domain interface clock need to be enabled before this
+// is called.
 // TODO: Load date from backup registers? AN2821 may shed light on that.
 // TODO: Reset BDRST to allow changing RTC settings if they differ from current
 static void RTC_init(void) {
 	uint32_t period;
 	uint32_t clock;
-
-	// The RTC clock is configured in the backup domain so enable the power
-	// interface clock and the backup domain interface clock
-	clock_enable(&RCC->APB1ENR, RCC_APB1ENR_PWREN|RCC_APB1ENR_BKPEN);
 
 	// Try for LSE, HSE/128, or LSI clock sources in that order
 	// Only LSE will work as a wakeup from deep sleep.

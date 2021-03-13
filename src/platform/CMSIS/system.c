@@ -278,7 +278,8 @@ static void clocks_init(void) {
 	CLEAR_BIT(RCC->CSR, RCC_CSR_LSION);
 
 	// The LSE is configured in the backup domain so enable the power interface
-	// clock and the backup domain interface clock
+	// clock and the backup domain interface clock; keep it on afterwards
+	// because RTC access requires them too
 	clock_enable(&RCC->APB1ENR, RCC_APB1ENR_PWREN|RCC_APB1ENR_BKPEN);
 
 	BD_write_enable();
