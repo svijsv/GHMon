@@ -156,7 +156,7 @@ static char* format_warnings(uint8_t warnings);
 /*
 * Functions
 */
-void log_init() {
+void log_init(void) {
 	power_off();
 
 	return;

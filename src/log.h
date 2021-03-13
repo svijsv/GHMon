@@ -83,7 +83,7 @@
 * Function prototypes (defined in log.c)
 */
 // Initialize the logging subsystem
-void log_init();
+void log_init(void);
 // If force_write is true, sync anything buffered to disk without adding
 // a new reading.
 void log_status(bool force_write);
