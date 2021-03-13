@@ -54,7 +54,7 @@
 */
 volatile uint8_t  G_IRQs           = 0;
 volatile uint8_t  G_warnings       = 0;
-volatile uint16_t G_button_pressed = 0;
+volatile uint8_t  G_button_pressed = 0;
 
 static utime_t log_alarm = 0;
 static utime_t status_alarm = 0;
