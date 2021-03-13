@@ -103,6 +103,8 @@ void Button_IRQHandler(void) {
 * Functions
 */
 void platform_init(void) {
+	uint32_t remaps;
+
 #if DEBUG
 	MODIFY_BITS(SCB->CCR, SCB_CCR_DIV_0_TRP_Msk|SCB_CCR_UNALIGN_TRP_Msk,
 		0b1 << SCB_CCR_DIV_0_TRP_Pos   | // Trap divide-by-0
@@ -124,18 +126,23 @@ void platform_init(void) {
 	// to set up the button interrupt below, so enable it here and disable at
 	// the end of setup when it's no longer needed
 	clock_init(&RCC->APB2ENR, &RCC->APB2RSTR, RCC_APB2ENR_AFIOEN);
-	// Unlike everything else, JTAG is enabled on reset and needs to be explicitly
-	// disabled
-	MODIFY_BITS(AFIO->MAPR, AFIO_MAPR_SWJ_CFG, AFIO_MAPR_SWJ_CFG_DISABLE);
+	remaps = 0;
 	// Remap CAN to PD[01] (per the errata sheet) so it doesn't interfere with
 	// USART1 (even though we don't use RTS...)
-	MODIFY_BITS(AFIO->MAPR, AFIO_MAPR_CAN_REMAP, AFIO_MAPR_CAN_REMAP_REMAP3);
+	remaps |= AFIO_MAPR_CAN_REMAP_REMAP3;
 #if SPI1_DO_REMAP
-	MODIFY_BITS(AFIO->MAPR, AFIO_MAPR_SPI1_REMAP, AFIO_MAPR_SPI1_REMAP);
+	remaps |= AFIO_MAPR_SPI1_REMAP;
 #endif
 #if UART1_DO_REMAP
-	MODIFY_BITS(AFIO->MAPR, AFIO_MAPR_USART1_REMAP, AFIO_MAPR_USART1_REMAP);
+	remaps |= AFIO_MAPR_USART1_REMAP;
 #endif
+	// Unlike everything else, JTAG is enabled on reset and needs to be explicitly
+	// disabled
+	// Unlike everything else, reading the JTAG part of AFIO_MAPR will always
+	// return '0' (fully-enabled) so it needs to be set everytime.
+	remaps     |= AFIO_MAPR_SWJ_CFG_JTAGDISABLE;
+	MODIFY_BITS(AFIO->MAPR, AFIO_MAPR_SWJ_CFG|AFIO_MAPR_USART1_REMAP|AFIO_MAPR_SPI1_REMAP|AFIO_MAPR_CAN_REMAP,
+		remaps);
 
 	gpio_init();
 	// Violoate our separation of concerns in order to provide early user
@@ -264,6 +271,7 @@ static void clocks_init(void) {
 		(0b100  << RCC_CFGR_PPRE1_Pos)  | // Use HCLK/2 as APB1 clock
 		(0b1000 << RCC_CFGR_HPRE_Pos )  | // Use SYSCLK/2 as HCLK
 		0);
+
 	update_system_clock_vars();
 
 	// We don't use the LSI for anything
