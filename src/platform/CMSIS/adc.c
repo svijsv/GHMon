@@ -134,6 +134,7 @@ void adc_init(void) {
 		0);
 
 	// Make things simpler by setting the whole sample time registers at once
+	// Be sure G_freq_ADC is set before calculating the sample rate.
 	reg = 0;
 	tmp = calculate_sample_rate(ADC_SAMPLE_TIME);
 	for (uiter_t i = 0; i < 11; ++i) {
@@ -263,6 +264,7 @@ static adc_t adc_read_channel(uint32_t channel, utime_t timeout) {
 	// Five bits of channel selection
 	assert(channel <= 0b11111);
 
+	adc = 0;
 	timeout = SET_TIMEOUT(timeout);
 
 	// Select the ADC channel to convert
@@ -271,17 +273,17 @@ static adc_t adc_read_channel(uint32_t channel, utime_t timeout) {
 		);
 
 	// When ADON is set the first time, wake from power-down mode
-	SET_BIT(ADCx->CR2, ADC_CR2_ADON);
-	// ADC stabilization time is specified under Tstab in the datasheet as
-	// 1us max
-	dumber_delay(ADC_STAB_TIME_uS * (G_freq_HCLK/1000000U));
+	if (!BIT_IS_SET(ADCx->CR2, ADC_CR2_ADON)) {
+		SET_BIT(ADCx->CR2, ADC_CR2_ADON);
+	}
 	// The ST HAL waits for ADON to be set to 1 after setting it to 1;
 	// there's nothing in the reference manual about that though.
 	while (!BIT_IS_SET(ADCx->CR2, ADC_CR2_ADON)) {
 		if (TIMES_UP(timeout)) {
-			break;
+			goto END;
 		}
 	}
+	dumber_delay(ADC_STAB_TIME_uS * (G_freq_HCLK/1000000U));
 
 	// Conversion can begin when ADON is set the second time after ADC power up
 	// If any bit other than ADON is changed when ADON is set, no conversion is
@@ -289,18 +291,19 @@ static adc_t adc_read_channel(uint32_t channel, utime_t timeout) {
 	SET_BIT(ADCx->CR2, ADC_CR2_ADON);
 	SET_BIT(ADCx->CR2, ADC_CR2_EXTTRIG);
 
-	adc = 0;
 	for (uiter_t i = 0; i < ADC_SAMPLE_COUNT; ++i) {
 		SET_BIT(ADCx->CR2, ADC_CR2_SWSTART);
 		while (!BIT_IS_SET(ADCx->SR, ADC_SR_EOC)) {
 			if (TIMES_UP(timeout)) {
-				break;
+				goto END;
 			}
 		}
 		adc += SELECT_BITS(ADCx->DR, ADC_MAX);
 	}
-	CLEAR_BIT(ADCx->CR2, ADC_CR2_ADON|ADC_CR2_EXTTRIG);
 	adc /= ADC_SAMPLE_COUNT;
+
+END:
+	CLEAR_BIT(ADCx->CR2, ADC_CR2_ADON|ADC_CR2_EXTTRIG);
 
 	return adc;
 }

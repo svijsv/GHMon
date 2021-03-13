@@ -32,7 +32,6 @@
 /*
 * Includes
 */
-#include "config.h"
 #include "stm32f103.h"
 
 
@@ -67,7 +66,7 @@ void adc_init(void);
 // claims it varies by 45C between chips due to process differences.
 // If ADCx isn't ADC1, this will always return 3300V and 0C.
 // Both arguments are mandatory.
-// void adc_read_internals(int16_t *vref, int16_t *tempCx10);
+//void adc_read_internals(int16_t *vref, int16_t *tempCx10);
 
 
 /*
