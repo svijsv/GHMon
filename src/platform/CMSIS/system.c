@@ -142,14 +142,20 @@ void platform_init(void) {
 	time_init();
 	led_flash(1, DELAY_SHORT);
 
+#if USE_SERIAL
 	uart_init();
 	led_flash(1, DELAY_SHORT);
+#endif
 
+#if USE_SPI
 	spi_init();
 	led_flash(1, DELAY_SHORT);
+#endif
 
+#if USE_ADC
 	adc_init();
 	led_flash(1, DELAY_SHORT);
+#endif
 
 	// Set interrupt priority grouping
 	// Use 4 bits for group priority and 0 bits for subpriority

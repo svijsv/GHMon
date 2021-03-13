@@ -36,6 +36,8 @@
 #include "stm32f103.h"
 
 
+#if USE_SPI
+
 /*
 * Static values
 */
@@ -59,18 +61,16 @@
 /*
 * Function prototypes (defined in spi.c)
 */
-#if USE_SPI
 // Initialize the SPI peripheral
 void spi_init(void);
-#else
-#define spi_init() ((void )0U)
-#endif
 
 
 /*
 * Macros
 */
 
+
+#endif // USE_SPI
 
 #endif // _PLATFORM_CMSIS_SPI_H
 #ifdef __cplusplus

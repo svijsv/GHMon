@@ -35,6 +35,8 @@
 #include "stm32f103.h"
 
 
+#if USE_ADC
+
 /*
 * Static values
 */
@@ -73,6 +75,8 @@ void adc_init(void);
 * Macros
 */
 
+
+#endif // USE_ADC
 
 #endif // _PLATFORM_CMSIS_ADC_H
 #ifdef __cplusplus

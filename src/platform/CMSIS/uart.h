@@ -67,8 +67,6 @@ err_t uart_init(void);
 */
 
 
-#else // !USE_SERIAL
-# define uart_init() ((void )0U)
 #endif // USE_SERIAL
 
 #endif // _PLATFORM_CMSIS_UART_H
