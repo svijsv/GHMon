@@ -253,7 +253,7 @@ void adc_read_internals(int16_t *vref, int16_t *tempCx10);
 
 // Read the value on an analog pin
 // If the pin selected doesn't support analog reading, 0 is returned
-adc_t adc_read_pin(pin_t pin, utime_t timeout);
+adc_t adc_read_pin(pin_t pin);
 
 #else // !USE_ADC
 #define adc_on() ((void )0U)

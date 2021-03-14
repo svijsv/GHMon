@@ -49,9 +49,6 @@
 /*
 * Static values
 */
-// Timeout if ADC conversion takes longer than this
-#define CONVERSION_TIMEOUT_MS 1000
-
 // Store multi-use strings in variables so they aren't duplicated
 static const char *setup_err_msg_i = "Invalid sensor %u configuration";
 static const char *setup_err_msg   = "Invalid sensor configuration";
@@ -323,7 +320,7 @@ static imath_t read_sensor(sensor_t *s) {
 #if USE_ADC
 	default:
 		gpio_set_mode(cfg->pin, GPIO_MODE_AIN, GPIO_FLOAT);
-		value = adc_read_pin(cfg->pin, CONVERSION_TIMEOUT_MS);
+		value = adc_read_pin(cfg->pin);
 		gpio_set_mode(cfg->pin, GPIO_MODE_HiZ, GPIO_FLOAT);
 		break;
 

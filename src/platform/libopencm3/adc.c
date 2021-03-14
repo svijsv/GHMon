@@ -74,7 +74,7 @@ uint32_t G_freq_ADC;
 */
 static uint32_t calculate_prescaler(uint32_t max_hz);
 static uint8_t calculate_sample_rate(uint32_t uS);
-static adc_t adc_read_channel(uint8_t channel, utime_t timeout);
+static adc_t adc_read_channel(uint8_t channel);
 
 
 /*
@@ -140,8 +140,8 @@ void adc_on(void) {
 	return;
 }
 void adc_off(void) {
-	rcc_periph_clock_disable(RCC_ADCx);
 	adc_power_off(ADCx);
+	rcc_periph_clock_disable(RCC_ADCx);
 
 	return;
 }
@@ -185,7 +185,7 @@ static uint8_t calculate_sample_rate(uint32_t uS) {
 	return tmp;
 }
 
-adc_t adc_read_pin(pin_t pin, utime_t timeout) {
+adc_t adc_read_pin(pin_t pin) {
 	uint32_t channel;
 	pin_t pinno;
 
@@ -212,30 +212,26 @@ adc_t adc_read_pin(pin_t pin, utime_t timeout) {
 		break;
 	}
 
-	return adc_read_channel(channel, timeout);
+	return adc_read_channel(channel);
 }
-static adc_t adc_read_channel(uint8_t channel, utime_t timeout) {
+static adc_t adc_read_channel(uint8_t channel) {
 	adcm_t adc;
 
 	// Five bits of channel selection
 	assert(channel <= 0b11111);
 
-	timeout = SET_TIMEOUT(timeout);
 	adc_set_regular_sequence(ADCx, 1, &channel);
 
 	adc = 0;
 	for (uiter_t i = 0; i < ADC_SAMPLE_COUNT; ++i) {
 		adc_start_conversion_regular(ADCx);
 		while (!adc_eoc(ADCx)) {
-			if (TIMES_UP(timeout)) {
-				goto END;
-			}
+			// Nothing to do here
 		}
 		adc += adc_read_regular(ADCx);
 	}
 	adc /= ADC_SAMPLE_COUNT;
 
-END:
 	return adc;
 }
 
@@ -251,7 +247,7 @@ void adc_read_internals(int16_t *vref, int16_t *tempCx10) {
 	// Rely on the overhead between here and measuring for the startup delay
 	//dumber_delay(TEMP_START_TIME_uS * (freq_CoreCLK/1000000U));
 
-	adc = adc_read_channel(ADC_CHANNEL_VREF, 1000);
+	adc = adc_read_channel(ADC_CHANNEL_VREF);
 	// Calculate the ADC Vref by comparing it to the internal Vref
 	// adc / max = 1200mV / vref
 	// (adc / max) * vref = 1200mV
@@ -259,7 +255,7 @@ void adc_read_internals(int16_t *vref, int16_t *tempCx10) {
 	// vref = (1200mV * max) / adc
 	*vref = (INTERNAL_VREF * ADC_MAX) / (uint32_t )adc;
 
-	adc = adc_read_channel(ADC_CHANNEL_TEMP, 1000);
+	adc = adc_read_channel(ADC_CHANNEL_TEMP);
 	// adc/max = v/vref
 	// (adc/max)*vref = v
 	// v = (adc*vref)/max

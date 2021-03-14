@@ -90,7 +90,7 @@ static void clock_on(void);
 static void clock_off(void);
 static uint32_t calculate_prescaler(uint32_t max_hz);
 static uint32_t calculate_sample_rate(uint32_t uS);
-static adc_t adc_read_channel(uint32_t channel, utime_t timeout);
+static adc_t adc_read_channel(uint32_t channel);
 
 
 /*
@@ -226,7 +226,7 @@ static uint32_t calculate_sample_rate(uint32_t uS) {
 	return tmp;
 }
 
-adc_t adc_read_pin(pin_t pin, utime_t timeout) {
+adc_t adc_read_pin(pin_t pin) {
 	uint32_t channel;
 	pin_t pinno;
 
@@ -253,16 +253,15 @@ adc_t adc_read_pin(pin_t pin, utime_t timeout) {
 		break;
 	}
 
-	return adc_read_channel(channel, timeout);
+	return adc_read_channel(channel);
 }
-static adc_t adc_read_channel(uint32_t channel, utime_t timeout) {
+static adc_t adc_read_channel(uint32_t channel) {
 	adcm_t adc;
 
 	// Five bits of channel selection
 	assert(channel <= 0b11111);
 
 	adc = 0;
-	timeout = SET_TIMEOUT(timeout);
 
 	// Select the ADC channel to convert
 	MODIFY_BITS(ADCx->SQR3, 0b11111 << ADC_SQR3_SQ1_Pos,
@@ -276,9 +275,7 @@ static adc_t adc_read_channel(uint32_t channel, utime_t timeout) {
 	// The ST HAL waits for ADON to be set to 1 after setting it to 1;
 	// there's nothing in the reference manual about that though.
 	while (!BIT_IS_SET(ADCx->CR2, ADC_CR2_ADON)) {
-		if (TIMES_UP(timeout)) {
-			goto END;
-		}
+		// Nothing to do here
 	}
 	dumber_delay(ADC_STAB_TIME_uS * (G_freq_HCLK/1000000U));
 
@@ -291,15 +288,12 @@ static adc_t adc_read_channel(uint32_t channel, utime_t timeout) {
 	for (uiter_t i = 0; i < ADC_SAMPLE_COUNT; ++i) {
 		SET_BIT(ADCx->CR2, ADC_CR2_SWSTART);
 		while (!BIT_IS_SET(ADCx->SR, ADC_SR_EOC)) {
-			if (TIMES_UP(timeout)) {
-				goto END;
-			}
+			// Nothing to do here
 		}
 		adc += SELECT_BITS(ADCx->DR, ADC_MAX);
 	}
 	adc /= ADC_SAMPLE_COUNT;
 
-END:
 	CLEAR_BIT(ADCx->CR2, ADC_CR2_ADON|ADC_CR2_EXTTRIG);
 
 	return adc;
@@ -317,7 +311,7 @@ void adc_read_internals(int16_t *vref, int16_t *tempCx10) {
 	// Rely on the overhead between here and measuring for the startup delay
 	// dumber_delay(TEMP_START_TIME_US * (freq_CoreCLK/1000000U));
 
-	adc = adc_read_channel(VREF_CHANNEL, 1000);
+	adc = adc_read_channel(VREF_CHANNEL);
 	// Calculate the ADC Vref by comparing it to the internal Vref
 	// adc / max = 1200mV / vref
 	// (adc / max) * vref = 1200mV
@@ -325,7 +319,7 @@ void adc_read_internals(int16_t *vref, int16_t *tempCx10) {
 	// vref = (1200mV * max) / adc
 	*vref = (INTERNAL_VREF * ADC_MAX) / (uint32_t )adc;
 
-	adc = adc_read_channel(TEMP_CHANNEL, 1000);
+	adc = adc_read_channel(TEMP_CHANNEL);
 	// adc/max = v/vref
 	// (adc/max)*vref = v
 	// v = (adc*vref)/max
