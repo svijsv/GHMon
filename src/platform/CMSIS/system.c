@@ -262,6 +262,15 @@ static void clocks_init(void) {
 		(0b1000 << RCC_CFGR_HPRE_Pos )  | // Use SYSCLK/2 as HCLK
 		0);
 
+	// Set flash latency and prefetch buffer
+	// According to the reference manual, you should use a flash latency of 0
+	// for speeds <= 24MHz, 1 for 24-48MHz, and 2 for anything higher.
+	// The prefetch buffer must be on when using a scaler other than 1 for HCLK
+	MODIFY_BITS(FLASH->ACR, FLASH_ACR_PRFTBE|FLASH_ACR_LATENCY,
+		(0b1   << FLASH_ACR_PRFTBE_Pos  ) | // Enable the prefetch buffer
+		(0b000 << FLASH_ACR_LATENCY_Pos ) | // Use a latency of 0
+		0);
+
 	// We don't use the LSI for anything
 	CLEAR_BIT(RCC->CSR, RCC_CSR_LSION);
 
@@ -277,15 +286,6 @@ static void clocks_init(void) {
 		// TODO: Timeout?
 	}
 	BD_write_disable();
-
-	// Set flash latency and prefetch buffer
-	// According to the reference manual, you should use a flash latency of 0
-	// for speeds <= 24MHz, 1 for 24-48MHz, and 2 for anything higher.
-	// The prefetch buffer must be on when using a scaler other than 1 for HCLK
-	MODIFY_BITS(FLASH->ACR, FLASH_ACR_PRFTBE|FLASH_ACR_LATENCY,
-		(0b1   << FLASH_ACR_PRFTBE_Pos  ) | // Enable the prefetch buffer
-		(0b000 << FLASH_ACR_LATENCY_Pos ) | // Use a latency of 0
-		0);
 
 #if USE_INTERNAL_CLOCK
 	G_freq_HCLK = G_freq_HSI/2;
