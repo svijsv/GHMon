@@ -86,8 +86,6 @@ uint32_t G_freq_ADC;
 /*
 * Local function prototypes
 */
-static void clock_on(void);
-static void clock_off(void);
 static uint32_t calculate_prescaler(uint32_t max_hz);
 static uint32_t calculate_sample_rate(uint32_t uS);
 static adc_t adc_read_channel(uint32_t channel);
@@ -164,26 +162,16 @@ void adc_init(void) {
 	}
 
 	CLEAR_BIT(ADCx->CR2, ADC_CR2_ADON);
-	clock_off();
+	clock_disable(&RCC->APB2ENR, RCC_APB2ENR_ADCxEN);
 
 	return;
 }
 void adc_on(void) {
-	clock_on();
-
-	return;
-}
-void adc_off(void) {
-	clock_off();
-
-	return;
-}
-static void clock_on(void) {
 	clock_enable(&RCC->APB2ENR, RCC_APB2ENR_ADCxEN);
 
 	return;
 }
-static void clock_off(void) {
+void adc_off(void) {
 	clock_disable(&RCC->APB2ENR, RCC_APB2ENR_ADCxEN);
 
 	return;

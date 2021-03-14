@@ -54,8 +54,6 @@
 /*
 * Local function prototypes
 */
-static void clock_on(void);
-static void clock_off(void);
 static uint16_t calculate_baud_div(uint32_t baud);
 
 
@@ -110,7 +108,7 @@ err_t uart_init(void) {
 	return EOK;
 }
 void uart_on(void) {
-	clock_on();
+	clock_enable(&UARTx_APBxENR, UARTx_CLOCKEN);
 
 	// Peripheral pin modes specified in reference manual section 9.1.11
 	gpio_set_mode(UARTx_TX_PIN, GPIO_MODE_PP_AF, GPIO_LOW);
@@ -119,7 +117,7 @@ void uart_on(void) {
 	return;
 }
 void uart_off(void) {
-	clock_off();
+	clock_disable(&UARTx_APBxENR, UARTx_CLOCKEN);
 
 	gpio_set_mode(UARTx_TX_PIN, GPIO_MODE_HiZ, GPIO_FLOAT);
 	gpio_set_mode(UARTx_RX_PIN, GPIO_MODE_HiZ, GPIO_FLOAT);
@@ -172,16 +170,6 @@ END:
 	return res;
 }
 
-static void clock_on(void) {
-	clock_enable(&UARTx_APBxENR, UARTx_CLOCKEN);
-
-	return;
-}
-static void clock_off(void) {
-	clock_disable(&UARTx_APBxENR, UARTx_CLOCKEN);
-
-	return;
-}
 static uint16_t calculate_baud_div(uint32_t baud) {
 	// From section 27.3.4 of the reference manual:
 	//   baud = pclk/(16*div)

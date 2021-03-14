@@ -39,8 +39,6 @@
 /*
 * Static values
 */
-static void clock_on(void);
-static void clock_off(void);
 
 
 /*
@@ -123,23 +121,13 @@ static uint32_t calculate_prescaler(uint32_t goal) {
 	return (scaler << SPI_CR1_BR_Pos);
 }
 
-static void clock_on(void) {
-	clock_enable(&SPIx_APBxENR, SPIx_CLOCKEN);
-
-	return;
-}
-static void clock_off(void) {
-	clock_disable(&SPIx_APBxENR, SPIx_CLOCKEN);
-
-	return;
-}
 void spi_on(void) {
 	// Reference manual section 9.1.11 lists pin configuration for peripherals.
 	gpio_set_mode(SPIx_SCK_PIN,  GPIO_MODE_PP_AF, GPIO_LOW);
 	gpio_set_mode(SPIx_MOSI_PIN, GPIO_MODE_PP_AF, GPIO_LOW);
 	gpio_set_mode(SPIx_MISO_PIN, GPIO_MODE_IN,    GPIO_HIGH);
 
-	clock_on();
+	clock_enable(&SPIx_APBxENR, SPIx_CLOCKEN);
 	SET_BIT(SPIx->CR1, SPI_CR1_SPE);
 
 	return;
@@ -167,7 +155,7 @@ void spi_off(void) {
 	gpio_set_mode(SPIx_MISO_PIN, GPIO_MODE_HiZ, GPIO_LOW);
 
 	CLEAR_BIT(SPIx->CR1, SPI_CR1_SPE);
-	clock_off();
+	clock_disable(&SPIx_APBxENR, SPIx_CLOCKEN);
 
 	return;
 }
