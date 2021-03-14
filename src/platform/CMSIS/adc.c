@@ -126,9 +126,10 @@ void adc_init(void) {
 
 	clock_init(&RCC->APB2ENR, &RCC->APB2RSTR, RCC_APB2ENR_ADCxEN);
 
-	MODIFY_BITS(ADCx->CR2, ADC_CR2_CONT|ADC_CR2_EXTSEL,
+	MODIFY_BITS(ADCx->CR2, ADC_CR2_CONT|ADC_CR2_EXTSEL|ADC_CR2_EXTTRIG,
 		(0b0   << ADC_CR2_CONT_Pos  ) | // Keep at 0 for single conversion mode
 		(0b111 << ADC_CR2_EXTSEL_Pos) | // Enable software start
+		(0b1   << ADC_CR2_EXTTRIG_Pos)| // Enable the trigger
 		0);
 
 	// Make things simpler by setting the whole sample time registers at once
@@ -169,9 +170,23 @@ void adc_init(void) {
 void adc_on(void) {
 	clock_enable(&RCC->APB2ENR, RCC_APB2ENR_ADCxEN);
 
+	// When ADON is set the first time, wake from power-down mode
+	if (!BIT_IS_SET(ADCx->CR2, ADC_CR2_ADON)) {
+		SET_BIT(ADCx->CR2, ADC_CR2_ADON);
+	}
+	// The ST HAL waits for ADON to be set to 1 after setting it to 1;
+	// there's nothing in the reference manual about that though.
+	while (!BIT_IS_SET(ADCx->CR2, ADC_CR2_ADON)) {
+		// Nothing to do here
+	}
+	// Wait for stabilization
+	dumber_delay(ADC_STAB_TIME_uS * (G_freq_HCLK/1000000U));
+
 	return;
 }
 void adc_off(void) {
+	CLEAR_BIT(ADCx->CR2, ADC_CR2_ADON);
+
 	clock_disable(&RCC->APB2ENR, RCC_APB2ENR_ADCxEN);
 
 	return;
@@ -249,30 +264,17 @@ static adc_t adc_read_channel(uint32_t channel) {
 	// Five bits of channel selection
 	assert(channel <= 0b11111);
 
-	adc = 0;
-
 	// Select the ADC channel to convert
 	MODIFY_BITS(ADCx->SQR3, 0b11111 << ADC_SQR3_SQ1_Pos,
 		(channel << ADC_SQR3_SQ1_Pos)
 		);
 
-	// When ADON is set the first time, wake from power-down mode
-	if (!BIT_IS_SET(ADCx->CR2, ADC_CR2_ADON)) {
-		SET_BIT(ADCx->CR2, ADC_CR2_ADON);
-	}
-	// The ST HAL waits for ADON to be set to 1 after setting it to 1;
-	// there's nothing in the reference manual about that though.
-	while (!BIT_IS_SET(ADCx->CR2, ADC_CR2_ADON)) {
-		// Nothing to do here
-	}
-	dumber_delay(ADC_STAB_TIME_uS * (G_freq_HCLK/1000000U));
-
 	// Conversion can begin when ADON is set the second time after ADC power up
 	// If any bit other than ADON is changed when ADON is set, no conversion is
 	// triggered.
 	SET_BIT(ADCx->CR2, ADC_CR2_ADON);
-	SET_BIT(ADCx->CR2, ADC_CR2_EXTTRIG);
 
+	adc = 0;
 	for (uiter_t i = 0; i < ADC_SAMPLE_COUNT; ++i) {
 		SET_BIT(ADCx->CR2, ADC_CR2_SWSTART);
 		while (!BIT_IS_SET(ADCx->SR, ADC_SR_EOC)) {
@@ -281,8 +283,6 @@ static adc_t adc_read_channel(uint32_t channel) {
 		adc += SELECT_BITS(ADCx->DR, ADC_MAX);
 	}
 	adc /= ADC_SAMPLE_COUNT;
-
-	CLEAR_BIT(ADCx->CR2, ADC_CR2_ADON|ADC_CR2_EXTTRIG);
 
 	return adc;
 }
