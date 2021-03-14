@@ -628,6 +628,10 @@ static void calculate_log_beta(sensor_t *s, imath_t adc) {
 	}
 
 	r = FIXEDP_FROM(ADC_TO_R(adc, sR));
+	if (r == 0) {
+		s->status = (beta > 0) ? SENSOR_HIGH : SENSOR_LOW;
+		return;
+	}
 	// Using 1/T = 1/T0 + 1/B * log(R/R0)
 	// T = 1/(1/T0 + (log(R/R0)/B))
 	//
