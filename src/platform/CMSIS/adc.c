@@ -154,16 +154,13 @@ void adc_init(void) {
 	SET_BIT(ADCx->CR2, ADC_CR2_ADON);
 
 	// Calibrate the ADC
-	MODIFY_BITS(ADCx->CR2, ADC_CR2_RSTCAL|ADC_CR2_CAL,
-		(0b1 << ADC_CR2_RSTCAL_Pos) |
-		(0b1 << ADC_CR2_CAL_Pos   ) |
-		0);
-	tmp = SET_TIMEOUT(1000);
+	SET_BIT(ADCx->CR2, ADC_CR2_RSTCAL);
+	while (BIT_IS_SET(ADCx->CR2, ADC_CR2_RSTCAL)) {
+		// Nothing to do here
+	}
+	SET_BIT(ADCx->CR2, ADC_CR2_CAL);
 	while (BIT_IS_SET(ADCx->CR2, ADC_CR2_CAL)) {
-		if (TIMES_UP(tmp)) {
-			ERROR_STATE("ADC calibration timed out");
-			break;
-		}
+		// Nothing to do here
 	}
 
 	CLEAR_BIT(ADCx->CR2, ADC_CR2_ADON);
