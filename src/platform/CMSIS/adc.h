@@ -40,6 +40,13 @@
 /*
 * Static values
 */
+//
+// Handle ADCx
+// The ADC is internal, there's no reason for anyone to change it
+#define ADCx_IS_ADC1 1
+#define ADCx ADC1
+#define RCC_APB2ENR_ADCxEN_Pos RCC_APB2ENR_ADC1EN_Pos
+#define RCC_APB2ENR_ADCxEN     (1 << RCC_APB2ENR_ADC1EN_Pos)
 
 
 /*

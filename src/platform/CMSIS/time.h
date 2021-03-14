@@ -50,6 +50,15 @@
 #define RTC_ALARM_EXTI_LINE_Pos 17
 #define RTC_ALARM_EXTI_LINE (1 << RTC_ALARM_EXTI_LINE_Pos)
 
+//
+// Timers
+// SLEEP_ALARM_TIM must be on APB1 (alarms 2-7 or 12-14)
+#define SLEEP_ALARM_TIM TIM2
+#define SLEEP_ALARM_CLOCKEN_Pos RCC_APB1ENR_TIM2EN_Pos
+#define SLEEP_ALARM_CLOCKEN     (1 << SLEEP_ALARM_CLOCKEN_Pos)
+#define SLEEP_ALARM_IRQn TIM2_IRQn
+#define SleepAlarm_IRQHandler TIM2_IRQHandler
+
 /*
 * Types
 */

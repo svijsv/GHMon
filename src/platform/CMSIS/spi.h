@@ -46,6 +46,37 @@
 // necessarily reliable.
 #define SPI_SPEED 100000
 
+//
+// Handle SPIx
+#if USE_SPI
+// SPI1 remapped
+#if (SPIx_SCK_PIN == PB3) && (SPIx_MISO_PIN == PB4) && (SPIx_MOSI_PIN == PB5)
+# define SPI1_DO_REMAP 1
+#endif
+
+// SPI1
+#if ((SPIx_SCK_PIN == PA5) && (SPIx_MISO_PIN == PA6) && (SPIx_MOSI_PIN == PA7)) || SPI1_DO_REMAP
+# define SPIx SPI1
+# define SPIx_APBxENR  RCC->APB2ENR
+# define SPIx_APBxRSTR RCC->APB2RSTR
+# define SPIx_CLOCKEN  RCC_APB2ENR_SPI1EN
+# define SPIx_BUSFREQ  G_freq_PCLK2
+
+// SPI2
+#elif (SPIx_SCK_PIN == PB13) && (SPIx_MISO_PIN == PB14) && (SPIx_MOSI_PIN == PB15)
+# define SPIx SPI2
+# define SPIx_APBxENR  RCC->APB1ENR
+# define SPIx_APBxRSTR RCC->APB1RSTR
+# define SPIx_CLOCKEN  RCC_APB1ENR_SPI2EN
+# define SPIx_BUSFREQ  G_freq_PCLK1
+
+#elif !defined(SPIx_SCK_PIN) && !defined(SPIx_MISO_PIN) && !defined(SPIx_MOSI_PIN)
+# error "No SPI peripheral set"
+#else
+# error "Can't determine SPI peripheral"
+#endif // SPIx
+#endif // USE_SPI
+
 
 /*
 * Types

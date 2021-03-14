@@ -38,6 +38,42 @@
 /*
 * Static values
 */
+//
+// Handle user button
+#if ! BUTTON_PIN
+	// Nothing to do here
+
+#elif GPIO_GET_PINNO(BUTTON_PIN) == 0
+# define BUTTON_IRQn       EXTI0_IRQn
+# define Button_IRQHandler EXTI0_IRQHandler
+
+#elif GPIO_GET_PINNO(BUTTON_PIN) == 1
+# define BUTTON_IRQn       EXTI1_IRQn
+# define Button_IRQHandler EXTI1_IRQHandler
+
+#elif GPIO_GET_PINNO(BUTTON_PIN) == 2
+# define BUTTON_IRQn       EXTI2_IRQn
+# define Button_IRQHandler EXTI2_IRQHandler
+
+#elif GPIO_GET_PINNO(BUTTON_PIN) == 3
+# define BUTTON_IRQn       EXTI3_IRQn
+# define Button_IRQHandler EXTI3_IRQHandler
+
+#elif GPIO_GET_PINNO(BUTTON_PIN) == 4
+# define BUTTON_IRQn       EXTI4_IRQn
+# define Button_IRQHandler EXTI4_IRQHandler
+
+#elif (GPIO_GET_PINNO(BUTTON_PIN) >= 5) && (GPIO_GET_PINNO(BUTTON_PIN) <= 9)
+# define BUTTON_IRQn       EXTI9_5_IRQn
+# define Button_IRQHandler EXTI9_5_IRQHandler
+
+#elif (GPIO_GET_PINNO(BUTTON_PIN) >= 10) && (GPIO_GET_PINNO(BUTTON_PIN) <= 15)
+# define BUTTON_IRQn       EXTI15_10_IRQn
+# define Button_IRQHandler EXTI15_10_IRQHandler
+
+#else
+# error "Can't determine user button"
+#endif // User button
 
 
 /*

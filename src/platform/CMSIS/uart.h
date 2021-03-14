@@ -40,6 +40,48 @@
 /*
 * Static values
 */
+//
+// Handle UARTx
+// USART1 remapped
+#if (UARTx_TX_PIN == PB6) && (UARTx_RX_PIN == PB7)
+# define UART1_DO_REMAP 1
+#endif
+// USART2 and USART3 can be remapped, but the remapped pins aren't accessible
+// on the bluepill
+
+// USART1
+#if ((UARTx_TX_PIN == PA9) && (UARTx_RX_PIN == PA10)) || UART1_DO_REMAP
+# define UARTx USART1
+# define UARTx_IRQn     USART1_IRQn
+# define UARTx_IRQHandler USART1_IRQHandler
+# define UARTx_APBxENR  RCC->APB2ENR
+# define UARTx_APBxRSTR RCC->APB2RSTR
+# define UARTx_CLOCKEN  RCC_APB2ENR_USART1EN
+# define UARTx_BUSFREQ  G_freq_PCLK2
+
+// USART2
+#elif (UARTx_TX_PIN == PA2) && (UARTx_RX_PIN == PA3)
+# define UARTx USART2
+# define UARTx_IRQn     USART2_IRQn
+# define UARTx_IRQHandler USART2_IRQHandler
+# define UARTx_APBxENR  RCC->APB1ENR
+# define UARTx_APBxRSTR RCC->APB1RSTR
+# define UARTx_CLOCKEN  RCC_APB1ENR_USART2EN
+# define UARTx_BUSFREQ  G_freq_PCLK1
+
+// USART3
+#elif (UARTx_TX_PIN == PB10) && (UARTx_RX_PIN == PB11)
+# define UARTx USART3
+# define UARTx_IRQn     USART3_IRQn
+# define UARTx_IRQHandler USART3_IRQHandler
+# define UARTx_APBxENR  RCC->APB1ENR
+# define UARTx_APBxRSTR RCC->APB1RSTR
+# define UARTx_CLOCKEN  RCC_APB1ENR_USART3EN
+# define UARTx_BUSFREQ  G_freq_PCLK1
+
+#else
+# error "Can't determine UART peripheral"
+#endif // UARTx
 
 
 /*
