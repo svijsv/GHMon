@@ -67,7 +67,6 @@ uint32_t G_freq_PCLK2;
 static void light_sleep(utime_t ms, uint8_t flags);
 static void deep_sleep(utime_t s, uint8_t flags);
 static void clocks_init(void);
-static void update_system_clock_vars(void);
 
 static inline __attribute__((always_inline)) \
 void sysflash(void);
@@ -104,9 +103,6 @@ void Button_IRQHandler(void) {
 */
 void platform_init(void) {
 	uint32_t remaps;
-
-	// Needed before anything else to allow *_delay() to work
-	update_system_clock_vars();
 
 	clocks_init();
 
@@ -266,8 +262,6 @@ static void clocks_init(void) {
 		(0b1000 << RCC_CFGR_HPRE_Pos )  | // Use SYSCLK/2 as HCLK
 		0);
 
-	update_system_clock_vars();
-
 	// We don't use the LSI for anything
 	CLEAR_BIT(RCC->CSR, RCC_CSR_LSION);
 
@@ -293,23 +287,13 @@ static void clocks_init(void) {
 		(0b000 << FLASH_ACR_LATENCY_Pos ) | // Use a latency of 0
 		0);
 
-	return;
-}
-static void update_system_clock_vars(void) {
-	uint32_t div;
-
-	// This function is provided by system_stm32f1xx.c from CMSIS
-	SystemCoreClockUpdate();
-	// SystemCoreClock is provided by system_stm32f1xx.c from CMSIS
-	G_freq_HCLK = SystemCoreClock;
-
-	div = GATHER_BITS(RCC->CFGR, 0b111, RCC_CFGR_PPRE1_Pos);
-	// APBPrescTable[] is provided by system_stm32f1xx.c from CMSIS
-	G_freq_PCLK1 = G_freq_HCLK >> APBPrescTable[div];
-
-	div = GATHER_BITS(RCC->CFGR, 0b111, RCC_CFGR_PPRE2_Pos);
-	// APBPrescTable[] is provided by system_stm32f1xx.c from CMSIS
-	G_freq_PCLK2 = G_freq_HCLK >> APBPrescTable[div];
+#if USE_INTERNAL_CLOCK
+	G_freq_HCLK = G_freq_HSI/2;
+#else
+	G_freq_HCLK = G_freq_HSE/2;
+#endif
+	G_freq_PCLK1 = G_freq_HCLK/2;
+	G_freq_PCLK2 = G_freq_HCLK;
 
 	return;
 }

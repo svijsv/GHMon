@@ -219,12 +219,12 @@
 
 
 /*
-* Variable declarations (defined in stm32f103.c)
+* Variable declarations
 */
 
 
 /*
-* Function prototypes (defined in stm32f103.c)
+* Function prototypes
 */
 
 
