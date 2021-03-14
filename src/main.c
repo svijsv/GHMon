@@ -175,7 +175,7 @@ int main(void) {
 						LOGGER("Appending to log");
 					}
 					do_status = true;
-					LOGGER("Checking sensor status");
+					LOGGER("Forcing sensor status check");
 					break;
 				case 1:
 					led_flash(2, DELAY_LONG);
@@ -206,6 +206,7 @@ int main(void) {
 
 		// Checking the status only updates warning blinks
 		if (do_status || ((status_alarm > 0) && (NOW() >= status_alarm))) {
+			LOGGER("Checking sensor status");
 			status_alarm = 0;
 			check_sensors();
 			check_sensor_warnings();
