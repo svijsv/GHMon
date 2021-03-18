@@ -79,8 +79,9 @@ int msb32_idx(uint32_t n);
 #define SET_BIT(field, bits) ((field) |= (bits))
 // Unset one or more bits in a field
 #define CLEAR_BIT(field, bits) ((field) &= ~(bits))
-// toggle one or more bits in a field
+// Toggle one or more bits in a field
 #define TOGGLE_BIT(field, bits) ((field) ^= (bits))
+// Read one or more bits in a field
 #degine GET_BIT(field, bits) ((field) & (bits))
 // Set or clear bits in a field limited by a mask
 //#define MODIFY_BITS(field, mask, bits) ((field) = (((field) & ~(mask)) | (bits)))
@@ -96,7 +97,8 @@ int msb32_idx(uint32_t n);
 #define GATHER_BITS(field, mask, offset) (SELECT_BITS((field), ((mask) << (offset))) >> (offset))
 
 // Check if any bit set in mask is set in field
-#define BIT_IS_SET(field, mask)    ((field) & (mask))
+//#define BIT_IS_SET(field, mask)    ((field) & (mask))
+#define BIT_IS_SET(field, mask)    (((field) & (mask)) != 0)
 // Check if every bit set in mask is set in field
 // mask is expanded twice for convenience
 #define BITS_ARE_SET(field, mask) (((field) & (mask)) == (mask))
