@@ -105,6 +105,9 @@ int msb32_idx(uint32_t n);
 
 // Turn an integer into a bit mask
 #define AS_BIT(n) (1U << (n))
+#ifndef _BV
+# define _BV(n) (1U << (n))
+#endif
 
 // Find the lowest set bit in a field
 #define LOWEST_BIT(field) ((field) & -(field))
