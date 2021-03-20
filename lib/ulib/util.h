@@ -97,22 +97,16 @@ void vaprintf(printf_putc_t printf_putc, const char *fmt, va_list arp);
 	} while (0);
 
 // Write a volatile variable without atomic access
-#define WRITE_VOLATILE(ui, set) \
+#define WRITE_VOLATILE(set, get) \
 	do { \
-		(ui) = (set); \
-	} while ((ui) != (set));
-
+		(set) = (get); \
+	} while ((set) != (get));
 // Read a volatile variable without atomic access
-#define READ_VOLATILE32(u32, get) \
+// For now, it's identical to WRITE_VOLATILE()
+#define READ_VOLATILE(set, get) \
 	do { \
-		uint8_t *p = &(u32), *g = &(get); \
-		g[0] = p[0]; g[1] = p[1]; g[2] = p[2]; g[3] = p[3]; \
-	} while ((u32) != (get));
-#define READ_VOLATILE16(u16, get) \
-	do { \
-		uint8_t *p = &(u16), *g = &(get); \
-		g[0] = p[0]; g[1] = p[1]; \
-	} while ((u16) != (get));
+		(set) = (get); \
+	} while ((set) != (get));
 
 
 #if !DEBUG
