@@ -40,6 +40,18 @@
 /*
 * Static values
 */
+// Shifts needed to adjust a value by a given power of 2
+#define P2_2_SHIFTS    (1)
+#define P2_4_SHIFTS    (2)
+#define P2_8_SHIFTS    (3)
+#define P2_16_SHIFTS   (4)
+#define P2_32_SHIFTS   (5)
+#define P2_64_SHIFTS   (6)
+#define P2_128_SHIFTS  (7)
+#define P2_256_SHIFTS  (8)
+#define P2_512_SHIFTS  (9)
+#define P2_1024_SHIFTS (10)
+
 //
 // User-overrideable values
 //
@@ -103,6 +115,31 @@ FIXEDP_ITYPE log10_fixedp(FIXEDP_ITYPE x);
 */
 // Absolute value of an integer, naive-but-simple approach
 #define ABS(x) (((x) > 0) ? (x) : -(x))
+
+// Quick power-of-2 division for unsigned ints
+#define SHIFT_DIV_2(x)    ((x) >>  1)
+#define SHIFT_DIV_4(x)    ((x) >>  2)
+#define SHIFT_DIV_8(x)    ((x) >>  3)
+#define SHIFT_DIV_16(x)   ((x) >>  4)
+#define SHIFT_DIV_32(x)   ((x) >>  5)
+#define SHIFT_DIV_64(x)   ((x) >>  6)
+#define SHIFT_DIV_128(x)  ((x) >>  7)
+#define SHIFT_DIV_256(x)  ((x) >>  8)
+#define SHIFT_DIV_512(x)  ((x) >>  9)
+#define SHIFT_DIV_1024(x) ((x) >> 10)
+
+// Quick power-of-2 multiplication for unsigned ints
+#define SHIFT_MUL_2(x)    ((x) <<  1)
+#define SHIFT_MUL_4(x)    ((x) <<  2)
+#define SHIFT_MUL_8(x)    ((x) <<  3)
+#define SHIFT_MUL_16(x)   ((x) <<  4)
+#define SHIFT_MUL_32(x)   ((x) <<  5)
+#define SHIFT_MUL_64(x)   ((x) <<  6)
+#define SHIFT_MUL_128(x)  ((x) <<  7)
+#define SHIFT_MUL_256(x)  ((x) <<  8)
+#define SHIFT_MUL_512(x)  ((x) <<  9)
+#define SHIFT_MUL_1024(x) ((x) << 10)
+
 
 //
 // Fixed-point operations
