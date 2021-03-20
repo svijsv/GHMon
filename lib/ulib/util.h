@@ -96,6 +96,25 @@ void vaprintf(printf_putc_t printf_putc, const char *fmt, va_list arp);
 		(low)  = (uint16_t )((combined) & 0xFFFF); \
 	} while (0);
 
+// Write a volatile variable without atomic access
+#define WRITE_VOLATILE(ui, set) \
+	do { \
+		(ui) = (set); \
+	} while ((ui) != (set));
+
+// Read a volatile variable without atomic access
+#define READ_VOLATILE32(u32, get) \
+	do { \
+		uint8_t *p = &(u32), *g = &(get); \
+		g[0] = p[0]; g[1] = p[1]; g[2] = p[2]; g[3] = p[3]; \
+	} while ((u32) != (get));
+#define READ_VOLATILE16(u16, get) \
+	do { \
+		uint8_t *p = &(u16), *g = &(get); \
+		g[0] = p[0]; g[1] = p[1]; \
+	} while ((u16) != (get));
+
+
 #if !DEBUG
 # define OPTIMIZE_FUNCTION __attribute__((optimize("O2")))
 #else
