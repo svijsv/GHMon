@@ -82,7 +82,7 @@ int msb32_idx(uint32_t n);
 // Toggle one or more bits in a field
 #define TOGGLE_BIT(field, bits) ((field) ^= (bits))
 // Read one or more bits in a field
-#degine GET_BIT(field, bits) ((field) & (bits))
+#define GET_BIT(field, bits) ((field) & (bits))
 // Set or clear bits in a field limited by a mask
 //#define MODIFY_BITS(field, mask, bits) ((field) = (((field) & ~(mask)) | (bits)))
 #define MODIFY_BITS(field, mask, bits) ((field) = (((field) & ~(mask)) | ((bits) & (mask))))
