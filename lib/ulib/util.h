@@ -96,7 +96,8 @@ void vaprintf(printf_putc_t printf_putc, const char *fmt, va_list arp);
 		(low)  = (uint16_t )((combined) & 0xFFFF); \
 	} while (0);
 
-// Write a volatile variable without atomic access
+// Write a volatile variable without atomic access; this doesn't protect
+// anything trying to read it during the write
 #define WRITE_VOLATILE(set, get) \
 	do { \
 		(set) = (get); \
@@ -108,12 +109,18 @@ void vaprintf(printf_putc_t printf_putc, const char *fmt, va_list arp);
 		(set) = (get); \
 	} while ((set) != (get));
 
-
 #if !DEBUG
 # define OPTIMIZE_FUNCTION __attribute__((optimize("O2")))
 #else
 # define OPTIMIZE_FUNCTION
 #endif
+
+// Use these to show the value of a macro at compile-time
+// https://stackoverflow.com/questions/1562074/how-do-i-show-the-value-of-a-define-at-compile-time
+#define XTRINGIZE(x) STRINGIZE(x)
+#define STRINGIZE(x) #x
+//#pragma message "The value of ABC: " XTRINGIZE(ABC)
+
 
 #endif // _LIB_UTIL_H
 #ifdef __cplusplus
