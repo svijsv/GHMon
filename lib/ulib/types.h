@@ -78,8 +78,8 @@ typedef uint32_t flag_t;
 typedef uint32_t utime_t;
 
 // Types used for generic iterators
-typedef int_fast16_t  iter_t;
-typedef uint_fast16_t uiter_t;
+typedef int_fast8_t  iter_t;
+typedef uint_fast8_t uiter_t;
 
 /*
 * Variable declarations (defined in types.c)
