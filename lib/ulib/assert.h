@@ -57,7 +57,7 @@ void _assert_failed(const char *file_path, uint32_t lineno, const char *func_nam
 /*
 * Macros
 */
-#if DEBUG
+#if DEBUG && ! NO_ASSERT
 # define assert(exp) ((exp) ? (void)0 : _assert_failed(__FILE__, __LINE__, __func__, #exp))
 #else
 # define assert(exp) ((void)0)
