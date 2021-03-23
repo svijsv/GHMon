@@ -162,7 +162,7 @@ typedef struct {
 	// At time of last test, storing 'i' in the struct used less space on flash
 	// than pointer arithmetic for controllers but more for sensors; both used
 	// the same amount of RAM
-	uint8_t i;
+	//uint8_t i;
 } controller_t;
 
 
@@ -190,8 +190,8 @@ void check_controller_warnings(void);
 */
 #define SET_CLOCK_TIME(hours, minutes) (((hours) * 60) + (minutes))
 
-//#define GET_CONTROLLER_I(c) ((uint )(c - G_controllers))
-#define GET_CONTROLLER_I(c) ((c)->i)
+#define GET_CONTROLLER_I(c) ((uint )(c - G_controllers))
+//#define GET_CONTROLLER_I(c) ((c)->i)
 
 #else // !USE_CONTROLLERS
 # define controllers_init()  ((void )0U)

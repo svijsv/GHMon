@@ -103,7 +103,7 @@ void controllers_init(void) {
 			}
 		}
 
-		G_controllers[i].i = i;
+		//G_controllers[i].i = i;
 		power_off_output(cfg->control_pin);
 	}
 
