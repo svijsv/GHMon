@@ -682,7 +682,7 @@ static void st_qword (BYTE* ptr, QWORD val)	/* Store an 8-byte word in little-en
 /*-----------------------------------------------------------------------*/
 /* String functions                                                      */
 /*-----------------------------------------------------------------------*/
-#if USE_CLIB_STRING
+#if ! USE_CLIB_STRING
 /* Copy memory to memory */
 static void mem_cpy (void* dst, const void* src, UINT cnt)
 {
@@ -729,7 +729,7 @@ static int chk_chr (const char* str, int chr)	/* NZ:contained, ZR:not contained 
 	return *str;
 }
 
-#else // !USE_CLIB_STRING
+#else // USE_CLIB_STRING
 # define mem_cpy memcpy
 # define mem_set memset
 # define mem_cmp memcmp
