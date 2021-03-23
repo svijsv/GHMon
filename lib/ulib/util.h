@@ -111,8 +111,10 @@ void vaprintf(printf_putc_t printf_putc, const char *fmt, va_list arp);
 
 #if !DEBUG
 # define OPTIMIZE_FUNCTION __attribute__((optimize("O2")))
+# define DONT_OPTIMIZE_FUNCTION __attribute__((optimize("O0")))
 #else
 # define OPTIMIZE_FUNCTION
+# define DONT_OPTIMIZE_FUNCTION
 #endif
 
 // Use these to show the value of a macro at compile-time
