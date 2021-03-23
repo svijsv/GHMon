@@ -57,6 +57,7 @@
 
 //
 // Configuration flags
+// Reserve 0xF0 for local uses
 #define CFG_NONE             0x00
 #define CFG_ALLOW_INTERRUPTS 0x01
 
@@ -299,13 +300,22 @@ void issue_warning(void);
 #endif
 
 #if DEBUG
-#define LOGGER(...)      logger(__VA_ARGS__)
+#define LOGGER(fmt, ...)      logger(fmt, ## __VA_ARGS__)
 #else
 #define LOGGER(...)      ((void )0U)
 #endif
 
+#if USE_SERIAL
+# define PRINTF(fmt, ...)     serial_printf(fmt, ## __VA_ARGS__)
+# define PUTS(msg, len)       serial_print(msg, len)
+#else
+# define PRINTF(...) ((void )0U)
+# define PUTS(...)   ((void )0U)
+#endif
+
 // Get the system time enumerated in seconds
 #define NOW() (get_RTC_seconds())
+
 
 #endif // _INTERFACE_H
 #ifdef __cplusplus

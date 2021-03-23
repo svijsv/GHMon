@@ -80,8 +80,8 @@ void serial_init(void) {
 	// TODO: Handle uart_init() failure
 	print_system_info();
 #if USE_TERMINAL
-	serial_print("Press any key to enter the console\r\n", 0);
-	serial_print("If that doesn't work, press the user button first\r\n", 0);
+	PUTS("Press any key to enter the console\r\n", 0);
+	PUTS("If that doesn't work, press the user button first\r\n", 0);
 #endif
 
 	G_serial_is_up = true;
@@ -190,9 +190,9 @@ void print_system_info(void) {
 	seconds_to_date(seconds, &year, &month, &day);
 	seconds_to_time(seconds, &hour, &minute, &second);
 
-	serial_printf("%s version %s\r\n", PROGNAME, PROGVERS);
-	serial_printf("Build Date: %s PlatformIO: %u\r\n", BUILD_DATE, PLATFORMIO);
-	serial_printf("Current system time is %04u.%02u.%02u %02u:%02u:%02u\r\n",
+	PRINTF("%s version %s\r\n", PROGNAME, PROGVERS);
+	PRINTF("Build Date: %s PlatformIO: %u\r\n", BUILD_DATE, (uint )PLATFORMIO);
+	PRINTF("Current system time is %04u.%02u.%02u %02u:%02u:%02u\r\n",
 		(uint )(YEAR_0 + year),
 		(uint )month,
 		(uint )day,
@@ -201,7 +201,7 @@ void print_system_info(void) {
 		(uint )second
 	);
 #if USE_SD
-	serial_printf("Using FatFS revision %u\r\n", FFCONF_DEF);
+	PRINTF("Using FatFS revision %u\r\n", (uint )FFCONF_DEF);
 #endif // USE_SD
 
 	print_platform_info(serial_putc);

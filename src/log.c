@@ -54,20 +54,18 @@
 static const char *prefix_std = "\t";
 static const char *prefix_warn = "\t!";
 
-#if DEBUG
-static const char *WRITE_ERR_FMT = "f_write(): fatfs error %u";
-#define WRITE_ERR_MSG(err) WRITE_ERR_FMT, (uint )(err)
+// Store multi-use strings in const arrays so they aren't duplicated
+static const char open_err_msg[] = "f_open(): fatfs error %u";
+#define OPEN_ERR_MSG(err) LOGGER(open_err_msg,  (uint )(err))
 
-static const char *CLOSE_ERR_FMT = "f_close(): fatfs error %u";
-#define CLOSE_ERR_MSG(err) CLOSE_ERR_FMT, (uint )(err)
+static const char write_err_msg[] = "f_write(): fatfs error %u";
+#define WRITE_ERR_MSG(err) LOGGER(write_err_msg, (uint )(err))
 
-static const char *OPEN_ERR_FMT = "f_open(): fatfs error %u";
-#define OPEN_ERR_MSG(err)  OPEN_ERR_FMT,  (uint )(err)
+static const char close_err_msg[] = "f_close(): fatfs error %u";
+#define CLOSE_ERR_MSG(err) LOGGER(close_err_msg, (uint )(err))
 
-static const char *UNMOUNT_ERR_FMT = "f_unmount(): fatfs error %u";
-#define UNMOUNT_ERR_MSG(err)  UNMOUNT_ERR_FMT,  (uint )(err)
-#endif // DEBUG
-
+static const char unmount_err_msg[] = "f_unmount(): fatfs error %u";
+#define UNMOUNT_ERR_MSG(err) LOGGER(unmount_err_msg,  (uint )(err))
 
 /*
 * Types
@@ -218,7 +216,7 @@ void log_status(bool force_write) {
 
 	LOGGER("Logging to %s", logfile_name);
 	if ((err = f_open(&fb, logfile_name, FA_WRITE|FA_OPEN_APPEND)) != FR_OK) {
-		LOGGER(OPEN_ERR_MSG(err));
+		OPEN_ERR_MSG(err);
 		SET_BIT(G_warnings, WARN_SD_FAILED);
 		goto END;
 	}
@@ -328,7 +326,7 @@ END:
 	file = NULL;
 
 	if ((fs.fs_type != 0) && ((err = f_unmount("")) != FR_OK)) {
-		LOGGER(UNMOUNT_ERR_MSG(err));
+		UNMOUNT_ERR_MSG(err);
 		SET_BIT(G_warnings, WARN_SD_FAILED);
 	}
 
@@ -461,18 +459,18 @@ static void buffer_line(utime_t now) {
 #endif // USE_CONTROLLERS
 
 #if DEBUG
-	serial_printf("%s\t%s\t%u\t%u", format_uptime(line->uptime), format_warnings(line->warnings), (uint )line->vcc_voltage, (uint )line->mcu_temp);
+	PRINTF("%s\t%s\t%u\t%u", format_uptime(line->uptime), format_warnings(line->warnings), (uint )line->vcc_voltage, (uint )line->mcu_temp);
 	for (uiter_t i = 0; i < SENSOR_COUNT; ++i) {
-		serial_printf("\t%d", (int )line->status[i]);
+		PRINTF("\t%d", (int )line->status[i]);
 	}
 #if USE_CONTROLLERS
 #if USE_SMALL_CONTROLLERS < 1
 	for (uiter_t i = 0; i < CONTROLLER_COUNT; ++i) {
-		serial_printf("\t%u\t%u", (uint )line->run_count[i], (uint )line->run_time[i]);
+		PRINTF("\t%u\t%u", (uint )line->run_count[i], (uint )line->run_time[i]);
 	}
 #endif // USE_SMALL_CONTROLLERS < 1
 #endif // USE_CONTROLLERS
-	serial_print("\r\n", 2);
+	PUTS("\r\n", 2);
 #endif // DEBUG
 
 	++log_buffer.tail;
@@ -537,7 +535,7 @@ static void lprintf_putc(int c) {
 		if ((err = f_write(file, print_buffer.buffer, PRINT_BUFFER_SIZE, &bh)) != FR_OK) {
 			// Not much else we can do about it here
 			++write_errors;
-			LOGGER(WRITE_ERR_MSG(err));
+			WRITE_ERR_MSG(err);
 			return;
 		}
 #if DEBUG
@@ -558,7 +556,7 @@ static void lprintf_putc(int c) {
 	if ((err = f_write(file, &cb, 1, &bh)) != FR_OK) {
 		// Not much else we can do about it here
 		++write_errors;
-		LOGGER(WRITE_ERR_MSG(err));
+		WRITE_ERR_MSG(err);
 		return;
 	}
 
@@ -589,7 +587,7 @@ FRESULT close_file(void) {
 	if (print_buffer.size != 0) {
 		if ((err = f_write(file, print_buffer.buffer, print_buffer.size, &bh)) != FR_OK) {
 			++write_errors;
-			LOGGER(WRITE_ERR_MSG(err));
+			WRITE_ERR_MSG(err);
 			res = err;
 		}
 #if DEBUG
@@ -602,7 +600,7 @@ FRESULT close_file(void) {
 #endif // PRINT_BUFFER_SIZE > 0
 
 	if ((err = f_close(file)) != FR_OK) {
-		LOGGER(CLOSE_ERR_MSG(err));
+		CLOSE_ERR_MSG(err);
 		res = err;
 	}
 
@@ -627,7 +625,7 @@ FRESULT next_line(void) {
 		lines_logged_this_file = 0;
 
 		if ((err = f_open(file, logfile_name, FA_WRITE|FA_OPEN_APPEND)) != FR_OK) {
-			LOGGER(OPEN_ERR_MSG(err));
+			OPEN_ERR_MSG(err);
 			res = err;
 		}
 		if ((err = print_header()) != FR_OK) {

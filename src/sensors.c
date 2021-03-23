@@ -49,15 +49,16 @@
 /*
 * Static values
 */
-// Store multi-use strings in variables so they aren't duplicated
-static const char *setup_err_msg_i = "Invalid sensor %u configuration";
-static const char *setup_err_msg   = "Invalid sensor configuration";
-static const char *unknown_msg     = "Unknown sensor type '%u' in %s.";
+// Store multi-use strings in const arrays so they aren't duplicated
+static const char l_invalid_msg[] = "Invalid sensor %u configuration";
+static const char e_invalid_msg[] = "Invalid sensor configuration";
+#define SETUP_ERR(i) \
+	LOGGER(l_invalid_msg, (uint )(i)); \
+	ERROR_STATE(e_invalid_msg)
 
-// Format parameters can't be checked against variables so use macros to
-// minimize potential problems
-#define SETUP_ERR(i) LOGGER(setup_err_msg_i, (uint )(i)); ERROR_STATE(setup_err_msg)
+static const char unknown_msg[] = "Unknown sensor type '%u' in %s.";
 #define UNKNOWN_MSG(i) LOGGER(unknown_msg, (uint )(i), __func__);
+
 
 /*
 * Types
@@ -159,7 +160,7 @@ void sensors_init(void) {
 		cfg = &SENSORS[i];
 		dev_cfg = &cfg->devcfg;
 
-		// s->i = i;
+		//s->i = i;
 
 		if (cfg->name[0] == 0) {
 			LOGGER("Unset name in SENSORS[%u]; is SENSOR_COUNT correct?", (uint )i);
@@ -261,6 +262,7 @@ void sensors_init(void) {
 
 		default:
 			UNKNOWN_MSG(cfg->type);
+			SETUP_ERR(i);
 			break;
 		}
 	}

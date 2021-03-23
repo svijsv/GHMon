@@ -47,16 +47,14 @@
 /*
 * Static values
 */
-// Use const pointers instead of #define for these to prevent using extra
-// memory for each place where they occur
-static const char *TERMINAL_INTRO =
+// Store multi-use strings in const arrays so they aren't duplicated
+static const char TERMINAL_INTRO[] =
 	"\r\nEntering command terminal\r\nType 'help' for a list of commands.\r\n";
-static const char *TERMINAL_OUTRO =
+static const char TERMINAL_OUTRO[] =
 	"Leaving command terminal until input is received.\r\n";
-// Begin with '\r' to make sure the prompt is at the start of the line
-static const char *TERMINAL_PROMPT =
+static const char TERMINAL_PROMPT[] =
 	"\r$ ";
-static const char *TERMINAL_HELP =
+static const char TERMINAL_HELP[] =
 "Accepted commands:\r\n"
 "   set_time YY.MM.DD hh:mm:ss - Set system time, clock is 24-hour\r\n"
 "   info                       - Print system info\r\n"
@@ -121,7 +119,7 @@ static void terminalcmd_fdisk(char *line_in, uiter_t size);
 void terminal(void) {
 	char line_in[TERMINAL_BUFFER_SIZE];
 
-	serial_print(TERMINAL_INTRO, 0);
+	PUTS(TERMINAL_INTRO, 0);
 	led_off();
 	led_flash(1, DELAY_SHORT);
 
@@ -133,11 +131,11 @@ void terminal(void) {
 			terminalcmd_led_flash(line_in);
 
 		} else if (cstring_cmp(line_in, "led_on") == 0) {
-			serial_print("Turning LED on\r\n", 0);
+			PUTS("Turning LED on\r\n", 0);
 			led_on();
 
 		} else if (cstring_cmp(line_in, "led_off") == 0) {
-			serial_print("Turning LED off\r\n", 0);
+			PUTS("Turning LED off\r\n", 0);
 			led_off();
 
 		} else if (cstring_cmp(line_in, "led_toggle") == 0) {
@@ -163,7 +161,7 @@ void terminal(void) {
 #endif // USE_LOGGING
 
 		} else if (cstring_ncmp(line_in, "help", 4) == 0) {
-			serial_print(TERMINAL_HELP, 0);
+			PUTS(TERMINAL_HELP, 0);
 
 #if USE_FDISK
 		} else if (cstring_cmp(line_in, "format") == 0) {
@@ -174,12 +172,12 @@ void terminal(void) {
 			terminalcmd_test(line_in);
 
 		} else {
-			serial_printf("Unknown command '%s'\r\n", line_in);
+			PRINTF("Unknown command '%s'\r\n", line_in);
 		}
 	}
 
 END:
-	serial_print(TERMINAL_OUTRO, 0);
+	PUTS(TERMINAL_OUTRO, 0);
 
 	return;
 }
@@ -194,10 +192,10 @@ static uiter_t terminal_gets(char *line_in, uiter_t size) {
 	i = 0;
 	while (1) {
 		if (!started_line) {
-			serial_print(TERMINAL_PROMPT, 0);
+			PUTS(TERMINAL_PROMPT, 0);
 		}
-		if (uart_receive_block(&c, 1, TERMINAL_TIMEOUT_S*1000) == ETIMEOUT) {
-			serial_print("Timed out waiting for input\r\n", 0);
+		if (uart_receive_block(&c, 1, (uint32_t )TERMINAL_TIMEOUT_S*1000) == ETIMEOUT) {
+			PUTS("Timed out waiting for input\r\n", 0);
 			line_in[0] = 0;
 			return 0;
 		}
@@ -259,7 +257,7 @@ static uiter_t terminal_gets(char *line_in, uiter_t size) {
 				}
 			}
 			if ((newlines != 0) || (other != 0)) {
-				serial_printf("Ignoring %u newlines and %u other characters after the linebreak", (uint )newlines, (uint )other);
+				PRINTF("Ignoring %u newlines and %u other characters after the linebreak", (uint )newlines, (uint )other);
 			}
 			break;
 		}
@@ -269,21 +267,21 @@ static uiter_t terminal_gets(char *line_in, uiter_t size) {
 }
 
 static void terminalcmd_print_sensor_status(void) {
-	serial_print("Checking sensor status...\r\n", 0);
+	PUTS("Checking sensor status...\r\n", 0);
 	invalidate_sensors();
 	check_sensors();
 
-	serial_printf("   VCC: %u\r\n   CPU_temp: %u\r\n\n   I  Name  Status\r\n",
+	PRINTF("   VCC: %u\r\n   CPU_temp: %u\r\n\n   I  Name  Status\r\n",
 		(uint )G_vcc_voltage, (uint16_t )G_mcu_temp);
 	for (uiter_t i = 0; i < SENSOR_COUNT; ++i) {
-		serial_printf("   %u  %s   %d\r\n", (uint )i, SENSORS[i].name, (int )G_sensors[i].status);
+		PRINTF("   %u  %s   %d\r\n", (uint )i, SENSORS[i].name, (int )G_sensors[i].status);
 	}
 
 	return;
 }
 #if USE_CONTROLLERS
 static void terminalcmd_run_controllers(void) {
-	serial_print("Running controller checks...\r\n", 0);
+	PUTS("Running controller checks...\r\n", 0);
 
 	for (uiter_t i = 0; i < CONTROLLER_COUNT; ++i) {
 		check_controller(&G_controllers[i]);
@@ -339,7 +337,7 @@ static void terminalcmd_set_time(char *token) {
 		// Nothing to do here
 	}
 	if (token[i] != 0) {
-		serial_printf("Unexpected token(s): %s'\r\n", token);
+		PRINTF("Unexpected token(s): %s'\r\n", token);
 		goto END;
 	}
 
@@ -364,14 +362,14 @@ static void terminalcmd_set_time(char *token) {
 	}
 
 	if (!format_ok) {
-		serial_print("Invalid format; use 'YY.MM.DD hh:mm:ss'\r\n", 0);
+		PUTS("Invalid format; use 'YY.MM.DD hh:mm:ss'\r\n", 0);
 		goto END;
 	}
 
 	if (year > 2000) {
 		year -= 2000;
 	}
-	serial_printf("Setting time to 20%02u.%02u.%02u %02u:%02u:%02u\r\n",
+	PRINTF("Setting time to 20%02u.%02u.%02u %02u:%02u:%02u\r\n",
 		(uint )year, (uint )month, (uint )day, (uint )hour, (uint )minute, (uint )second);
 
 	year -= (YEAR_0 - 2000);
@@ -379,7 +377,7 @@ static void terminalcmd_set_time(char *token) {
 		year = 0;
 	}
 	if (((err = set_date(year, month, day)) != EOK) || ((err = set_time(hour, minute, second)) != EOK)) {
-		serial_printf("   Error %u while setting time\r\n", (uint )err);
+		PRINTF("   Error %u while setting time\r\n", (uint )err);
 		goto END;
 	}
 
@@ -393,7 +391,7 @@ static void terminalcmd_led_flash(char *token) {
 	token = (char *)cstring_next_token(token, ' ');
 	n = read_number(token);
 
-	serial_printf("Flashing LED %u times.\r\n", (uint )n);
+	PRINTF("Flashing LED %u times.\r\n", (uint )n);
 
 	led_flash(n, DELAY_SHORT);
 
@@ -401,16 +399,16 @@ static void terminalcmd_led_flash(char *token) {
 }
 #if USE_FDISK
 static void terminalcmd_fdisk(char *line_in, uiter_t size) {
-	static const char *confirm_string = "ERASE MY CARD!";
+	static const char confirm_string[] = "ERASE MY CARD!";
 	uiter_t len;
 
-	serial_printf("Format SD card? Type '%s' to confirm:\r\n", confirm_string);
+	PRINTF("Format SD card? Type '%s' to confirm:\r\n", confirm_string);
 	terminal_gets(line_in, size);
 
 	len = cstring_len(confirm_string);
 	for (uiter_t i = 0; i < len; ++i) {
 		if (line_in[i] != confirm_string[i]) {
-			serial_print("Aborting format", 0);
+			PUTS("Aborting format", 0);
 			return;
 		}
 	}
@@ -428,21 +426,21 @@ static void terminalcmd_test(char *token) {
 	UNUSED(token);
 #if DEBUG
 
-	serial_printf("sensor struct sizes:\r\n\tsensor_t: %u\r\n\tsensor_static_t: %u\r\n\tsensor_devcfg_t: %u\r\n\tSENSORS: %u\r\n\tG_sensors: %u\r\n",
+	PRINTF("sensor struct sizes:\r\n\tsensor_t: %u\r\n\tsensor_static_t: %u\r\n\tsensor_devcfg_t: %u\r\n\tSENSORS: %u\r\n\tG_sensors: %u\r\n",
 		(uint )sizeof(sensor_t), (uint )sizeof(sensor_static_t), (uint )sizeof(sensor_devcfg_t), (uint )sizeof(SENSORS), (uint )sizeof(G_sensors));
 #if USE_CONTROLLERS
-	serial_printf("controller struct sizes:\r\n\tcontroller_t: %u\r\n\tcontroller_static_t: %u\r\n\tCONTROLLERS: %u\r\n\tG_controllers: %u\r\n",
+	PRINTF("controller struct sizes:\r\n\tcontroller_t: %u\r\n\tcontroller_static_t: %u\r\n\tCONTROLLERS: %u\r\n\tG_controllers: %u\r\n",
 		(uint )sizeof(controller_t), (uint )sizeof(controller_static_t), (uint )sizeof(CONTROLLERS), (uint )sizeof(G_controllers));
 #endif
 
 #if USE_CONTROLLERS && USE_SMALL_CONTROLLERS < 1
 	for (uiter_t i = 0; i < CONTROLLER_COUNT; ++i) {
-		serial_printf("controller %u: next check in %d minutes\r\n", (uint )i, (int )(((int32_t )G_controllers[i].next_check - (int32_t )NOW())/60));
+		PRINTF("controller %u: next check in %d minutes\r\n", (uint )i, (int )(((int32_t )G_controllers[i].next_check - (int32_t )NOW())/60));
 	}
 #endif // USE_SMALL_CONTROLLERS < 1
 
 #if USE_LOGGING
-	serial_printf("Log print buffer size: %u\r\n", (uint )PRINT_BUFFER_SIZE);
+	PRINTF("Log print buffer size: %u\r\n", (uint )PRINT_BUFFER_SIZE);
 #endif
 
 #endif // DEBUG

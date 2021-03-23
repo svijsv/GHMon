@@ -9,4 +9,4 @@
 // Print a debug message
 void logger(const char *format, ...)
 	__attribute__ ((format(printf, 1, 2)));
-#endif
+#endif // DEBUG

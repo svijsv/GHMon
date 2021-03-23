@@ -453,7 +453,7 @@ void error_state(const char *file_path, uint32_t lineno, const char *func_name, 
 			} else {
 				msg_timeout = SET_TIMEOUT(5 * 60000);
 			}
-			serial_printf("Err %s:%u in %s(): %s\r\n", basename, (uint )lineno, func_name, msg);
+			PRINTF("Err %s:%u in %s(): %s\r\n", basename, (uint )lineno, func_name, msg);
 		}
 
 		led_toggle();
