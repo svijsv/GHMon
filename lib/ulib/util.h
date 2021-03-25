@@ -88,13 +88,23 @@ void vaprintf(printf_putc_t printf_putc, const char *fmt, va_list arp);
 	do { \
 		((combined) = (((uint32_t )(high)) << 16) | (((uint32_t )(low)) & 0xFFFF)); \
 	} while (((combined) & 0xFFFF0000) != (((uint32_t )(high)) << 16));
+#define READ_SPLITREG16(combined, high, low) \
+	do { \
+		((combined) = (((uint16_t )(high)) << 8) | (((uint16_t )(low)) & 0xFF)); \
+	} while (((combined) & 0xFF00) != (((uint16_t )(high)) << 8));
 
-// Write to a split register without having to think about shifts and masks
+// Write to a split register while making sure the low half doesn't overflow
+// into high in the process
 #define WRITE_SPLITREG(combined, high, low) \
 	do { \
 		(high) = (uint16_t )((combined) >> 16); \
 		(low)  = (uint16_t )((combined) & 0xFFFF); \
-	} while (0);
+	} while (((combined) & 0xFFFF0000) != (((uint32_t )(high)) << 16));
+#define WRITE_SPLITREG16(combined, high, low) \
+	do { \
+		(high) = (uint8_t )((combined) >> 8); \
+		(low)  = (uint8_t )((combined) & 0xFF); \
+	} while (((combined) & 0xFF00) != (((uint16_t )(high)) << 8));
 
 // Write a volatile variable without atomic access; this doesn't protect
 // anything trying to read it during the write
