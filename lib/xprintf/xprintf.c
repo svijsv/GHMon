@@ -28,7 +28,7 @@
 #if USE_CLIB_STRING
 # include <string.h>
 #else // !USE_CLIB_STRING
-# include <sys/types.h>
+# include <stddef.h>
   size_t strlen(const char *s);
 #endif // USE_CLIB_STRING
 void (*xfunc_output)(int);	/* Pointer to the default output device */

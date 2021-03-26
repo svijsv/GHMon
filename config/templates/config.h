@@ -131,6 +131,7 @@
 // like that (like an SD card) if it will be present at those times
 //
 // Some pins (like A12) may have external pullups or pulldowns
+#if USE_STM32
 //
 // Sensor inputs
 #define SENSOR_BAT_PIN    PA0
@@ -170,3 +171,47 @@
 #define SPIx_SCK_PIN   PB13
 #define SPIx_MISO_PIN  PB14
 #define SPIx_MOSI_PIN  PB15
+#endif // USE_STM32
+
+// ATMega328
+// Sensors like thermistors need to be on a pin that supports ADC; that means
+// A0-A5 as well as A6 and A7 when present
+//
+// Pins A6 and A7 don't have digital buffers and can only be used for analog
+// input
+// There are internal pullups but no internal pulldowns
+#if USE_AVR
+//
+// Sensor inputs
+#define SENSOR_BAT_PIN    PIN_A0
+#define SENSOR_TOD_PIN    PIN_A1
+#define SENSOR_TID_PIN    PIN_A2
+#define SENSOR_WATER_PIN  PIN_A3
+//
+// Controller outputs
+#define CONTROL_FAN_PIN   PIN_4
+#define CONTROL_WATER_PIN PIN_5
+//
+// UI pins
+#define LED_PIN    PIN_2
+#define BUTTON_PIN PIN_3
+//
+// Power pins
+#define SENSOR_POWER_PIN PIN_6
+//#define SD_POWER_PIN   PIN_7
+//
+// UART pins; hardware-specified; used if USE_SERIAL != 0
+// PA9-PA10: UART1
+#define UARTx_TX_PIN PIN_TX
+#define UARTx_RX_PIN PIN_RX
+//
+// SPI pins; hardware-specified; used if USE_LOGGING != 0
+// The hardware SS pin must be used as a slave-select pin because if it's
+// ever set low as an input it will force the MCU into SPI slave mode
+#define SPIx_SS_PIN    PIN_10
+#define SPIx_CS_SD_PIN SPIx_SS_PIN
+#define SPIx_SCK_PIN   PIN_13
+#define SPIx_MISO_PIN  PIN_12
+#define SPIx_MOSI_PIN  PIN_11
+
+#endif // USE_AVR

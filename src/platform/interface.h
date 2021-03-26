@@ -28,8 +28,8 @@
 #ifndef _INTERFACE_H
 #define _INTERFACE_H
 
-#define SYSTICKS G_sys_uticks // Used in util.h
-#define RTCTICKS NOW()        // Used in util.h
+#define SYSTICKS NOW_MS() // Used in util.h
+#define RTCTICKS NOW()    // Used in util.h
 /*
 * Includes
 */
@@ -322,7 +322,13 @@ void issue_warning(void);
 #endif
 
 // Get the system time enumerated in seconds
-#define NOW() (get_RTC_seconds())
+#ifndef NOW
+# define NOW() (get_RTC_seconds())
+#endif
+// Read the systick counter
+#ifndef NOW_MS
+# define NOW_MS() (G_sys_uticks)
+#endif
 
 
 #endif // _INTERFACE_H
