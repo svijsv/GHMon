@@ -1,8 +1,0 @@
-#!/bin/sh
-
-TOOLDIR="${HOME}/.platformio/packages/toolchain-gccarmnoneeabi/bin"
-BUILD="${1}"; shift
-TOOL="${1}"; shift
-ELF=".pio/build/bluepill_${BUILD}/firmware.elf"
-
-"${TOOLDIR}/arm-none-eabi-${TOOL}" "${@}" "${ELF}"
