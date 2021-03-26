@@ -1,6 +1,6 @@
 #!/bin/sh
 
-USAGE="${0} <stm32|avr> <tool> <build_name> [gdb_arguments]"
+USAGE="${0} <stm32|avr> <tool> <build_name> [tool_arguments]"
 
 if [ "${1}" = "stm32" ]; then
 	ROOT="${HOME}/.platformio/packages/toolchain-gccarmnoneeabi"
