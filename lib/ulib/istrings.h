@@ -24,6 +24,8 @@
 //   address space work-arounds
 //
 //   These macros make use of the GCC extension ({...}) to 'return' values
+//
+//   In some cases these macros may alter the arguments
 
 #ifdef __cplusplus
  extern "C" {
@@ -79,6 +81,29 @@
 		r = (s1[i] == s2[i]) ? 0 : ((uint8_t )s1[i] > (uint8_t )s2[i]) ? 1 : -1; \
 		r; \
 	})
+
+#define ISTRING_BASENAME(s, sep) \
+	{ \
+		cstrlen_t i; \
+		i = ISTRING_LEN(s); \
+		for (; ((s[i] == sep) && (i > 0)); --i) { } \
+		for (; ((s[i] != sep) && (i > 0)); --i) { } \
+		s = ((i == 0) && (s[0] != sep)) ? s : &s[i+1]; \
+	}
+
+#define ISTRING_MEMCPY(d, s, n) \
+	{ \
+		cstrlen_t i; \
+		for (i = 0; i < n; ++i) { d[i] = s[i]; } \
+	}
+
+#define ISTRING_STRCPY(d, s) \
+	{ \
+		cstrlen_t i; \
+		for (i = 0; (d[i] = s[i]) != 0; ++i) { } \
+		d[i] = 0; \
+	}
+
 
 #endif // _LIB_ISTRINGS_H
 #ifdef __cplusplus
