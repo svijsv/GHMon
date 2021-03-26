@@ -35,6 +35,7 @@
 */
 #include "ulib/types.h"
 #include "ulib/util.h"
+#include "ulib/cstrings.h"
 
 #include "config.h"
 
@@ -271,8 +272,15 @@ adc_t adc_read_pin(pin_t pin);
 // Print a debug message
 void logger(const char *format, ...)
 	__attribute__ ((format(printf, 1, 2)));
+// Print formatted string
+void serial_printf(const char *format, ...)
+	__attribute__ ((format(printf, 1, 2)));
+// Print a string
+void serial_print(const char *msg, cstrlen_t len);
 #else
 # define logger(...) ((void )0U)
+# define serial_printf(...) ((void )0U)
+# define serial_print(...) ((void )0U)
 #endif
 
 // Go to an endless error loop
