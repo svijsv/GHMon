@@ -1,0 +1,6 @@
+#!/bin/sh
+
+ROOT="${HOME}/.platformio/packages/tool-simavr"
+
+LD_LIBRARY_PATH="${ROOT}/lib"; export LD_LIBRARY_PATH
+"${ROOT}/bin/simavr" "${@}"
