@@ -193,6 +193,8 @@ static adc_t adc_read_channel(uint8_t channel) {
 
 	// Select the ADC channel to convert
 	MODIFY_BITS(ADMUX, CHANNEL_MASK, channel << MUX0);
+	// The readings are inaccurate without this delay()
+	delay(5);
 
 	adc = 0;
 	for (uiter_t i = ADC_SAMPLE_COUNT; i != 0; --i) {
@@ -206,7 +208,6 @@ static adc_t adc_read_channel(uint8_t channel) {
 		tmp  = ADCL;
 		tmp |= (adc_t )ADCH << 8;
 		adc += tmp;
-
 	}
 	adc /= ADC_SAMPLE_COUNT;
 
