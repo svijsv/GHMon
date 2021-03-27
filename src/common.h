@@ -40,11 +40,6 @@
 #include "platform.h"
 #include "config.h"
 
-// Needed for logger()
-#if DEBUG
-# include "serial.h"
-#endif
-
 
 /*
 * Static values

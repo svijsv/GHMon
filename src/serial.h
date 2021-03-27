@@ -20,6 +20,8 @@
 // serial.h
 // Manage serial communication
 // NOTES:
+//    Most of the public functions defined in serial.c are prototyped in
+//    platform/interface.h
 //
 
 #ifdef __cplusplus
@@ -68,20 +70,6 @@ extern bool G_serial_is_up;
 // Initialize the serial communication subsystem
 void serial_init(void);
 
-// Print a string
-void serial_print(const char *msg, cstrlen_t len);
-
-// Print a string followed by a newline
-void serial_println(const char *msg, cstrlen_t len);
-
-// Print formatted string
-void serial_printf(const char *format, ...)
-	__attribute__ ((format(printf, 1, 2)));
-
-// Print a debug message
-// void logger(const char *format, ...)
-// 	__attribute__ ((format(printf, 1, 2)));
-
 // Print information about the running system to the serial line
 void print_system_info(void);
 
@@ -91,14 +79,6 @@ void print_system_info(void);
 */
 
 
-#else // !USE_SERIAL
-# define G_serial_is_up false
-# define serial_init(...) ((void )0U)
-# define serial_print(...) ((void )0U)
-# define serial_println(...) ((void )0U)
-# define serial_printf(...) ((void )0U)
-# define logger(...) ((void )0U)
-# define print_system_info(...) ((void )0U)
 #endif // USE_SERIAL
 
 #endif // _SERIAL_H

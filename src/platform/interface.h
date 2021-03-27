@@ -270,10 +270,10 @@ adc_t adc_read_pin(pin_t pin);
 //
 #if USE_SERIAL
 // Print a debug message
-void logger(const char *format, ...)
+void logger(const char *fmt, ...)
 	__attribute__ ((format(printf, 1, 2)));
 // Print formatted string
-void serial_printf(const char *format, ...)
+void serial_printf(const char *fmt, ...)
 	__attribute__ ((format(printf, 1, 2)));
 // Print a string
 void serial_print(const char *msg, cstrlen_t len);

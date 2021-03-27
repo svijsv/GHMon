@@ -110,8 +110,10 @@ int main(void) {
 	platform_init();
 	led_flash(1, DELAY_SHORT);
 
+#if USE_SERIAL
 	serial_init();
 	led_flash(1, DELAY_SHORT);
+#endif
 
 	log_init();
 	led_flash(1, DELAY_SHORT);
@@ -439,6 +441,15 @@ static void check_warnings(void) {
 	return;
 }
 
+
+void error_state_crude(void) {
+	while (1) {
+		led_toggle();
+		dumb_delay(DELAY_ERR);
+	}
+	return;
+}
+#if USE_SERIAL
 void error_state(const char *file_path, uint32_t lineno, const char *func_name, const char *msg) {
 	const char *basename;
 	utime_t msg_timeout;
@@ -461,13 +472,16 @@ void error_state(const char *file_path, uint32_t lineno, const char *func_name, 
 	}
 	return;
 }
-void error_state_crude(void) {
-	while (1) {
-		led_toggle();
-		dumb_delay(DELAY_ERR);
-	}
+#else // !USE_SERIAL
+void error_state(const char *file_path, uint32_t lineno, const char *func_name, const char *msg) {
+	UNUSED(file_path);
+	UNUSED(lineno);
+	UNUSED(func_name);
+	UNUSED(msg);
+	error_state_crude();
 	return;
 }
+#endif // USE_SERIAL
 
 void _assert_failed(const char *file_path, uint32_t lineno, const char *func_name, const char *expr) {
 	error_state(file_path, lineno, func_name, expr);

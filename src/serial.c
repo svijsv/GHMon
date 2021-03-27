@@ -134,46 +134,32 @@ void serial_print(const char *msg, cstrlen_t len) {
 
 	return;
 }
-void serial_println(const char *msg, cstrlen_t len) {
-	assert(msg != NULL);
 
-	if (len == 0) {
-		len = cstring_len(msg);
-	}
-
-	flush_printf_buffer();
-	if (len != 0) {
-		uart_transmit_block((uint8_t *)msg, len, SERIAL_TIMEOUT_MS);
-	}
-	uart_transmit_block((uint8_t *)"\r\n", 2, SERIAL_TIMEOUT_MS);
-
-	return;
-}
-void serial_printf(const char *format, ...) {
+void serial_printf(const char *fmt, ...) {
 	va_list arp;
 
-	assert(format != NULL);
+	assert(fmt != NULL);
 
-	va_start(arp, format);
-	vaprintf(serial_putc, format, arp);
+	va_start(arp, fmt);
+	vaprintf(serial_putc, fmt, arp);
 	flush_printf_buffer();
 	va_end(arp);
 
 	return;
 }
-void logger(const char *format, ...) {
+void logger(const char *fmt, ...) {
 	va_list arp;
 
-	assert(format != NULL);
+	assert(fmt != NULL);
 
 	if (!G_serial_is_up) {
 		return;
 	}
 
-	va_start(arp, format);
+	va_start(arp, fmt);
 	// Prefix message with system up time
 	vvprintf(serial_putc, "%04u:  ", (uint )NOW());
-	vaprintf(serial_putc, format, arp);
+	vaprintf(serial_putc, fmt, arp);
 	// Append message with a newline
 	serial_putc('\r'); serial_putc('\n');
 	flush_printf_buffer();
