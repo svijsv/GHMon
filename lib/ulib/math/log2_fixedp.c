@@ -109,7 +109,7 @@ FIXEDP_ITYPE log2_fixedp(FIXEDP_ITYPE x) {
 #define TBL_SIZE      ((1 << LOG2_TBL_SIZE) + 2)
 int32_t log2_fp(int32_t x) {
 	// for i = [0,65]: log2(1 + i/64) * (1 << 31)
-	static const uint32_t log2Tab [TBL_SIZE] = {
+	static _FLASH const uint32_t log2Tab [TBL_SIZE] = {
 		0x00000000, 0x02dcf2d1, 0x05aeb4dd, 0x08759c50, 
 		0x0b31fb7d, 0x0de42120, 0x108c588d, 0x132ae9e2, 
 		0x15c01a3a, 0x184c2bd0, 0x1acf5e2e, 0x1d49ee4c, 

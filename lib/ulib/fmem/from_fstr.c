@@ -17,9 +17,15 @@
 *                                                                      *
 *                                                                      *
 ***********************************************************************/
-// private.c
+// from_fstr.c
+// Convert a flash string into a normal string
 //
 // NOTES:
+//    These functions are only used for MCUs with separate flash and RAM
+//    address spaces
+//
+//    Hopefully the compiler is smart enough to remove any unused FROM_FSTR()
+//    variants
 //
 
 #ifdef __cplusplus
@@ -34,6 +40,7 @@
 #include "private.h"
 
 
+#if USE_AVR
 /*
 * Static values
 */
@@ -47,7 +54,6 @@
 /*
 * Variables
 */
-_FLASH const uint8_t days_per_month[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
 
 /*
@@ -63,7 +69,61 @@ _FLASH const uint8_t days_per_month[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 
 /*
 * Functions
 */
+char* FROM_FSTR(_FLASH_STR_T *fs) {
+	static char _FLASH_TMP[_FLASH_TMP_SIZE];
+	uint8_t i;
 
+	assert(fs != NULL);
+
+	for (i = 0; ((_FLASH_TMP[i] = fs[i]) != 0) && (i < (_FLASH_TMP_SIZE-1)); ++i) {
+		// Nothing to do here
+	}
+	_FLASH_TMP[i] = 0;
+
+	return _FLASH_TMP;
+}
+char* FROM_FSTR1(_FLASH_STR_T *fs) {
+	static char _FLASH_TMP[_FLASH_TMP_SIZE];
+	uint8_t i;
+
+	assert(fs != NULL);
+
+	for (i = 0; ((_FLASH_TMP[i] = fs[i]) != 0) && (i < (_FLASH_TMP_SIZE-1)); ++i) {
+		// Nothing to do here
+	}
+	_FLASH_TMP[i] = 0;
+
+	return _FLASH_TMP;
+}
+char* FROM_FSTR2(_FLASH_STR_T *fs) {
+	static char _FLASH_TMP[_FLASH_TMP_SIZE];
+	uint8_t i;
+
+	assert(fs != NULL);
+
+	for (i = 0; ((_FLASH_TMP[i] = fs[i]) != 0) && (i < (_FLASH_TMP_SIZE-1)); ++i) {
+		// Nothing to do here
+	}
+	_FLASH_TMP[i] = 0;
+
+	return _FLASH_TMP;
+}
+char* FROM_FSTR3(_FLASH_STR_T *fs) {
+	static char _FLASH_TMP[_FLASH_TMP_SIZE];
+	uint8_t i;
+
+	assert(fs != NULL);
+
+	for (i = 0; ((_FLASH_TMP[i] = fs[i]) != 0) && (i < (_FLASH_TMP_SIZE-1)); ++i) {
+		// Nothing to do here
+	}
+	_FLASH_TMP[i] = 0;
+
+	return _FLASH_TMP;
+}
+
+
+#endif // USE_AVR
 
 #endif // ! USE_MONOLITHIC_ULIB
 #ifdef __cplusplus

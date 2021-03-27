@@ -127,6 +127,8 @@ void vaprintf(printf_putc_t printf_putc, const char *fmt, va_list arp);
 # define DONT_OPTIMIZE_FUNCTION
 #endif
 
+#define INLINE static inline __attribute__((always_inline))
+
 // Use these to show the value of a macro at compile-time
 // https://stackoverflow.com/questions/1562074/how-do-i-show-the-value-of-a-define-at-compile-time
 #define XTRINGIZE(x) STRINGIZE(x)

@@ -35,6 +35,7 @@
 
 #include "types.h"
 #include "util.h"
+#include "fmem.h"
 
 
 /*
@@ -58,7 +59,7 @@
 /*
 * Variable declarations
 */
-extern const uint8_t days_per_month[];
+extern _FLASH const uint8_t days_per_month[];
 
 
 /*
