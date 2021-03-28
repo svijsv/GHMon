@@ -634,10 +634,10 @@ F 3 "http://portal.fciconnect.com/Comergent//fci/drawing/10067847.pdf" H 1650 17
 	-1   0    0    -1  
 $EndComp
 $Comp
-L Device:C C?
+L Device:C C2
 U 1 1 60482F1F
 P 3350 1750
-F 0 "C?" V 3510 1750 50  0000 C CNN
+F 0 "C2" V 3510 1750 50  0000 C CNN
 F 1 "47nF" V 3601 1750 50  0000 C CNN
 F 2 "" H 3388 1600 50  0001 C CNN
 F 3 "~" H 3350 1750 50  0001 C CNN
@@ -645,10 +645,10 @@ F 3 "~" H 3350 1750 50  0001 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L power:GND #PWR?
+L power:GND #PWR06
 U 1 1 60484B98
 P 3500 1750
-F 0 "#PWR?" H 3500 1500 50  0001 C CNN
+F 0 "#PWR06" H 3500 1500 50  0001 C CNN
 F 1 "GND" V 3505 1622 50  0000 R CNN
 F 2 "" H 3500 1750 50  0001 C CNN
 F 3 "" H 3500 1750 50  0001 C CNN
@@ -657,4 +657,6 @@ F 3 "" H 3500 1750 50  0001 C CNN
 $EndComp
 Text Notes 9000 3300 0    50   ~ 0
 The series resistors for\nsensors should be roughly\nin the middle of the range\nto be measured
+Text Notes 900  1150 0    50   ~ 0
+Care should be taken to feed the SD card\nmodule the voltage it expects both on Vcc\nand at the IO pins - some (like this jury-\nrigged adapter) only work with 3.3V MCUs,\nothers have integrated level shifters and\nonly work with 5V MCUs
 $EndSCHEMATC
