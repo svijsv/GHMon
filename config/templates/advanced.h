@@ -67,9 +67,10 @@
 // to give (hopefully) more accurate ADC readings
 // This must be set to detect the regulated voltage and warn when it drops
 // below the warning threshold if that's desired
-#define CHECK_VREF 1
+#define CHECK_VREF 0
 
 // Target ADC sampling time in uS
+// Depending on platform, this may be ignored
 #define ADC_SAMPLE_TIME 5
 // Number of samples to take and then average for every ADC reading
 #define ADC_SAMPLE_COUNT 1
