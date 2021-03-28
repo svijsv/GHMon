@@ -1,6 +1,6 @@
 #!/bin/sh
 
-USAGE="${0} <stm32|avr> <tool> <build_name> [tool_arguments]"
+USAGE="${0} <stm32|avr> <build_name> <tool> [tool_arguments]"
 
 if [ "${1}" = "stm32" ]; then
 	ROOT="${HOME}/.platformio/packages/toolchain-gccarmnoneeabi"
@@ -14,8 +14,8 @@ else
 fi
 shift 1
 
-TOOL="${1}"; shift 1
 BUILD_NAME="${1}"; shift 1
+TOOL="${1}"; shift 1
 if [ -z "${TOOL}" ] || [ -z "${BUILD_NAME}" ]; then
 	echo "${USAGE}" >&2
 	exit 1
