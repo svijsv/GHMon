@@ -57,12 +57,12 @@
   // on expected typical setups - 17 characters for uptime, 2 for MCU temp,
   // 4 for MCU Vcc, 5 each per sensor, 8 each per controller, the tabs
   // between them, the newline, 2 so we don't undercount, and an assumption
-  // that the rest of the program only needs 1.5KB
+  // that the rest of the program only needs 2KB
 # define PRINT_BUF_PER_LINE (17 + 2 + 4 + (5*SENSOR_COUNT) + (8*CONTROLLER_COUNT) + (3 + CONTROLLER_COUNT + SENSOR_COUNT) + 1 + 2)
-# if (PRINT_BUF_PER_LINE * (LOGFILE_BUFFER_COUNT+1)) < (RAM_PRESENT - (1536 + (16 * LOGFILE_BUFFER_COUNT)))
+# if (PRINT_BUF_PER_LINE * (LOGFILE_BUFFER_COUNT+1)) < (RAM_PRESENT - (2048 + (16 * LOGFILE_BUFFER_COUNT)))
 #  define PRINT_BUFFER_SIZE (PRINT_BUF_PER_LINE * (LOGFILE_BUFFER_COUNT+1))
 # else
-#  define PRINT_BUFFER_SIZE (RAM_PRESENT - (1536 + (16 * LOGFILE_BUFFER_COUNT)))
+#  define PRINT_BUFFER_SIZE (RAM_PRESENT - (2048 + (16 * LOGFILE_BUFFER_COUNT)))
 # endif
 #else
 # define PRINT_BUFFER_SIZE 0

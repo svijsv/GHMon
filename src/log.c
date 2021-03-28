@@ -113,17 +113,23 @@ uint8_t  write_errors;
 static bool have_log_header = false;
 static char logfile_name[] = LOGFILE_NAME_PATTERN;
 
-// To save on available RAM the print buffer and file handle are are allocated
-// on the stack in log_status()
+// The print buffer, fs handle, and file handle could all be allocated on the
+// stack in log_status() if saving RAM for other functions was important, but
+// I think reserving it so that needed space isn't allocated by the user to
+// other areas like sensors/controllers/tables is more important. I also can't
+// think of anywhere else that uses a lot of temporary RAM except the input
+// buffer for the terminal.
 #if PRINT_BUFFER_SIZE > 0
-print_buffer_t print_buffer;
-#endif // PRINT_BUFFER_SIZE > 0
-FIL *file = NULL;
+static print_buffer_t print_buffer;
+#endif
+static FATFS fs;
+static FIL fh;
+
 
 #if LOGFILE_BUFFER_COUNT != 0
 // Use a ring buffer so that if there's a problem preventing us from writing
 // out the log it's the oldest data that gets overwritten.
-struct {
+static struct {
 	log_buffer_t lines[LOGFILE_BUFFER_COUNT];
 	uint16_t tail;
 	uint16_t size;
@@ -165,11 +171,10 @@ void log_init(void) {
 }
 
 void log_status(bool force_write) {
-	FATFS    fs;
-	FIL      fb;
 	uint32_t now;
 	FRESULT  err;
 	const char *prefix;
+	bool is_opened = false;
 
 	// Determine the time at the same time the status is checked so that they
 	// match
@@ -219,12 +224,12 @@ void log_status(bool force_write) {
 #endif // LINES_PER_FILE > 0
 
 	LOGGER("Logging to %s", logfile_name);
-	if ((err = f_open(&fb, logfile_name, FA_WRITE|FA_OPEN_APPEND)) != FR_OK) {
+	if ((err = f_open(&fh, logfile_name, FA_WRITE|FA_OPEN_APPEND)) != FR_OK) {
 		OPEN_ERR_MSG(err);
 		SET_BIT(G_warnings, WARN_SD_FAILED);
 		goto END;
 	}
-	file = &fb;
+	is_opened = true;
 
 	if ((!have_log_header) && (print_header() != FR_OK)) {
 		// print_header() will print the error message
@@ -323,11 +328,10 @@ END:
 	if (write_errors != 0) {
 		SET_BIT(G_warnings, WARN_SD_FAILED);
 	}
-	if ((file != NULL) && ((err = close_file()) != FR_OK)) {
+	if (is_opened && ((err = close_file()) != FR_OK)) {
 		// close_file() handles the error message
 		SET_BIT(G_warnings, WARN_SD_FAILED);
 	}
-	file = NULL;
 
 	if ((fs.fs_type != 0) && ((err = f_unmount("")) != FR_OK)) {
 		UNMOUNT_ERR_MSG(err);
@@ -536,7 +540,7 @@ static void lprintf_putc(int c) {
 		print_buffer.size = 0;
 
 		bh = 0;
-		if ((err = f_write(file, print_buffer.buffer, PRINT_BUFFER_SIZE, &bh)) != FR_OK) {
+		if ((err = f_write(&fh, print_buffer.buffer, PRINT_BUFFER_SIZE, &bh)) != FR_OK) {
 			// Not much else we can do about it here
 			++write_errors;
 			WRITE_ERR_MSG(err);
@@ -557,7 +561,7 @@ static void lprintf_putc(int c) {
 	FRESULT err;
 
 	cb = (uint8_t )c;
-	if ((err = f_write(file, &cb, 1, &bh)) != FR_OK) {
+	if ((err = f_write(&fh, &cb, 1, &bh)) != FR_OK) {
 		// Not much else we can do about it here
 		++write_errors;
 		WRITE_ERR_MSG(err);
@@ -589,7 +593,7 @@ FRESULT close_file(void) {
 	assert(print_buffer.size < PRINT_BUFFER_SIZE);
 
 	if (print_buffer.size != 0) {
-		if ((err = f_write(file, print_buffer.buffer, print_buffer.size, &bh)) != FR_OK) {
+		if ((err = f_write(&fh, print_buffer.buffer, print_buffer.size, &bh)) != FR_OK) {
 			++write_errors;
 			WRITE_ERR_MSG(err);
 			res = err;
@@ -603,7 +607,7 @@ FRESULT close_file(void) {
 	}
 #endif // PRINT_BUFFER_SIZE > 0
 
-	if ((err = f_close(file)) != FR_OK) {
+	if ((err = f_close(&fh)) != FR_OK) {
 		CLOSE_ERR_MSG(err);
 		res = err;
 	}
@@ -628,7 +632,7 @@ FRESULT next_line(void) {
 		new_name();
 		lines_logged_this_file = 0;
 
-		if ((err = f_open(file, logfile_name, FA_WRITE|FA_OPEN_APPEND)) != FR_OK) {
+		if ((err = f_open(&fh, logfile_name, FA_WRITE|FA_OPEN_APPEND)) != FR_OK) {
 			OPEN_ERR_MSG(err);
 			res = err;
 		}
