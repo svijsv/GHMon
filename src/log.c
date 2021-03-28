@@ -46,6 +46,10 @@
 # error "LINES_PER_FILE can't be '1'; it would create an infinite recursion."
 #endif
 
+#if DEBUG
+# pragma message "PRINT_BUFFER_SIZE: " XTRINGIZE(PRINT_BUFFER_SIZE)
+#endif
+
 
 /*
 * Static values
@@ -55,17 +59,17 @@ static const char *prefix_std = "\t";
 static const char *prefix_warn = "\t!";
 
 // Store multi-use strings in const arrays so they aren't duplicated
-static const char open_err_msg[] = "f_open(): fatfs error %u";
-#define OPEN_ERR_MSG(err) LOGGER(open_err_msg,  (uint )(err))
+static _FLASH const char open_err_msg[] = "f_open(): fatfs error %u";
+#define OPEN_ERR_MSG(err) LOGGER_NOF(FROM_FSTR(open_err_msg),  (uint )(err))
 
-static const char write_err_msg[] = "f_write(): fatfs error %u";
-#define WRITE_ERR_MSG(err) LOGGER(write_err_msg, (uint )(err))
+static _FLASH const char write_err_msg[] = "f_write(): fatfs error %u";
+#define WRITE_ERR_MSG(err) LOGGER_NOF(FROM_FSTR(write_err_msg), (uint )(err))
 
-static const char close_err_msg[] = "f_close(): fatfs error %u";
-#define CLOSE_ERR_MSG(err) LOGGER(close_err_msg, (uint )(err))
+static _FLASH const char close_err_msg[] = "f_close(): fatfs error %u";
+#define CLOSE_ERR_MSG(err) LOGGER_NOF(FROM_FSTR(close_err_msg), (uint )(err))
 
-static const char unmount_err_msg[] = "f_unmount(): fatfs error %u";
-#define UNMOUNT_ERR_MSG(err) LOGGER(unmount_err_msg,  (uint )(err))
+static _FLASH const char unmount_err_msg[] = "f_unmount(): fatfs error %u";
+#define UNMOUNT_ERR_MSG(err) LOGGER_NOF(FROM_FSTR(unmount_err_msg),  (uint )(err))
 
 /*
 * Types
@@ -406,7 +410,7 @@ static char* format_warnings(uint8_t warnings) {
 	static char wstr[10];
 	// The order of the symbols needs to correspond to the warning bits set in
 	// common.h
-	static const char symbols[] = "BVSCclL";
+	static _FLASH const char symbols[] = "BVSCclL";
 
 	if (warnings == 0) {
 		wstr[0] = 'O';
@@ -642,24 +646,27 @@ FRESULT print_header(void) {
 	LOGGER("Writing log header");
 	lines_logged_this_file = 0;
 
-	lprintf("# uptime\twarnings\tMCU_mV\tMCU_temp");
+	lprintf(F("# uptime\twarnings\tMCU_mV\tMCU_temp"));
 	for (uiter_t i = 0; i < SENSOR_COUNT; ++i) {
 		if (BIT_IS_SET(G_sensors[i].iflags, SENS_FLAG_MONITORED)) {
-			lprintf("\t[!]%s", SENSORS[i].name);
+			lprintf("\t[!]%s", FROM_FSTR(SENSORS[i].name));
 		} else {
-			lprintf("\t%s", SENSORS[i].name);
+			lprintf("\t%s", FROM_FSTR(SENSORS[i].name));
 		}
 	}
 #if USE_CONTROLLERS
 #if USE_SMALL_CONTROLLERS < 1
 	for (uiter_t i = 0; i < CONTROLLER_COUNT; ++i) {
-		lprintf("\t[!]%s_count\t%s_time", CONTROLLERS[i].name, CONTROLLERS[i].name);
+		const char *n = FROM_FSTR(CONTROLLERS[i].name);
+		lprintf(F("\t[!]%s_count\t%s_time"), n, n);
 	}
 #endif // USE_SMALL_CONTROLLERS < 1
 #endif // USE_CONTROLLERS
 	lprintf_putc('\n');
 
-	lprintf("# Warnings: B=battery low, V=Vcc low, S=sensor warning, C=controller warning, c=controller check skipped, L=log error, l=log sync skipped\n");
+	// This needs to be split to fit in the buffer for F()
+	lprintf(F("# Warnings: B=battery low, V=Vcc low, S=sensor warning, C=controller warning, "));
+	lprintf(F("c=controller check skipped, L=log error, l=log sync skipped\n"));
 
 	if ((err = next_line()) == FR_OK) {
 		have_log_header = true;

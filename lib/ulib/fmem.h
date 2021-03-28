@@ -21,13 +21,30 @@
 // Helpers for working with data in a separate flash address space
 //
 // NOTES:
+//    AVR MCU's use separate address spaces for flash and RAM and in order to
+//    store constant data in flash, these macros must be used - _FLASH as part
+//    of a static declaration for any data and F() for raw strings. Because
+//    the pointers don't store information about which address space they
+//    belong to, a pointer to data declared with _FLASH and one that wasn't
+//    can't be interchanged; in particular, passing such a pointer to a
+//    function that doesn't expect it will produce garbage on the other side.
+//
 //    Unfortunately there's no real way to do typechecking between flash and
 //    RAM strings (or other data for that matter) except for using dummy
 //    container structs, and those aren't always practical in the current
 //    use case
 //
-//    The F() macro seems to increase flash usage by double what it saves in
-//    RAM, so probably isn't worth using in spite of it's ease
+//    Strings passed to F() aren't deduplicated so anything that's used
+//    repeatedly should be put in a variable declared as:
+//        '_FLASH const char n[] = "..."'
+//    rather than with #define
+//
+//    These helpers depend on named address spaces - a GNU extension based on
+//    a proposal for the C11 standard - and won't work with C++ code or code
+//    compiled without gnu extension support (such as with -std=c99)
+//
+//    The F() macro increases flash usage by more than it saves in RAM, so
+//    may not always be worth using in spite of it's ease
 //
 // TODO:
 //
@@ -65,6 +82,7 @@
 * Types
 */
 /*
+// Dummy struct used to wrap flash strings to provide stronger type-checking
 typedef struct {
 	char *contents;
 } fstring_t;
@@ -75,10 +93,18 @@ typedef struct {
 /*
 * Function prototypes
 */
+// Copy a string from flash memory to a RAM buffer so it can be passed to a
+// function or pointer that doesn't know about flash memory
+//
 // Macro and inline versions of FROM_FSTR() are possible but take a LOT more
 // program space per invocation
+//
 // Multiple versions are defined because they use internal static arrays and
-// so can't be used more than once in a single expression
+// so can't be used more than once in a single statement
+//
+// Unused FROM_FSTR() functions (and their static arrays) should be dropped
+// by the compiler or linker, so the smallest subset of these possible should
+// be used
 char* FROM_FSTR(_FLASH_STR_T *fs);
 char* FROM_FSTR1(_FLASH_STR_T *fs);
 char* FROM_FSTR2(_FLASH_STR_T *fs);
@@ -87,7 +113,12 @@ char* FROM_FSTR3(_FLASH_STR_T *fs);
 /*
 * Macros
 */
+// Store a static string in flash memory
 #define FSTR(s) ((_FLASH_STR_T *)({static _FLASH const char __c[] = (s); &__c[0];}))
+
+// Store a string in flash memory, but copy it to a ram buffer before use so
+// that it can be passed to a function expecting normal strings
+//
 // Use the name 'F()' (borrowed from arduino) rather than PSTR() (used by
 // avr-gcc) because we're building with the latter and want to avoid clashes
 #define F(s) FROM_FSTR(FSTR(s))

@@ -61,8 +61,8 @@
 * Macros
 */
 // F() doesn't deduplicate, so do this instead
-static const char u_port_fmt[] = "Unhandled GPIO port 0x%02u in %s";
-#define UNHANDLED_PORT(pin) LOGGER(u_port_fmt, (uint )GPIO_GET_PORT(pin), __func__)
+static _FLASH const char u_port_fmt[] = "Unhandled GPIO port 0x%02u at " __FILE__ ":%u";
+#define UNHANDLED_PORT(pin) LOGGER_NOF(FROM_FSTR(u_port_fmt), (uint )GPIO_GET_PORT(pin), (uint )__LINE__)
 
 
 /*
@@ -171,7 +171,7 @@ void gpio_toggle_state(pin_t pin) {
 	return;
 }
 gpio_state_t gpio_get_state(pin_t pin) {
-	uint8_t st;
+	uint8_t st = 0;
 
 	assert(pin != 0);
 

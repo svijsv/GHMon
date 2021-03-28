@@ -48,13 +48,17 @@
 * Static values
 */
 // Store multi-use strings in const arrays so they aren't duplicated
-static const char TERMINAL_INTRO[] =
+static _FLASH const char TERMINAL_INTRO[] =
 	"\r\nEntering command terminal\r\nType 'help' for a list of commands.\r\n";
-static const char TERMINAL_OUTRO[] =
+static _FLASH const char TERMINAL_OUTRO[] =
 	"Leaving command terminal until input is received.\r\n";
-static const char TERMINAL_PROMPT[] =
+static _FLASH const char TERMINAL_PROMPT[] =
 	"\r$ ";
-static const char TERMINAL_HELP[] =
+
+static _FLASH const char TERMINAL_HELP[] =
+#if USE_AVR
+"Commands: set_time info status controllers synclog led_{on,off,toggle} fdisk test help"
+#else // !USE_AVR
 "Accepted commands:\r\n"
 "   set_time YY.MM.DD hh:mm:ss - Set system time, clock is 24-hour\r\n"
 "   info                       - Print system info\r\n"
@@ -74,6 +78,7 @@ static const char TERMINAL_HELP[] =
 "   test                       - Stub command for testing new functionality\r\n"
 "   help                       - Display this help\r\n"
 "   exit                       - Exit the command terminal\r\n"
+#endif // USE_AVR
 ;
 
 
@@ -119,7 +124,7 @@ static void terminalcmd_fdisk(char *line_in, uiter_t size);
 void terminal(void) {
 	char line_in[TERMINAL_BUFFER_SIZE];
 
-	PUTS(TERMINAL_INTRO, 0);
+	PUTS_NOF(FROM_FSTR(TERMINAL_INTRO), 0);
 	led_off();
 	led_flash(1, DELAY_SHORT);
 
@@ -161,7 +166,7 @@ void terminal(void) {
 #endif // USE_LOGGING
 
 		} else if (cstring_ncmp(line_in, "help", 4) == 0) {
-			PUTS(TERMINAL_HELP, 0);
+			PUTS_NOF(FROM_FSTR(TERMINAL_HELP), 0);
 
 #if USE_FDISK
 		} else if (cstring_cmp(line_in, "format") == 0) {
@@ -177,7 +182,7 @@ void terminal(void) {
 	}
 
 END:
-	PUTS(TERMINAL_OUTRO, 0);
+	PUTS_NOF(FROM_FSTR(TERMINAL_OUTRO), 0);
 
 	return;
 }
@@ -192,7 +197,7 @@ static uiter_t terminal_gets(char *line_in, uiter_t size) {
 	i = 0;
 	while (1) {
 		if (!started_line) {
-			PUTS(TERMINAL_PROMPT, 0);
+			PUTS_NOF(FROM_FSTR(TERMINAL_PROMPT), 0);
 		}
 		if (uart_receive_block(&c, 1, (uint32_t )TERMINAL_TIMEOUT_S*1000) == ETIMEOUT) {
 			PUTS("Timed out waiting for input\r\n", 0);
@@ -271,10 +276,10 @@ static void terminalcmd_print_sensor_status(void) {
 	invalidate_sensors();
 	check_sensors();
 
-	PRINTF("   VCC: %u\r\n   CPU_temp: %u\r\n\n   I  Name  Status\r\n",
-		(uint )G_vcc_voltage, (uint16_t )G_mcu_temp);
+	PRINTF("   VCC: %d\r\n   CPU_temp: %d\r\n\n   I  Name  Status\r\n",
+		(int )G_vcc_voltage, (int )G_mcu_temp);
 	for (uiter_t i = 0; i < SENSOR_COUNT; ++i) {
-		PRINTF("   %u  %s   %d\r\n", (uint )i, SENSORS[i].name, (int )G_sensors[i].status);
+		PRINTF("   %u  %s   %d\r\n", (uint )i, FROM_FSTR(SENSORS[i].name), (int )G_sensors[i].status);
 	}
 
 	return;
@@ -399,15 +404,17 @@ static void terminalcmd_led_flash(char *token) {
 }
 #if USE_FDISK
 static void terminalcmd_fdisk(char *line_in, uiter_t size) {
-	static const char confirm_string[] = "ERASE MY CARD!";
+	static _FLASH const char confirm_string[] = "ERASE MY CARD!";
+	const char *tc;
 	uiter_t len;
 
-	PRINTF("Format SD card? Type '%s' to confirm:\r\n", confirm_string);
+	tc = FROM_FSTR(confirm_string);
+	PRINTF("Format SD card? Type '%s' to confirm:\r\n", tc);
 	terminal_gets(line_in, size);
 
-	len = cstring_len(confirm_string);
+	len = sizeof(confirm_string)-1;
 	for (uiter_t i = 0; i < len; ++i) {
-		if (line_in[i] != confirm_string[i]) {
+		if (line_in[i] != tc[i]) {
 			PUTS("Aborting format", 0);
 			return;
 		}
@@ -426,16 +433,23 @@ static void terminalcmd_test(char *token) {
 	UNUSED(token);
 #if DEBUG
 
-	PRINTF("sensor struct sizes:\r\n\tsensor_t: %u\r\n\tsensor_static_t: %u\r\n\tsensor_devcfg_t: %u\r\n\tSENSORS: %u\r\n\tG_sensors: %u\r\n",
-		(uint )sizeof(sensor_t), (uint )sizeof(sensor_static_t), (uint )sizeof(sensor_devcfg_t), (uint )sizeof(SENSORS), (uint )sizeof(G_sensors));
+	// Break the strings up so they fit in the buffer for F()
+	PRINTF("sensor struct sizes:\r\n\tsensor_t: %u\r\n\tsensor_static_t: %u\r\n",
+		(uint )sizeof(sensor_t), (uint )sizeof(sensor_static_t));
+	PRINTF("\tsensor_devcfg_t: %u\r\n\tSENSORS: %u\r\n\tG_sensors: %u\r\n",
+		(uint )sizeof(sensor_devcfg_t), (uint )sizeof(SENSORS), (uint )sizeof(G_sensors));
+
 #if USE_CONTROLLERS
-	PRINTF("controller struct sizes:\r\n\tcontroller_t: %u\r\n\tcontroller_static_t: %u\r\n\tCONTROLLERS: %u\r\n\tG_controllers: %u\r\n",
-		(uint )sizeof(controller_t), (uint )sizeof(controller_static_t), (uint )sizeof(CONTROLLERS), (uint )sizeof(G_controllers));
+	PRINTF("controller struct sizes:\r\n\tcontroller_t: %u\r\n\tcontroller_static_t: %u\r\n",
+		(uint )sizeof(controller_t), (uint )sizeof(controller_static_t));
+	PRINTF("\tCONTROLLERS: %u\r\n\tG_controllers: %u\r\n",
+		(uint )sizeof(CONTROLLERS), (uint )sizeof(G_controllers));
 #endif
 
 #if USE_CONTROLLERS && USE_SMALL_CONTROLLERS < 1
 	for (uiter_t i = 0; i < CONTROLLER_COUNT; ++i) {
-		PRINTF("controller %u: next check in %d minutes\r\n", (uint )i, (int )(((int32_t )G_controllers[i].next_check - (int32_t )NOW())/60));
+		PRINTF("controller %u: next check in %d minutes\r\n",
+			(uint )i, (int )(((int32_t )G_controllers[i].next_check - (int32_t )NOW())/60));
 	}
 #endif // USE_SMALL_CONTROLLERS < 1
 

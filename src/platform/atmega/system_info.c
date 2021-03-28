@@ -79,13 +79,13 @@ extern char __heap_start;
 void print_platform_info(printf_putc_t printf_putc) {
 	int stack_size, bss_size, data_size;
 
-	vvprintf(printf_putc, "Device signature: 0x%02X%02X%02X\r\n",
+	vvprintf(printf_putc, F("Device signature: 0x%02X%02X%02X\r\n"),
 		(uint )SIGNATURE_0,
 		(uint )SIGNATURE_1,
 		(uint )SIGNATURE_2
 		);
 
-	vvprintf(printf_putc, "Osc: %luHz, Core: %luHz, ADC: %luHz\r\n",
+	vvprintf(printf_putc, F("Osc: %luHz, Core: %luHz, ADC: %luHz\r\n"),
 		(uint32_t )G_freq_OSC,
 		(uint32_t )G_freq_CORECLK,
 		(uint32_t )G_freq_ADC
@@ -96,7 +96,7 @@ void print_platform_info(printf_putc_t printf_putc) {
 	stack_size = RAMEND - stack_size;
 	data_size = (int )(&__data_end) - (int )(&__data_start);
 	bss_size  = (int )(&__bss_end ) - (int )(&__bss_start );
-	vvprintf(printf_putc, "RAM used: %dB stack, %dB .data, %dB .bss\r\n", (int )stack_size, (int )data_size, (int )bss_size);
+	vvprintf(printf_putc, F("RAM used: %dB stack, %dB .data, %dB .bss\r\n"), (int )stack_size, (int )data_size, (int )bss_size);
 
 	return;
 }

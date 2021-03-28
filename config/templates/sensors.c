@@ -8,7 +8,7 @@
 // If using controllers, the indexes of the sensors should be tracked to make
 // referencing them less error-prone. The easy way to do this is just to #define
 // a name for each sensor after it's definition.
-const sensor_static_t SENSORS[SENSOR_COUNT] = {
+_FLASH const sensor_static_t SENSORS[SENSOR_COUNT] = {
 /*
 * 0: Greenhouse temperature */ {
 	.name  = "TID_SEN", // Logging name, max size 7 characters by default

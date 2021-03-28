@@ -35,6 +35,7 @@
 #include "ulib/types.h"
 #include "ulib/bits.h"
 #include "ulib/util.h"
+#include "ulib/fmem.h"
 
 #include "platform/interface.h"
 #include "platform.h"

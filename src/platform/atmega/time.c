@@ -259,8 +259,8 @@ static void calc_timer2_1ms(uint8_t *cnt, uint8_t *psc) {
 static uint16_t calc_timer2_Xms(uint16_t ms, uint8_t *cnt, uint8_t *psc) {
 	uint16_t test;
 	uint32_t clk_mHz;
-	static const uint16_t prescalers[] = { 1, 8, 32, 64, 128, 256, 1024 };
-	static const uint8_t  psc_bits[] = {
+	static _FLASH const uint16_t prescalers[] = { 1, 8, 32, 64, 128, 256, 1024 };
+	static _FLASH const uint8_t  psc_bits[] = {
 		TIM2_PRESCALER_1,
 		TIM2_PRESCALER_8,
 		TIM2_PRESCALER_32,
@@ -351,7 +351,7 @@ static void calibrate_WDT(void) {
 	utime_t pre_calib, post_calib;
 	uint8_t sreg;
 
-	assert(SYSTICK_POWER_CHECK() && BIT_IS_SET(SREG, 0x8000));
+	assert(SYSTICK_POWER_CHECK() && BIT_IS_SET(SREG, 0x80));
 
 	wdt_state = WDT_CALIBRATE;
 

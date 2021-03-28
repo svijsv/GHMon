@@ -302,23 +302,31 @@ void issue_warning(void);
 * Macros
 */
 #if (DEBUG || USE_SMALL_CODE < 2) && USE_SERIAL
-#define ERROR_STATE(msg) error_state(__FILE__, __LINE__, __func__, msg)
+#define ERROR_STATE(msg)     error_state(F1(__FILE__), __LINE__, __func__, F(msg))
+#define ERROR_STATE_NOF(msg) error_state(F1(__FILE__), __LINE__, __func__, msg)
 #else
-#define ERROR_STATE(msg) error_state_crude()
+#define ERROR_STATE(msg)     error_state_crude()
+#define ERROR_STATE_NOF(msg) error_state_crude()
 #endif
 
 #if DEBUG
-#define LOGGER(fmt, ...)      logger(fmt, ## __VA_ARGS__)
+#define LOGGER(fmt, ...)      logger(F1(fmt), ## __VA_ARGS__)
+#define LOGGER_NOF(fmt, ...)  logger(fmt, ## __VA_ARGS__)
 #else
 #define LOGGER(...)      ((void )0U)
+#define LOGGER_NOF(...)  ((void )0U)
 #endif
 
 #if USE_SERIAL
-# define PRINTF(fmt, ...)     serial_printf(fmt, ## __VA_ARGS__)
-# define PUTS(msg, len)       serial_print(msg, len)
+# define PRINTF(fmt, ...)     serial_printf(F1(fmt), ## __VA_ARGS__)
+# define PRINTF_NOF(fmt, ...) serial_printf(fmt, ## __VA_ARGS__)
+# define PUTS(msg, len)       serial_print(F1(msg), len)
+# define PUTS_NOF(msg, len)   serial_print(msg, len)
 #else
-# define PRINTF(...) ((void )0U)
-# define PUTS(...)   ((void )0U)
+# define PRINTF(...)     ((void )0U)
+# define PRINTF_NOF(...) ((void )0U)
+# define PUTS(...)       ((void )0U)
+# define PUTS_NOF(...)   ((void )0U)
 #endif
 
 // Get the system time enumerated in seconds

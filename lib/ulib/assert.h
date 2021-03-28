@@ -63,7 +63,7 @@ void _assert_failed(const char *file_path, uint32_t lineno, const char *func_nam
 // Using F() with only #exp saves more RAM and uses less flash than using it
 // only with __FILE__, presumably because the multiple uses of each file name
 // are deduplicated in RAM but not flash
-# define assert(exp) ((exp) ? (void)0 : _assert_failed(__FILE__, __LINE__, __func__, F(#exp)))
+# define assert(exp) ((exp) ? (void)0 : _assert_failed(F1(__FILE__), __LINE__, __func__, F(#exp)))
 #else
 # define assert(exp) ((void)0)
 #endif

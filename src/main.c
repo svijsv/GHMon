@@ -282,7 +282,7 @@ static uint32_t set_alarms(bool force) {
 #if USE_CONTROLLERS
 #if USE_SMALL_CONTROLLERS < 1
 	controller_t *c;
-	const controller_static_t *cfg;
+	_FLASH const controller_static_t *cfg;
 	utime_t alarm;
 
 	for (uiter_t i = 0; i < CONTROLLER_COUNT; ++i) {
@@ -413,10 +413,10 @@ void issue_warning(void) {
 	return;
 }
 static void check_warnings(void) {
-	const uint8_t warn_SD         = (WARN_SD_SKIPPED|WARN_SD_SKIPPED);
-	const uint8_t warn_power      = (WARN_BATTERY_LOW|WARN_VCC_LOW);
-	const uint8_t warn_sensor     = (WARN_SENSOR);
-	const uint8_t warn_controller = (WARN_CONTROLLER|WARN_CONTROLLER_SKIPPED);
+	static _FLASH const uint8_t warn_SD         = (WARN_SD_SKIPPED|WARN_SD_SKIPPED);
+	static _FLASH const uint8_t warn_power      = (WARN_BATTERY_LOW|WARN_VCC_LOW);
+	static _FLASH const uint8_t warn_sensor     = (WARN_SENSOR);
+	static _FLASH const uint8_t warn_controller = (WARN_CONTROLLER|WARN_CONTROLLER_SKIPPED);
 
 	// Delay briefly first so that it doesn't blend into any
 	// acknowledgement flashes
@@ -440,7 +440,6 @@ static void check_warnings(void) {
 
 	return;
 }
-
 
 void error_state_crude(void) {
 	while (1) {

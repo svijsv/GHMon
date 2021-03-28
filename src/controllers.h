@@ -173,7 +173,7 @@ typedef struct {
 extern controller_t G_controllers[CONTROLLER_COUNT];
 // Array of controller configuration structs representing available output
 // Defined in config.c.
-extern const controller_static_t CONTROLLERS[CONTROLLER_COUNT];
+extern _FLASH const controller_static_t CONTROLLERS[CONTROLLER_COUNT];
 
 /*
 * Function prototypes (defined in controllers.c)

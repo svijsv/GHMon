@@ -5,7 +5,7 @@
 * Try tools/VLUTgen.py for generating lookup tables for thermistors
 *
 */
-const sensor_LUT_t LOOKUP_TABLES[] = {
+_FLASH const sensor_LUT_t LOOKUP_TABLES[] = {
 // A selection of pre-computed tables is available in config/tables; see those
 // files for comments about their suitability
 #include "tables/VC_3950B.tab"

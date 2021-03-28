@@ -6,7 +6,7 @@
 */
 // Be sure to change CONTROLLER_COUNT in config.h if the number of controllers
 // changes.
-const controller_static_t CONTROLLERS[CONTROLLER_COUNT] = {
+_FLASH const controller_static_t CONTROLLERS[CONTROLLER_COUNT] = {
 /*
 * 0: Fan control */ {
 	.name = "FAN_CTL", // Logging name, max size 7 characters by default

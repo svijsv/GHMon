@@ -50,14 +50,14 @@
 * Static values
 */
 // Store multi-use strings in const arrays so they aren't duplicated
-static const char l_invalid_msg[] = "Invalid sensor %u configuration";
-static const char e_invalid_msg[] = "Invalid sensor configuration";
+static _FLASH const char l_invalid_msg[] = "Invalid sensor %u configuration";
+static _FLASH const char e_invalid_msg[] = "Invalid sensor configuration";
 #define SETUP_ERR(i) \
-	LOGGER(l_invalid_msg, (uint )(i)); \
-	ERROR_STATE(e_invalid_msg)
+	LOGGER_NOF(FROM_FSTR(l_invalid_msg), (uint )(i)); \
+	ERROR_STATE_NOF(FROM_FSTR(e_invalid_msg))
 
-static const char unknown_msg[] = "Unknown sensor type '%u' in %s.";
-#define UNKNOWN_MSG(i) LOGGER(unknown_msg, (uint )(i), __func__);
+static _FLASH const char unknown_msg[] = "Unknown sensor type '%u' at " __FILE__ ":%u";
+#define UNKNOWN_MSG(i) LOGGER_NOF(FROM_FSTR(unknown_msg), (uint )(i), (uint )__LINE__);
 
 
 /*
@@ -149,8 +149,8 @@ static void power_off(void);
 
 void sensors_init(void) {
 	sensor_t *s;
-	const sensor_devcfg_t *dev_cfg;
-	const sensor_static_t *cfg;
+	_FLASH const sensor_devcfg_t *dev_cfg;
+	_FLASH const sensor_static_t *cfg;
 
 	power_off();
 
@@ -306,7 +306,7 @@ void invalidate_sensors(void) {
 
 static imath_t read_sensor(sensor_t *s) {
 	imath_t value;
-	const sensor_static_t *cfg;
+	_FLASH const sensor_static_t *cfg;
 
 	cfg = &SENSORS[GET_SENSOR_I(s)];
 
@@ -338,7 +338,7 @@ static imath_t read_sensor(sensor_t *s) {
 }
 
 static void update_sensor(sensor_t *s, imath_t value) {
-	const sensor_static_t *cfg;
+	_FLASH const sensor_static_t *cfg;
 
 	cfg = &SENSORS[GET_SENSOR_I(s)];
 
@@ -403,7 +403,7 @@ static void update_sensor(sensor_t *s, imath_t value) {
 static void update_sensor_warning(sensor_t *s) {
 #if USE_SMALL_SENSORS < 2
 	bool high, low, inside;
-	const sensor_static_t *cfg;
+	_FLASH const sensor_static_t *cfg;
 
 	cfg = &SENSORS[GET_SENSOR_I(s)];
 
@@ -431,7 +431,7 @@ static void update_sensor_warning(sensor_t *s) {
 #if USE_VOLT_SENSOR
 static void calculate_millivolts(sensor_t *s, imath_t adc) {
 	status_t adjust;
-	const sensor_static_t *cfg;
+	_FLASH const sensor_static_t *cfg;
 
 	assert(s != NULL);
 	assert(adc <= ADC_MAX);
@@ -458,8 +458,8 @@ static void calculate_millivolts(sensor_t *s, imath_t adc) {
 static void calculate_ohms(sensor_t *s, imath_t adc) {
 	imath_t adjust;
 	imath_t r, sR;
-	const sensor_opt_ohm_t *dev_cfg;
-	const sensor_static_t *cfg;
+	_FLASH const sensor_opt_ohm_t *dev_cfg;
+	_FLASH const sensor_static_t *cfg;
 
 	assert(s != NULL);
 	assert(adc <= ADC_MAX);
@@ -497,8 +497,8 @@ static void calculate_linearV(sensor_t *s, imath_t adc) {
 	imath_t adjust;
 	imath_t ref, refV, slope;
 	imath_t maxV;
-	const sensor_opt_linear_t *dev_cfg;
-	const sensor_static_t *cfg;
+	_FLASH const sensor_opt_linear_t *dev_cfg;
+	_FLASH const sensor_static_t *cfg;
 
 	assert(s != NULL);
 	assert(adc <= ADC_MAX);
@@ -551,8 +551,8 @@ static void calculate_linearV(sensor_t *s, imath_t adc) {
 static void calculate_linearR(sensor_t *s, imath_t adc) {
 	imath_t adjust;
 	imath_t r, slope, ref, refR, sR;
-	const sensor_opt_linear_t *dev_cfg;
-	const sensor_static_t *cfg;
+	_FLASH const sensor_opt_linear_t *dev_cfg;
+	_FLASH const sensor_static_t *cfg;
 
 	assert(s != NULL);
 	assert(adc <= ADC_MAX);
@@ -593,8 +593,8 @@ static void calculate_linearR(sensor_t *s, imath_t adc) {
 static void calculate_log_beta(sensor_t *s, imath_t adc) {
 	FIXEDP_ITYPE r, beta, tmp, adjust, BdivT0, logR0;
 	imath_t sR;
-	const sensor_opt_log_beta_t *dev_cfg;
-	const sensor_static_t *cfg;
+	_FLASH const sensor_opt_log_beta_t *dev_cfg;
+	_FLASH const sensor_static_t *cfg;
 
 	assert(s != NULL);
 	assert(adc <= ADC_MAX);
@@ -672,10 +672,10 @@ static void calculate_lookupR(sensor_t *s, imath_t adc) {
 	imath_t status, adjust;
 	imath_t r, sR;
 	imath_t min, max, size, scale;
-	const LUT_T *lut;
-	const sensor_opt_lut_t *dev_cfg;
-	const sensor_LUT_t *table_cfg;
-	const sensor_static_t *cfg;
+	_FLASH const LUT_T *lut;
+	_FLASH const sensor_opt_lut_t *dev_cfg;
+	_FLASH const sensor_LUT_t *table_cfg;
+	_FLASH const sensor_static_t *cfg;
 
 	assert(s != NULL);
 	assert(adc <= ADC_MAX);
@@ -744,10 +744,10 @@ static void calculate_lookupR(sensor_t *s, imath_t adc) {
 static void calculate_lookupV(sensor_t *s, imath_t adc) {
 	imath_t status, adjust, calibration;
 	imath_t min, max, Vref, size, scale;
-	const LUT_T *lut;
-	const sensor_opt_lut_t *dev_cfg;
-	const sensor_LUT_t *table_cfg;
-	const sensor_static_t *cfg;
+	_FLASH const LUT_T *lut;
+	_FLASH const sensor_opt_lut_t *dev_cfg;
+	_FLASH const sensor_LUT_t *table_cfg;
+	_FLASH const sensor_static_t *cfg;
 
 	assert(s != NULL);
 	assert(adc <= ADC_MAX);
@@ -822,7 +822,7 @@ static void calculate_lookupV(sensor_t *s, imath_t adc) {
 
 #if USE_BINARY_SENSOR
 static void calculate_binary(sensor_t *s, imath_t value) {
-	const sensor_static_t *cfg;
+	_FLASH const sensor_static_t *cfg;
 
 	cfg = &SENSORS[GET_SENSOR_I(s)];
 
@@ -865,7 +865,7 @@ void check_sensor_warnings(void) {
 
 #if USE_SMALL_SENSORS < 2
 	sensor_t *s;
-	const sensor_static_t *cfg;
+	_FLASH const sensor_static_t *cfg;
 
 	for (uiter_t i = 0; i < SENSOR_COUNT; ++i) {
 		s = &G_sensors[i];

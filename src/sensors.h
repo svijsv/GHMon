@@ -289,10 +289,10 @@ extern sensor_t G_sensors[SENSOR_COUNT];
 
 // Array of sensor configuration structs representing available input
 // Defined in config.c
-extern const sensor_static_t SENSORS[SENSOR_COUNT];
+extern _FLASH const sensor_static_t SENSORS[SENSOR_COUNT];
 // Array of lookup tables used for associated sensors
 // Defined in config.c
-extern const sensor_LUT_t LOOKUP_TABLES[];
+extern _FLASH const sensor_LUT_t LOOKUP_TABLES[];
 
 /*
 * Function prototypes (defined in sensors.c)
