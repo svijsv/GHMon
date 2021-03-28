@@ -357,7 +357,7 @@ static void update_runtime(controller_t *c) {
 	last = &last_check[GET_CONTROLLER_I(c)];
 
 	if (*last < now) {
-		if ((now - *last) > DAYS) {
+		if ((now - *last) > (HOURS*4)) {
 			LOGGER("Traveled %u seconds into the future, not updating %s run time", (uint )(now - *last), FROM_FSTR(cfg->name));
 		} else {
 			LOGGER("%s has been running %us", FROM_FSTR(cfg->name), (uint )(now - *last));
