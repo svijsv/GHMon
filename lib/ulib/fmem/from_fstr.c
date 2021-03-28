@@ -73,7 +73,7 @@ char* FROM_FSTR(_FLASH_STR_T *fs) {
 	static char _FLASH_TMP[_FLASH_TMP_SIZE];
 	uint8_t i;
 
-	assert(fs != NULL);
+	assert(fs != (_FLASH_STR_T *)0);
 
 	for (i = 0; ((_FLASH_TMP[i] = fs[i]) != 0) && (i < (_FLASH_TMP_SIZE-1)); ++i) {
 		// Nothing to do here
@@ -86,7 +86,7 @@ char* FROM_FSTR1(_FLASH_STR_T *fs) {
 	static char _FLASH_TMP[_FLASH_TMP_SIZE];
 	uint8_t i;
 
-	assert(fs != NULL);
+	assert(fs != (_FLASH_STR_T *)0);
 
 	for (i = 0; ((_FLASH_TMP[i] = fs[i]) != 0) && (i < (_FLASH_TMP_SIZE-1)); ++i) {
 		// Nothing to do here
@@ -99,7 +99,7 @@ char* FROM_FSTR2(_FLASH_STR_T *fs) {
 	static char _FLASH_TMP[_FLASH_TMP_SIZE];
 	uint8_t i;
 
-	assert(fs != NULL);
+	assert(fs != (_FLASH_STR_T *)0);
 
 	for (i = 0; ((_FLASH_TMP[i] = fs[i]) != 0) && (i < (_FLASH_TMP_SIZE-1)); ++i) {
 		// Nothing to do here
@@ -112,7 +112,7 @@ char* FROM_FSTR3(_FLASH_STR_T *fs) {
 	static char _FLASH_TMP[_FLASH_TMP_SIZE];
 	uint8_t i;
 
-	assert(fs != NULL);
+	assert(fs != (_FLASH_STR_T *)0);
 
 	for (i = 0; ((_FLASH_TMP[i] = fs[i]) != 0) && (i < (_FLASH_TMP_SIZE-1)); ++i) {
 		// Nothing to do here
