@@ -261,12 +261,11 @@ static void _sleep(utime_t ms, uint8_t flags) {
 			// Section 9 of the reference manual includes startup time tables
 			// for the various oscillators; they vary... quite a bit and I can't
 			// find a way to detect the right one at run-time, but the most
-			// likely value for a given board seems to be ~1K cycles which is
-			// only 1/4ms @ 4MHz, so let's hope we're undercounting something
-			// somewhere else
+			// likely value for a given board seems to be ~16K cycles which is
+			// 4ms @ 4MHz
 			if (SELECT_BITS(SMCR, _BV(SM2)|_BV(SM1)|_BV(SM0)) == _BV(SM1)) {
-				//add_RTC_millis(F_OSC/(16000*1000));
-				add_RTC_millis(1);
+				add_RTC_millis(16000/(G_freq_CORECLK/1000));
+				//add_RTC_millis(4);
 			}
 
 			// If desired keep sleeping until the wakeup alarm triggers
