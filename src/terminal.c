@@ -286,11 +286,17 @@ static void terminalcmd_print_sensor_status(void) {
 }
 #if USE_CONTROLLERS
 static void terminalcmd_run_controllers(void) {
+#if USE_AVR && DEBUG
+# warning "Omitting terminalcmd_run_controllers() due to compiler bug"
+	PUTS("Can't run controller checks, there's a compiler bug...\r\n", 0);
+
+#else
 	PUTS("Running controller checks...\r\n", 0);
 
 	for (uiter_t i = 0; i < CONTROLLER_COUNT; ++i) {
 		check_controller(&G_controllers[i]);
 	}
+#endif
 
 	return;
 }
