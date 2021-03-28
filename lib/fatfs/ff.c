@@ -24,6 +24,7 @@
 #if USE_CLIB_STRING
 # include <string.h>
 #endif
+#include "ulib/fmem.h" // For _FLASH
 
 
 /*--------------------------------------------------------------------------
@@ -588,11 +589,11 @@ static const BYTE Dc950[] = TBL_DC950;
 
 #elif FF_CODE_PAGE < 900	/* Static code page configuration (SBCS) */
 #define CODEPAGE FF_CODE_PAGE
-static const BYTE ExCvt[] = MKCVTBL(TBL_CT, FF_CODE_PAGE);
+static _FLASH const BYTE ExCvt[] = MKCVTBL(TBL_CT, FF_CODE_PAGE);
 
 #else					/* Static code page configuration (DBCS) */
 #define CODEPAGE FF_CODE_PAGE
-static const BYTE DbcTbl[] = MKCVTBL(TBL_DC, FF_CODE_PAGE);
+static _FLASH const BYTE DbcTbl[] = MKCVTBL(TBL_DC, FF_CODE_PAGE);
 
 #endif
 
