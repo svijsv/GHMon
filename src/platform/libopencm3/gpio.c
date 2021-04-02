@@ -145,6 +145,16 @@ gpio_state_t gpio_get_state(pin_t pin) {
 	return GPIO_FLOAT;
 }
 
+void gpio_quickread_prepare(volatile gpio_quick_t *qpin, pin_t pin) {
+	assert(qpin != NULL);
+	assert(pin != 0);
+
+	qpin->mask = GPIO_GET_PINMASK(pin);
+	qpin->idr = &(GPIO_IDR(GPIO_GET_PORT(pin)));
+
+	return;
+}
+
 void gpio_set_mode_OVERRIDE(pin_t pin, gpio_mode_t mode, gpio_state_t istate) {
 	uint32_t lmode, cnf;
 	uint32_t port;

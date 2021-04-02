@@ -55,7 +55,7 @@ volatile utime_t G_sys_uticks;
 /*
 * Local function prototypes
 */
-static uint16_t calculate_TIM2_5_prescaler(uint16_t hz);
+static uint16_t calculate_TIM2_5_prescaler(uint32_t hz);
 static void systick_init(void);
 static void RTC_init(void);
 static void timers_init(void);
@@ -216,26 +216,42 @@ void stop_RTC_alarm(void) {
 	return;
 }
 //
-// Configure the sleep() timer
+// Configure the sleep() and uscounter timers
 static void timers_init(void) {
 	// Timers 2-7 and 12-14 are on APB1
 	// Timers 1 and 8-11 are on APB2
-	clock_init(&RCC->APB1ENR, &RCC->APB1RSTR, SLEEP_ALARM_CLOCKEN);
+	clock_init(&RCC->APB1ENR, &RCC->APB1RSTR, SLEEP_ALARM_CLOCKEN|USCOUNTER_CLOCKEN);
 
+	//
+	// Sleep timer
+	//
 	MODIFY_BITS(SLEEP_ALARM_TIM->CR1, TIM_CR1_ARPE|TIM_CR1_CMS|TIM_CR1_DIR|TIM_CR1_OPM,
 		(0b0  << TIM_CR1_ARPE_Pos) | // 0 to disable reload register buffer
 		(0b00 << TIM_CR1_CMS_Pos ) | // 0 to disable bidirectional counting
 		(0b0 << TIM_CR1_DIR_Pos  ) | // 0 to use as an upcounter
 		(0b1 << TIM_CR1_OPM_Pos  ) | // 1 to automatically disable on update events
 		0);
-
 	SLEEP_ALARM_TIM->PSC = calculate_TIM2_5_prescaler(1000*TIM_MS_PERIOD);
 	NVIC_SetPriority(SLEEP_ALARM_IRQn, SLEEP_ALARM_IRQp);
+
+	//
+	// USCOUNTER timer
+	//
+	MODIFY_BITS(USCOUNTER_TIM->CR1, TIM_CR1_ARPE|TIM_CR1_CMS|TIM_CR1_DIR|TIM_CR1_OPM,
+		(0b0  << TIM_CR1_ARPE_Pos) | // 0 to disable reload register buffer
+		(0b00 << TIM_CR1_CMS_Pos ) | // 0 to disable bidirectional counting
+		(0b0 << TIM_CR1_DIR_Pos  ) | // 0 to use as an upcounter
+		(0b1 << TIM_CR1_OPM_Pos  ) | // 1 to automatically disable on update events
+		0);
+	USCOUNTER_TIM->PSC = calculate_TIM2_5_prescaler(1000000);
+	USCOUNTER_TIM->ARR = 0xFFFF;
+
+	clock_disable(&RCC->APB1ENR, SLEEP_ALARM_CLOCKEN|USCOUNTER_CLOCKEN);
 
 	return;
 }
 // hz is the target Hz, e.g. 1000 for 1ms timing
-static uint16_t calculate_TIM2_5_prescaler(uint16_t hz) {
+static uint16_t calculate_TIM2_5_prescaler(uint32_t hz) {
 	uint16_t prescaler;
 
 	assert(((G_freq_PCLK1/hz) <= (0xFFFF/2)) || (SELECT_BITS(RCC->CFGR, RCC_CFGR_PPRE1) == 0));
@@ -290,6 +306,14 @@ void stop_sleep_alarm(void) {
 
 	clock_disable(&RCC->APB1ENR, SLEEP_ALARM_CLOCKEN);
 
+	return;
+}
+void uscounter_on(void) {
+	clock_enable(&RCC->APB1ENR, USCOUNTER_CLOCKEN);
+	return;
+}
+void uscounter_off(void) {
+	clock_disable(&RCC->APB1ENR, USCOUNTER_CLOCKEN);
 	return;
 }
 

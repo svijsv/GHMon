@@ -20,6 +20,8 @@
 // interface.h
 // Interface between the frontend and backend code
 // NOTES:
+//    Backend-specific interface components are defined in platform.h in the
+//    individual backend directories
 //
 
 #ifdef __cplusplus
@@ -67,6 +69,8 @@
 * Types
 */
 // Define the state of a GPIO pin
+// GPIO_LOW should always be '0' and GPIO_HIGH should always be '1'; any
+// other values can't have assumptions made about them
 typedef enum {
 	GPIO_LOW  = 0,
 	GPIO_HIGH = 1,
@@ -169,6 +173,10 @@ void gpio_toggle_state(pin_t pin);
 // For outputs, get the value of the output data register
 gpio_state_t gpio_get_state(pin_t pin);
 
+// Prepare to read the state of a pin quickly
+// qpin can be passed to GPIO_QUICK_READ() after being set up here
+void gpio_quickread_prepare(volatile gpio_quick_t *qpin, pin_t pin);
+
 //
 // UART interface
 #if USE_SERIAL
@@ -227,6 +235,11 @@ utime_t get_RTC_seconds(void);
 // Set system date and time
 err_t set_time(uint8_t hour, uint8_t minute, uint8_t second);
 err_t set_date(uint8_t year, uint8_t month, uint8_t day);
+
+// Enable and disable the microsecond counter used for USCOUNTER_START()
+// and USCOUNTER_STOP()
+void uscounter_on(void);
+void uscounter_off(void);
 
 // Don't do anything for a bit
 void delay(utime_t ms);

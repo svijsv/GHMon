@@ -107,6 +107,9 @@ static void calculate_lookupV(sensor_t *s, imath_t adc);
 #if USE_BINARY_SENSOR
 static void calculate_binary(sensor_t *s, imath_t value);
 #endif
+#if USE_DHT11_SENSOR
+static void read_dht11_sensor(pin_t pin);
+#endif
 static void power_on(void);
 static void power_off(void);
 
@@ -256,6 +259,19 @@ void sensors_init(void) {
 			break;
 #endif // USE_LOOKUP_R_SENSOR
 
+#if USE_BINARY_SENSOR
+		case SENS_BINARY:
+			// Nothing to do here
+			break;
+#endif
+
+#if USE_DHT11_SENSOR
+		case SENS_DHT11_HUM:
+		case SENS_DHT11_TEMP:
+			// Nothing to do here
+			break;
+#endif
+
 		case SENS_NONE:
 			SETUP_ERR(i);
 			break;
@@ -280,7 +296,18 @@ void check_sensors() {
 
 	LOGGER("Updating sensor status");
 
+	for (uiter_t i = 0; i < SENSOR_COUNT; ++i) {
+		CLEAR_BIT(G_sensors[i].iflags, SENS_FLAG_DONE);
+	}
 	power_on();
+
+#if USE_DHT11_SENSOR
+	// Per the DHT11 data sheet, don't send any instructions for at least 1
+	// second after power-on
+	hibernate(1, 0);
+	// Only sleeping for 1s doesn't seem to reliably work
+	sleep(500);
+#endif
 
 #if CHECK_VREF
 	adc_read_internals(&G_vcc_voltage, &G_mcu_temp);
@@ -318,6 +345,22 @@ static imath_t read_sensor(sensor_t *s) {
 		power_off_input(cfg->pin);
 		break;
 #endif // USE_BINARY_SENSOR
+
+#if USE_DHT11_SENSOR
+	case SENS_DHT11_HUM:
+	case SENS_DHT11_TEMP:
+		if (!BIT_IS_SET(s->iflags, SENS_FLAG_DONE)) {
+			SET_BIT(s->iflags, SENS_FLAG_DONE);
+			// The mode of the input pin needs to be changed in order to trigger
+			// the read in read_dht11_sensor(), so don't bother setting it here
+			//power_on_input(cfg->pin);
+			read_dht11_sensor(cfg->pin);
+			//power_off_input(cfg->pin);
+		}
+		// The sensor values are set in read_dht11_sensor()
+		value = 0;
+		break;
+#endif // USE_DHT11_SENSOR
 
 #if USE_ADC
 	default:
@@ -391,10 +434,17 @@ static void update_sensor(sensor_t *s, imath_t value) {
 		break;
 #endif // USE_BINARY_SENSOR
 
+#if USE_DHT11_SENSOR
+	case SENS_DHT11_HUM:
+	case SENS_DHT11_TEMP:
+		// Nothing to do here; the statuses were set when they were read
+		break;
+
 	default:
 		UNKNOWN_MSG(cfg->type);
 		break;
 	}
+#endif // USE_DHT11_SENSOR
 
 	update_sensor_warning(s);
 
@@ -855,6 +905,126 @@ static void calculate_binary(sensor_t *s, imath_t value) {
 	return;
 }
 #endif // USE_BINARY_SENSOR
+
+#if USE_DHT11_SENSOR
+static void read_dht11_sensor(pin_t pin) {
+	utime_t timeout;
+	uint8_t us_count;
+	uint8_t reading[5] = { 0 };
+	gpio_quick_t qpin;
+
+	// Pull the data pin low at least 18ms to signal the sensor to start
+	gpio_set_mode(pin, GPIO_MODE_PP, GPIO_LOW);
+	sleep(20);
+
+	uscounter_on();
+	gpio_quickread_prepare(&qpin, pin);
+	timeout = SET_TIMEOUT(1000);
+	power_on_input(pin);
+
+	// Wait for sensor to pull data low, 20-40us
+	do {
+		if (TIMES_UP(timeout)) {
+			goto END;
+		}
+	} while (GPIO_QUICK_READ(qpin) == GPIO_HIGH);
+	// Wait for data to go high again, at least 80us
+	do {
+		if (TIMES_UP(timeout)) {
+			goto END;
+		}
+	} while (GPIO_QUICK_READ(qpin) == GPIO_LOW);
+	// Wait for data to go low, indicating transmission will begin
+	do {
+		if (TIMES_UP(timeout)) {
+			goto END;
+		}
+	} while (GPIO_QUICK_READ(qpin) == GPIO_HIGH);
+
+	// Read the 5 bytes: humidity x 2, temperature x2, checksum
+	for (uiter_t i = 0; i != 5; ++i) {
+		for (uiter_t j = 8; j != 0; --j) {
+			// Wait for data to go high, 50us
+			do {
+				if (TIMES_UP(timeout)) {
+					goto END;
+				}
+			} while (GPIO_QUICK_READ(qpin) == GPIO_LOW);
+
+			// Wait for data to go low, 26-70us
+			USCOUNTER_START();
+			do {
+				if (TIMES_UP(timeout)) {
+					goto END;
+				}
+			} while (GPIO_QUICK_READ(qpin) == GPIO_HIGH);
+			USCOUNTER_STOP(us_count);
+
+			// A high period of 26-28us is 0 and 70us is 1
+			reading[i] = (reading[i] << 1) | (us_count > 35);
+		}
+	}
+
+	/*
+	// Wait for data to go high, 50us
+	do {
+		if (TIMES_UP(timeout)) {
+			goto END;
+		}
+	} while (GPIO_QUICK_READ(qpin) == GPIO_LOW);
+	*/
+
+END:
+	power_off_input(pin);
+	uscounter_off();
+
+#if DEBUG
+	uint16_t cksum = reading[0] + reading[1] + reading[2] + reading[3];
+	if ((cksum & 0xFF) != reading[4]) {
+		LOGGER("DHT11 sensor on pin 0x%02X: invalid checksum: have %u, expected %u", (uint )pin, (uint )(cksum & 0xFF), (uint )reading[4]);
+	}
+	if ((reading[0] == 0) && (reading[1] == 0) && (reading[2] == 0) && (reading[3] == 0) && (reading[4] == 0)) {
+		LOGGER("DHT11 sensor on pin 0x%02X: all readings were 0", (uint )pin);
+	}
+#endif
+
+	for (uiter_t i = 0; i < SENSOR_COUNT; ++i) {
+		if (PINID(SENSORS[i].pin) == PINID(pin)) {
+			imath_t adjust, tmp;
+			_FLASH const sensor_static_t *cfg;
+
+			cfg = &SENSORS[i];
+#if USE_SMALL_SENSORS < 2
+			// Adjust the adjustment to compensate for the shift used to deal
+			// with the fractional part of the response
+			adjust = (uint16_t )cfg->adjust << 8;
+#else
+			adjust = 0;
+#endif
+
+			switch (cfg->type) {
+			case SENS_DHT11_HUM:
+				SET_BIT(G_sensors[i].iflags, SENS_FLAG_DONE);
+				// To preserve the fraction part for scaling, shift it all left
+				// then right - effectively multiply by 2^8 then divide by same
+				tmp = ((uint16_t )reading[0] << 8) | reading[1];
+				G_sensors[i].status = (SCALE_INT(tmp + adjust)) >> 8;
+				break;
+			case SENS_DHT11_TEMP:
+				SET_BIT(G_sensors[i].iflags, SENS_FLAG_DONE);
+				tmp = ((uint16_t )reading[2] << 8) | reading[3];
+				G_sensors[i].status = (SCALE_INT(tmp + adjust)) >> 8;
+				break;
+			default:
+				UNKNOWN_MSG(cfg->type);
+				break;
+			}
+		}
+	}
+
+	return;
+}
+#endif // USE_DHT11_SENSOR
 
 void check_sensor_warnings(void) {
 	CLEAR_BIT(G_warnings, (WARN_BATTERY_LOW|WARN_VCC_LOW|WARN_SENSOR));

@@ -34,11 +34,19 @@
 /*
 * Includes
 */
+#include "ulib/types.h"
+
+#include <libopencmsis/core_cm3.h>
+#include <libopencm3/stm32/timer.h>
 
 
 /*
 * Types
 */
+typedef struct {
+	volatile __IO uint32_t *idr;
+	uint32_t mask;
+} gpio_quick_t;
 
 
 /*
@@ -145,9 +153,24 @@
 #define GPIO_BIAS_MASK (0xC0)
 #define GPIO_GET_BIAS(pin) ((pin) & GPIO_BIAS_MASK)
 
+#define PINID(pin) ((pin) & (GPIO_PIN_MASK | GPIO_PORT_MASK))
+
+#define GPIO_QUICK_READ(qpin) (SELECT_BITS(*((qpin).idr), (qpin).mask) != 0)
+
 // There's a name conflict between my interface and libopencm3, this works
 // around that:
 #define gpio_set_mode gpio_set_mode_OVERRIDE
+
+# define USCOUNTER_START() \
+	do { \
+		timer_generate_event(TIM3, TIM_EGR_UG); /* Generate an update event to reset the counter */ \
+		timer_enable_counter(TIM3); /* Enable the timer */ \
+	} while (0);
+# define USCOUNTER_STOP(counter) \
+	do { \
+		timer_disable_counter(TIM3); /* Disable the timer */ \
+		counter = TIM3_CNT; \
+	} while (0);
 
 
 #endif // _PLATFORM_LIBOPENCM3_H

@@ -20,6 +20,10 @@
 // time.c
 // Manage the time-keeping peripherals
 //
+// NOTES:
+//    The systick timer is timer 2 (8-bit)
+//    The micro-second timer is timer 0 (8-bit)
+//
 
 #ifdef __cplusplus
  extern "C" {
@@ -111,6 +115,7 @@ static void WDT_init(void);
 static void calibrate_WDT(void);
 static void calc_timer2_1ms(uint8_t *cnt, uint8_t *psc);
 //static uint16_t calc_timer2_Xms(uint16_t ms, uint8_t *cnt, uint8_t *psc);
+static void uscounter_init(void);
 
 
 /*
@@ -142,6 +147,10 @@ static void calc_timer2_1ms(uint8_t *cnt, uint8_t *psc);
 #define SYSTICK_POWER_DISABLE()   power_timer2_disable()
 #define SYSTICK_POWER_CHECK()     (!BIT_IS_SET(PRR, _BV(PRTIM2)))
 
+#define USCOUNTER_POWER_ENABLE()    power_timer0_enable()
+#define USCOUNTER_POWER_DISABLE()   power_timer0_disable()
+#define USCOUNTER_POWER_CHECK()     (!BIT_IS_SET(PRR, _BV(PRTIM0)))
+
 
 /*
 * Interrupt handlers
@@ -170,6 +179,7 @@ ISR(WDT_vect) {
 void time_init(void) {
 	systick_init();
 	WDT_init();
+	uscounter_init();
 
 	return;
 }
@@ -476,6 +486,35 @@ static void set_RTC_seconds(utime_t s) {
 }
 void add_RTC_millis(uint16_t ms) {
 	RTC_millis += ms;
+
+	return;
+}
+//
+// Set up the micro-second timer
+static void uscounter_init(void) {
+	USCOUNTER_POWER_ENABLE();
+	DISABLE_COUNTER(TCCR0B);
+
+	// Set the timer to reset when it reaches OxFF
+	CLEAR_BIT(TCCR0A, 0b11 << WGM00);
+	CLEAR_BIT(TCCR0B, 0b1  << WGM02);
+
+	// Setting the prescaler re-enables the counter, so don't do it here
+	//SET_TIMER_PRESCALER(TCCR0B, TIM01_PRESCALER_1);
+	//SET_TIMER_PRESCALER(TCCR0B, TIM01_PRESCALER_8);
+	//SET_TIMER_PRESCALER(TCCR0B, TIM01_PRESCALER_1024);
+
+	USCOUNTER_POWER_DISABLE();
+
+	return;
+}
+void uscounter_on(void) {
+	USCOUNTER_POWER_ENABLE();
+
+	return;
+}
+void uscounter_off(void) {
+	USCOUNTER_POWER_DISABLE();
 
 	return;
 }

@@ -47,6 +47,8 @@
 #define USE_LOOKUP_V_SENSOR 0
 // Digital pin sensors; either '1' (high) or '0' (low)
 #define USE_BINARY_SENSOR 0
+// DHT11 temperature and humidity sensor
+#define USE_DHT11_SENSOR 0
 
 
 //

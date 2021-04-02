@@ -41,6 +41,10 @@
 /*
 * Types
 */
+typedef struct {
+	volatile __IO uint32_t *idr;
+	uint32_t mask;
+} gpio_quick_t;
 
 
 /*
@@ -149,11 +153,25 @@
 //#define GPIO_GET_BIAS(pin) ((((pin) & GPIO_BIAS_MASK) == BIAS_HIGH) ? GPIO_HIGH : (((pin) & GPIO_BIAS_MASK) == BIAS_LOW) ? GPIO_LOW : GPIO_FLOAT)
 #define GPIO_GET_BIAS(pin) ((pin) & GPIO_BIAS_MASK)
 
+#define PINID(pin) ((pin) & (GPIO_PIN_MASK | GPIO_PORT_MASK))
+
 // Quick pin access, for when you know what you want:
 #define IS_GPIO_INPUT_HIGH(pin)  (BIT_IS_SET(GPIO_GET_PORT(pin)->IDR, GPIO_GET_PINMASK(pin)))
 #define SET_GPIO_OUTPUT_HIGH(pin) SET_BIT(GPIO_GET_PORT(pin)->ODR, GPIO_GET_PINMASK(pin))
 #define SET_GPIO_OUTPUT_LOW(pin)  CLEAR_BIT(GPIO_GET_PORT(pin)->ODR, GPIO_GET_PINMASK(pin))
 
+#define GPIO_QUICK_READ(qpin) (SELECT_BITS(*((qpin).idr), (qpin).mask) != 0)
+
+# define USCOUNTER_START() \
+	do { \
+		SET_BIT(TIM3->EGR, TIM_EGR_UG); /* Generate an update event to reset the counter */ \
+		SET_BIT(TIM3->CR1, TIM_CR1_CEN); /* Enable the timer */ \
+	} while (0);
+# define USCOUNTER_STOP(counter) \
+	do { \
+		CLEAR_BIT(TIM3->CR1, TIM_CR1_CEN); /* Disable the timer */ \
+		counter = TIM3->CNT; \
+	} while (0);
 
 #endif // _PLATFORM_H
 #ifdef __cplusplus

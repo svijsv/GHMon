@@ -68,7 +68,7 @@ volatile bool RTC_alarm_is_set;
 /*
 * Local function prototypes
 */
-static uint16_t calculate_TIM2_5_prescaler(uint16_t hz);
+static uint16_t calculate_TIM2_5_prescaler(uint32_t hz);
 static void systick_init(void);
 static void RTC_init(void);
 static void timers_init(void);
@@ -182,8 +182,11 @@ utime_t get_RTC_seconds(void) {
 }
 
 //
-// Configure the sleep() timer
+// Configure the sleep() and uscounter timers
 static void timers_init(void) {
+	//
+	// Sleep timer
+	//
 	rcc_periph_clock_enable(SLEEP_ALARM_RCC);
 	rcc_periph_reset_pulse(SLEEP_ALARM_RST);
 
@@ -194,13 +197,26 @@ static void timers_init(void) {
 	timer_set_prescaler(SLEEP_ALARM_TIM, calculate_TIM2_5_prescaler(1000*TIM_MS_PERIOD));
 
 	nvic_set_priority(SLEEP_ALARM_IRQn, SLEEP_ALARM_IRQp);
-
 	rcc_periph_clock_disable(SLEEP_ALARM_RCC);
+
+	//
+	// USCOUNTER timer
+	//
+	rcc_periph_clock_enable(USCOUNTER_RCC);
+	rcc_periph_reset_pulse(USCOUNTER_RST);
+
+	timer_disable_preload(USCOUNTER_TIM);
+	timer_set_alignment(USCOUNTER_TIM, TIM_CR1_CMS_EDGE);
+	timer_direction_up(USCOUNTER_TIM);
+	timer_one_shot_mode(USCOUNTER_TIM);
+	timer_set_prescaler(USCOUNTER_TIM, calculate_TIM2_5_prescaler(1000000));
+
+	rcc_periph_clock_disable(USCOUNTER_RCC);
 
 	return;
 }
 // hz is the target Hz, e.g. 1000 for 1ms timing
-static uint16_t calculate_TIM2_5_prescaler(uint16_t hz) {
+static uint16_t calculate_TIM2_5_prescaler(uint32_t hz) {
 	uint16_t prescaler;
 
 	assert(((rcc_apb1_frequency/hz) <= (0xFFFF/2)) || (rcc_apb1_frequency == rcc_ahb_frequency));
@@ -256,6 +272,14 @@ void stop_sleep_alarm(void) {
 
 	rcc_periph_clock_disable(SLEEP_ALARM_RCC);
 
+	return;
+}
+void uscounter_on(void) {
+	rcc_periph_clock_enable(USCOUNTER_RCC);
+	return;
+}
+void uscounter_off(void) {
+	rcc_periph_clock_disable(USCOUNTER_RCC);
 	return;
 }
 

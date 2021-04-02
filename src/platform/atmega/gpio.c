@@ -192,6 +192,29 @@ gpio_state_t gpio_get_state(pin_t pin) {
 
 	return (st != 0) ? GPIO_HIGH : GPIO_LOW;
 }
+void gpio_quickread_prepare(volatile gpio_quick_t *qpin, pin_t pin) {
+	assert(qpin != NULL);
+	assert(pin != 0);
+
+	qpin->mask = GPIO_GET_PINMASK(pin);
+
+	switch (GPIO_GET_PORT(pin)) {
+	case GPIO_PORTB:
+		qpin->port = &PINB;
+		break;
+	case GPIO_PORTC:
+		qpin->port = &PINC;
+		break;
+	case GPIO_PORTD:
+		qpin->port = &PIND;
+		break;
+	default:
+		UNHANDLED_PORT(pin);
+		break;
+	}
+
+	return;
+}
 
 void gpio_set_mode(pin_t pin, gpio_mode_t mode, gpio_state_t istate) {
 	uint8_t pinmask;

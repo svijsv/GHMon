@@ -49,12 +49,20 @@
 
 //
 // Timers
-// SLEEP_ALARM_TIM must be on APB1 (alarms 2-7 or 12-14)
+// Timers must be on APB1 (alarms 2-7 or 12-14) because that's the bus I
+// check when setting up the prescalers
+//
+// Sleep alarm timer
 #define SLEEP_ALARM_TIM TIM2
 #define SLEEP_ALARM_RCC RCC_TIM2
 #define SLEEP_ALARM_RST RST_TIM2
 #define SLEEP_ALARM_IRQn NVIC_TIM2_IRQ
 #define SleepAlarm_IRQHandler tim2_isr
+//
+// Micro-second counter timer
+#define USCOUNTER_TIM TIM3
+#define USCOUNTER_RCC RCC_TIM3
+#define USCOUNTER_RST RST_TIM3
 
 
 /*

@@ -34,13 +34,19 @@
 /*
 * Includes
 */
+// Needed for SHIFT_MUL|DIV_*()
+#include "ulib/math.h"
+
 // Needed for RAMSTART and RAMEND
 #include <avr/io.h>
-
 
 /*
 * Types
 */
+typedef struct {
+	volatile uint8_t *port;
+	uint8_t mask;
+} gpio_quick_t;
 
 
 /*
@@ -194,7 +200,75 @@
 
 #define PINID(pin) ((pin) & (GPIO_PIN_MASK | GPIO_PORT_MASK))
 
+#define GPIO_QUICK_READ(qpin) (SELECT_BITS(*((qpin).port), (qpin).mask) != 0)
+
 #define NOW_MS() ({ utime_t n; READ_VOLATILE(n, G_sys_uticks); n; })
+
+// Ideally the prescaler would just be set to the highest value and the number
+// of micro-seconds determined by prescaler counter * 0xff + timer counter,
+// but the prescaler can't be read
+// Instead, try to set the prescaler such that each timer counter corresponds
+// to one micro-second - this is only possible at 8MHz and 1MHz though, so
+// the rest either have a smaller range or a reduced accuracy.
+#if G_freq_TIM01CLK == 16000000
+# define USCOUNTER_START() \
+	do { \
+		TCNT0 = 0; \
+		MODIFY_BITS(TCCR0B, 0b111, 0b010); /* Prescaler 8 */ \
+	} while (0);
+# define USCOUNTER_STOP(counter) \
+	do { \
+		CLEAR_BIT(TCCR0B, 0b111); \
+		counter = SHIFT_DIV_2(TCNT0); \
+	} while (0);
+#elif G_freq_TIM01CLK == 8000000
+# define USCOUNTER_START() \
+	do { \
+		TCNT0 = 0; \
+		MODIFY_BITS(TCCR0B, 0b111, 0b010); /* Prescaler 8 */ \
+	} while (0);
+# define USCOUNTER_STOP(counter) \
+	do { \
+		CLEAR_BIT(TCCR0B, 0b111); \
+		counter = TCNT0; \
+	} while (0);
+#elif G_freq_TIM01CLK == 4000000
+# define USCOUNTER_START() \
+	do { \
+		TCNT0 = 0; \
+		MODIFY_BITS(TCCR0B, 0b111, 0b010); /* Prescaler 8 */ \
+	} while (0);
+# define USCOUNTER_STOP(counter) \
+	do { \
+		CLEAR_BIT(TCCR0B, 0b111); \
+		counter = SHIFT_MUL_2(TCNT0); \
+	} while (0);
+#elif G_freq_TIM01CLK == 2000000
+# define USCOUNTER_START() \
+	do { \
+		TCNT0 = 0; \
+		MODIFY_BITS(TCCR0B, 0b111, 0b001); /* Prescaler 1 */ \
+	} while (0);
+# define USCOUNTER_STOP(counter) \
+	do { \
+		CLEAR_BIT(TCCR0B, 0b111); \
+		counter = SHIFT_DIV_2(TCNT0); \
+	} while (0);
+#elif G_freq_TIM01CLK == 1000000
+# define USCOUNTER_START() \
+	do { \
+		TCNT0 = 0; \
+		MODIFY_BITS(TCCR0B, 0b111, 0b001); /* Prescaler 1 */ \
+	} while (0);
+# define USCOUNTER_STOP(counter) \
+	do { \
+		CLEAR_BIT(TCCR0B, 0b111); \
+		counter = TCNT0; \
+	} while (0);
+#else
+# error "CPU frequency must be 16MHz, 8MHz, 4MHz, 2MHz, or 1MHz"
+#endif
+
 
 #endif // _PLATFORM_H
 #ifdef __cplusplus

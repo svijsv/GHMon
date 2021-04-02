@@ -59,6 +59,9 @@
 //
 // Internal flags for sensor_t structs
 //
+// Set internally if the sensor has already been read in a given cycle
+// Used for multi-sensor inputs like the dht11
+#define SENS_FLAG_DONE      0x20
 // Set internally if the sensor is being monitored (that is, either warn_below
 // or warn_above is non-zero and not SENS_THRESHOLD_IGNORE)
 #define SENS_FLAG_MONITORED 0x40
@@ -111,6 +114,11 @@ typedef enum {
 
 #if USE_BINARY_SENSOR
 	SENS_BINARY,
+#endif
+
+#if USE_DHT11_SENSOR
+	SENS_DHT11_HUM,
+	SENS_DHT11_TEMP,
 #endif
 } sensor_type_t;
 
