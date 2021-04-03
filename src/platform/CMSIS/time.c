@@ -155,7 +155,6 @@ static void RTC_init(void) {
 	CLEAR_BIT(RTC->CRL, RTC_CRL_RSF);
 	while (!BIT_IS_SET(RTC->CRL, RTC_CRL_RSF)) {
 		// Nothing to do here
-		// TODO: Timeout?
 	}
 
 	RTC_cfg_enable(1000);

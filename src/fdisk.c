@@ -80,7 +80,6 @@ err_t format_SD(void) {
 
 	power_on_SD();
 
-	// Is this right for the drive name? should it be "/" or something?
 	res = f_mkfs("", &opt, buf, FF_MAX_SS);
 	switch (res) {
 	case FR_INVALID_DRIVE:

@@ -242,7 +242,6 @@ static void clocks_init(void) {
 	SET_BIT(RCC->CR, RCC_CR_HSEON);
 	while (!BIT_IS_SET(RCC->CR, RCC_CR_HSERDY)) {
 		// Nothing to do here
-		// TODO: Timeout?
 	}
 
 	MODIFY_BITS(RCC->CFGR, RCC_CFGR_SW,
@@ -251,7 +250,6 @@ static void clocks_init(void) {
 	// Wait for HSE to become SYSCLK
 	while (GATHER_BITS(RCC->CFGR, 0b11, RCC_CFGR_SWS_Pos) != 0b01) {
 		// Nothing to do here
-		// TODO: Timeout?
 	}
 	CLEAR_BIT(RCC->CR, RCC_CR_HSION);
 #endif // USE_INTERNAL_CLOCK
@@ -283,7 +281,6 @@ static void clocks_init(void) {
 	SET_BIT(RCC->BDCR, RCC_BDCR_LSEON);
 	while (!BIT_IS_SET(RCC->BDCR, RCC_BDCR_LSERDY)) {
 		// Nothing to do here
-		// TODO: Timeout?
 	}
 	BD_write_disable();
 
@@ -442,7 +439,6 @@ static void deep_sleep(utime_t s, uint8_t flags) {
 	SET_BIT(RCC->CR, RCC_CR_HSEON);
 	while (!BIT_IS_SET(RCC->CR, RCC_CR_HSERDY)) {
 		// Nothing to do here
-		// TODO: Timeout?
 	}
 
 	MODIFY_BITS(RCC->CFGR, RCC_CFGR_SW,
@@ -451,7 +447,6 @@ static void deep_sleep(utime_t s, uint8_t flags) {
 	// Wait for HSE to become SYSCLK
 	while (GATHER_BITS(RCC->CFGR, 0b11, RCC_CFGR_SWS_Pos) != 0b01) {
 		// Nothing to do here
-		// TODO: Timeout?
 	}
 	CLEAR_BIT(RCC->CR, RCC_CR_HSION);
 #endif // USE_INTERNAL_CLOCK
@@ -475,7 +470,6 @@ void clock_enable(__IO uint32_t *reg, uint32_t enable_mask) {
 	tmpreg = SELECT_BITS(*reg, enable_mask);
 	while (SELECT_BITS(*reg, enable_mask) != enable_mask) {
 		// Nothing to do here
-		// TODO: Timeout?
 	}
 	tmpreg = tmpreg; // Shut the compiler up
 
@@ -485,7 +479,6 @@ void clock_disable(__IO uint32_t *reg, uint32_t enable_mask) {
 	CLEAR_BIT(*reg, enable_mask);
 	while (SELECT_BITS(*reg, enable_mask) != 0) {
 		// Nothing to do here
-		// TODO: Timeout?
 	}
 
 	return;
@@ -496,13 +489,11 @@ void clock_init(__IO uint32_t *en_reg, __IO uint32_t *rst_reg, uint32_t enable_m
 	SET_BIT(*rst_reg, enable_mask);
 	while (SELECT_BITS(*rst_reg, enable_mask) != enable_mask) {
 		// Nothing to do here
-		// TODO: Timeout?
 	}
 
 	CLEAR_BIT(*rst_reg, enable_mask);
 	while (SELECT_BITS(*rst_reg, enable_mask) != 0) {
 		// Nothing to do here
-		// TODO: Timeout?
 	}
 
 	return;
@@ -512,7 +503,6 @@ void BD_write_enable(void) {
 	SET_BIT(PWR->CR, PWR_CR_DBP);
 	while (!BIT_IS_SET(PWR->CR, PWR_CR_DBP)) {
 		// Nothing to do here
-		// TODO: Timeout?
 	}
 
 	return;
@@ -524,7 +514,6 @@ void BD_write_disable(void) {
 		CLEAR_BIT(PWR->CR, PWR_CR_DBP);
 		while (BIT_IS_SET(PWR->CR, PWR_CR_DBP)) {
 			// Nothing to do here
-			// TODO: Timeout?
 		}
 	}
 
