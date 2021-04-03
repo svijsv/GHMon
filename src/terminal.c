@@ -95,7 +95,7 @@ static _FLASH const char TERMINAL_HELP[] =
 /*
 * Local function prototypes
 */
-static uiter_t terminal_gets(char *line_in, uiter_t size);
+static txsize_t terminal_gets(char *line_in, txsize_t size);
 
 static int  read_number(char *token);
 static void terminalcmd_print_sensor_status(void);
@@ -109,7 +109,7 @@ static void terminalcmd_sync_log(void);
 static void terminalcmd_run_controllers(void);
 #endif // USE_CONTROLLERS
 #if USE_FDISK
-static void terminalcmd_fdisk(char *line_in, uiter_t size);
+static void terminalcmd_fdisk(char *line_in, txsize_t size);
 #endif // USE_FDISK
 
 
@@ -187,9 +187,9 @@ END:
 	return;
 }
 
-static uiter_t terminal_gets(char *line_in, uiter_t size) {
+static txsize_t terminal_gets(char *line_in, txsize_t size) {
 	uint8_t c;
-	uiter_t i;
+	txsize_t i;
 	bool done, started_line;
 
 	done = false;
@@ -244,16 +244,17 @@ static uiter_t terminal_gets(char *line_in, uiter_t size) {
 		}
 
 		if (done) {
-			uiter_t newlines, other;
+			uint newlines, other;
 			utime_t timeout;
 
 			other = 0;
 			newlines = 0;
 			timeout = SET_TIMEOUT(10);
 			// Eat any remaining input
-			while (!TIMES_UP(timeout) && (uart_receive_block(&c, 1, 1) != ETIMEOUT)) {
+			while (!TIMES_UP(timeout) && (uart_receive_block(&c, 1, 5) != ETIMEOUT)) {
 				switch (c) {
 				case '\n':
+				case '\r':
 					++newlines;
 					break;
 				default:
@@ -262,7 +263,7 @@ static uiter_t terminal_gets(char *line_in, uiter_t size) {
 				}
 			}
 			if ((newlines != 0) || (other != 0)) {
-				PRINTF("Ignoring %u newlines and %u other characters after the linebreak", (uint )newlines, (uint )other);
+				PRINTF("Ignoring %u newlines and %u other characters after the linebreak\r\n", (uint )newlines, (uint )other);
 			}
 			break;
 		}
@@ -409,10 +410,10 @@ static void terminalcmd_led_flash(char *token) {
 	return;
 }
 #if USE_FDISK
-static void terminalcmd_fdisk(char *line_in, uiter_t size) {
+static void terminalcmd_fdisk(char *line_in, txsize_t size) {
 	static _FLASH const char confirm_string[] = "ERASE MY CARD!";
 	const char *tc;
-	uiter_t len;
+	uint8_t len;
 
 	tc = FROM_FSTR(confirm_string);
 	PRINTF("Format SD card? Type '%s' to confirm:\r\n", tc);
