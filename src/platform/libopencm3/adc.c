@@ -192,19 +192,19 @@ adc_t adc_read_pin(pin_t pin) {
 	channel = 0; // Shut the compiler up
 
 	pinno = GPIO_GET_PINNO(pin);
-	switch (pin) {
-	case (GPIO_PORTA|GPIO_PINNO(0)):
-	case (GPIO_PORTA|GPIO_PINNO(1)):
-	case (GPIO_PORTA|GPIO_PINNO(2)):
-	case (GPIO_PORTA|GPIO_PINNO(3)):
-	case (GPIO_PORTA|GPIO_PINNO(4)):
-	case (GPIO_PORTA|GPIO_PINNO(5)):
-	case (GPIO_PORTA|GPIO_PINNO(6)):
-	case (GPIO_PORTA|GPIO_PINNO(7)):
+	switch (PINID(pin)) {
+	case PINID_A0:
+	case PINID_A1:
+	case PINID_A2:
+	case PINID_A3:
+	case PINID_A4:
+	case PINID_A5:
+	case PINID_A6:
+	case PINID_A7:
 		channel = pinno;
 		break;
-	case (GPIO_PORTB|GPIO_PINNO(0)):
-	case (GPIO_PORTB|GPIO_PINNO(1)):
+	case PINID_B0:
+	case PINID_B1:
 		channel = pinno + 8;
 		break;
 	default:

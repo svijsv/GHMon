@@ -47,6 +47,7 @@ typedef struct {
 	volatile __IO uint32_t *idr;
 	uint32_t mask;
 } gpio_quick_t;
+#define GPIO_QUICK_T_IS_DEFINED 1
 
 
 /*
@@ -65,102 +66,122 @@ typedef struct {
 
 // 12-bit ADC maximum value
 #define ADC_MAX 0x0FFF
-// Ideal voltage output by the on-board voltage regulator
-#ifndef REGULATED_VOLTAGE
-# define REGULATED_VOLTAGE 3300
-#endif // REGULATED_VOLTAGE
-// Consider the regulated voltage low if it falls below this
-#ifndef REGULATED_VOLTAGE_LOW
-# define REGULATED_VOLTAGE_LOW 3100
-#endif // REGULATED_VOLTAGE_LOW
 // Voltage of the internal reference in mV
 // Per the STM32F1 datasheet the internal Vref can be between 1.16V and 1.24V,
 // with 1.20V being typical.
 #ifndef INTERNAL_VREF
 # define INTERNAL_VREF 1200
-#endif  // INTERNAL_VREF
+#endif
 
 //
 // Base pin definitions
+//
 // Only ports A and B are supported; none of the rest are broken out except
 // possibly a few on port C that interfere with the RTC
 //
 // Port A
-#define GPIO_PORTA 0x10
-#define PA0  (GPIO_PORTA|0x00)
-#define PA1  (GPIO_PORTA|0x01)
-#define PA2  (GPIO_PORTA|0x02)
-#define PA3  (GPIO_PORTA|0x03)
-#define PA4  (GPIO_PORTA|0x04)
-#define PA5  (GPIO_PORTA|0x05)
-#define PA6  (GPIO_PORTA|0x06)
-#define PA7  (GPIO_PORTA|0x07)
-#define PA8  (GPIO_PORTA|0x08)
-#define PA9  (GPIO_PORTA|0x09)
-#define PA10 (GPIO_PORTA|0x0A)
-#define PA11 (GPIO_PORTA|0x0B)
-#define PA12 (GPIO_PORTA|0x0C)
-// PA13 and PA14 are used for SWDIO and SWCLK
-//#define PA13 (GPIO_PORTA|0x0D)
-//#define PA14 (GPIO_PORTA|0x0E)
-#define PA15 (GPIO_PORTA|0x0F)
+#define GPIO_PORTA 1
+#define GPIO_PORTA_MASK (GPIO_PORTA << GPIO_PORT_OFFSET)
+#define PINID_A0  (GPIO_PORTA_MASK|0x00)
+#define PINID_A1  (GPIO_PORTA_MASK|0x01)
+#define PINID_A2  (GPIO_PORTA_MASK|0x02)
+#define PINID_A3  (GPIO_PORTA_MASK|0x03)
+#define PINID_A4  (GPIO_PORTA_MASK|0x04)
+#define PINID_A5  (GPIO_PORTA_MASK|0x05)
+#define PINID_A6  (GPIO_PORTA_MASK|0x06)
+#define PINID_A7  (GPIO_PORTA_MASK|0x07)
+#define PINID_A8  (GPIO_PORTA_MASK|0x08)
+#define PINID_A9  (GPIO_PORTA_MASK|0x09)
+#define PINID_A10 (GPIO_PORTA_MASK|0x0A)
+#define PINID_A11 (GPIO_PORTA_MASK|0x0B)
+#define PINID_A12 (GPIO_PORTA_MASK|0x0C)
+// PINID_A13 and PINID_A14 are used for SWDIO and SWCLK
+//#define PINID_A13 (GPIO_PORTA_MASK|0x0D)
+//#define PINID_A14 (GPIO_PORTA_MASK|0x0E)
+#define PINID_A15 (GPIO_PORTA_MASK|0x0F)
+//
 // Port B
-#define GPIO_PORTB 0x20
-#define PB0  (GPIO_PORTB|0x00)
-#define PB1  (GPIO_PORTB|0x01)
-// PB2 is reset
-//#define PB2  (GPIO_PORTB|0x02)
-#define PB3  (GPIO_PORTB|0x03)
-#define PB4  (GPIO_PORTB|0x04)
-#define PB5  (GPIO_PORTB|0x05)
-#define PB6  (GPIO_PORTB|0x06)
-#define PB7  (GPIO_PORTB|0x07)
-#define PB8  (GPIO_PORTB|0x08)
-#define PB9  (GPIO_PORTB|0x09)
-#define PB10 (GPIO_PORTB|0x0A)
-#define PB11 (GPIO_PORTB|0x0B)
-#define PB12 (GPIO_PORTB|0x0C)
-#define PB13 (GPIO_PORTB|0x0D)
-#define PB14 (GPIO_PORTB|0x0E)
-#define PB15 (GPIO_PORTB|0x0F)
+#define GPIO_PORTB 2
+#define GPIO_PORTB_MASK (GPIO_PORTB << GPIO_PORT_OFFSET)
+#define PINID_B0  (GPIO_PORTB_MASK|0x00)
+#define PINID_B1  (GPIO_PORTB_MASK|0x01)
+// PINID_B2 is reset
+//#define PINID_B2  (GPIO_PORTB_MASK|0x02)
+#define PINID_B3  (GPIO_PORTB_MASK|0x03)
+#define PINID_B4  (GPIO_PORTB_MASK|0x04)
+#define PINID_B5  (GPIO_PORTB_MASK|0x05)
+#define PINID_B6  (GPIO_PORTB_MASK|0x06)
+#define PINID_B7  (GPIO_PORTB_MASK|0x07)
+#define PINID_B8  (GPIO_PORTB_MASK|0x08)
+#define PINID_B9  (GPIO_PORTB_MASK|0x09)
+#define PINID_B10 (GPIO_PORTB_MASK|0x0A)
+#define PINID_B11 (GPIO_PORTB_MASK|0x0B)
+#define PINID_B12 (GPIO_PORTB_MASK|0x0C)
+#define PINID_B13 (GPIO_PORTB_MASK|0x0D)
+#define PINID_B14 (GPIO_PORTB_MASK|0x0E)
+#define PINID_B15 (GPIO_PORTB_MASK|0x0F)
 
-#define BIAS_LOW  0x40
-#define BIAS_HIGH 0x80
+//
+// Bluepill pin mappings
+#define PIN_A0  PINID_A0
+#define PIN_A1  PINID_A1
+#define PIN_A2  PINID_A2
+#define PIN_A3  PINID_A3
+#define PIN_A4  PINID_A4
+#define PIN_A5  PINID_A5
+#define PIN_A6  PINID_A6
+#define PIN_A7  PINID_A7
+#define PIN_A8  PINID_A8
+#define PIN_A9  PINID_A9
+#define PIN_A10 PINID_A10
+#define PIN_A11 PINID_A11
+#define PIN_A12 PINID_A12
+//#define PIN_SWDIO PINID_A13
+//#define PIN_SWCLK PINID_A14
+#define PIN_A15 PINID_A15
+
+#define PIN_B0  PINID_B0
+#define PIN_B1  PINID_B1
+#define PIN_B3  PINID_B3
+#define PIN_B4  PINID_B4
+#define PIN_B5  PINID_B5
+#define PIN_B6  PINID_B6
+#define PIN_B7  PINID_B7
+#define PIN_B8  PINID_B8
+#define PIN_B9  PINID_B9
+#define PIN_B10 PINID_B10
+#define PIN_B11 PINID_B11
+#define PIN_B12 PINID_B12
+#define PIN_B13 PINID_B13
+#define PIN_B14 PINID_B14
+#define PIN_B15 PINID_B15
 
 
 /*
 * Variable declarations
 */
+extern volatile utime_t G_sys_msticks;
 
 
 /*
 * Function prototypes
 */
+utime_t get_RTC_seconds(void);
 
 
 /*
 * Macros
 */
-#define GPIO_PIN_MASK  (0x0F)
-#define GPIO_GET_PINNO(pin) ((pin) & GPIO_PIN_MASK)
-#define GPIO_GET_PINMASK(pin) AS_BIT((uint32_t )GPIO_GET_PINNO((pin)))
-#define GPIO_PINNO(no) (no)
-
-#define GPIO_PORT_MASK (0x30)
-#define GPIO_GET_PORTNO(pin) (((pin) & GPIO_PORT_MASK) >> 4)
-#define GPIO_GET_PORT(pin) ((((pin) & GPIO_PORT_MASK) == GPIO_PORTA) ? GPIOA : GPIOB)
-
-#define GPIO_BIAS_MASK (0xC0)
-#define GPIO_GET_BIAS(pin) ((pin) & GPIO_BIAS_MASK)
-
-#define PINID(pin) ((pin) & (GPIO_PIN_MASK | GPIO_PORT_MASK))
-
+#define GPIO_GET_PORT(pin) (((GPIO_GET_PORTMASK(pin)) == GPIO_PORTA_MASK) ? GPIOA : GPIOB)
 #define GPIO_QUICK_READ(qpin) (SELECT_BITS(*((qpin).idr), (qpin).mask) != 0)
 
 // There's a name conflict between my interface and libopencm3, this works
 // around that:
 #define gpio_set_mode gpio_set_mode_OVERRIDE
 
+#define NOW() (get_RTC_seconds())
+
+// Use the micro-second counter
 # define USCOUNTER_START() \
 	do { \
 		timer_generate_event(TIM3, TIM_EGR_UG); /* Generate an update event to reset the counter */ \

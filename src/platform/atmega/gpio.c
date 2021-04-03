@@ -62,7 +62,7 @@
 */
 // F() doesn't deduplicate, so do this instead
 static _FLASH const char u_port_fmt[] = "Unhandled GPIO port 0x%02u at " __FILE__ ":%u";
-#define UNHANDLED_PORT(pin) LOGGER_NOF(FROM_FSTR(u_port_fmt), (uint )GPIO_GET_PORT(pin), (uint )__LINE__)
+#define UNHANDLED_PORT(pin) LOGGER_NOF(FROM_FSTR(u_port_fmt), (uint )GPIO_GET_PORTNO(pin), (uint )__LINE__)
 
 
 /*
@@ -99,7 +99,7 @@ void gpio_set_state(pin_t pin, gpio_state_t new_state) {
 	pinmask = GPIO_GET_PINMASK(pin);
 	switch (new_state) {
 	case GPIO_HIGH:
-		switch (GPIO_GET_PORT(pin)) {
+		switch (GPIO_GET_PORTNO(pin)) {
 		case GPIO_PORTB:
 			SET_BIT(PORTB, pinmask);
 			break;
@@ -115,7 +115,7 @@ void gpio_set_state(pin_t pin, gpio_state_t new_state) {
 		}
 		break;
 	case GPIO_LOW:
-		switch (GPIO_GET_PORT(pin)) {
+		switch (GPIO_GET_PORTNO(pin)) {
 		case GPIO_PORTB:
 			CLEAR_BIT(PORTB, pinmask);
 			break;
@@ -131,7 +131,7 @@ void gpio_set_state(pin_t pin, gpio_state_t new_state) {
 		}
 		break;
 	case GPIO_FLOAT:
-		switch (GPIO_GET_PORT(pin)) {
+		switch (GPIO_GET_PORTNO(pin)) {
 		case GPIO_PORTB:
 			CLEAR_BIT(PORTB, pinmask & (PORTB ^ pinmask));
 			break;
@@ -153,7 +153,7 @@ void gpio_set_state(pin_t pin, gpio_state_t new_state) {
 void gpio_toggle_state(pin_t pin) {
 	assert(pin != 0);
 
-	switch (GPIO_GET_PORT(pin)) {
+	switch (GPIO_GET_PORTNO(pin)) {
 	case GPIO_PORTB:
 		SET_BIT(PINB, GPIO_GET_PINMASK(pin));
 		break;
@@ -175,7 +175,7 @@ gpio_state_t gpio_get_state(pin_t pin) {
 
 	assert(pin != 0);
 
-	switch (GPIO_GET_PORT(pin)) {
+	switch (GPIO_GET_PORTNO(pin)) {
 	case GPIO_PORTB:
 		st = SELECT_BITS(PINB, GPIO_GET_PINMASK(pin));
 		break;
@@ -198,7 +198,7 @@ void gpio_quickread_prepare(volatile gpio_quick_t *qpin, pin_t pin) {
 
 	qpin->mask = GPIO_GET_PINMASK(pin);
 
-	switch (GPIO_GET_PORT(pin)) {
+	switch (GPIO_GET_PORTNO(pin)) {
 	case GPIO_PORTB:
 		qpin->port = &PINB;
 		break;
@@ -233,7 +233,7 @@ void gpio_set_mode(pin_t pin, gpio_mode_t mode, gpio_state_t istate) {
 		// both the direction and the state at the same time. Setting the state
 		// first and then the direction is least likely to cause problems; see
 		// section 14.2.3 in the manual.
-		switch (GPIO_GET_PORT(pin)) {
+		switch (GPIO_GET_PORTNO(pin)) {
 		case GPIO_PORTB:
 			MODIFY_BITS(PORTB, pinmask, PORT_mask);
 			MODIFY_BITS(DDRB, pinmask, DDR_mask);
@@ -272,7 +272,7 @@ void gpio_set_mode(pin_t pin, gpio_mode_t mode, gpio_state_t istate) {
 		}
 
 	} else { // GPIO_MODE_AIN, GPIO_MODE_HiZ, or GPIO_MODE_RESET
-		switch (GPIO_GET_PORT(pin)) {
+		switch (GPIO_GET_PORTNO(pin)) {
 		case GPIO_PORTB:
 			CLEAR_BIT(DDRB, pinmask);
 			CLEAR_BIT(PORTB, pinmask);
@@ -314,7 +314,7 @@ gpio_mode_t gpio_get_mode(pin_t pin) {
 
 	pinmask = GPIO_GET_PINMASK(pin);
 	// TODO: This should check for AF modes
-	switch (GPIO_GET_PORT(pin)) {
+	switch (GPIO_GET_PORTNO(pin)) {
 	case GPIO_PORTB:
 		return BIT_IS_SET(DDRB, pinmask) ? GPIO_MODE_PP : GPIO_MODE_IN;
 		break;

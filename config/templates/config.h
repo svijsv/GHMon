@@ -136,21 +136,21 @@
 #if USE_STM32
 //
 // Sensor inputs
-#define SENSOR_BAT_PIN    PA0
-#define SENSOR_TOD_PIN    PA1
-#define SENSOR_TID_PIN    PA2
-#define SENSOR_WATER_PIN  PA3
+#define SENSOR_BAT_PIN    PIN_A0
+#define SENSOR_TOD_PIN    PIN_A1
+#define SENSOR_TID_PIN    PIN_A2
+#define SENSOR_WATER_PIN  PIN_A3
 //
 // Controller outputs
-#define CONTROL_FAN_PIN   PB9
-#define CONTROL_WATER_PIN PB8
+#define CONTROL_FAN_PIN   PIN_B9
+#define CONTROL_WATER_PIN PIN_B8
 //
 // UI pins
-#define LED_PIN    PB3
-#define BUTTON_PIN PB4
+#define LED_PIN    PIN_B3
+#define BUTTON_PIN PIN_B4
 //
 // Power pins
-#define SENSOR_POWER_PIN PB11
+#define SENSOR_POWER_PIN PIN_B11
 //
 // The SD card should be switched only if it uses a separate voltage regulator
 // from the main board and a few mA power usage matters; powering them on and
@@ -158,21 +158,21 @@
 // If a power pin has a bias, the pin is always in push-pull mode and it's
 // output is set to the bias value when OFF and the reverse when ON; the
 // default is high-impedence mode when OFF and output HIGH when ON
-//#define SD_POWER_PIN (PB5 | BIAS_LOW)
+//#define SD_POWER_PIN (PIN_B5 | BIAS_LOW)
 //
 // UART pins; hardware-specified; used if USE_SERIAL != 0
-// PA9-PA10: UART1
-#define UARTx_TX_PIN  PA9
-#define UARTx_RX_PIN PA10
+// PIN_A9-PIN_A10: UART1
+#define UARTx_TX_PIN PIN_A9
+#define UARTx_RX_PIN PIN_A10
 //
 // SPI pins; hardware-specified; used if USE_LOGGING != 0
 // Use SPI2 because SPI1 overlaps with the analog pins and we want to save as
 // many of those as we can for sensors.
-// PB12-PB15: SPI2
-#define SPIx_CS_SD_PIN PB12
-#define SPIx_SCK_PIN   PB13
-#define SPIx_MISO_PIN  PB14
-#define SPIx_MOSI_PIN  PB15
+// PIN_B12-PIN_B15: SPI2
+#define SPIx_CS_SD_PIN PIN_B12
+#define SPIx_SCK_PIN   PIN_B13
+#define SPIx_MISO_PIN  PIN_B14
+#define SPIx_MOSI_PIN  PIN_B15
 #endif // USE_STM32
 
 // ATMega328
@@ -215,5 +215,4 @@
 #define SPIx_SCK_PIN   PIN_13
 #define SPIx_MISO_PIN  PIN_12
 #define SPIx_MOSI_PIN  PIN_11
-
 #endif // USE_AVR

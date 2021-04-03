@@ -50,7 +50,7 @@
 * Variables
 */
 // System ticks, milliseconds
-volatile utime_t G_sys_uticks;
+volatile utime_t G_sys_msticks;
 
 /*
 * Local function prototypes
@@ -66,7 +66,7 @@ static void timers_init(void);
 */
 OPTIMIZE_FUNCTION \
 void SysTick_Handler(void) {
-	++G_sys_uticks;
+	++G_sys_msticks;
 	return;
 }
 OPTIMIZE_FUNCTION \
@@ -116,7 +116,7 @@ void time_init(void) {
 static void systick_init(void) {
 	uint32_t period;
 
-	G_sys_uticks = 0;
+	G_sys_msticks = 0;
 	// G_sys_sticks = 0;
 
 	// Re-implement SysTick_Config() from CMSIS/ARM/core_cm3.h so we can use
@@ -320,7 +320,7 @@ void uscounter_off(void) {
 void delay(utime_t ms) {
 	utime_t timer;
 
-#if DEBUG
+#if DEBUG && USE_SERIAL
 	uint32_t systick_mask = SysTick_CTRL_TICKINT_Msk|SysTick_CTRL_ENABLE_Msk;
 	if (SELECT_BITS(SysTick->CTRL, systick_mask) != systick_mask) {
 		uart_on();
@@ -328,7 +328,7 @@ void delay(utime_t ms) {
 		dumb_delay(ms);
 		return;
 	}
-#endif // DEBUG
+#endif
 
 	timer = SET_TIMEOUT(ms);
 	while (!TIMES_UP(timer)) {

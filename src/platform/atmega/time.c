@@ -94,7 +94,7 @@
 volatile bool wakeup_alarm_is_set = false;
 
 // System ticks, milliseconds
-volatile utime_t G_sys_uticks = 0;
+volatile utime_t G_sys_msticks = 0;
 // 'RTC' ticks, seconds
 static utime_t RTC_ticks = 0;
 static utime_t RTC_prev_uticks = 0;
@@ -156,7 +156,7 @@ static void uscounter_init(void);
 * Interrupt handlers
 */
 ISR(SYSTICK_ISR) {
-	++G_sys_uticks;
+	++G_sys_msticks;
 }
 ISR(WDT_vect) {
 	wdt_disable();
@@ -372,7 +372,7 @@ static void calibrate_WDT(void) {
 	// Enable interrupts without concern for initial state, which is already
 	// saved
 	sei();
-	READ_VOLATILE(pre_calib, G_sys_uticks);
+	READ_VOLATILE(pre_calib, G_sys_msticks);
 	wdt_reset();
 
 	do {
@@ -385,7 +385,7 @@ static void calibrate_WDT(void) {
 	// tick increments during this read and have to deal ISR overhead, we're
 	// mostly going to overcount so subtract 1ms to (hopefully) keep things a
 	// little closer to reality
-	READ_VOLATILE(post_calib, G_sys_uticks);
+	READ_VOLATILE(post_calib, G_sys_msticks);
 	wdt_calibration = (uint8_t )(post_calib - pre_calib) - 1;
 
 	RESTORE_INTERRUPTS(sreg);
@@ -466,7 +466,7 @@ void stop_wakeup_alarm(void) {
 utime_t get_RTC_seconds(void) {
 	utime_t uticks;
 
-	READ_VOLATILE(uticks, G_sys_uticks);
+	READ_VOLATILE(uticks, G_sys_msticks);
 	RTC_millis += (uticks - RTC_prev_uticks);
 	RTC_prev_uticks = uticks;
 
@@ -481,7 +481,7 @@ utime_t get_RTC_seconds(void) {
 }
 static void set_RTC_seconds(utime_t s) {
 	RTC_ticks = s;
-	READ_VOLATILE(RTC_prev_uticks, G_sys_uticks);
+	READ_VOLATILE(RTC_prev_uticks, G_sys_msticks);
 	RTC_millis = 0;
 }
 void add_RTC_millis(uint16_t ms) {

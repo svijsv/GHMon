@@ -50,12 +50,12 @@
 // Handle SPIx
 #if USE_SPI
 // SPI1 remapped
-#if (SPIx_SCK_PIN == PB3) && (SPIx_MISO_PIN == PB4) && (SPIx_MOSI_PIN == PB5)
+#if (PINID(SPIx_SCK_PIN) == PINID_B3) && (PINID(SPIx_MISO_PIN) == PINID_B4) && (PINID(SPIx_MOSI_PIN) == PINID_B5)
 # define SPI1_DO_REMAP 1
 #endif
 
 // SPI1
-#if ((SPIx_SCK_PIN == PA5) && (SPIx_MISO_PIN == PA6) && (SPIx_MOSI_PIN == PA7)) || SPI1_DO_REMAP
+#if ((PINID(SPIx_SCK_PIN) == PINID_A5) && (PINID(SPIx_MISO_PIN) == PINID_A6) && (PINID(SPIx_MOSI_PIN) == PINID_A7)) || SPI1_DO_REMAP
 # define SPIx SPI1
 # define SPIx_APBxENR  RCC->APB2ENR
 # define SPIx_APBxRSTR RCC->APB2RSTR
@@ -63,7 +63,7 @@
 # define SPIx_BUSFREQ  G_freq_PCLK2
 
 // SPI2
-#elif (SPIx_SCK_PIN == PB13) && (SPIx_MISO_PIN == PB14) && (SPIx_MOSI_PIN == PB15)
+#elif (PINID(SPIx_SCK_PIN) == PINID_B13) && (PINID(SPIx_MISO_PIN) == PINID_B14) && (PINID(SPIx_MOSI_PIN) == PINID_B15)
 # define SPIx SPI2
 # define SPIx_APBxENR  RCC->APB1ENR
 # define SPIx_APBxRSTR RCC->APB1RSTR

@@ -60,7 +60,7 @@
 * Variables
 */
 // System ticks, milliseconds
-volatile utime_t G_sys_uticks;
+volatile utime_t G_sys_msticks;
 
 volatile bool sleep_alarm_is_set;
 volatile bool RTC_alarm_is_set;
@@ -79,7 +79,7 @@ static void timers_init(void);
 */
 OPTIMIZE_FUNCTION \
 void sys_tick_handler(void) {
-	++G_sys_uticks;
+	++G_sys_msticks;
 	return;
 }
 
@@ -129,7 +129,7 @@ static void systick_init(void) {
 	nvic_set_priority(NVIC_SYSTICK_IRQ, SYSTICK_IRQp);
 	systick_set_frequency(1000, rcc_ahb_frequency);
 	systick_clear();
-	G_sys_uticks = 0;
+	G_sys_msticks = 0;
 
 	systick_interrupt_enable();
 	systick_counter_enable();
