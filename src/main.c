@@ -37,6 +37,7 @@
 #include "log.h"
 #include "serial.h"
 #include "terminal.h"
+#include "calendar.h"
 
 
 /*

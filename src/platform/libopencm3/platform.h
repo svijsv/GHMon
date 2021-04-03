@@ -166,7 +166,6 @@ extern volatile utime_t G_sys_msticks;
 /*
 * Function prototypes
 */
-utime_t get_RTC_seconds(void);
 
 
 /*
@@ -178,8 +177,6 @@ utime_t get_RTC_seconds(void);
 // There's a name conflict between my interface and libopencm3, this works
 // around that:
 #define gpio_set_mode gpio_set_mode_OVERRIDE
-
-#define NOW() (get_RTC_seconds())
 
 // Use the micro-second counter
 # define USCOUNTER_START() \

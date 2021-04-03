@@ -479,10 +479,12 @@ utime_t get_RTC_seconds(void) {
 
 	return RTC_ticks;
 }
-static void set_RTC_seconds(utime_t s) {
+err_t set_RTC_seconds(utime_t s) {
 	RTC_ticks = s;
 	READ_VOLATILE(RTC_prev_msticks, G_sys_msticks);
 	RTC_millis = 0;
+
+	return EOK;
 }
 void add_RTC_millis(uint16_t ms) {
 	RTC_millis += ms;
@@ -554,34 +556,6 @@ void dumber_delay(uint32_t cycles) {
 	}
 
 	return;
-}
-
-err_t set_time(uint8_t hour, uint8_t minute, uint8_t second) {
-	utime_t now;
-
-	if ((hour > 24) || (minute > 59) || (second > 59)) {
-		return EUSAGE;
-	}
-
-	// Conserve the date part of the RTC
-	now = get_RTC_seconds();
-	now = SNAP_TO_FACTOR(now, DAYS) + time_to_seconds(hour, minute, second);
-	set_RTC_seconds(now);
-
-	return EOK;
-}
-err_t set_date(uint8_t year, uint8_t month, uint8_t day) {
-	uint32_t now;
-
-	if ((year > (0xFFFFFFFF/YEARS)) || (!IS_BETWEEN(month, 1, 12)) || (!IS_BETWEEN(day, 1, 31))) {
-		return EUSAGE;
-	}
-
-	// Conserve the time part of the RTC
-	now = (get_RTC_seconds() % DAYS) + date_to_seconds(year, month, day);
-	set_RTC_seconds(now);
-
-	return EOK;
 }
 
 

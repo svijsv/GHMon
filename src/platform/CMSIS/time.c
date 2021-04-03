@@ -174,6 +174,17 @@ utime_t get_RTC_seconds(void) {
 
 	return rtcs;
 }
+err_t set_RTC_seconds(utime_t s) {
+	err_t res;
+
+	if ((res = RTC_cfg_enable(1000)) == EOK) {
+		WRITE_SPLITREG(s, RTC->CNTH, RTC->CNTL);
+		res = RTC_cfg_disable(1000);
+	}
+
+	return res;
+}
+
 void set_RTC_alarm(utime_t time) {
 	assert(time > 0);
 	time = get_RTC_seconds() + time;
@@ -357,46 +368,6 @@ void dumber_delay(uint32_t cycles) {
 	}
 
 	return;
-}
-
-err_t set_time(uint8_t hour, uint8_t minute, uint8_t second) {
-	err_t res;
-	uint32_t now;
-
-	if ((hour > 24) || (minute > 59) || (second > 59)) {
-		return EUSAGE;
-	}
-
-	// Conserve the date part of the RTC
-	// Don't call get_RTC_seconds() from the macro SNAP_TO_FACTOR() or it will
-	// be called twice.
-	now = get_RTC_seconds();
-	now = SNAP_TO_FACTOR(now, DAYS) + time_to_seconds(hour, minute, second);
-
-	if ((res = RTC_cfg_enable(1000)) == EOK) {
-		WRITE_SPLITREG(now, RTC->CNTH, RTC->CNTL);
-		res = RTC_cfg_disable(1000);
-	}
-
-	return res;
-}
-err_t set_date(uint8_t year, uint8_t month, uint8_t day) {
-	err_t res;
-	uint32_t now;
-
-	if ((year > (0xFFFFFFFF/YEARS)) || (!IS_BETWEEN(month, 1, 12)) || (!IS_BETWEEN(day, 1, 31))) {
-		return EUSAGE;
-	}
-
-	// Conserve the time part of the RTC
-	now = (get_RTC_seconds() % DAYS) + date_to_seconds(year, month, day);
-
-	if ((res = RTC_cfg_enable(1000)) == EOK) {
-		WRITE_SPLITREG(now, RTC->CNTH, RTC->CNTL);
-		res = RTC_cfg_disable(1000);
-	}
-
-	return res;
 }
 
 

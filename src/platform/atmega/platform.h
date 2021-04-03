@@ -184,7 +184,6 @@ extern volatile utime_t G_sys_msticks;
 /*
 * Function prototypes
 */
-utime_t get_RTC_seconds(void);
 
 
 /*
@@ -192,7 +191,6 @@ utime_t get_RTC_seconds(void);
 */
 #define GPIO_QUICK_READ(qpin) (SELECT_BITS(*((qpin).port), (qpin).mask) != 0)
 
-#define NOW() (get_RTC_seconds())
 #define NOW_MS() ({ utime_t n; READ_VOLATILE(n, G_sys_msticks); n; })
 
 // Use the micro-second counter

@@ -166,7 +166,6 @@ extern volatile utime_t G_sys_msticks;
 /*
 * Function prototypes
 */
-utime_t get_RTC_seconds(void);
 
 
 /*
@@ -179,8 +178,6 @@ utime_t get_RTC_seconds(void);
 #define IS_GPIO_INPUT_HIGH(pin)  (BIT_IS_SET(GPIO_GET_PORT(pin)->IDR, GPIO_GET_PINMASK(pin)))
 #define SET_GPIO_OUTPUT_HIGH(pin) SET_BIT(GPIO_GET_PORT(pin)->ODR, GPIO_GET_PINMASK(pin))
 #define SET_GPIO_OUTPUT_LOW(pin)  CLEAR_BIT(GPIO_GET_PORT(pin)->ODR, GPIO_GET_PINMASK(pin))
-
-#define NOW() (get_RTC_seconds())
 
 // Use the micro-second counter
 # define USCOUNTER_START() \

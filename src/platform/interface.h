@@ -266,9 +266,9 @@ err_t spi_transmit_block(const uint8_t *tx_buffer, txsize_t tx_size, utime_t tim
 
 //
 // Time-management interface
-// Set system date and time
-err_t set_time(uint8_t hour, uint8_t minute, uint8_t second);
-err_t set_date(uint8_t year, uint8_t month, uint8_t day);
+// Get and set the system time enumerated in seconds
+err_t set_RTC_seconds(utime_t s);
+utime_t get_RTC_seconds(void);
 // Enable and disable the microsecond counter used for USCOUNTER_START()
 // and USCOUNTER_STOP()
 void uscounter_on(void);
@@ -370,7 +370,7 @@ void issue_warning(void);
 // read if the system time was set in the meantime, but it updates even
 // during sleep
 #ifndef NOW
-# define NOW() (G_sys_sticks)
+# define NOW() (get_RTC_seconds())
 #endif
 // Read the systick counter; this always increases or stays the same from one
 // read to the next but is stopped during sleep

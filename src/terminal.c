@@ -37,6 +37,7 @@
 #include "controllers.h"
 #include "fdisk.h"
 #include "log.h"
+#include "calendar.h"
 
 #if USE_TERMINAL
 

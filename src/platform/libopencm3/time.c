@@ -180,6 +180,11 @@ void stop_RTC_alarm(void) {
 utime_t get_RTC_seconds(void) {
 	return rtc_get_counter_val();
 }
+err_t set_RTC_seconds(utime_t s) {
+	rtc_set_counter_val(s);
+
+	return EOK;
+}
 
 //
 // Configure the sleep() and uscounter timers
@@ -313,36 +318,6 @@ void dumber_delay(uint32_t cycles) {
 	}
 
 	return;
-}
-
-err_t set_time(uint8_t hour, uint8_t minute, uint8_t second) {
-	uint32_t now;
-
-	if ((hour > 24) || (minute > 59) || (second > 59)) {
-		return EUSAGE;
-	}
-
-	// Conserve the date part of the RTC
-	// Don't call get_RTC_seconds() from the macro SNAP_TO_FACTOR() or it will
-	// be called twice.
-	now = rtc_get_counter_val();
-	now = SNAP_TO_FACTOR(now, DAYS) + time_to_seconds(hour, minute, second);
-	rtc_set_counter_val(now);
-
-	return EOK;
-}
-err_t set_date(uint8_t year, uint8_t month, uint8_t day) {
-	uint32_t now;
-
-	if ((year > (0xFFFFFFFF/YEARS)) || (!IS_BETWEEN(month, 1, 12)) || (!IS_BETWEEN(day, 1, 31))) {
-		return EUSAGE;
-	}
-
-	// Conserve the time part of the RTC
-	now = (rtc_get_counter_val() % DAYS) + date_to_seconds(year, month, day);
-	rtc_set_counter_val(now);
-
-	return EOK;
 }
 
 
