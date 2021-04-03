@@ -60,14 +60,6 @@ extern uint32_t G_freq_ADC;
 // Initialize the ADC peripheral
 void adc_init(void);
 
-// Return the analog voltage reference value and the MCU's internal temperature
-// sensor
-// vref is measured in millivolts
-// tempCx10 is measured in degrees celsius * 10
-// The reference manual claims +/-10C for the temperature sensor
-// Both arguments are mandatory.
-//void adc_read_internals(int16_t *vref, int16_t *tempCx10);
-
 
 /*
 * Macros

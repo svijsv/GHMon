@@ -71,7 +71,6 @@ typedef adcm_t imath_t;
 * Variables
 */
 int16_t G_vcc_voltage = REGULATED_VOLTAGE;
-int16_t G_mcu_temp    = 0;
 
 utime_t cooldown = 0;
 
@@ -310,8 +309,8 @@ void check_sensors() {
 #endif
 
 #if CHECK_VREF
-	adc_read_internals(&G_vcc_voltage, &G_mcu_temp);
-#endif // CHECK_VREF
+	G_vcc_voltage = adc_read_vref_mV();
+#endif
 
 	for (uiter_t i = 0; i < SENSOR_COUNT; ++i) {
 		value[i] = read_sensor(&G_sensors[i]);

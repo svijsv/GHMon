@@ -213,11 +213,8 @@ static adc_t adc_read_channel(uint8_t channel) {
 
 	return adc;
 }
-void adc_read_internals(int16_t *vref, int16_t *tempCx10) {
-	adcm_t adc;
-
-	assert(vref != NULL);
-	assert(tempCx10 != NULL);
+int16_t adc_read_vref_mV(void) {
+	adc_t adc;
 
 	// Measure the internal bandgap reference voltage
 	adc = adc_read_channel(CHANNEL_Vbg);
@@ -226,20 +223,7 @@ void adc_read_internals(int16_t *vref, int16_t *tempCx10) {
 	// (adc / max) * vref = 1100mV
 	// vref = 1100mV / (adc / max)
 	// vref = (1100mV * max) / adc
-	*vref = ((uint32_t )INTERNAL_VREF * (uint32_t )ADC_MAX) / adc;
-
-	// Per the data sheet, the voltage reference must be the internal bandgap
-	// reference for temperature measurement
-	MODIFY_BITS(ADMUX, VREF_MASK, VREF_Vbg);
-	adc = adc_read_channel(CHANNEL_T);
-	MODIFY_BITS(ADMUX, VREF_MASK, VREF_Vcc);
-	// The temperature sensor voltage increases by approximately 1mV/C with an
-	// accuracy of +/-10C
-	// adc/max = v/vref
-	// v = (adc*vref)/max
-	*tempCx10 = (((((adc * INTERNAL_VREF)/ADC_MAX) - TEMP_INT_V25) / TEMP_INT_SLOPE) + 25) * 10;
-
-	return;
+	return ((uint32_t )INTERNAL_VREF * (uint32_t )ADC_MAX) / (uint32_t )adc;
 }
 
 

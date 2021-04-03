@@ -78,7 +78,6 @@ static _FLASH const char unmount_err_msg[] = "f_unmount(): fatfs error %u";
 typedef struct {
 	utime_t  uptime;
 	int16_t  vcc_voltage;
-	int16_t  mcu_temp;
 #if USE_CONTROLLERS
 #if USE_SMALL_CONTROLLERS < 1
 	uint16_t run_time[CONTROLLER_COUNT];
@@ -251,7 +250,7 @@ void log_status(bool force_write) {
 	while (log_buffer.size > 0) {
 		line = &log_buffer.lines[head];
 
-		lprintf("%s\t%s\t%u\t%u", format_uptime(line->uptime), format_warnings(line->warnings), (uint )line->vcc_voltage, (uint )line->mcu_temp);
+		lprintf("%s\t%s\t%u", format_uptime(line->uptime), format_warnings(line->warnings), (uint )line->vcc_voltage);
 		for (uiter_t i = 0; i < SENSOR_COUNT; ++i) {
 			if (BIT_IS_SET(line->sensor_iflags[i], SENS_FLAG_WARNING)) {
 				prefix = prefix_warn;
@@ -291,7 +290,7 @@ void log_status(bool force_write) {
 	// We only need to add the latest measurements if this is a scheduled call;
 	// otherwise the duration between lines won't be even.
 	if (!force_write) {
-		lprintf("%s\t%s\t%u\t%u", format_uptime(now), format_warnings(G_warnings), (uint )G_vcc_voltage, (uint )G_mcu_temp);
+		lprintf("%s\t%s\t%u", format_uptime(now), format_warnings(G_warnings), (uint )G_vcc_voltage);
 		for (uiter_t i = 0; i < SENSOR_COUNT; ++i) {
 			if (BIT_IS_SET(G_sensors[i].iflags, SENS_FLAG_WARNING)) {
 				prefix = prefix_warn;
@@ -450,7 +449,6 @@ static void buffer_line(utime_t now) {
 	line = &log_buffer.lines[log_buffer.tail];
 	line->uptime      = now;
 	line->warnings    = G_warnings;
-	line->mcu_temp    = G_mcu_temp;
 	line->vcc_voltage = G_vcc_voltage;
 	for (uiter_t i = 0; i < SENSOR_COUNT; ++i) {
 		line->status[i] = G_sensors[i].status;
@@ -467,7 +465,7 @@ static void buffer_line(utime_t now) {
 #endif // USE_CONTROLLERS
 
 #if DEBUG
-	PRINTF("%s\t%s\t%u\t%u", format_uptime(line->uptime), format_warnings(line->warnings), (uint )line->vcc_voltage, (uint )line->mcu_temp);
+	PRINTF("%s\t%s\t%u", format_uptime(line->uptime), format_warnings(line->warnings), (uint )line->vcc_voltage);
 	for (uiter_t i = 0; i < SENSOR_COUNT; ++i) {
 		PRINTF("\t%d", (int )line->status[i]);
 	}
@@ -650,7 +648,7 @@ FRESULT print_header(void) {
 	LOGGER("Writing log header");
 	lines_logged_this_file = 0;
 
-	lprintf(F("# uptime\twarnings\tMCU_mV\tMCU_temp"));
+	lprintf(F("# uptime\twarnings\tVcc_mV"));
 	for (uiter_t i = 0; i < SENSOR_COUNT; ++i) {
 		if (BIT_IS_SET(G_sensors[i].iflags, SENS_FLAG_MONITORED)) {
 			lprintf("\t[!]%s", FROM_FSTR(SENSORS[i].name));

@@ -276,8 +276,8 @@ static void terminalcmd_print_sensor_status(void) {
 	invalidate_sensors();
 	check_sensors();
 
-	PRINTF("   VCC: %d\r\n   CPU_temp: %d\r\n\n   I  Name  Status\r\n",
-		(int )G_vcc_voltage, (int )G_mcu_temp);
+	PRINTF("   VCC: %d\r\n\n   I  Name  Status\r\n",
+		(int )G_vcc_voltage);
 	for (uiter_t i = 0; i < SENSOR_COUNT; ++i) {
 		PRINTF("   %u  %s   %d\r\n", (uint )i, FROM_FSTR(SENSORS[i].name), (int )G_sensors[i].status);
 	}

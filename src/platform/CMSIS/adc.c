@@ -287,17 +287,13 @@ static adc_t adc_read_channel(uint32_t channel) {
 	return adc;
 }
 
-void adc_read_internals(int16_t *vref, int16_t *tempCx10) {
+int16_t adc_read_vref_mV(void) {
 	adc_t adc;
-
-	assert(vref != NULL);
-	assert(tempCx10 != NULL);
+	uint16_t vref;
 
 #if ADCx_IS_ADC1
 	// Enable internal VREF and temperature sensors
 	SET_BIT(ADCx->CR2, ADC_CR2_TSVREFE);
-	// Rely on the overhead between here and measuring for the startup delay
-	// dumber_delay(TEMP_START_TIME_US * (freq_CoreCLK/1000000U));
 
 	adc = adc_read_channel(VREF_CHANNEL);
 	// Calculate the ADC Vref by comparing it to the internal Vref
@@ -305,24 +301,15 @@ void adc_read_internals(int16_t *vref, int16_t *tempCx10) {
 	// (adc / max) * vref = 1200mV
 	// vref = 1200mV / (adc / max)
 	// vref = (1200mV * max) / adc
-	*vref = (INTERNAL_VREF * ADC_MAX) / (uint32_t )adc;
-
-	adc = adc_read_channel(TEMP_CHANNEL);
-	// adc/max = v/vref
-	// (adc/max)*vref = v
-	// v = (adc*vref)/max
-	// From the reference manual:
-	// tempC = ((V25-Vsense)/avg_slope)+25
-	*tempCx10 = (((TEMP_INT_V25 - ((adc * *vref) / ADC_MAX)) * 1000) / TEMP_INT_SLOPE) + 25;
+	vref = (INTERNAL_VREF * ADC_MAX) / (uint32_t )adc;
 
 	CLEAR_BIT(ADCx->CR2, ADC_CR2_TSVREFE);
 
 #else // !ADCx_IS_ADC1
-	*vref = REGULATED_VOLTAGE;
-	*tempCx10 = 0;
+	vref = REGULATED_VOLTAGE;
 #endif // ADCx_IS_ADC1
 
-	return;
+	return vref;
 }
 
 #endif // USE_ADC

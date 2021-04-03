@@ -283,22 +283,17 @@ void dumber_delay(uint32_t cycles);
 // Enable and disable the ADC peripheral
 void adc_on(void);
 void adc_off(void);
-// Return the analog voltage reference value and the MCU's internal temperature
-// sensor
-// vref is measured in millivolts
-// tempCx10 is measured in degrees celsius * 10
+// Return the analog voltage reference value in millivolts
 // Depending on the platform and configuration this may always return
-// REGULATED_VOLTAGE and/or 0 respectively or may be very inaccurate; see
-// adc.h.
-// Both arguments are mandatory.
-void adc_read_internals(int16_t *vref, int16_t *tempCx10);
+// REGULATED_VOLTAGE
+int16_t adc_read_vref_mV(void);
 // Read the value on an analog pin
 // If the pin selected doesn't support analog reading, 0 is returned
 adc_t adc_read_pin(pin_t pin);
 #else
 # define adc_on()  ((void )0)
 # define adc_off() ((void )0)
-# define adc_read_internals(v, t) do { *(v) = 0; *(t) = 0; } while (0);
+# define adc_read_vref_mV() REGULATED_VOLTAGE
 # define adc_read_pin(p) 0
 #endif
 

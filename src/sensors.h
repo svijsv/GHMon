@@ -289,9 +289,6 @@ typedef struct {
 // Last-measured VCC voltage in mV
 extern int16_t G_vcc_voltage;
 
-// Last-measure MCU temperature in degrees C * 10
-extern int16_t G_mcu_temp;
-
 // Array of sensor structs representing available input
 extern sensor_t G_sensors[SENSOR_COUNT];
 

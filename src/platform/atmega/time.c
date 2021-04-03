@@ -97,9 +97,9 @@ volatile bool wakeup_alarm_is_set = false;
 volatile utime_t G_sys_msticks = 0;
 // 'RTC' ticks, seconds
 static utime_t RTC_ticks = 0;
-static utime_t RTC_prev_uticks = 0;
+static utime_t RTC_prev_msticks = 0;
 // It would be easier in theory to add a millisecond to the RTC by subtracting
-// one from RTC_prev_uticks but the time spent sleeping is so much greater
+// one from RTC_prev_msticks but the time spent sleeping is so much greater
 // than the time spent awake that doing so would roll the counter over rather
 // quickly, so a separate counter is needed for that
 static uint16_t RTC_millis = 0;
@@ -464,11 +464,11 @@ void stop_wakeup_alarm(void) {
 //
 // Manage the fake RTC system
 utime_t get_RTC_seconds(void) {
-	utime_t uticks;
+	utime_t msticks;
 
-	READ_VOLATILE(uticks, G_sys_msticks);
-	RTC_millis += (uticks - RTC_prev_uticks);
-	RTC_prev_uticks = uticks;
+	READ_VOLATILE(msticks, G_sys_msticks);
+	RTC_millis += (msticks - RTC_prev_msticks);
+	RTC_prev_msticks = msticks;
 
 	// This should happen close enough to every second that repeated subtraction
 	// will be faster than division
@@ -481,7 +481,7 @@ utime_t get_RTC_seconds(void) {
 }
 static void set_RTC_seconds(utime_t s) {
 	RTC_ticks = s;
-	READ_VOLATILE(RTC_prev_uticks, G_sys_msticks);
+	READ_VOLATILE(RTC_prev_msticks, G_sys_msticks);
 	RTC_millis = 0;
 }
 void add_RTC_millis(uint16_t ms) {
