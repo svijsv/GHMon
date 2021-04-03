@@ -233,23 +233,18 @@ int main(void) {
 #if USE_SMALL_CONTROLLERS < 1
 		controller_t *c;
 		utime_t alarm;
-		bool invalid;
+		bool invalidated;
 
-		invalid = false;
-		for (uiter_t i = 0; i < CONTROLLER_COUNT; ++i) {
-			c = &G_controllers[i];
-			if (BITS_ARE_SET(c->iflags, CTRL_FLAG_INVALIDATE|CTRL_FLAG_USES_SENSORS)) {
-				invalid = true;
-			}
-		}
-		if (invalid) {
-			invalidate_sensors();
-		}
+		invalidated = false;
 		for (uiter_t i = 0; i < CONTROLLER_COUNT; ++i) {
 			c = &G_controllers[i];
 			alarm = c->next_check;
 
 			if (force_controllers || ((alarm > 0) && (NOW() >= alarm)) || (do_controllers && (alarm == 0))) {
+				if (!invalidated && BITS_ARE_SET(c->iflags, CTRL_FLAG_INVALIDATE|CTRL_FLAG_USES_SENSORS)) {
+					invalidated = true;
+					invalidate_sensors();
+				}
 				c->next_check = 0;
 				check_controller(c);
 			}
