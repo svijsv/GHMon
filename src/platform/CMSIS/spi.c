@@ -185,9 +185,9 @@ err_t spi_exchange_byte(uint8_t tx, uint8_t *rx, utime_t timeout) {
 
 	return res;
 }
-err_t spi_receive_block(uint8_t *rx_buffer, uint32_t rx_size, uint8_t tx, utime_t timeout) {
+err_t spi_receive_block(uint8_t *rx_buffer, txsize_t rx_size, uint8_t tx, utime_t timeout) {
 	err_t res;
-	uint32_t i;
+	txsize_t i;
 
 	assert(rx_buffer != NULL);
 	assert(rx_size > 0);
@@ -227,10 +227,10 @@ err_t spi_receive_block(uint8_t *rx_buffer, uint32_t rx_size, uint8_t tx, utime_
 END:
 	return res;
 }
-err_t spi_transmit_block(const uint8_t *tx_buffer, uint32_t tx_size, utime_t timeout) {
+err_t spi_transmit_block(const uint8_t *tx_buffer, txsize_t tx_size, utime_t timeout) {
 	err_t res;
 	uint16_t rx;
-	uint32_t i;
+	txsize_t i;
 
 	assert(tx_buffer != NULL);
 	assert(tx_size > 0);

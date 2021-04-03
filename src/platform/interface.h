@@ -160,6 +160,10 @@ typedef uint16_t adc_t;
 typedef int32_t adcm_t;
 #endif
 
+#if ! TXSIZE_T_IS_DEFINED
+typedef uint16_t txsize_t;
+#endif
+
 
 /*
 * Variable declarations
@@ -227,9 +231,9 @@ void gpio_quickread_prepare(volatile gpio_quick_t *qpin, pin_t pin);
 void uart_on(void);
 void uart_off(void);
 // Receive a block of data
-err_t uart_receive_block(uint8_t *buffer, uint32_t size, utime_t timeout);
+err_t uart_receive_block(uint8_t *buffer, txsize_t size, utime_t timeout);
 // Transmit a block of data
-err_t uart_transmit_block(const uint8_t *buffer, uint32_t size, utime_t timeout);
+err_t uart_transmit_block(const uint8_t *buffer, txsize_t size, utime_t timeout);
 #else
 # define uart_on()  ((void )0)
 # define uart_off() ((void )0)
@@ -249,9 +253,9 @@ err_t spi_exchange_byte(uint8_t tx, uint8_t *rx, utime_t timeout);
 // tx is the value transmitted for each byte read and must be 0xFF when
 // communicating with an SD card in order to keep MOSI high; other devices
 // may have different (or no) requirements.
-err_t spi_receive_block(uint8_t *rx_buffer, uint32_t rx_size, uint8_t tx, utime_t timeout);
+err_t spi_receive_block(uint8_t *rx_buffer, txsize_t rx_size, uint8_t tx, utime_t timeout);
 // Transmit a data block
-err_t spi_transmit_block(const uint8_t *tx_buffer, uint32_t tx_size, utime_t timeout);
+err_t spi_transmit_block(const uint8_t *tx_buffer, txsize_t tx_size, utime_t timeout);
 #else
 # define spi_on()  ((void )0)
 # define spi_off() ((void )0)

@@ -127,7 +127,7 @@ void uart_listen_off(void) {
 	return;
 }
 
-err_t uart_transmit_block(const uint8_t *buffer, uint32_t size, utime_t timeout) {
+err_t uart_transmit_block(const uint8_t *buffer, txsize_t size, utime_t timeout) {
 	err_t res;
 
 	res = EOK;
@@ -135,7 +135,7 @@ err_t uart_transmit_block(const uint8_t *buffer, uint32_t size, utime_t timeout)
 
 	// TXC0 is cleared by writing '1' to it
 	SET_BIT(UCSR0A, _BV(TXC0));
-	for (uint32_t i = 0; i < size; ++i) {
+	for (txsize_t i = 0; i < size; ++i) {
 		while (!BIT_IS_SET(UCSR0A, _BV(UDRE0))) {
 			if (TIMES_UP(timeout)) {
 				res = ETIMEOUT;
@@ -154,13 +154,13 @@ err_t uart_transmit_block(const uint8_t *buffer, uint32_t size, utime_t timeout)
 END:
 	return res;
 }
-err_t uart_receive_block(uint8_t *buffer, uint32_t size, utime_t timeout) {
+err_t uart_receive_block(uint8_t *buffer, txsize_t size, utime_t timeout) {
 	err_t res;
 
 	res = EOK;
 	timeout = SET_TIMEOUT(timeout);
 
-	for (uint32_t i = 0; i < size; ++i) {
+	for (txsize_t i = 0; i < size; ++i) {
 		while (!BIT_IS_SET(UCSR0A, _BV(RXC0))) {
 			if (TIMES_UP(timeout)) {
 				res = ETIMEOUT;
