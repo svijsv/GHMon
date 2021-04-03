@@ -102,7 +102,7 @@ static utime_t RTC_prev_msticks = 0;
 // one from RTC_prev_msticks but the time spent sleeping is so much greater
 // than the time spent awake that doing so would roll the counter over rather
 // quickly, so a separate counter is needed for that
-static uint16_t RTC_millis = 0;
+static utime_t RTC_millis = 0;
 
 volatile uint8_t wdt_state;
 volatile uint8_t wdt_calibration;
@@ -446,11 +446,11 @@ uint16_t set_wakeup_alarm(uint16_t ms) {
 		wdt_enable(WDTO_8S-shifts);
 		ENABLE_WDT_ISR();
 		RESTORE_INTERRUPTS(sreg);
-	}
 
-	// When sleep is interrupted (specifically by a button press), this will
-	// result in the system time being ahead of real time
-	add_RTC_millis(period_ms);
+		// When sleep is interrupted (specifically by a button press), this will
+		// result in the system time being ahead of real time
+		add_RTC_millis(period_ms);
+	}
 
 	return period_ms + adjust_ms;
 }
