@@ -9,8 +9,10 @@
 // the help message in terminal.c at 86 characters + the NUL
 #define _FLASH_TMP_SIZE 96
 
+/*
 #if DEBUG
 // Print a debug message
 void logger(const char *format, ...)
 	__attribute__ ((format(printf, 1, 2)));
 #endif
+*/
