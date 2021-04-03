@@ -100,6 +100,8 @@ void controllers_init(void) {
 			if (cfg->inputs[j].si >= SENSOR_COUNT) {
 				LOGGER("Controller %u input %u index >= SENSOR_COUNT", (uint )i, (uint )j);
 				ERROR_STATE("Controller input index >= SENSOR_COUNT");
+			} else if (cfg->inputs[j].si >= 0) {
+				SET_BIT(G_controllers[i].iflags, CTRL_FLAG_USES_SENSORS);
 			}
 		}
 
@@ -114,7 +116,7 @@ void check_controller(controller_t *c) {
 	_FLASH const controller_sens_t *s;
 	_FLASH const controller_static_t *cfg;
 	status_t status;
-	bool any_met, any_unmet, high, low, inside, do_engage, is_engaged;
+	bool do_engage, is_engaged;
 
 	cfg = &CONTROLLERS[GET_CONTROLLER_I(c)];
 	if (BIT_IS_SET(G_warnings, WARN_BATTERY_LOW|WARN_VCC_LOW) && !BIT_IS_SET(cfg->cflags, CTRL_FLAG_IGNORE_POWER)) {
@@ -137,42 +139,47 @@ void check_controller(controller_t *c) {
 
 	LOGGER("Checking %s", FROM_FSTR(cfg->name));
 
-	any_met = false;
-	any_unmet = false;
 	do_engage = false;
 	is_engaged = false;
 	CLEAR_BIT(c->iflags, CTRL_FLAG_WARNING);
 	CLEAR_BIT(c->iflags, CTRL_FLAG_INVALIDATE);
 
-	// It simplifies things greatly to always check all the sensors here and
-	// trust in the cooldown timer to keep us from doing so too often
-	check_sensors();
+	do_engage = true;
+	if (BIT_IS_SET(c->iflags, CTRL_FLAG_USES_SENSORS)) {
+		bool any_met = false, any_unmet = false;
+		bool high = false, low = false, inside = false;
 
-	for (uiter_t i = 0; i < CONTROLLER_SENS_COUNT; ++i) {
-		s = &cfg->inputs[i];
-		if (s->si < 0) {
-			continue;
-		}
-		status = G_sensors[s->si].status;
+		// It simplifies things greatly to always check all the sensors here
+		// and trust in the cooldown timer to keep us from doing so too often
+		check_sensors();
 
-		high = (s->above == SENS_THRESHOLD_IGNORE) ? false : (status > s->above);
-		low  = (s->below == SENS_THRESHOLD_IGNORE) ? false : (status < s->below);
-		inside = ((s->above != SENS_THRESHOLD_IGNORE) && (s->below != SENS_THRESHOLD_IGNORE) && (s->above < s->below));
+		for (uiter_t i = 0; i < CONTROLLER_SENS_COUNT; ++i) {
+			s = &cfg->inputs[i];
+			if (s->si < 0) {
+				continue;
+			}
+			status = G_sensors[s->si].status;
 
-		if (inside) {
-			if (high && low) {
+			high = (s->above == SENS_THRESHOLD_IGNORE) ? false : (status > s->above);
+			low  = (s->below == SENS_THRESHOLD_IGNORE) ? false : (status < s->below);
+			inside = ((s->above != SENS_THRESHOLD_IGNORE) && (s->below != SENS_THRESHOLD_IGNORE) && (s->above < s->below));
+
+			if (inside) {
+				if (high && low) {
+					any_met = true;
+				} else {
+					any_unmet = true;
+				}
+			} else if (high || low) {
 				any_met = true;
 			} else {
 				any_unmet = true;
 			}
-		} else if (high || low) {
-			any_met = true;
-		} else {
-			any_unmet = true;
 		}
-	}
-	if (any_met && (!any_unmet || BIT_IS_SET(cfg->cflags, CTRL_FLAG_TRIGGER_ANY))) {
-		do_engage = true;
+
+		if (!any_met || (any_unmet && !BIT_IS_SET(cfg->cflags, CTRL_FLAG_TRIGGER_ANY))) {
+			do_engage = false;
+		}
 	}
 	is_engaged = check_engaged(cfg->control_pin);
 

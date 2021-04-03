@@ -238,7 +238,7 @@ int main(void) {
 		invalid = false;
 		for (uiter_t i = 0; i < CONTROLLER_COUNT; ++i) {
 			c = &G_controllers[i];
-			if (BIT_IS_SET(c->iflags, CTRL_FLAG_INVALIDATE)) {
+			if (BITS_ARE_SET(c->iflags, CTRL_FLAG_INVALIDATE|CTRL_FLAG_USES_SENSORS)) {
 				invalid = true;
 			}
 		}

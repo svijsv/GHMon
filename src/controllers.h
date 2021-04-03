@@ -67,9 +67,11 @@
 //
 // Internal flags for controller_t structs
 //
+// Set if the controller has sensors attached
+#define CTRL_FLAG_USES_SENSORS 0x20
 // Set when the controller wants sensor data invalidated
 #define CTRL_FLAG_INVALIDATE  0x40
-// Set internally if a warning was issued by the controller
+// Set if a warning was issued by the controller
 #define CTRL_FLAG_WARNING     0x80
 
 
