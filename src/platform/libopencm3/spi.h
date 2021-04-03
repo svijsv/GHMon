@@ -40,13 +40,6 @@
 /*
 * Static values
 */
-// Target speed of the SPI bus; it will generally be somewhat higher due to
-// limitations on choices available.
-// Try to hit ~100KHz; speed's not overly important to us and the wiring isn't
-// necessarily reliable.
-#define SPI_SPEED 100000
-
-
 //
 // Handle SPIx
 // SPI1 remapped

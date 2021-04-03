@@ -30,6 +30,11 @@
 // The UART communication parameters
 #define UART_BAUDRATE 9600
 
+// SPI communication parameters
+// Target speed of the SPI bus; it will generally be somewhat higher due to
+// hardware limitations
+#define SPI_SPEED 100000
+
 // Maximum length of sensor and controller names
 // Increasing this will increase the ROM space used, but depending on struct
 // layout it may not be a direct relationship; typically rounding the number
