@@ -172,11 +172,13 @@ void print_system_info(void) {
 	utime_t seconds;
 	uint8_t year, month, day, hour, minute, second;
 
+	PRINTF("%s version %s\r\n", PROGNAME, PROGVERS);
+
+#if USE_SMALL_CODE < 2
 	seconds = get_RTC_seconds();
 	seconds_to_date(seconds, &year, &month, &day);
 	seconds_to_time(seconds, &hour, &minute, &second);
 
-	PRINTF("%s version %s\r\n", PROGNAME, PROGVERS);
 	PRINTF("Build Date: %s PlatformIO: %u\r\n", BUILD_DATE, (uint )PLATFORMIO);
 	PRINTF("Current system time is %04u.%02u.%02u %02u:%02u:%02u\r\n",
 		(uint )(YEAR_0 + year),
@@ -192,6 +194,7 @@ void print_system_info(void) {
 
 	print_platform_info(serial_putc);
 	flush_printf_buffer();
+#endif
 
 	return;
 }
