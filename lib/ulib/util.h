@@ -79,9 +79,6 @@ void vaprintf(printf_putc_t printf_putc, const char *fmt, va_list arp);
 // Find the nearest multiple of some factor which isn't larger than some value
 #define SNAP_TO_FACTOR(value, factor) (((factor) != 0) ? ((value) - ((value) % (factor))) : 0)
 
-// Find absolute value of an integer; naive approach is good enough
-//#define ABS(x) (((x) > 0) ? (x) : -(x))
-
 // Copy a split register while making sure the low half doesn't overflow into
 // high in the process
 #define READ_SPLITREG(combined, high, low) \
@@ -121,11 +118,10 @@ void vaprintf(printf_putc_t printf_putc, const char *fmt, va_list arp);
 
 #if !DEBUG
 # define OPTIMIZE_FUNCTION __attribute__((optimize("O2")))
-# define DONT_OPTIMIZE_FUNCTION __attribute__((optimize("O0")))
 #else
 # define OPTIMIZE_FUNCTION
-# define DONT_OPTIMIZE_FUNCTION
 #endif
+#define DONT_OPTIMIZE_FUNCTION __attribute__((optimize("O0")))
 
 #define INLINE static inline __attribute__((always_inline))
 
