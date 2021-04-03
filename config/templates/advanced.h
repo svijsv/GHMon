@@ -68,11 +68,14 @@
 // Depending on the platform this may affect the accuracy of timekeeping.
 #define USE_INTERNAL_CLOCK 1
 
-// If set, measure the analog voltage reference (if supported by the platform)
-// to give (hopefully) more accurate ADC readings
-// This must be set to detect the regulated voltage and warn when it drops
-// below the warning threshold if that's desired
-#define CHECK_VREF 0
+// If set to 1, measure the analog voltage reference on power-up to give
+// (hopefully) more accurate ADC readings
+// If set to 2, measure the analog voltage reference before each use of the
+// ADC
+// This must be set to 2 to warn if the regulated voltage drops below the
+// warning threshold
+// The utility of this calibration depends on the accuracy of INTERNAL_VREF
+#define CALIBRATE_VREF 0
 
 // Target ADC sampling time in uS
 // Depending on platform, this may be ignored

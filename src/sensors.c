@@ -282,6 +282,12 @@ void sensors_init(void) {
 		}
 	}
 
+#if CALIBRATE_VREF == 1
+	adc_on();
+	G_vcc_voltage = adc_read_vref_mV();
+	adc_off();
+#endif
+
 	return;
 }
 
@@ -308,7 +314,7 @@ void check_sensors() {
 	sleep(500);
 #endif
 
-#if CHECK_VREF
+#if CALIBRATE_VREF >= 2
 	G_vcc_voltage = adc_read_vref_mV();
 #endif
 
@@ -1028,9 +1034,11 @@ END:
 void check_sensor_warnings(void) {
 	CLEAR_BIT(G_warnings, (WARN_BATTERY_LOW|WARN_VCC_LOW|WARN_SENSOR));
 
+#if CALIBRATE_VREF >= 2
 	if (G_vcc_voltage < REGULATED_VOLTAGE_LOW) {
 		SET_BIT(G_warnings, WARN_VCC_LOW);
 	}
+#endif
 
 #if USE_SMALL_SENSORS < 2
 	sensor_t *s;
