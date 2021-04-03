@@ -58,7 +58,7 @@ static _FLASH const char TERMINAL_PROMPT[] =
 
 static _FLASH const char TERMINAL_HELP[] =
 #if USE_AVR
-"Commands: set_time info status controllers synclog led_{on,off,toggle} fdisk test help"
+"Commands: set_time info status controllers synclog led_{on,off,toggle} delay fdisk test help"
 #else // !USE_AVR
 "Accepted commands:\r\n"
 "   set_time YY.MM.DD hh:mm:ss - Set system time, clock is 24-hour\r\n"
@@ -73,6 +73,7 @@ static _FLASH const char TERMINAL_HELP[] =
 "   led_on\r\n"
 "   led_off\r\n"
 "   led_toggle\r\n"
+"   delay <seconds>"
 #if USE_FDISK
 "   fdisk                      - Format the SD card\r\n"
 #endif // USE_FDISK
@@ -102,6 +103,7 @@ static int  read_number(char *token);
 static void terminalcmd_print_sensor_status(void);
 static void terminalcmd_set_time(char *token);
 static void terminalcmd_led_flash(char *token);
+static void terminalcmd_delay_S(char *token);
 static void terminalcmd_test(char *token);
 #if USE_LOGGING
 static void terminalcmd_sync_log(void);
@@ -143,6 +145,9 @@ void terminal(void) {
 		} else if (cstring_cmp(line_in, "led_off") == 0) {
 			PUTS("Turning LED off\r\n", 0);
 			led_off();
+
+		} else if (cstring_ncmp(line_in, "delay ", 6) == 0) {
+			terminalcmd_delay_S(line_in);
 
 		} else if (cstring_cmp(line_in, "led_toggle") == 0) {
 			led_toggle();
@@ -407,6 +412,23 @@ static void terminalcmd_led_flash(char *token) {
 	PRINTF("Flashing LED %u times.\r\n", (uint )n);
 
 	led_flash(n, DELAY_SHORT);
+
+	return;
+}
+// Format: 'delay <N>'
+static void terminalcmd_delay_S(char *token) {
+	utime_t n;
+
+	token = (char *)cstring_next_token(token, ' ');
+	n = read_number(token);
+
+	PRINTF("Delaying %u seconds...", (uint )n);
+	n += NOW();
+	//delay(n * 1000);
+	while (NOW() != n) {
+		delay(50);
+	}
+	PRINTF("done.\r\n");
 
 	return;
 }
