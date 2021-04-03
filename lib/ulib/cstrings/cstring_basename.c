@@ -62,6 +62,18 @@
 /*
 * Functions
 */
+#if USE_CLIB_STRING
+const char* cstring_basename(const char *s, char sep) {
+	const char *bn;
+
+	assert(s != NULL);
+	assert(sep != 0);
+
+	bn = strrchr(s, sep);
+	return (bn != NULL) ? bn+1 : s;
+}
+
+#else // ! USE_CLIB_STRING
 const char* cstring_basename(const char *s, char sep) {
 	cstrlen_t i;
 
@@ -85,6 +97,7 @@ const char* cstring_basename(const char *s, char sep) {
 
 	return (char *)&s[i+1];
 }
+#endif // USE_CLIB_STRING
 
 
 #endif // ! USE_MONOLITHIC_ULIB
