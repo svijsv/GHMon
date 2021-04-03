@@ -214,6 +214,14 @@ int main(void) {
 			check_sensor_warnings();
 			check_controller_warnings();
 			check_warnings();
+
+#if DEBUG && USE_SERIAL
+			PRINTF("   VCC: %d\r\n   CPU_temp: %d\r\n\n   I  Name  Status\r\n",
+				(int )G_vcc_voltage, (int )G_mcu_temp);
+			for (uiter_t i = 0; i < SENSOR_COUNT; ++i) {
+				PRINTF("   %u  %s   %d\r\n", (uint )i, FROM_FSTR(SENSORS[i].name), (int )G_sensors[i].status);
+			}
+#endif
 		}
 
 		if ((do_log) || ((log_alarm > 0) && (NOW() >= log_alarm))) {
