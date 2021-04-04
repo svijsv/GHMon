@@ -39,6 +39,9 @@
 #include "log.h"
 #include "calendar.h"
 
+#include "ulib/cstrings.h"
+
+
 #if USE_TERMINAL
 
 #if YEAR_0 < 2000
@@ -99,12 +102,11 @@ static _FLASH const char TERMINAL_HELP[] =
 */
 static txsize_t terminal_gets(char *line_in, txsize_t size);
 
-static int  read_number(char *token);
 static void terminalcmd_print_sensor_status(void);
-static void terminalcmd_set_time(char *token);
-static void terminalcmd_led_flash(char *token);
-static void terminalcmd_delay_S(char *token);
-static void terminalcmd_test(char *token);
+static void terminalcmd_set_time(char *line_in);
+static void terminalcmd_led_flash(char *line_in);
+static void terminalcmd_delay_S(char *line_in);
+static void terminalcmd_test(char *line_in);
 #if USE_LOGGING
 static void terminalcmd_sync_log(void);
 #endif // USE_LOGGING
@@ -313,50 +315,52 @@ static void terminalcmd_sync_log(void) {
 	log_status(true);
 }
 #endif // USE_LOGGING
-static int read_number(char *token) {
-	char num[5];
-	uiter_t i;
-
-	for (i = 0; ((token[i] >= '0') && (token[i] <= '9') && (i < 4)); ++i) {
-		num[i] = token[i];
-	}
-	num[i] = 0;
-	return cstring_to_int(num);
-}
 // Format: 'set_time YY.MM.DD hh:mm:ss'
-static void terminalcmd_set_time(char *token) {
-	uiter_t i;
+static void terminalcmd_set_time(char *line_in) {
 	int year, month, day, hour, minute, second;
 	bool format_ok;
 	err_t err;
+	const char *nt;
 
 	// Year
 	// Two-digit years won't be an issue until the distant year 2000.
-	token = (char *)cstring_next_token(token, ' ');
-	year = read_number(token);
+	nt = cstring_next_token(line_in, ' ');
+	year = cstring_to_int(nt);
 	// Month
-	token = (char *)cstring_next_token(token, '.');
-	month = read_number(token);
+	nt = cstring_next_token(nt, '.');
+	month = cstring_to_int(nt);
 	// Day
-	token = (char *)cstring_next_token(token, '.');
-	day = read_number(token);
+	nt = cstring_next_token(nt, '.');
+	day = cstring_to_int(nt);
 
 	// Hour
-	token = (char *)cstring_next_token(token, ' ');
-	hour = read_number(token);
+	nt = cstring_next_token(nt, ' ');
+	hour = cstring_to_int(nt);
 	// Minute
-	token = (char *)cstring_next_token(token, ':');
-	minute = read_number(token);
+	nt = cstring_next_token(nt, ':');
+	minute = cstring_to_int(nt);
 	// Second
-	token = (char *)cstring_next_token(token, ':');
-	second = read_number(token);
+	nt = cstring_next_token(nt, ':');
+	second = cstring_to_int(nt);
 
-	for (i = 0; ((token[i] >= '0') && (token[i] <= '9')); ++i) {
-		// Nothing to do here
-	}
-	if (token[i] != 0) {
-		PRINTF("Unexpected token(s): %s'\r\n", token);
-		goto END;
+	for (uiter_t i = 0; nt[i] != 0; ++i) {
+		switch (nt[i]) {
+		case '0':
+		case '1':
+		case '2':
+		case '3':
+		case '4':
+		case '5':
+		case '6':
+		case '7':
+		case '8':
+		case '9':
+			break;
+		default:
+			PRINTF("Unexpected token(s): %s'\r\n", &nt[i]);
+			goto END;
+			break;
+		}
 	}
 
 	format_ok = true;
@@ -403,11 +407,10 @@ END:
 	return;
 }
 // Format: 'led_flash <N>'
-static void terminalcmd_led_flash(char *token) {
+static void terminalcmd_led_flash(char *line_in) {
 	int n;
 
-	token = (char *)cstring_next_token(token, ' ');
-	n = read_number(token);
+	n = cstring_to_int(cstring_next_token(line_in, ' '));
 
 	PRINTF("Flashing LED %u times.\r\n", (uint )n);
 
@@ -416,11 +419,10 @@ static void terminalcmd_led_flash(char *token) {
 	return;
 }
 // Format: 'delay <N>'
-static void terminalcmd_delay_S(char *token) {
+static void terminalcmd_delay_S(char *line_in) {
 	utime_t n;
 
-	token = (char *)cstring_next_token(token, ' ');
-	n = read_number(token);
+	n = cstring_to_int(cstring_next_token(line_in, ' '));
 
 	PRINTF("Delaying %u seconds...", (uint )n);
 	n += NOW();
@@ -459,8 +461,8 @@ static void terminalcmd_fdisk(char *line_in, txsize_t size) {
 //#include "../temp/terminal_X_test.h"
 //#include "../temp/terminal_sd_test.h"
 #ifndef TERMINAL_TEST_CMD
-static void terminalcmd_test(char *token) {
-	UNUSED(token);
+static void terminalcmd_test(char *line_in) {
+	UNUSED(line_in);
 #if DEBUG
 
 	// Break the strings up so they fit in the buffer for F()

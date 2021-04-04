@@ -86,7 +86,7 @@ int cstring_to_int(const char *s) {
 			break;
 	}
 
-	for (value = 0; s[i] != 0; ++i) {
+	for (value = 0; ((s[i] >= '0') && (s[i] <= '9')); ++i) {
 		value *= 10;
 		value += s[i] - '0';
 	}

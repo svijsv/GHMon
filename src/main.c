@@ -39,6 +39,7 @@
 #include "terminal.h"
 #include "calendar.h"
 
+#include "ulib/cstrings.h"
 
 /*
 * Static values

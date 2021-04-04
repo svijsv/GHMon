@@ -33,8 +33,10 @@
 #include "serial.h"
 
 #include "ulib/time.h"
+#include "ulib/cstrings.h"
 // fatfs/ff.h is only needed for the FatFS revision number
 #include "fatfs/ff.h"
+
 
 #if USE_SERIAL
 
@@ -119,7 +121,7 @@ static void serial_putc(int c) {
 	return;
 }
 #endif // SERIAL_BUFFER_SIZE > 0
-void serial_print(const char *msg, cstrlen_t len) {
+void serial_print(const char *msg, txsize_t len) {
 	assert(msg != NULL);
 
 	if (len == 0) {

@@ -66,7 +66,8 @@ int cstring_ncmp(const char *s1, const char *s2, cstrlen_t n);
 // Interpret a string as an integer
 // s is assumed to be a valid number in base 10 and not larger than can fit
 // in an int.
-// The only non-numerals allowed are a (possible) leading '-' or '+'.
+// The only non-numerals allowed are a (possible) leading '-' or '+';
+// conversion stops when anything else is encountered
 int cstring_to_int(const char *s);
 // Interpret an integer as a string
 // width is the minimal width of the string

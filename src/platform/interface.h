@@ -37,7 +37,6 @@
 */
 #include "ulib/types.h"
 #include "ulib/util.h"
-#include "ulib/cstrings.h"
 
 #include "platform.h"
 #include "config.h"
@@ -313,7 +312,7 @@ void logger(const char *fmt, ...)
 void serial_printf(const char *fmt, ...)
 	__attribute__ ((format(printf, 1, 2)));
 // Print a string
-void serial_print(const char *msg, cstrlen_t len);
+void serial_print(const char *msg, txsize_t len);
 #else
 # define logger(...)        ((void )0)
 # define serial_printf(...) ((void )0)

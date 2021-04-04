@@ -75,7 +75,7 @@ const char* cstring_next_token(const char *cs, char delim) {
 		// Nothing to do in here
 	}
 
-	return (char *)cs;
+	return cs;
 }
 
 

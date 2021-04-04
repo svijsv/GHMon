@@ -36,8 +36,6 @@
 #include "config.h"
 #include "common.h"
 
-#include "ulib/cstrings.h"
-
 #if USE_SERIAL
 
 /*
