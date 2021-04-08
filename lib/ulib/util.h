@@ -79,6 +79,16 @@ void vaprintf(printf_putc_t printf_putc, const char *fmt, va_list arp);
 // Find the nearest multiple of some factor which isn't larger than some value
 #define SNAP_TO_FACTOR(value, factor) (((factor) != 0) ? ((value) - ((value) % (factor))) : 0)
 
+// Copy an integer from smaller integers
+#define READ_SPLIT_U16(combined, high, low) \
+	do { \
+		((combined) = (uint16_t )((((uint16_t )(high)) << 8) | (((uint16_t )(low)) & 0xFF))); \
+	} while (0);
+#define READ_SPLIT_S16(combined, high, low) \
+	do { \
+		((combined) = (int16_t )((((int16_t )(high)) << 8) | (((int16_t )(low)) & 0xFF))); \
+	} while (0);
+
 // Copy a split register while making sure the low half doesn't overflow into
 // high in the process
 #define READ_SPLITREG(combined, high, low) \
