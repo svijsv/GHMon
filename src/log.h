@@ -54,11 +54,11 @@
 // Set to 0 to disable.
 #if USE_SMALL_CODE < 1
   // This is a very crude method of determining the needed buffer size based
-  // on expected typical setups - 17 characters for uptime, 2 for MCU temp,
+  // on expected typical setups - 17 characters for uptime,
   // 4 for MCU Vcc, 5 each per sensor, 8 each per controller, the tabs
   // between them, the newline, 2 so we don't undercount, and an assumption
   // that the rest of the program only needs 2KB
-# define PRINT_BUF_PER_LINE (17 + 2 + 4 + (5*SENSOR_COUNT) + (8*CONTROLLER_COUNT) + (3 + CONTROLLER_COUNT + SENSOR_COUNT) + 1 + 2)
+# define PRINT_BUF_PER_LINE (17 + 4 + (5*SENSOR_COUNT) + (8*CONTROLLER_COUNT) + (2 + CONTROLLER_COUNT + SENSOR_COUNT) + 1 + 2)
 # if (PRINT_BUF_PER_LINE * (LOGFILE_BUFFER_COUNT+1)) < (RAM_PRESENT - (2048 + (16 * LOGFILE_BUFFER_COUNT)))
 #  define PRINT_BUFFER_SIZE (PRINT_BUF_PER_LINE * (LOGFILE_BUFFER_COUNT+1))
 # else

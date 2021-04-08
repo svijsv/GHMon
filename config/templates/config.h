@@ -49,6 +49,8 @@
 #define USE_BINARY_SENSOR 0
 // DHT11 temperature and humidity sensor
 #define USE_DHT11_SENSOR 0
+// BMP280 and BME280 temperature, air pressure, and humidity sensors
+#define USE_BMx280_SENSOR 0
 
 
 //
@@ -124,6 +126,7 @@
 // Pin configuration
 // Platform-specific
 //
+//
 // STM32F103
 // Sensors like thermistors need to be on a pin that supports ADC; that means
 // A0-A7 or B0-B1
@@ -150,15 +153,19 @@
 #define BUTTON_PIN PIN_B4
 //
 // Power pins
-#define SENSOR_POWER_PIN PIN_B11
 //
-// The SD card should be switched only if it uses a separate voltage regulator
-// from the main board and a few mA power usage matters; powering them on and
-// off is sometimes unreliable
+// If a power pin isn't defined or is 0, it's assumed anything it would
+// normally control is always powered on
+//
 // If a power pin has a bias, the pin is always in push-pull mode and it's
 // output is set to the bias value when OFF and the reverse when ON; the
 // default is high-impedence mode when OFF and output HIGH when ON
-//#define SD_POWER_PIN (PIN_B5 | BIAS_LOW)
+//
+// Power for ADC sensors
+#define ADC_POWER_PIN PIN_B11
+// Power for ALL devices on the SPI bus; they can't be selectively turned off
+// because voltage on the IO pins without power on Vcc will damage many devices
+//#define SPI_POWER_PIN (PIN_B5 | BIAS_LOW)
 //
 // UART pins; hardware-specified; used if USE_SERIAL != 0
 // PIN_A9-PIN_A10: UART1
@@ -175,6 +182,7 @@
 #define SPIx_MOSI_PIN  PIN_B15
 #endif // USE_STM32
 
+//
 // ATMega328
 // Sensors like thermistors need to be on a pin that supports ADC; that means
 // A0-A5 as well as A6 and A7 when present
@@ -199,8 +207,8 @@
 #define BUTTON_PIN PIN_3
 //
 // Power pins
-#define SENSOR_POWER_PIN PIN_6
-//#define SD_POWER_PIN   PIN_7
+#define ADC_POWER_PIN PIN_6
+//#define SPI_POWER_PIN   PIN_7
 //
 // UART pins; hardware-specified; used if USE_SERIAL != 0
 // PA9-PA10: UART1

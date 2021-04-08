@@ -28,12 +28,13 @@
 #ifndef _CONFIG_UNIFY_H
 #define _CONFIG_UNIFY_H
 
-// Check if we need the ADC
 #if USE_VOLT_SENSOR || USE_OHM_SENSOR || \
     USE_LOG_BETA_SENSOR || \
     USE_LINEAR_R_SENSOR || USE_LINEAR_V_SENSOR || \
-    USE_LOOKUP_R_SENSOR || USE_LOOKUP_V_SENSOR || \
-    CALIBRATE_VREF
+    USE_LOOKUP_R_SENSOR || USE_LOOKUP_V_SENSOR
+# define USE_ADC_SENSORS 1
+#endif
+#if USE_ADC_SENSORS || CALIBRATE_VREF
 # define USE_ADC 1
 #endif
 
@@ -57,7 +58,11 @@
 # define USE_SD  1
 #endif
 
-#if USE_SD
+#if USE_BMx280_SENSOR
+# define USE_SPI_SENSORS 1
+#endif
+
+#if USE_SD || USE_SPI_SENSORS
 # define USE_SPI 1
 #endif
 

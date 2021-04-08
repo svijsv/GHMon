@@ -109,8 +109,9 @@ static void calculate_binary(sensor_t *s, imath_t value);
 #if USE_DHT11_SENSOR
 static void read_dht11_sensor(pin_t pin);
 #endif
-static void power_on(void);
-static void power_off(void);
+#if USE_BMx280_SENSOR
+static void read_bmx280_sensor(sensor_t *s);
+#endif
 
 
 /*
@@ -153,8 +154,6 @@ void sensors_init(void) {
 	sensor_t *s;
 	_FLASH const sensor_devcfg_t *dev_cfg;
 	_FLASH const sensor_static_t *cfg;
-
-	power_off();
 
 	// Check for any problems with the sensor configuration
 	for (uiter_t i = 0; i < SENSOR_COUNT; ++i) {
@@ -271,6 +270,24 @@ void sensors_init(void) {
 			break;
 #endif
 
+#if USE_BMx280_SENSOR
+		case SENS_BMx280_PRESSURE:
+		case SENS_BMx280_TEMP:
+		case SENS_BMx280_HUM:
+			if (dev_cfg->bmx280.protocol == BMx280_SPI) {
+				SET_BIT(s->iflags, SENS_FLAG_SPI);
+#if ! SPI_POWER_PIN
+				// The CS pin needs to be pulled low once to put the device into
+				// SPI mode
+				gpio_set_mode(cfg->pin, GPIO_MODE_PP, GPIO_LOW);
+				gpio_set_state(cfg->pin, GPIO_HIGH);
+#endif
+			} else {
+				SETUP_ERR(i);
+			}
+			break;
+#endif
+
 		case SENS_NONE:
 			SETUP_ERR(i);
 			break;
@@ -281,6 +298,8 @@ void sensors_init(void) {
 			break;
 		}
 	}
+
+	power_off_sensors();
 
 #if CALIBRATE_VREF == 1
 	adc_on();
@@ -304,14 +323,17 @@ void check_sensors() {
 	for (uiter_t i = 0; i < SENSOR_COUNT; ++i) {
 		CLEAR_BIT(G_sensors[i].iflags, SENS_FLAG_DONE);
 	}
-	power_on();
+	power_on_sensors();
 
 #if USE_DHT11_SENSOR
 	// Per the DHT11 data sheet, don't send any instructions for at least 1
 	// second after power-on
-	hibernate(1, 0);
 	// Only sleeping for 1s doesn't seem to reliably work
-	sleep(500);
+	sleep(1500);
+#elif USE_BMx280_SENSOR
+	// Per the data sheet, the BMP280 needs 2ms to get ready after powerup
+	// Edit: But the power-on delay should handle that
+	//sleep(2);
 #endif
 
 #if CALIBRATE_VREF >= 2
@@ -321,7 +343,7 @@ void check_sensors() {
 	for (uiter_t i = 0; i < SENSOR_COUNT; ++i) {
 		value[i] = read_sensor(&G_sensors[i]);
 	}
-	power_off();
+	power_off_sensors();
 	cooldown = SET_RTC_TIMEOUT(SENS_COOLDOWN);
 
 	for (uiter_t i = 0; i < SENSOR_COUNT; ++i) {
@@ -355,7 +377,6 @@ static imath_t read_sensor(sensor_t *s) {
 	case SENS_DHT11_HUM:
 	case SENS_DHT11_TEMP:
 		if (!BIT_IS_SET(s->iflags, SENS_FLAG_DONE)) {
-			SET_BIT(s->iflags, SENS_FLAG_DONE);
 			// The mode of the input pin needs to be changed in order to trigger
 			// the read in read_dht11_sensor(), so don't bother setting it here
 			//power_on_input(cfg->pin);
@@ -366,6 +387,18 @@ static imath_t read_sensor(sensor_t *s) {
 		value = 0;
 		break;
 #endif // USE_DHT11_SENSOR
+
+#if USE_BMx280_SENSOR
+	case SENS_BMx280_PRESSURE:
+	case SENS_BMx280_TEMP:
+	case SENS_BMx280_HUM:
+		if (!BIT_IS_SET(s->iflags, SENS_FLAG_DONE)) {
+			read_bmx280_sensor(s);
+		}
+		// The sensor values are set in read_bmx280_sensor()
+		value = 0;
+		break;
+#endif // USE_BMx280_SENSOR
 
 #if USE_ADC
 	default:
@@ -444,12 +477,20 @@ static void update_sensor(sensor_t *s, imath_t value) {
 	case SENS_DHT11_TEMP:
 		// Nothing to do here; the statuses were set when they were read
 		break;
+#endif
+
+#if USE_BMx280_SENSOR
+	case SENS_BMx280_PRESSURE:
+	case SENS_BMx280_TEMP:
+	case SENS_BMx280_HUM:
+		// Nothing to do here; the statuses were set when they were read
+		break;
+#endif
 
 	default:
 		UNKNOWN_MSG(cfg->type);
 		break;
 	}
-#endif // USE_DHT11_SENSOR
 
 	update_sensor_warning(s);
 
@@ -1031,6 +1072,267 @@ END:
 }
 #endif // USE_DHT11_SENSOR
 
+#if USE_BMx280_SENSOR
+static void read_bmx280_sensor(sensor_t *s) {
+	pin_t pin;
+	uint8_t protocol;
+	uint8_t byte, buffer[26];
+	bool do_humidity = false;
+	utime_t timeout;
+	// Don't blame me for the names, I copied them out of the datasheet
+	// And why are T1 and P1 unsigned? they're cast to signed the only places
+	// they're used.
+	uint16_t dig_T1, dig_P1;
+	int16_t dig_T2, dig_T3, dig_P2, dig_P3, dig_P4, dig_P5, dig_P6, dig_P7, dig_P8, dig_P9, dig_H2, dig_H4, dig_H5;
+	uint8_t dig_H1, dig_H3;
+	int8_t dig_H6;
+	uint32_t t_adc, p_adc, h_adc = 0;
+	_FLASH const sensor_opt_bmx280_t *dev_cfg;
+	_FLASH const sensor_static_t *cfg;
+
+	cfg = &SENSORS[GET_SENSOR_I(s)];
+	pin = cfg->pin;
+	dev_cfg = &cfg->devcfg.bmx280;
+	protocol = dev_cfg->protocol;
+
+	gpio_set_mode(pin, GPIO_MODE_PP, GPIO_HIGH);
+
+	// Check if this is a BMP280 (pressure and temperature) or a BME280 (that
+	// plus humidity)
+	gpio_set_state(pin, GPIO_LOW);
+	spi_exchange_byte((0xD0 | 0x80), &byte, 100);
+	spi_exchange_byte(0xFF, &byte, 100);
+	gpio_set_state(pin, GPIO_HIGH);
+	if (byte == 0x60) {
+		do_humidity = true;
+	}
+
+	if (do_humidity) {
+		// Set ctrl_hum to oversample humidity 1x
+		// This doesn't take effect until ctrl_meas has been set
+		gpio_set_state(pin, GPIO_LOW);
+		buffer[0] = (0xF2 & 0x7F);
+		buffer[1] = (0b001);
+		spi_transmit_block(buffer, 2, 100);
+		gpio_set_state(pin, GPIO_HIGH);
+	}
+	//
+	// Set ctrl_meas register to oversample temperature and pressure 1x and
+	// begin measuring
+	// The most significant byte of the register address is used to indicate
+	// read/write mode: 0 is write, 1 is read
+	gpio_set_state(pin, GPIO_LOW);
+	buffer[0] = (0xF4 & 0x7F);
+	buffer[1] = (0b00100101);
+	spi_transmit_block(buffer, 2, 100);
+	gpio_set_state(pin, GPIO_HIGH);
+
+	//
+	// Wait for measurement to finish
+	// The datasheet gives 5.5-6.4ms measurement time for 1x oversampling
+	timeout = SET_TIMEOUT(100);
+	do {
+		delay(10);
+		gpio_set_state(pin, GPIO_LOW);
+
+		spi_exchange_byte((0xF3 | 0x80), &byte, 100);
+		spi_exchange_byte(0xFF, &byte, 100);
+
+		gpio_set_state(pin, GPIO_HIGH);
+	} while ((byte != 0) && (!TIMES_UP(timeout)));
+
+	//
+	// Read device calibration data part 1; 24 bytes
+	gpio_set_state(pin, GPIO_LOW);
+	spi_exchange_byte((0x88 | 0x80), &byte, 100);
+	spi_receive_block(buffer, 26, 0xFF, 500);
+	gpio_set_state(pin, GPIO_HIGH);
+
+	//
+	// Temperature calibration; 3 16-bit words
+	// The MSB is the higher byte for calibration data
+	READ_SPLIT_U16(dig_T1, buffer[1],  buffer[0]);
+	READ_SPLIT_S16(dig_T2, buffer[3],  buffer[2]);
+	READ_SPLIT_S16(dig_T3, buffer[5],  buffer[4]);
+	//
+	// Pressure calibration; 9 16-bit words
+	READ_SPLIT_U16(dig_P1, buffer[7],  buffer[6]);
+	READ_SPLIT_S16(dig_P2, buffer[9],  buffer[8]);
+	READ_SPLIT_S16(dig_P3, buffer[11], buffer[10]);
+	READ_SPLIT_S16(dig_P4, buffer[13], buffer[12]);
+	READ_SPLIT_S16(dig_P5, buffer[15], buffer[14]);
+	READ_SPLIT_S16(dig_P6, buffer[17], buffer[16]);
+	READ_SPLIT_S16(dig_P7, buffer[19], buffer[18]);
+	READ_SPLIT_S16(dig_P8, buffer[21], buffer[20]);
+	READ_SPLIT_S16(dig_P9, buffer[23], buffer[22]);
+	//
+	// First byte of humidity calibration; 1 signed char
+	dig_H1 = (int8_t )(buffer[25]);
+	//
+	// Read device calibration data part 2; 16 bytes (but only 7 are used?)
+	if (do_humidity) {
+		gpio_set_state(pin, GPIO_LOW);
+		spi_exchange_byte((0xE1 | 0x80), &byte, 100);
+		spi_receive_block(buffer, 7, 0xFF, 500);
+		gpio_set_state(pin, GPIO_HIGH);
+		//
+		// Remainder of humidity calibration; 7 bytes
+		READ_SPLIT_S16(dig_H2, buffer[1], buffer[0]);
+		dig_H3 = buffer[2];
+		dig_H4 = (((int16_t )(buffer[3])) << 4) | ((int16_t )(buffer[4] & 0x0F));
+		dig_H5 = (((int16_t )(buffer[5])) << 4) | (((int16_t )(buffer[4] & 0xF0)) >> 4);
+		dig_H6 = (int8_t )(buffer[6]);
+	}
+
+	//
+	// Read sensor measurement data; 8 bytes
+	// The humidity register is read even when it's not supported so that the
+	// registers can be read in a single go; it shouldn't hurt anything.
+	gpio_set_state(pin, GPIO_LOW);
+	spi_exchange_byte((0xF7 | 0x80), &byte, 100);
+	spi_receive_block(buffer, 8, 0xFF, 500);
+	gpio_set_state(pin, GPIO_HIGH);
+	// The MSB is the lower byte for measurement data
+	// Pressure measurement
+	p_adc = ((uint32_t )buffer[0] << 12) | ((uint32_t )buffer[1] << 4) | ((uint32_t )buffer[2] >> 4);
+	// Temperature measurement
+	t_adc = ((uint32_t )buffer[3] << 12) | ((uint32_t )buffer[4] << 4) | ((uint32_t )buffer[5] >> 4);
+	// Humidity measurement
+	if (do_humidity) {
+		h_adc = ((uint32_t )buffer[6] << 8) | ((uint32_t )buffer[7]);
+	}
+
+	power_off_output(pin);
+
+	// The reading for pressure, temperature, and humidity are 0x80000,
+	// 0x80000, and 0x8000 respectively when they're skipped and 0xFFFFF,
+	// 0xFFFFF, and 0xFFFF when the sensor is absent; it's easier to track this
+	// stuff by just setting them to 0 though
+	if ((t_adc == 0x80000) || (t_adc == 0xFFFFF)) {
+		t_adc = 0;
+	}
+	if ((p_adc == 0x80000) || (p_adc == 0xFFFFF)) {
+		p_adc = 0;
+	}
+	if ((h_adc == 0x8000) || (h_adc == 0xFFFF)) {
+		h_adc = 0;
+	}
+
+#if DEBUG
+	if ((t_adc | p_adc | h_adc) == 0) {
+		LOGGER("BMx280 sensor on pin 0x%02X: all readings were invalid", (uint )pin);
+	}
+#endif
+
+	//
+	// Calculate temperature, pressure, and humidity from the raw measurements
+	// Adapted from the code given in the data sheet and in the Bosh Sensortec
+	// github repos
+	//
+	// The github code uses division instead of right shifts (I assume because
+	// someone had a problem with the sign bit at some point) but I'm sticking
+	// with the shifts for now because the resulting binary is smaller.
+	//
+	// The only benefit to checking for x_adc == 0 is so that the end values
+	// are noticably wrong instead of just unexpected numbers.
+	//
+	// Again, sorry for the names, not my doing
+	int32_t var1, var2, var3, var4, var5, t_fine = 0, tmp;
+	int32_t temp = 0;
+	uint32_t press = 0, hum = 0;
+	//
+	// Temperature; result is DegC * 100
+	if (t_adc != 0) {
+		var1 = ((((t_adc >> 3) - ((int32_t )dig_T1 << 1))) * ((int32_t )dig_T2)) >> 11;
+		tmp = (t_adc >> 4) - (int32_t )dig_T1;
+		var2 = (((tmp * tmp) >> 12) * (int32_t )dig_T3) >> 14;
+		t_fine = var1 + var2;
+		temp = ((t_fine * 5) + 128) >> 8;
+	}
+	//
+	// Pressure; result is Pa (hPa * 100, or millibars * 100)
+	if (p_adc != 0) {
+		var1 = (t_fine >> 1) - (int32_t )64000;
+		tmp = var1 >> 2;
+		var2 = (tmp * tmp) * (int32_t )dig_P6;
+		var2 = var2 + ((var1 * ((int32_t )dig_P5)) << 1);
+		var2 = (var2 >> 2) + (((int32_t )dig_P4) << 16);
+		var1 = (((dig_P3 * ((tmp * tmp) >> 13)) >> 3) + ((((int32_t )dig_P2) * var1) >> 1)) >> 18;
+		var1 = ((((32768 + var1)) * ((int32_t )dig_P1)) >> 15);
+		if (var1 != 0) {
+			press = (((uint32_t )(((int32_t )1048576) - p_adc) - (var2 >> 12))) * 3125;
+			if (press < 0x80000000) {
+				press = (press << 1) / ((uint32_t )var1);
+			} else {
+				press = (press / (uint32_t )var1) * 2;
+			}
+			var1 = (((int32_t )dig_P9) * ((int32_t )(((press >> 3) * (press >> 3)) >> 13))) >> 12;
+			var2 = (((int32_t )(press >> 2)) * ((int32_t )dig_P8)) >> 13;
+			press = (uint32_t )((int32_t )press + ((var1 + var2 + dig_P7) >> 4));
+		} else {
+			press = 0;
+		}
+	}
+	//
+	// Humidity; %RH in 22.10 fixed-point format (or %RH * 1024)
+	if (do_humidity && (h_adc != 0)) {
+		var1 = t_fine - ((int32_t )76800);
+		var2 = (int32_t )(h_adc << 14);
+		var3 = (int32_t )(((int32_t )dig_H4) << 20);
+		var4 = ((int32_t )dig_H5) * var1;
+		var5 = (((var2 - var3) - var4) + (int32_t )16384) >> 15;
+		var2 = (var1 * ((int32_t )dig_H6)) >> 10;
+		var3 = (var1 * ((int32_t )dig_H3)) >> 11;
+		var4 = ((var2 * (var3 + (int32_t )32768)) >> 10) + (int32_t )2097152;
+		var2 = ((var4 * ((int32_t )dig_H2)) + 8192) >> 14;
+		var3 = var5 * var2;
+		tmp = (var3 >> 15);
+		var4 = (tmp * tmp) / 128;
+		var5 = var3 - ((var4 * ((int32_t )dig_H1)) >> 4);
+		var5 = (var5 < 0 ? 0 : var5);
+		var5 = (var5 > 419430400 ? 419430400 : var5);
+		hum = (uint32_t )(var5 >> 12);
+	}
+
+	for (uiter_t i = 0; i < SENSOR_COUNT; ++i) {
+		if (PINID(SENSORS[i].pin) == PINID(pin)) {
+			imath_t adjust;
+
+			cfg = &SENSORS[i];
+#if USE_SMALL_SENSORS < 2
+			adjust = cfg->adjust;
+#else
+			adjust = 0;
+#endif
+			switch (cfg->type) {
+			case SENS_BMx280_PRESSURE:
+				// Adjust the adjustment to compensate for the fractional part of
+				// the measurement
+				adjust *= 100;
+				SET_BIT(G_sensors[i].iflags, SENS_FLAG_DONE);
+				G_sensors[i].status = (SCALE_INT(press + adjust)) / 100;
+				break;
+			case SENS_BMx280_TEMP:
+				adjust *= 100;
+				SET_BIT(G_sensors[i].iflags, SENS_FLAG_DONE);
+				G_sensors[i].status = (SCALE_INT(temp + adjust)) / 100;
+				break;
+			case SENS_BMx280_HUM:
+				adjust <<= 10;
+				SET_BIT(G_sensors[i].iflags, SENS_FLAG_DONE);
+				G_sensors[i].status = (SCALE_INT(hum + adjust)) >> 10;
+				break;
+			default:
+				UNKNOWN_MSG(cfg->type);
+				break;
+			}
+		}
+	}
+
+	return;
+}
+#endif // USE_BMx280_SENSOR
+
 void check_sensor_warnings(void) {
 	CLEAR_BIT(G_warnings, (WARN_BATTERY_LOW|WARN_VCC_LOW|WARN_SENSOR));
 
@@ -1071,19 +1373,6 @@ void check_sensor_warnings(void) {
 		}
 	}
 #endif // USE_SMALL_SENSORS < 2
-
-	return;
-}
-
-static void power_on(void) {
-	power_on_sensors();
-	adc_on();
-
-	return;
-}
-static void power_off(void) {
-	power_off_sensors();
-	adc_off();
 
 	return;
 }

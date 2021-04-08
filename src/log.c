@@ -38,6 +38,8 @@
 #include "power.h"
 #include "serial.h"
 
+#include "ulib/cstrings.h"
+
 
 // Need to check this *after* the headers are included
 #if USE_LOGGING
@@ -338,7 +340,7 @@ END:
 	}
 
 	// TODO: Wait for the card to be not-busy
-#if SD_POWER_PIN
+#if SPI_POWER_PIN
 	if (!BIT_IS_SET(G_warnings, WARN_SD_SKIPPED)) {
 		sleep(SD_POWEROFF_DELAY_MS);
 	}

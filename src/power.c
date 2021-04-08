@@ -33,6 +33,9 @@
 * Includes
 */
 #include "power.h"
+#include "sensors.h"
+
+#include "fatfs/diskio.h"
 
 
 /*
@@ -54,6 +57,10 @@
 // The number of times SPI has been turned on without later being turned off
 static uint8_t SPI_callers = 0;
 #endif
+#if USE_SD
+// Whether or not the SD card has been initialized yet
+static bool SD_initialized = false;
+#endif
 
 
 /*
@@ -71,14 +78,28 @@ static void power_off_SPI(void);
 * Functions
 */
 void power_on_sensors(void) {
-	power_on_output(SENSOR_POWER_PIN);
-	// Delay to let power come up
-	sleep(POWER_UP_DELAY);
+#if USE_ADC_SENSORS
+#if ADC_POWER_PIN
+	power_on_output(ADC_POWER_PIN);
+#endif
+	adc_on();
+#endif
+#if USE_SPI_SENSORS
+	power_on_SPI();
+#endif
 
 	return;
 }
 void power_off_sensors(void) {
-	power_off_output(SENSOR_POWER_PIN);
+#if USE_SPI_SENSORS
+	power_off_SPI();
+#endif
+#if USE_ADC_SENSORS
+	adc_off();
+#if ADC_POWER_PIN
+	power_off_output(ADC_POWER_PIN);
+#endif
+#endif
 
 	return;
 }
@@ -86,8 +107,6 @@ void power_off_sensors(void) {
 #if USE_SD
 // Actual power on/off of the SD card is handled in power_[on|off]_SPI()
 // because the card can't be powered off while the SPI pins are on
-// TODO: Handle the case where the SD card shares a power pin with another
-// peripheral
 void power_on_SD(void) {
 	power_on_SPI();
 
@@ -107,54 +126,96 @@ static void power_on_SPI(void) {
 	if (SPI_callers == 0) {
 		// Per a sandisk datasheet by way of
 		// https:// thecavepearlproject.org/2015/11/05/a-diy-arduino-data-logger-build-instructions-part-4-power-optimization/
-		// we should apply power to the SD card before any pins are set HIGH. It's
-		// unclear however if this is meant to apply for SPI.
-		// The ideal way to go about this would be to simultaneously turn on power
-		// to the SD card and set all the pins connected to it to the correct modes
-		// to prevent parasitic voltage either causing the card to draw excess
-		// power or damaging it; we can't do that so instead:
-		//   1. Turn on the power; there's an internal capacitor and (probably)
-		//      another external one which will hopefully give us a brief window
-		//   2. Set the CS pin high to get the SD card to configure itself in SPI
-		//      mode immediately
+		// we should apply power to an SD card before any pins are set HIGH;
+		// this is true for pretty much all other devices too though, as
+		// applying power to an IO pin without also powering Vcc may cause
+		// damage.
+		//   1. Turn on the power
+		//   2. Set the SD CS pin high to get the SD card to configure itself
+		//      in SPI mode immediately; other devices follow
 		//   3. Turn on the SPI subsystem (which controls the other pins)
-		// TODO: The function call overhead may be too much time here
+		//   4. Initialize the SD card (if present) to keep it from interfering
+		//      with anything else on the bus
+		// TODO: The function call overhead may take too much time here
+#if SPI_POWER_PIN
+		power_on_output(SPI_POWER_PIN);
 #if USE_SD
-#if SD_POWER_PIN
-		power_on_output(SD_POWER_PIN);
-#endif // SD_POWER_PIN
 		gpio_set_mode(SPIx_CS_SD_PIN, GPIO_MODE_PP, GPIO_HIGH);
 #endif // USE_SD
+#if USE_SPI_SENSORS
+		for (uiter_t i = 0; i < SENSOR_COUNT; ++i) {
+			if (BIT_IS_SET(G_sensors[i].iflags, SENS_FLAG_SPI)) {
+				// The BMP280 requires the CS pin to be pulled down briefly to
+				// put it in SPI mode; hopefully any other sensors added in the
+				// future won't care
+				gpio_set_mode(SENSORS[i].pin, GPIO_MODE_PP, GPIO_LOW);
+				gpio_set_state(SENSORS[i].pin, GPIO_HIGH);
+			}
+		}
+#endif // USE_SPI_SENSORS
+#endif // SPI_POWER_PIN
 
 		spi_on();
 		// Delay to let power come up
 		sleep(POWER_UP_DELAY);
 	}
+#if USE_SD
+	// We're assuming here that the SD card won't have been removed and then
+	// reinserted while the SPI bus is on; the only good way to handle cases
+	// where it might be involves detecting insertion with a pin interrupt
+	// and initializing the card there
+	if (!SD_initialized) {
+		SD_initialized = (disk_initialize(0) == 0);
+	}
+#endif
 	++SPI_callers;
 
 	return;
 }
 static void power_off_SPI(void) {
-	if (SPI_callers == 0) {
-		return;
+	// This function may be called to initialize the power pins, in which case
+	// it should go through the motions of turning everything off
+	if (SPI_callers > 0) {
+		--SPI_callers;
 	}
-	--SPI_callers;
 
 	if (SPI_callers == 0) {
 		spi_off();
 
 		// The idea here is similar to turning power on:
 		//   1. Turn off SPI subsystem
-		//   2. Turn off SD card power, let the caps give us a buffer
-		//   3. Turn off CS pin last so that the card never tries to wake up
+		//   2. Turn off CS pins so that leaking current doesn't damage anything
+		//   3. Turn off SPI device power
 #if USE_SD
-#if SD_POWER_PIN
-			power_off_output(SD_POWER_PIN);
-			gpio_set_mode(SPIx_CS_SD_PIN, GPIO_MODE_HiZ, GPIO_LOW);
-#else // !SD_POWER_PIN
-			gpio_set_mode(SPIx_CS_SD_PIN, GPIO_MODE_PP, GPIO_HIGH);
-#endif // SD_POWER_PIN
+		// Mark the card as 'unitialized' even when power isn't removed because
+		// the card itself may be removed at some point and we won't be alerted
+		SD_initialized = false;
+#endif
+#if SPI_POWER_PIN
+#if USE_SD
+		gpio_set_mode(SPIx_CS_SD_PIN, GPIO_MODE_HiZ, GPIO_LOW);
 #endif // USE_SD
+#if USE_SPI_SENSORS
+		for (uiter_t i = 0; i < SENSOR_COUNT; ++i) {
+			if (BIT_IS_SET(G_sensors[i].iflags, SENS_FLAG_SPI)) {
+				gpio_set_mode(SENSORS[i].pin, GPIO_MODE_HiZ, GPIO_LOW);
+			}
+		}
+#endif // USE_SPI_SENSORS
+		power_off_output(SPI_POWER_PIN);
+
+#else // !SPI_POWER_PIN
+#if USE_SD
+		gpio_set_mode(SPIx_CS_SD_PIN, GPIO_MODE_PP, GPIO_HIGH);
+#endif // USE_SD
+#if USE_SPI_SENSORS
+		for (uiter_t i = 0; i < SENSOR_COUNT; ++i) {
+			if (BIT_IS_SET(G_sensors[i].iflags, SENS_FLAG_SPI)) {
+				gpio_set_mode(SENSORS[i].pin, GPIO_MODE_PP, GPIO_HIGH);
+			}
+		}
+#endif // USE_SPI_SENSORS
+#endif // SPI_POWER_PIN
 	}
 
 	return;
