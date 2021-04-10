@@ -36,6 +36,7 @@
 #include "spi.h"
 #include "time.h"
 #include "uart.h"
+#include "i2c.h"
 
 #include <libopencm3/cm3/nvic.h>
 #include <libopencm3/cm3/scb.h>
@@ -131,6 +132,9 @@ void platform_init(void) {
 #if UART1_DO_REMAP
 	remaps |= AFIO_MAPR_USART1_REMAP;
 #endif
+#if I2C1_DO_REMAP
+	remaps |= AFIO_MAPR_I2C1_REMAP;
+#endif
 	gpio_primary_remap(AFIO_MAPR_SWJ_CFG_JTAG_OFF_SW_ON, remaps);
 
 	gpio_init();
@@ -150,6 +154,11 @@ void platform_init(void) {
 
 #if USE_SPI
 	spi_init();
+	led_flash(1, DELAY_SHORT);
+#endif
+
+#if USE_I2C
+	i2c_init();
 	led_flash(1, DELAY_SHORT);
 #endif
 
