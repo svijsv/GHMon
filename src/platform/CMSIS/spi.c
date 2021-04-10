@@ -135,19 +135,24 @@ void spi_on(void) {
 void spi_off(void) {
 	uint16_t rx;
 
-	// Section 25.3.8 of the reference manual says the BSY flag may become
-	// unreliable if the proper procedure isn't followed before shutting an
-	// SPI interface down
-	while (BIT_IS_SET(SPIx->SR, SPI_SR_RXNE)) {
-		rx = SPIx->DR;
-		// If for whatever reason there are still bytes coming in we have no
-		// way of knowing how many so just wait until we've gone an arbitrary
-		// period of time without seeing any
-		delay(1);
-	}
-	rx = rx; // Shut the compiler up
-	while (!BIT_IS_SET(SPIx->SR, SPI_SR_TXE) || BIT_IS_SET(SPIx->SR, SPI_SR_BSY)) {
-		// Nothing to do here
+	// If the SPI peripheral clock is already disabled but the status flags
+	// for whatever reason haven't been cleared, this would become an infinite
+	// loop
+	if (BIT_IS_SET(SPIx->CR1, SPI_CR1_SPE)) {
+		// Section 25.3.8 of the reference manual says the BSY flag may become
+		// unreliable if the proper procedure isn't followed before shutting an
+		// SPI interface down
+		while (BIT_IS_SET(SPIx->SR, SPI_SR_RXNE)) {
+			rx = SPIx->DR;
+			// If for whatever reason there are still bytes coming in we have no
+			// way of knowing how many so just wait until we've gone an arbitrary
+			// period of time without seeing any
+			delay(1);
+		}
+		rx = rx; // Shut the compiler up
+		while (!BIT_IS_SET(SPIx->SR, SPI_SR_TXE) || BIT_IS_SET(SPIx->SR, SPI_SR_BSY)) {
+			// Nothing to do here
+		}
 	}
 
 	gpio_set_mode(SPIx_SCK_PIN,  GPIO_MODE_HiZ, GPIO_LOW);
