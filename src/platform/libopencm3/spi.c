@@ -132,11 +132,16 @@ void spi_on(void) {
 	return;
 }
 void spi_off(void) {
-	// spi_clean_disable() expects there to be another RX and will go into an
-	// infinite loop if there isn't one
-	//spi_clean_disable(SPIx);
-	while ((SPI_SR(SPIx) & SPI_SR_BSY) || (!(SPI_SR(SPIx) & SPI_SR_TXE))) {
-		// Nothing to do here
+	// If the SPI peripheral clock is already disabled but the status flags
+	// for whatever reason haven't been cleared, this would become an infinite
+	// loop
+	if (BIT_IS_SET(SPI_CR1(SPIx), SPI_CR1_SPE)) {
+		// spi_clean_disable() expects there to be another RX and will go into an
+		// infinite loop if there isn't one
+		//spi_clean_disable(SPIx);
+		while ((SPI_SR(SPIx) & SPI_SR_BSY) || (!(SPI_SR(SPIx) & SPI_SR_TXE))) {
+			// Nothing to do here
+		}
 	}
 	spi_disable(SPIx);
 	rcc_periph_clock_disable(SPIx_RCC);
