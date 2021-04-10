@@ -36,6 +36,7 @@
 #include "spi.h"
 #include "time.h"
 #include "uart.h"
+#include "i2c.h"
 
 
 #if LIGHT_SLEEP_PERIOD > MAX_SLEEP_PERIOD
@@ -120,6 +121,9 @@ void platform_init(void) {
 #if UART1_DO_REMAP
 	remaps |= AFIO_MAPR_USART1_REMAP;
 #endif
+#if I2C1_DO_REMAP
+	remaps |= AFIO_MAPR_I2C1_REMAP;
+#endif
 	// Unlike everything else, JTAG is enabled on reset and needs to be explicitly
 	// disabled
 	// Unlike everything else, reading the JTAG part of AFIO_MAPR will always
@@ -145,6 +149,11 @@ void platform_init(void) {
 
 #if USE_SPI
 	spi_init();
+	led_flash(1, DELAY_SHORT);
+#endif
+
+#if USE_I2C
+	i2c_init();
 	led_flash(1, DELAY_SHORT);
 #endif
 
