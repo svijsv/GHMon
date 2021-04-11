@@ -74,6 +74,7 @@
 // The SPI peripheral needs to be re-configured if it's powered off so
 // initialization is just a stub; everything happens in spi_on()
 void spi_init(void) {
+	spi_off();
 	return;
 }
 void spi_on(void) {

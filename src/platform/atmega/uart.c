@@ -100,7 +100,7 @@ void uart_init(void) {
 	// The USART peripheral needs to be re-enabled if the power is turned off
 	// so it wouldn't accomplish anything to shut it off here, and we don't
 	// want it off anyway because it's used for logging output
-	//power_usart0_disable();
+	//uart_off();
 
 	return;
 }

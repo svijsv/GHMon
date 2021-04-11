@@ -36,6 +36,7 @@
 #include "spi.h"
 #include "time.h"
 #include "uart.h"
+#include "i2c.h"
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
@@ -172,6 +173,11 @@ void platform_init(void) {
 
 #if USE_SPI
 	spi_init();
+	sysflash();
+#endif
+
+#if USE_I2C
+	i2c_init();
 	sysflash();
 #endif
 
