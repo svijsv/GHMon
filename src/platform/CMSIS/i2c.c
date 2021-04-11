@@ -131,21 +131,25 @@ void i2c_init(void) {
 }
 
 void i2c_on(void) {
-	// Reference manual section 9.1.11 lists pin configuration for peripherals.
-	gpio_set_mode(I2Cx_SCL_PIN, GPIO_MODE_OD_AF, GPIO_HIGH);
-	gpio_set_mode(I2Cx_SDA_PIN, GPIO_MODE_OD_AF, GPIO_HIGH);
-
+	// Enable the peripheral before switching the pin GPIO mode to prevent the
+	// pins from briefly pulling low
 	clock_enable(&I2Cx_APBxENR, I2Cx_CLOCKEN);
 	SET_BIT(I2Cx->CR1, I2C_CR1_PE);
+
+	// Reference manual section 9.1.11 lists pin configuration for peripherals.
+	gpio_set_mode(I2Cx_SCL_PIN, GPIO_MODE_OD_AF, GPIO_FLOAT);
+	gpio_set_mode(I2Cx_SDA_PIN, GPIO_MODE_OD_AF, GPIO_FLOAT);
 
 	return;
 }
 void i2c_off(void) {
-	CLEAR_BIT(I2Cx->CR1, I2C_CR1_PE);
-	clock_disable(&I2Cx_APBxENR, I2Cx_CLOCKEN);
-
+	// Switch the pin GPIO mode before disabling the peripheral to prevent the
+	// pins from briefly pulling low
 	gpio_set_mode(I2Cx_SCL_PIN, GPIO_MODE_HiZ, GPIO_LOW);
 	gpio_set_mode(I2Cx_SDA_PIN, GPIO_MODE_HiZ, GPIO_LOW);
+
+	CLEAR_BIT(I2Cx->CR1, I2C_CR1_PE);
+	clock_disable(&I2Cx_APBxENR, I2Cx_CLOCKEN);
 
 	return;
 }
@@ -259,8 +263,40 @@ err_t i2c_receive_block(uint8_t addr, uint8_t *rx_buffer, txsize_t rx_size, utim
 		rx_buffer[i] = I2Cx->DR;
 		break;
 	}
+	while (BIT_IS_SET(I2Cx->SR2, I2C_SR2_BUSY)) {
+		if (TIMES_UP(timeout)) {
+			res = ETIMEOUT;
+			goto END;
+		}
+	}
 
 END:
+	// If the busy flag is set, something went wrong (most immediately probably
+	// a timeout, but that indicates something else happened too)
+	//
+	// https://www.i2c-bus.org/i2c-primer/analysing-obscure-problems/blocked-bus/
+	// Suggests toggling the clock 16 times and then sending stop
+	if (BIT_IS_SET(I2Cx->SR2, I2C_SR2_BUSY)) {
+		SET_BIT(I2Cx->CR1, I2C_CR1_STOP);
+		timeout = SET_TIMEOUT(100);
+		while (BIT_IS_SET(I2Cx->SR2, I2C_SR2_BUSY)) {
+			if (TIMES_UP(timeout)) {
+				LOGGER("I2C RX Timed out waiting for busy to end");
+				res = ETIMEOUT;
+				break;
+			}
+		}
+	}
+
+#if DEBUG
+	if ((I2Cx->SR1 & ~(I2C_SR1_TXE|I2C_SR1_RXNE)) != 0) {
+		LOGGER("RX I2Cx_SR1: 0x%04X", (uint )I2Cx->SR1);
+	}
+	if ((I2Cx->SR2 & 0xFF03) != 0) {
+		LOGGER("RX I2Cx_SR2: 0x%04X", (uint )I2Cx->SR2);
+	}
+#endif
+
 	UNUSED(tmp);
 	return res;
 }
@@ -314,7 +350,7 @@ err_t i2c_transmit_block(uint8_t addr, const uint8_t *tx_buffer, txsize_t tx_siz
 		}
 	}
 	SET_BIT(I2Cx->CR1, I2C_CR1_STOP);
-	while (BIT_IS_SET(I2Cx->SR1, I2C_SR1_BTF)) {
+	while (BIT_IS_SET(I2Cx->SR2, I2C_SR2_BUSY)) {
 		if (TIMES_UP(timeout)) {
 			res = ETIMEOUT;
 			goto END;
@@ -322,6 +358,32 @@ err_t i2c_transmit_block(uint8_t addr, const uint8_t *tx_buffer, txsize_t tx_siz
 	}
 
 END:
+	// If the busy flag is set, something went wrong (most immediately probably
+	// a timeout, but that indicates something else happened too)
+	//
+	// https://www.i2c-bus.org/i2c-primer/analysing-obscure-problems/blocked-bus/
+	// Suggests toggling the clock 16 times and then sending stop
+	if (BIT_IS_SET(I2Cx->SR2, I2C_SR2_BUSY)) {
+		SET_BIT(I2Cx->CR1, I2C_CR1_STOP);
+		timeout = SET_TIMEOUT(100);
+		while (BIT_IS_SET(I2Cx->SR2, I2C_SR2_BUSY)) {
+			if (TIMES_UP(timeout)) {
+				LOGGER("I2C TX Timed out waiting for busy to end");
+				res = ETIMEOUT;
+				break;
+			}
+		}
+	}
+
+#if DEBUG
+	if ((I2Cx->SR1 & ~(I2C_SR1_TXE|I2C_SR1_RXNE)) != 0) {
+		LOGGER("TX I2Cx_SR1: 0x%04X", (uint )I2Cx->SR1);
+	}
+	if ((I2Cx->SR2 & 0xFF03) != 0) {
+		LOGGER("TX I2Cx_SR2: 0x%04X", (uint )I2Cx->SR2);
+	}
+#endif
+
 	UNUSED(tmp);
 	return res;
 }
