@@ -58,12 +58,20 @@
 # define USE_SD  1
 #endif
 
-#if USE_BMx280_SENSOR
+#if USE_BMx280_SPI_SENSOR
 # define USE_SPI_SENSORS 1
 #endif
 
 #if USE_SD || USE_SPI_SENSORS
 # define USE_SPI 1
+#endif
+
+#if USE_BMx280_I2C_SENSOR
+# define USE_I2C_SENSORS 1
+#endif
+
+#if USE_I2C_SENSORS
+# define USE_I2C 1
 #endif
 
 #if USE_CONTROLLERS && ! CONTROLLER_COUNT

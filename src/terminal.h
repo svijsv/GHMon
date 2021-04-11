@@ -41,7 +41,7 @@
 */
 // Timeout in seconds for the command terminal (that is, when it gives up
 // listening)
-#define TERMINAL_TIMEOUT_S 300 // 5m
+#define TERMINAL_TIMEOUT_S 3600 // 1Hr
 
 // Size of the input buffer
 #if USE_SMALL_CODE < 1

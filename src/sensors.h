@@ -59,6 +59,8 @@
 //
 // Internal flags for sensor_t structs
 //
+// Set internally if the sensor is connected to the I2C bus
+#define SENS_FLAG_I2C       0x08
 // Set internally if the sensor is connected to the SPI bus
 #define SENS_FLAG_SPI       0x10
 // Set internally if the sensor has already been read in a given cycle
@@ -76,12 +78,6 @@
 
 // Ignore a sensor warning threshold if set to this value
 #define SENS_THRESHOLD_IGNORE STATUS_MIN
-
-
-// The communication protocols supported by BMx280 sensors, used during
-// configuration
-#define BMx280_SPI 1
-#define BMx280_I2C 2
 
 
 /*
@@ -129,10 +125,16 @@ typedef enum {
 	SENS_DHT11_TEMP,
 #endif
 
-#if USE_BMx280_SENSOR
-	SENS_BMx280_TEMP,
-	SENS_BMx280_PRESSURE,
-	SENS_BMx280_HUM,
+#if USE_BMx280_SPI_SENSOR
+	SENS_BMx280_SPI_TEMP,
+	SENS_BMx280_SPI_PRESSURE,
+	SENS_BMx280_SPI_HUM,
+#endif
+
+#if USE_BMx280_I2C_SENSOR
+	SENS_BMx280_I2C_TEMP,
+	SENS_BMx280_I2C_PRESSURE,
+	SENS_BMx280_I2C_HUM,
 #endif
 } sensor_type_t;
 
@@ -185,11 +187,6 @@ typedef struct {
 	// The beta coefficient
 	int32_t beta;
 } sensor_opt_log_beta_t;
-// Settings for BMx280 sensors
-typedef struct {
-	// BMx280_SPI or BMx280_I2C
-	uint8_t protocol;
-} sensor_opt_bmx280_t;
 //
 // Configuration of the underlying device
 // Depending on configuration options, this could be 0, 4, 5, 12, or 16 bytes.
@@ -208,10 +205,6 @@ typedef union {
 
 #if USE_LOG_BETA_SENSOR
 	sensor_opt_log_beta_t log_beta;
-#endif
-
-#if USE_BMx280_SENSOR
-	sensor_opt_bmx280_t bmx280;
 #endif
 } sensor_devcfg_t;
 

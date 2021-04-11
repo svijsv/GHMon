@@ -50,7 +50,8 @@
 // DHT11 temperature and humidity sensor
 #define USE_DHT11_SENSOR 0
 // BMP280 and BME280 temperature, air pressure, and humidity sensors
-#define USE_BMx280_SENSOR 0
+#define USE_BMx280_SPI_SENSOR 0
+#define USE_BMx280_I2C_SENSOR 0
 
 
 //
@@ -126,6 +127,24 @@
 // Pin configuration
 // Platform-specific
 //
+// If a power pin isn't defined or is 0, it's assumed anything it would
+// normally control is always powered on
+//
+// If a power pin has a bias, the pin is always in push-pull mode and it's
+// output is set to the bias value when OFF and the reverse when ON; the
+// default is high-impedence mode when OFF and output HIGH when ON
+//
+// If any device on the SPI or I2C buses are power-switched then ALL devices
+// on that same bus (as well as the SDA and SCL pullups in the case of I2C)
+// must also be switched to prevent damage that might be caused by applying
+// voltage to the IO pins of an unpowered device or current leaking through
+// the IO pins
+//
+// The UART pins are only used if serial output is enabled
+// The SPI pins are only used if logging or an SPI sensor are enabled
+// The I2C pins are only used if an I2C sensor is enabled
+//
+//
 //
 // STM32F103
 // Sensors like thermistors need to be on a pin that supports ADC; that means
@@ -153,33 +172,30 @@
 #define BUTTON_PIN PIN_B4
 //
 // Power pins
-//
-// If a power pin isn't defined or is 0, it's assumed anything it would
-// normally control is always powered on
-//
-// If a power pin has a bias, the pin is always in push-pull mode and it's
-// output is set to the bias value when OFF and the reverse when ON; the
-// default is high-impedence mode when OFF and output HIGH when ON
-//
 // Power for ADC sensors
 #define ADC_POWER_PIN PIN_B11
-// Power for ALL devices on the SPI bus; they can't be selectively turned off
-// because voltage on the IO pins without power on Vcc will damage many devices
+// Power for SPI devices
 //#define SPI_POWER_PIN (PIN_B5 | BIAS_LOW)
+// Power for I2C devices
+//#define I2C_POWER_PIN (PIN_A11)
 //
-// UART pins; hardware-specified; used if USE_SERIAL != 0
+// UART pins; hardware-specified
 // PIN_A9-PIN_A10: UART1
 #define UARTx_TX_PIN PIN_A9
 #define UARTx_RX_PIN PIN_A10
 //
-// SPI pins; hardware-specified; used if USE_LOGGING != 0
-// Use SPI2 because SPI1 overlaps with the analog pins and we want to save as
-// many of those as we can for sensors.
+// SPI pins; hardware-specified
 // PIN_B12-PIN_B15: SPI2
 #define SPIx_CS_SD_PIN PIN_B12
 #define SPIx_SCK_PIN   PIN_B13
 #define SPIx_MISO_PIN  PIN_B14
 #define SPIx_MOSI_PIN  PIN_B15
+//
+// I2C pins; hardware-specified
+// PIN_B6-PIN_B7: I2C1
+#define I2Cx_SCL_PIN PIN_B6
+#define I2Cx_SDA_PIN PIN_B7
+
 #endif // USE_STM32
 
 //
@@ -189,7 +205,9 @@
 //
 // Pins A6 and A7 don't have digital buffers and can only be used for analog
 // input
+//
 // There are internal pullups but no internal pulldowns
+//
 #if USE_AVR
 //
 // Sensor inputs
@@ -207,15 +225,18 @@
 #define BUTTON_PIN PIN_3
 //
 // Power pins
+// Power for ADC sensors
 #define ADC_POWER_PIN PIN_6
+// Power for SPI devices
 //#define SPI_POWER_PIN   PIN_7
+// Power for I2C devices
+//#define I2C_POWER_PIN   PIN_8
 //
-// UART pins; hardware-specified; used if USE_SERIAL != 0
-// PA9-PA10: UART1
+// UART pins; hardware-specified
 #define UARTx_TX_PIN PIN_TX
 #define UARTx_RX_PIN PIN_RX
 //
-// SPI pins; hardware-specified; used if USE_LOGGING != 0
+// SPI pins; hardware-specified
 // The hardware SS pin must be used as a slave-select pin because if it's
 // ever set low as an input it will force the MCU into SPI slave mode
 #define SPIx_SS_PIN    PIN_10
@@ -223,4 +244,10 @@
 #define SPIx_SCK_PIN   PIN_13
 #define SPIx_MISO_PIN  PIN_12
 #define SPIx_MOSI_PIN  PIN_11
+//
+// I2C pins; hardware-specified
+// The SCL and SDA pins are the same as pins A4 and A5, even though they may
+// have separate pins broken out
+#define I2Cx_SCL_PIN PIN_A4
+#define I2Cx_SDA_PIN PIN_A5
 #endif // USE_AVR

@@ -35,6 +35,10 @@
 // hardware limitations
 #define SPI_SPEED 100000
 
+// I2C/TWI communication parameters
+// Target speed of the I2C bus
+#define I2C_SPEED 50000
+
 // Maximum length of sensor and controller names
 // Increasing this will increase the ROM space used, but depending on struct
 // layout it may not be a direct relationship; typically rounding the number

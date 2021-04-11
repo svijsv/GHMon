@@ -57,6 +57,10 @@
 // The number of times SPI has been turned on without later being turned off
 static uint8_t SPI_callers = 0;
 #endif
+#if USE_I2C
+// The number of times I2C has been turned on without later being turned off
+static uint8_t I2C_callers = 0;
+#endif
 #if USE_SD
 // Whether or not the SD card has been initialized yet
 static bool SD_initialized = false;
@@ -66,8 +70,14 @@ static bool SD_initialized = false;
 /*
 * Local function prototypes
 */
+#if USE_SPI
 static void power_on_SPI(void);
 static void power_off_SPI(void);
+#endif
+#if USE_I2C
+static void power_on_I2C(void);
+static void power_off_I2C(void);
+#endif
 
 /*
 * Interrupt handlers
@@ -87,10 +97,16 @@ void power_on_sensors(void) {
 #if USE_SPI_SENSORS
 	power_on_SPI();
 #endif
+#if USE_I2C_SENSORS
+	power_on_I2C();
+#endif
 
 	return;
 }
 void power_off_sensors(void) {
+#if USE_I2C_SENSORS
+	power_off_I2C();
+#endif
 #if USE_SPI_SENSORS
 	power_off_SPI();
 #endif
@@ -160,7 +176,9 @@ static void power_on_SPI(void) {
 		sleep(POWER_UP_DELAY);
 	}
 #if USE_SD
-	// We're assuming here that the SD card won't have been removed and then
+	// The SD card needs to be initialized or it may interfere with
+	// anything else on the SPI bus
+	// We're assuming here that the card won't have been removed and then
 	// reinserted while the SPI bus is on; the only good way to handle cases
 	// where it might be involves detecting insertion with a pin interrupt
 	// and initializing the card there
@@ -220,14 +238,44 @@ static void power_off_SPI(void) {
 
 	return;
 }
-#else // !USE_SPI
-static void power_on_SPI(void) {
-	return;
-}
-static void power_off_SPI(void) {
-	return;
-}
 #endif // USE_SPI
+
+#if USE_I2C
+static void power_on_I2C(void) {
+	if (I2C_callers == 0) {
+		// The I2C lines are all open-drain with pullups so there *shouldn't*
+		// be an issue with the power-up order unless there's a device connected
+		// that's switched on GND
+#if I2C_POWER_PIN
+		power_on_output(I2C_POWER_PIN);
+#endif // I2C_POWER_PIN
+
+		i2c_on();
+		// Delay to let power come up
+		sleep(POWER_UP_DELAY);
+	}
+	++I2C_callers;
+
+	return;
+}
+static void power_off_I2C(void) {
+	// This function may be called to initialize the power pins, in which case
+	// it should go through the motions of turning everything off
+	if (I2C_callers > 0) {
+		--I2C_callers;
+	}
+
+	if (I2C_callers == 0) {
+		i2c_off();
+
+#if I2C_POWER_PIN
+		power_off_output(I2C_POWER_PIN);
+#endif
+	}
+
+	return;
+}
+#endif // USE_I2C
 
 void power_on_output(pin_t pin) {
 	assert(pin != 0);

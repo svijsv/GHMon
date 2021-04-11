@@ -263,6 +263,23 @@ err_t spi_transmit_block(const uint8_t *tx_buffer, txsize_t tx_size, utime_t tim
 # define spi_transmit_block(...) ((void )0)
 #endif
 
+#if USE_I2C
+//
+// I2C interface
+// Turn on and off the I2C peripheral
+void i2c_on(void);
+void i2c_off(void);
+// Receive a data block
+err_t i2c_receive_block(uint8_t addr, uint8_t *rx_buffer, txsize_t rx_size, utime_t timeout);
+// Transmit a data block
+err_t i2c_transmit_block(uint8_t addr, const uint8_t *tx_buffer, txsize_t tx_size, utime_t timeout);
+#else
+# define i2c_on()  ((void )0)
+# define i2c_off() ((void )0)
+# define i2c_receive_block(...)  ((void )0)
+# define i2c_transmit_block(...) ((void )0)
+#endif
+
 //
 // Time-management interface
 // Get and set the system time enumerated in seconds
