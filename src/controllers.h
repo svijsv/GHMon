@@ -67,6 +67,8 @@
 //
 // Internal flags for controller_t structs
 //
+// Set if the controller is currently engaged
+#define CTRL_FLAG_ENGAGED     0x10
 // Set if the controller has sensors attached
 #define CTRL_FLAG_USES_SENSORS 0x20
 // Set when the controller wants sensor data invalidated

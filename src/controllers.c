@@ -72,7 +72,28 @@ controller_t G_controllers[CONTROLLER_COUNT];
 */
 static gpio_state_t read_stop(_FLASH const controller_static_t *cfg);
 static void update_runtime(controller_t *c);
-static bool check_engaged(pin_t pin);
+
+
+/*
+ * Macros
+*/
+#define CHECK_ENGAGED(c) (BIT_IS_SET((c)->iflags, CTRL_FLAG_ENGAGED))
+#define SET_ENGAGED(c)   (SET_BIT(   (c)->iflags, CTRL_FLAG_ENGAGED))
+#define UNSET_ENGAGED(c) (CLEAR_BIT( (c)->iflags, CTRL_FLAG_ENGAGED))
+
+#define ENGAGE(c, cfg) \
+	do { \
+		LOGGER("Engaging %s", FROM_FSTR((cfg)->name)); \
+		SET_ENGAGED((c)); \
+		power_on_output((cfg)->control_pin); \
+	} while (0);
+
+#define DISENGAGE(c, cfg, msg) \
+	do { \
+		LOGGER("Halting %s: " msg, FROM_FSTR((cfg)->name)); \
+		UNSET_ENGAGED((c)); \
+		power_off_output((cfg)->control_pin); \
+	} while (0);
 
 
 /*
@@ -120,13 +141,12 @@ void check_controller(controller_t *c) {
 
 	cfg = &CONTROLLERS[GET_CONTROLLER_I(c)];
 	if (BIT_IS_SET(G_warnings, WARN_BATTERY_LOW|WARN_VCC_LOW) && !BIT_IS_SET(cfg->cflags, CTRL_FLAG_IGNORE_POWER)) {
-		is_engaged = check_engaged(cfg->control_pin);
+		is_engaged = CHECK_ENGAGED(c);
 		if (is_engaged) {
-			power_off_output(cfg->control_pin);
+			DISENGAGE(c, cfg, "battery or Vcc low");
 #if USE_SMALL_CONTROLLERS < 1
 			c->try_count = 0;
 #endif
-			LOGGER("Shutting off %s, battery or Vcc low", FROM_FSTR(cfg->name));
 			update_runtime(c);
 		} else {
 			LOGGER("Skipping %s check, battery or Vcc low", FROM_FSTR(cfg->name));
@@ -181,7 +201,7 @@ void check_controller(controller_t *c) {
 			do_engage = false;
 		}
 	}
-	is_engaged = check_engaged(cfg->control_pin);
+	is_engaged = CHECK_ENGAGED(c);
 
 	if ((do_engage) && (BIT_IS_SET(cfg->cflags, CTRL_FLAG_WARN_WHEN_ON))) {
 		SET_BIT(c->iflags, CTRL_FLAG_WARNING);
@@ -194,13 +214,12 @@ void check_controller(controller_t *c) {
 		utime_t now;
 
 		if (read_stop(cfg) == GPIO_HIGH) {
-			LOGGER("Skipping %s (stop-pin is high)", FROM_FSTR(cfg->name));
+			LOGGER("Skipping %s: stop-pin is high", FROM_FSTR(cfg->name));
 			goto END;
 		}
 
-		LOGGER("Engaging %s", FROM_FSTR(cfg->name));
+		ENGAGE(c, cfg);
 		now = NOW();
-		power_on_output(cfg->control_pin);
 		++c->try_count;
 		c->run_start = now;
 		++c->run_count;
@@ -236,24 +255,21 @@ void check_controller(controller_t *c) {
 		}
 
 		if (timeout == 0) {
-			LOGGER("Halting %s (run timeout)", FROM_FSTR(cfg->name));
-			power_off_output(cfg->control_pin);
-
+			DISENGAGE(c, cfg, "run timeout");
 			if (BIT_IS_SET(cfg->cflags, CTRL_FLAG_RETRY)) {
 				if (c->try_count <= CONTROLLER_RETRY_MAX) {
 					c->next_check = now + ((cfg->run_timeout > CONTROLLER_RETRY_DELAY_S) ? CONTROLLER_RETRY_DELAY_S : cfg->run_timeout);
 					LOGGER("Re-checking %s in %us", FROM_FSTR(cfg->name), (uint )(c->next_check - now));
 					SET_BIT(c->iflags, CTRL_FLAG_INVALIDATE);
 				} else {
-					LOGGER("Aborting %s (exceeded max retries)", FROM_FSTR(cfg->name));
+					LOGGER("Aborting %s: exceeded max retries", FROM_FSTR(cfg->name));
 					SET_BIT(c->iflags, CTRL_FLAG_WARNING);
 					c->try_count = 0;
 				}
 			}
 
 		} else if (read_stop(cfg) == GPIO_HIGH) {
-			LOGGER("Halting %s (stop-pin is high)", FROM_FSTR(cfg->name));
-			power_off_output(cfg->control_pin);
+			DISENGAGE(c, cfg, "stop pin is high");
 			c->try_count = 0;
 
 		} else {
@@ -265,8 +281,7 @@ void check_controller(controller_t *c) {
 		}
 
 	} else if (!do_engage && is_engaged) {
-		LOGGER("Halting %s (conditions not met)", FROM_FSTR(cfg->name));
-		power_off_output(cfg->control_pin);
+		DISENGAGE(c, cfg, "conditions not met");
 		update_runtime(c);
 		c->try_count = 0;
 
@@ -276,14 +291,12 @@ void check_controller(controller_t *c) {
 	if (do_engage && !is_engaged) {
 #if USE_SMALL_CONTROLLERS < 2 // Have stop pin
 		if (read_stop(cfg) == GPIO_HIGH) {
-			LOGGER("Skipping %s (stop-pin is high)", FROM_FSTR(cfg->name));
+			LOGGER("Skipping %s: stop-pin is high", FROM_FSTR(cfg->name));
 			goto END;
 		}
 #endif // USE_SMALL_CONTROLLERS < 2
 
-		LOGGER("Engaging %s", FROM_FSTR(cfg->name));
-		power_on_output(cfg->control_pin);
-
+		ENGAGE(c, cfg);
 		if (cfg->run_timeout > 0) {
 			utime_t timeout;
 			timeout = cfg->run_timeout;
@@ -297,7 +310,7 @@ void check_controller(controller_t *c) {
 					timeout -= wakeup;
 					hibernate(wakeup, 0);
 					if (read_stop(cfg) == GPIO_HIGH) {
-						LOGGER("Halting %s (stop-pin is high)", FROM_FSTR(cfg->name));
+						DISENGAGE(c, cfg, "stop pin is high");
 						break;
 					}
 				}
@@ -308,21 +321,19 @@ void check_controller(controller_t *c) {
 				timeout = 0;
 			}
 			if (timeout == 0) {
-				LOGGER("Halting %s (run timeout)", FROM_FSTR(cfg->name));
+				DISENGAGE(c, cfg, "run timeout");
 			}
 			power_off_output(cfg->control_pin);
 		}
 
 	} else if (!do_engage && is_engaged) {
-		LOGGER("Halting %s (conditions not met)", FROM_FSTR(cfg->name));
-		power_off_output(cfg->control_pin);
+		DISENGAGE(c, cfg, "conditions not met");
 		update_runtime(c);
 
 	} else if (do_engage && is_engaged) {
 #if USE_SMALL_CONTROLLERS < 2
 		if (read_stop(cfg) == GPIO_HIGH) {
-			LOGGER("Halting %s (stop-pin is high)", FROM_FSTR(cfg->name));
-			power_off_output(cfg->control_pin);
+			DISENGAGE(c, cfg, "stop pin is high");
 		}
 		update_runtime(c);
 #endif // USE_SMALL_CONTROLLERS < 2
@@ -410,6 +421,7 @@ static gpio_state_t read_stop(_FLASH const controller_static_t *cfg) {
 }
 #endif // USE_SMALL_CONTROLLERS < 2
 
+/*
 static bool check_engaged(pin_t pin) {
 	bool is_engaged;
 
@@ -430,6 +442,30 @@ static bool check_engaged(pin_t pin) {
 
 	return is_engaged;
 }
+*/
+/*
+static void disengage(controller_t *c, const char *msg) {
+	uint8_t ci;
+	_FLASH const char *shared = NULL;
+
+	ci = GET_CONTROLLER_I(c);
+	for (uiter_t i = 0; i < SENSOR_COUNT; ++i) {
+		if ((i != ci) && (PINID(CONTROLLERS[i].control_pin) == PINID(CONTROLLERS[ci].control_pin)) && (BIT_IS_SET(G_controllers[i].iflags, CTRL_FLAG_ENGAGED))) {
+			shared = CONTROLLERS[i].name;
+			break;
+		}
+	}
+	if (shared != NULL) {
+		LOGGER("Halting %s: %s", FROM_FSTR(CONTROLLERS[ci].name), msg);
+		UNSET_ENGAGED(c);
+		power_off_output(CONTROLLERS[ci].control_pin);
+	} else {
+		LOGGER("Holding %s on: shares pin with %s", FROM_FSTR(CONTROLLERS[ci].name), FROM_FSTR2(CONTROLLERS[ci].name));
+	}
+
+	return;
+}
+*/
 
 
 #endif // USE_CONTROLLERS
