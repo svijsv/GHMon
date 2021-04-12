@@ -50,10 +50,10 @@
 * Static values
 */
 // Store multi-use strings in const arrays so they aren't duplicated
-static _FLASH const char l_invalid_msg[] = "Invalid sensor %u configuration";
+static _FLASH const char l_invalid_msg[] = "Invalid sensor %u configuration: %s";
 static _FLASH const char e_invalid_msg[] = "Invalid sensor configuration";
-#define SETUP_ERR(i) \
-	LOGGER_NOF(FROM_FSTR(l_invalid_msg), (uint )(i)); \
+#define SETUP_ERR(i, msg) \
+	LOGGER_NOF(FROM_FSTR(l_invalid_msg), (uint )(i), F1(msg)); \
 	ERROR_STATE_NOF(FROM_FSTR(e_invalid_msg))
 
 static _FLASH const char unknown_msg[] = "Unknown sensor type '%u' at " __FILE__ ":%u";
@@ -202,7 +202,7 @@ void sensors_init(void) {
 			// This wouldn't actually cause any problems, but it indicates the
 			// structure was never set
 			if (dev_cfg->ohm.series_R == 0) {
-				SETUP_ERR(i);
+				SETUP_ERR(i, "Series resistance of 0 not allowed");
 			}
 			break;
 #endif // USE_OHM_SENSOR
@@ -211,7 +211,7 @@ void sensors_init(void) {
 		case SENS_LOG_BETA:
 			// This would cause a divide-by-0 error if allowed
 			if (dev_cfg->log_beta.beta == 0) {
-				SETUP_ERR(i);
+				SETUP_ERR(i, "Beta constant of 0 not allowed");
 			}
 #if USE_SMALL_SENSORS < 1
 			s->B_div_T0 = FIXEDP_DIV(FIXEDP_FROM(dev_cfg->log_beta.beta), FIXEDP_FROM(dev_cfg->log_beta.ref));
@@ -224,7 +224,7 @@ void sensors_init(void) {
 		case SENS_LINEAR_V:
 			// This would cause a divide-by-0 error if allowed
 			if (dev_cfg->linear.slope == 0) {
-				SETUP_ERR(i);
+				SETUP_ERR(i, "Slope of 0 not allowed");
 			}
 			break;
 #endif // USE_LINEAR_V_SENSOR
@@ -233,12 +233,12 @@ void sensors_init(void) {
 		case SENS_LINEAR_R:
 			// This would cause a divide-by-0 error if allowed
 			if (dev_cfg->linear.slope == 0) {
-				SETUP_ERR(i);
+				SETUP_ERR(i, "Slope of 0 not allowed");
 			}
 			// This wouldn't actually cause any problems, but it indicates the
 			// structure was never set
 			if (dev_cfg->linear.calibration == 0) {
-				SETUP_ERR(i);
+				SETUP_ERR(i, "Series resistance of 0 not allowed");
 			}
 			break;
 #endif // USE_LINEAR_R_SENSOR
@@ -248,7 +248,7 @@ void sensors_init(void) {
 			// This wouldn't actually cause any problems, but it indicates the
 			// structure was never set
 			if (dev_cfg->lut.calibration == 0) {
-				SETUP_ERR(i);
+				SETUP_ERR(i, "Series resistance of 0 not allowed");
 			}
 			break;
 #endif // USE_LOOKUP_R_SENSOR
@@ -294,18 +294,18 @@ void sensors_init(void) {
 			// The pin is actually the I2C address, which is 0x77 or 0x76 for
 			// both the BMP280 and BME280
 			if ((cfg->pin != 0x77) && (cfg->pin != 0x76)) {
-				SETUP_ERR(i);
+				SETUP_ERR(i, "I2C address must be 0x76 or 0x77");
 			}
 			break;
 #endif
 
 		case SENS_NONE:
-			SETUP_ERR(i);
+			SETUP_ERR(i, "No sensor type specified");
 			break;
 
 		default:
 			UNKNOWN_MSG(cfg->type);
-			SETUP_ERR(i);
+			SETUP_ERR(i, "Unknown sensor type");
 			break;
 		}
 	}
