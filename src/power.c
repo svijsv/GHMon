@@ -89,8 +89,8 @@ static void power_off_I2C(void);
 */
 void power_on_sensors(void) {
 #if USE_ADC_SENSORS
-#if ADC_POWER_PIN
-	power_on_output(ADC_POWER_PIN);
+#if SENSOR_POWER_PIN
+	power_on_output(SENSOR_POWER_PIN);
 #endif
 	adc_on();
 #endif
@@ -112,8 +112,8 @@ void power_off_sensors(void) {
 #endif
 #if USE_ADC_SENSORS
 	adc_off();
-#if ADC_POWER_PIN
-	power_off_output(ADC_POWER_PIN);
+#if SENSOR_POWER_PIN
+	power_off_output(SENSOR_POWER_PIN);
 #endif
 #endif
 

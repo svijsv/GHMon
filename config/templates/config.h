@@ -172,8 +172,8 @@
 #define BUTTON_PIN PIN_B4
 //
 // Power pins
-// Power for ADC sensors
-#define ADC_POWER_PIN PIN_B11
+// Power for sensors not on the SPI or I2C buses
+#define SENSOR_POWER_PIN PIN_B11
 // Power for SPI devices
 //#define SPI_POWER_PIN (PIN_B5 | BIAS_LOW)
 // Power for I2C devices
@@ -225,8 +225,8 @@
 #define BUTTON_PIN PIN_3
 //
 // Power pins
-// Power for ADC sensors
-#define ADC_POWER_PIN PIN_6
+// Power for sensors not on the SPI or I2C buses
+#define SENSOR_POWER_PIN PIN_6
 // Power for SPI devices
 //#define SPI_POWER_PIN   PIN_7
 // Power for I2C devices
