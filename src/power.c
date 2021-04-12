@@ -70,14 +70,7 @@ static bool SD_initialized = false;
 /*
 * Local function prototypes
 */
-#if USE_SPI
-static void power_on_SPI(void);
-static void power_off_SPI(void);
-#endif
-#if USE_I2C
-static void power_on_I2C(void);
-static void power_off_I2C(void);
-#endif
+
 
 /*
 * Interrupt handlers
@@ -88,33 +81,16 @@ static void power_off_I2C(void);
 * Functions
 */
 void power_on_sensors(void) {
-#if USE_ADC_SENSORS
 #if SENSOR_POWER_PIN
 	power_on_output(SENSOR_POWER_PIN);
-#endif
-	adc_on();
-#endif
-#if USE_SPI_SENSORS
-	power_on_SPI();
-#endif
-#if USE_I2C_SENSORS
-	power_on_I2C();
+	sleep(POWER_UP_DELAY);
 #endif
 
 	return;
 }
 void power_off_sensors(void) {
-#if USE_I2C_SENSORS
-	power_off_I2C();
-#endif
-#if USE_SPI_SENSORS
-	power_off_SPI();
-#endif
-#if USE_ADC_SENSORS
-	adc_off();
 #if SENSOR_POWER_PIN
 	power_off_output(SENSOR_POWER_PIN);
-#endif
 #endif
 
 	return;
@@ -138,7 +114,7 @@ void power_off_SD(void) {
 #if USE_SPI
 // SD card powering needs to be handled along with SPI powering or else current
 // leakage through powered SPI pins may cause problems
-static void power_on_SPI(void) {
+void power_on_SPI(void) {
 	if (SPI_callers == 0) {
 		// Per a sandisk datasheet by way of
 		// https:// thecavepearlproject.org/2015/11/05/a-diy-arduino-data-logger-build-instructions-part-4-power-optimization/
@@ -190,7 +166,7 @@ static void power_on_SPI(void) {
 
 	return;
 }
-static void power_off_SPI(void) {
+void power_off_SPI(void) {
 	// This function may be called to initialize the power pins, in which case
 	// it should go through the motions of turning everything off
 	if (SPI_callers > 0) {
@@ -241,7 +217,7 @@ static void power_off_SPI(void) {
 #endif // USE_SPI
 
 #if USE_I2C
-static void power_on_I2C(void) {
+void power_on_I2C(void) {
 	if (I2C_callers == 0) {
 		// The I2C lines are all open-drain with pullups so there *shouldn't*
 		// be an issue with the power-up order unless there's a device connected
@@ -258,7 +234,7 @@ static void power_on_I2C(void) {
 
 	return;
 }
-static void power_off_I2C(void) {
+void power_off_I2C(void) {
 	// This function may be called to initialize the power pins, in which case
 	// it should go through the motions of turning everything off
 	if (I2C_callers > 0) {

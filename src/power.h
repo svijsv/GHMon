@@ -58,6 +58,10 @@ void power_on_sensors(void);
 void power_off_sensors(void);
 void power_on_SD(void);
 void power_off_SD(void);
+void power_on_SPI(void);
+void power_off_SPI(void);
+void power_on_I2C(void);
+void power_off_I2C(void);
 
 // Power a specific pin on and off
 void power_on_output(pin_t pin);

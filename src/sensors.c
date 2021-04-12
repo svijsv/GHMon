@@ -323,6 +323,7 @@ void sensors_init(void) {
 
 void check_sensors() {
 	imath_t value[SENSOR_COUNT];
+	sensor_t *s;
 
 	if (!RTC_TIMES_UP(cooldown)) {
 		LOGGER("Not updating sensor status; cooldown in effect");
@@ -334,28 +335,70 @@ void check_sensors() {
 	for (uiter_t i = 0; i < SENSOR_COUNT; ++i) {
 		CLEAR_BIT(G_sensors[i].iflags, SENS_FLAG_DONE);
 	}
-	power_on_sensors();
 
+	//
+	// To minimize the time any given subsystem is powered on, the sensors are
+	// checked in groups
+	//
+	// First handle the generic sensors
+	power_on_sensors();
 #if USE_DHT11_SENSOR
 	// Per the DHT11 data sheet, don't send any instructions for at least 1
 	// second after power-on
 	// Only sleeping for 1s doesn't seem to reliably work
 	sleep(1500);
 #endif
-
+#if (CALIBRATE_VREF >= 2) || USE_ADC_SENSORS
+	adc_on();
+#endif
 #if CALIBRATE_VREF >= 2
 	G_vcc_voltage = adc_read_vref_mV();
 #endif
 
 	for (uiter_t i = 0; i < SENSOR_COUNT; ++i) {
-		value[i] = read_sensor(&G_sensors[i]);
+		s = &G_sensors[i];
+
+		if (!BIT_IS_SET(s->iflags, SENS_FLAG_I2C) && !BIT_IS_SET(s->iflags, SENS_FLAG_SPI)) {
+			value[i] = read_sensor(&G_sensors[i]);
+		}
 	}
+#if (CALIBRATE_VREF >= 2) || USE_ADC_SENSORS
+	adc_off();
+#endif
 	power_off_sensors();
-	cooldown = SET_RTC_TIMEOUT(SENS_COOLDOWN);
+
+	//
+	// Then SPI sensors
+#if USE_SPI_SENSORS
+	power_on_SPI();
+	for (uiter_t i = 0; i < SENSOR_COUNT; ++i) {
+		s = &G_sensors[i];
+
+		if (BIT_IS_SET(s->iflags, SENS_FLAG_SPI)) {
+			value[i] = read_sensor(&G_sensors[i]);
+		}
+	}
+	power_off_SPI();
+#endif // USE_SPI_SENSORS
+
+	//
+	// Then I2C sensors
+#if USE_I2C_SENSORS
+	power_on_I2C();
+	for (uiter_t i = 0; i < SENSOR_COUNT; ++i) {
+		s = &G_sensors[i];
+
+		if (BIT_IS_SET(s->iflags, SENS_FLAG_I2C)) {
+			value[i] = read_sensor(&G_sensors[i]);
+		}
+	}
+	power_off_I2C();
+#endif // USE_I2C_SENSORS
 
 	for (uiter_t i = 0; i < SENSOR_COUNT; ++i) {
 		update_sensor(&G_sensors[i], value[i]);
 	}
+	cooldown = SET_RTC_TIMEOUT(SENS_COOLDOWN);
 
 	return;
 }
