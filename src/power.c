@@ -43,6 +43,18 @@
 */
 // Wait this many ms for power to come up when it's turned on
 #define POWER_UP_DELAY 10
+#if SENSOR_POWER_UP_DELAY < POWER_UP_DELAY
+# undef SENSOR_POWER_UP_DELAY
+# define SENSOR_POWER_UP_DELAY POWER_UP_DELAY
+#endif
+#if SPI_POWER_UP_DELAY < POWER_UP_DELAY
+# undef SPI_POWER_UP_DELAY
+# define SPI_POWER_UP_DELAY POWER_UP_DELAY
+#endif
+#if I2C_POWER_UP_DELAY < POWER_UP_DELAY
+# undef I2C_POWER_UP_DELAY
+# define I2C_POWER_UP_DELAY POWER_UP_DELAY
+#endif
 
 
 /*
@@ -83,7 +95,7 @@ static bool SD_initialized = false;
 void power_on_sensors(void) {
 #if SENSOR_POWER_PIN
 	power_on_output(SENSOR_POWER_PIN);
-	sleep(POWER_UP_DELAY);
+	sleep(SENSOR_POWER_UP_DELAY);
 #endif
 
 	return;
@@ -149,7 +161,7 @@ void power_on_SPI(void) {
 
 		spi_on();
 		// Delay to let power come up
-		sleep(POWER_UP_DELAY);
+		sleep(SPI_POWER_UP_DELAY);
 	}
 #if USE_SD
 	// The SD card needs to be initialized or it may interfere with
@@ -228,7 +240,7 @@ void power_on_I2C(void) {
 
 		i2c_on();
 		// Delay to let power come up
-		sleep(POWER_UP_DELAY);
+		sleep(I2C_POWER_UP_DELAY);
 	}
 	++I2C_callers;
 

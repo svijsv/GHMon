@@ -20,6 +20,8 @@
 // sensors.h
 // Manage sensors
 // NOTES:
+//     This file is closely tied to sensors/config.h even though it doesn't
+//     directly include it
 //
 
 #ifdef __cplusplus
@@ -33,7 +35,8 @@
 */
 #include "config.h"
 #include "common.h"
-
+// This is included indirectly from config.h
+//#include "sensors/config.h"
 
 /*
 * Static values
@@ -85,129 +88,6 @@
 */
 typedef int16_t status_t;
 
-typedef enum {
-	SENS_NONE = 0,
-
-#if USE_VOLT_SENSOR
-	SENS_VOLT,
-#endif
-
-#if USE_OHM_SENSOR
-	SENS_OHM,
-#endif
-
-#if USE_LINEAR_V_SENSOR
-	SENS_LINEAR_V,
-#endif
-
-#if USE_LINEAR_R_SENSOR
-	SENS_LINEAR_R,
-#endif
-
-#if USE_LOOKUP_R_SENSOR
-	SENS_LOOKUP_R,
-#endif
-
-#if USE_LOOKUP_V_SENSOR
-	SENS_LOOKUP_V,
-#endif
-
-#if USE_LOG_BETA_SENSOR
-	SENS_LOG_BETA,
-#endif
-
-#if USE_BINARY_SENSOR
-	SENS_BINARY,
-#endif
-
-#if USE_DHT11_SENSOR
-	SENS_DHT11_HUM,
-	SENS_DHT11_TEMP,
-#endif
-
-#if USE_BMx280_SPI_SENSOR
-	SENS_BMx280_SPI_TEMP,
-	SENS_BMx280_SPI_PRESSURE,
-	SENS_BMx280_SPI_HUM,
-#endif
-
-#if USE_BMx280_I2C_SENSOR
-	SENS_BMx280_I2C_TEMP,
-	SENS_BMx280_I2C_PRESSURE,
-	SENS_BMx280_I2C_HUM,
-#endif
-} sensor_type_t;
-
-//
-// Settings for direct resistance sensors
-typedef struct {
-	// The value of the other resistor in the voltage divider
-	uint32_t series_R;
-} sensor_opt_ohm_t;
-//
-// Settings for linear sensors
-typedef struct {
-	// For resistance sensors, the resistance in ohms of the other resistor in
-	// the voltage divider.
-	// For voltage sensors, the reference voltage in mV of the system the
-	// reference value was taken in; used to calibrate steps against the ADC
-	// voltage reference when the sensor is operating off the same power supply
-	// and the output is Vcc-dependent.
-	// Ignored by voltage sensors if 0.
-	uint32_t calibration;
-	// The voltage in mV or resistance in ohms at the reference value
-	int32_t ref_value;
-	// The reference value
-	status_t ref;
-	// The voltage increase in 1/100 mV at each step or resistance increase in
-	// 1/10 ohms at each step
-	int16_t slope;
-} sensor_opt_linear_t;
-//
-// Settings for sensors with lookup tables
-typedef struct {
-	// For resistance tables, the value of the other resistor in the sensor's
-	// voltage divider
-	// For voltage tables, set the table max to this % of it's listed value,
-	// effectively scaling the voltage steps by the same
-	// Ignored for voltage tables if 0.
-	uint32_t calibration;
-	// The index of the lookup table in LOOKUP_TABLES[]
-	uint8_t lutno;
-} sensor_opt_lut_t;
-//
-// Settings for non-linear sensors with beta coefficents
-typedef struct {
-	// The value of the other resistor in the voltage divider
-	uint32_t series_R;
-	// The resistance in ohms at the reference value
-	uint32_t ref_R;
-	// The reference value
-	int32_t ref;
-	// The beta coefficient
-	int32_t beta;
-} sensor_opt_log_beta_t;
-//
-// Configuration of the underlying device
-// Depending on configuration options, this could be 0, 4, 5, 12, or 16 bytes.
-typedef union {
-#if USE_OHM_SENSOR
-	sensor_opt_ohm_t ohm;
-#endif
-
-#if USE_LINEAR_V_SENSOR || USE_LINEAR_R_SENSOR
-	sensor_opt_linear_t linear;
-#endif
-
-#if USE_LOOKUP_R_SENSOR || USE_LOOKUP_V_SENSOR
-	sensor_opt_lut_t lut;
-#endif
-
-#if USE_LOG_BETA_SENSOR
-	sensor_opt_log_beta_t log_beta;
-#endif
-} sensor_devcfg_t;
-
 //
 // Description of the user-configured portion of a sensor struct
 typedef struct {
@@ -231,6 +111,7 @@ typedef struct {
 	// If above < below warn when inside a window
 	// If above == SENS_THRESHOLD_IGNORE only warn when below 'below'
 	// If below == SENS_THRESHOLD_IGNORE only warn when above 'above'
+	// These are ignored if both fields are 0 (unset) or SENS_THRESHOLD_IGNORE
 	status_t warn_above;
 	status_t warn_below;
 
@@ -256,12 +137,12 @@ typedef struct {
 // Description of the internal portion of a sensor struct
 typedef struct {
 #if USE_SMALL_SENSORS < 1
-#if USE_LOG_BETA_SENSOR
+#if USE_BETA_R_SENSORS
 	// Cache the terms (B/T0) and log(R0) used in sensor interpretation
 	// calculations in order to cut out a division and a log()
 	FIXEDP_ITYPE B_div_T0;
 	FIXEDP_ITYPE log_R0;
-#endif // USE_LOG_BETA_SENSOR
+#endif // USE_BETA_R_SENSORS
 #endif // USE_SMALL_SENSORS < 1
 
 	// Converted sensor reading
@@ -309,10 +190,10 @@ extern int16_t G_vcc_voltage;
 extern sensor_t G_sensors[SENSOR_COUNT];
 
 // Array of sensor configuration structs representing available input
-// Defined in config.c
+// Defined in config/sensors.c
 extern _FLASH const sensor_static_t SENSORS[SENSOR_COUNT];
 // Array of lookup tables used for associated sensors
-// Defined in config.c
+// Defined in config/tables.c
 extern _FLASH const sensor_LUT_t LOOKUP_TABLES[];
 
 /*
@@ -343,6 +224,7 @@ void check_sensor_warnings(void);
 // Calculate a divider
 #define DIVIDE_BY(div) ((100) / (div))
 
+// Determine the index in G_sensors of a sensor_t instance
 #define GET_SENSOR_I(s) ((uint )(s - G_sensors))
 //#define GET_SENSOR_I(s) ((s)->i)
 

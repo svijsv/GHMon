@@ -32,26 +32,27 @@
 // Supported sensor types
 //
 // Direct reading of voltage, measured in millivolts
-#define USE_VOLT_SENSOR 1
+#define USE_VOLT_SENSORS 1
 // Direct reading of resistance, measured in ohms
-#define USE_OHM_SENSOR 1
-// Sensors such as thermistors with non-linear resistance changes
-#define USE_LOG_BETA_SENSOR 1
+#define USE_OHM_SENSORS 1
+// Sensors such as thermistors with reference values and beta coefficients
+// used to calculate non-linear resistance changes
+#define USE_BETA_R_SENSORS 1
 // Sensors with linear resistance changes
-#define USE_LINEAR_R_SENSOR 0
+#define USE_LINEAR_R_SENSORS 0
 // Sensors with linear voltage changes
-#define USE_LINEAR_V_SENSOR 0
+#define USE_LINEAR_V_SENSORS 0
 // Sensors with resistance lookup tables
-#define USE_LOOKUP_R_SENSOR 0
+#define USE_LOOKUP_R_SENSORS 0
 // Sensors with voltage lookup tables
-#define USE_LOOKUP_V_SENSOR 0
+#define USE_LOOKUP_V_SENSORS 0
 // Digital pin sensors; either '1' (high) or '0' (low)
-#define USE_BINARY_SENSOR 0
+#define USE_BINARY_SENSORS 0
 // DHT11 temperature and humidity sensor
-#define USE_DHT11_SENSOR 0
+#define USE_DHT11_SENSORS 0
 // BMP280 and BME280 temperature, air pressure, and humidity sensors
-#define USE_BMx280_SPI_SENSOR 0
-#define USE_BMx280_I2C_SENSOR 0
+#define USE_BMx280_SPI_SENSORS 0
+#define USE_BMx280_I2C_SENSORS 0
 
 
 //

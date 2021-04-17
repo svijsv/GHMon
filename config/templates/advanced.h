@@ -93,7 +93,7 @@
 // Platform-specific
 //
 // The voltage of the internal reference used to calibrate the ADC reference
-// If not set, use device-specific default
+// If not set, use platform-specific default
 //#define INTERNAL_VREF 1200
 
 // Ideal voltage output by the on-board voltage regulator
@@ -101,5 +101,5 @@
 //#define REGULATED_VOLTAGE 3300
 
 // Consider the regulated voltage low if it falls below this
-// If not set, use device-specific default
+// If not set, use platform-specific default
 //#define REGULATED_VOLTAGE_LOW 3100

@@ -38,6 +38,9 @@
 #include "../config/config.h"
 #include "../config/advanced.h"
 
+// Device configuration
+#include "sensors/config.h"
+
 // This is used internally to determine which subsystems should be enabled or
 // disabled based on user-configured values
 #include "config_unify.h"

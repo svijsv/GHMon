@@ -17,13 +17,13 @@ _FLASH const sensor_static_t SENSORS[SENSOR_COUNT] = {
 	.warn_above = 35, // Issue a warning if above 35C/95.0F
 	.warn_below =  5, // Issue a warning if below 5C/41.0F
 
-	.type = SENS_LOG_BETA, // Calculate the temperature with a reference point
-	                       // and a beta coefficient
+	.type = SENS_ADC_BETA_R, // Calculate the temperature with a reference point
+	                         // and a beta coefficient
 	.devcfg = {
-		.log_beta.ref      = 298,   // Thermistor reference temperature, 25C + 273.15K
-		.log_beta.ref_R    = 20000, // Thermistor reference resistance
-		.log_beta.beta     = 3950,  // Thermistor beta coefficient
-		.log_beta.series_R = 22000, // Series resistor (Vcc -> Rs -> MCU_pin, -> thermistor -> GND)
+		.beta_R.ref_value = 298,   // Thermistor reference temperature, 25C + 273.15K
+		.beta_R.ref_ohms  = 20000, // Thermistor reference resistance
+		.beta_R.beta      = 3950,  // Thermistor beta coefficient
+		.beta_R.series_R_ohms = 22000, // Series resistor (Vcc -> Rs -> MCU_pin -> thermistor -> GND)
 	},
 	.adjust = -273, // Convert to Celsius
 },
@@ -34,12 +34,12 @@ _FLASH const sensor_static_t SENSORS[SENSOR_COUNT] = {
 	.name  = "TOD_SEN",
 	.pin   = SENSOR_TOD_PIN,
 
-	.type = SENS_LOG_BETA,
+	.type = SENS_ADC_BETA_R,
 	.devcfg = {
-		.log_beta.ref      = 298,
-		.log_beta.ref_R    = 20000,
-		.log_beta.beta     = 3950,
-		.log_beta.series_R = 22000,
+		.beta_R.ref_value = 298,
+		.beta_R.ref_ohms  = 20000,
+		.beta_R.beta      = 3950,
+		.beta_R.series_R_ohms = 22000,
 	},
 	.adjust = -273,
 },
@@ -50,10 +50,10 @@ _FLASH const sensor_static_t SENSORS[SENSOR_COUNT] = {
 	.name  = "SM0_SEN",
 	.pin   = SENSOR_WATER_PIN,
 
-	.type = SENS_OHM, // Calculate moisture level based directly on resistance
-	                  // of the sensor
+	.type = SENS_ADC_OHM, // Calculate moisture level based directly on resistance
+	                      // of the sensor
 	.devcfg = {
-		.ohm.series_R = 47000,  // Series resistor (Vcc -> Rs -> MCU_pin, -> sensor -> Gnd)
+		.ohm.series_R_ohms = 47000,  // Series resistor (Vcc -> Rs -> MCU_pin -> sensor -> Gnd)
 	},
 },
 #define WATER 2
@@ -68,7 +68,7 @@ _FLASH const sensor_static_t SENSORS[SENSOR_COUNT] = {
 	.warn_above = SENS_THRESHOLD_IGNORE, // Don't worry about high voltage
 	.warn_below =  4000, // Warn if below 4000mV
 
-	.type = SENS_VOLT, // Voltage sensors need no further device configuration
+	.type = SENS_ADC_VOLT, // Voltage sensors need no further device configuration
 	.scale = 200, // Scale the final value to 200%, done here to account for the
 	              // voltage divider needed to read values > Vcc.
 	              // See also the macros MULTIPLY_BY(), DIVIDE_BY(), and
@@ -84,11 +84,11 @@ _FLASH const sensor_static_t SENSORS[SENSOR_COUNT] = {
 	.name  = "DIT_SEN",
 	.pin   = SENSOR_TEMP_PIN,
 
-	.type = SENS_LINEAR_V,
+	.type = SENS_ADC_LINEAR_V,
 	.devcfg = {
-		.linear.ref = 0, // Reference value, here 0C
-		.linear.ref_value = 600, // Voltage in mV at reference value
-		.linear.slope = -200, // Change in hundredths of a mV between value steps
+		.linear_V.ref_value = 0, // Reference value, here 0C
+		.linear_V.ref_mV = 600, // Voltage in mV at reference value
+		.linear_V.slope_mVx100 = -200, // Change in hundredths of a mV between value steps
 	},
 },
 
@@ -99,7 +99,7 @@ _FLASH const sensor_static_t SENSORS[SENSOR_COUNT] = {
 
 	.type = SENS_LUT_V,
 	.devcfg = {
-		.lut.lutno = TAB_VF_3950B, // TAB_VF_3950B is defined in tables.c
+		.lookup_V.lutno = TAB_VF_3950B, // TAB_VF_3950B is defined in tables.c
 	},
 },
 */

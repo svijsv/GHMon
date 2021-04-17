@@ -28,18 +28,9 @@
 #ifndef _CONFIG_UNIFY_H
 #define _CONFIG_UNIFY_H
 
-#if USE_VOLT_SENSOR || USE_OHM_SENSOR || \
-    USE_LOG_BETA_SENSOR || \
-    USE_LINEAR_R_SENSOR || USE_LINEAR_V_SENSOR || \
-    USE_LOOKUP_R_SENSOR || USE_LOOKUP_V_SENSOR
-# define USE_ADC_SENSORS 1
-#endif
+
 #if USE_ADC_SENSORS || CALIBRATE_VREF
 # define USE_ADC 1
-#endif
-
-#if USE_LOOKUP_R_SENSOR || USE_LOOKUP_V_SENSOR
-# define USE_LOOKUP_TABLES 1
 #endif
 
 #if USE_FDISK && !USE_TERMINAL
@@ -58,16 +49,8 @@
 # define USE_SD  1
 #endif
 
-#if USE_BMx280_SPI_SENSOR
-# define USE_SPI_SENSORS 1
-#endif
-
 #if USE_SD || USE_SPI_SENSORS
 # define USE_SPI 1
-#endif
-
-#if USE_BMx280_I2C_SENSOR
-# define USE_I2C_SENSORS 1
 #endif
 
 #if USE_I2C_SENSORS
