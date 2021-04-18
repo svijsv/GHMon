@@ -123,7 +123,7 @@ outfile.write("   //Vcc: %umV Rseries: %.02fR" % (param.sysVcc, param.seriesR))
 for i in range(0, param.steps):
 	if (i % param.columns) == 0:
 		outfile.write("\n ")
-	outfile.write(" % 6.0d /*% 4.2fmV*/," % (int(tab_T[i]*param.scale), tab_V[i]))
+	outfile.write(" % 6.0d, /*% 4.2fmV */" % (int(tab_T[i]*param.scale), tab_V[i]))
 
 outfile.write("\n }\n},\n")
 
