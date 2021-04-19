@@ -49,9 +49,13 @@
 //
 // Configuration flags for sensor_t structs
 //
+// Choose between resistance and voltage sensing for sensor backends that
+// support both
+#define SENS_FLAG_VOLTS 0x01
+#define SENS_FLAG_OHMS  0x02
 // Invert the relationship between the pin voltage reading and the value
 // Use this if the sensor is on the high side of the voltage divider.
-#define SENS_FLAG_INVERT  0x02
+#define SENS_FLAG_INVERT  0x04
 //
 // This flag depends on structure members that may not exist
 #if USE_SMALL_SENSORS < 2

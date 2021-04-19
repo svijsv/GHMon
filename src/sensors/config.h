@@ -63,8 +63,7 @@ typedef struct {
 uint16_t sensor_read_ADC(uiter_t si);
 //
 // Sensor header inclusions
-#include "sensors/ADC_linearR.h"
-#include "sensors/ADC_linearV.h"
+#include "sensors/ADC_linear.h"
 #include "sensors/ADC_betaR.h"
 #include "sensors/ADC_lookupR.h"
 #include "sensors/ADC_lookupV.h"
@@ -89,8 +88,7 @@ typedef enum {
 
 	_SENS_ADC_VOLT
 	_SENS_ADC_OHM
-	_SENS_ADC_LINEAR_R
-	_SENS_ADC_LINEAR_V
+	_SENS_ADC_LINEAR
 	_SENS_ADC_LOOKUP_R
 	_SENS_ADC_LOOKUP_V
 	_SENS_ADC_BETA_R
@@ -119,8 +117,7 @@ extern _FLASH const sensor_dispatch_t sensor_dispatch[SENSOR_TYPE_COUNT];
  \
 	SENS_ADC_VOLT_DISPATCH \
 	SENS_ADC_OHM_DISPATCH \
-	SENS_ADC_LINEAR_R_DISPATCH \
-	SENS_ADC_LINEAR_V_DISPATCH \
+	SENS_ADC_LINEAR_DISPATCH \
 	SENS_ADC_LOOKUP_R_DISPATCH \
 	SENS_ADC_LOOKUP_V_DISPATCH \
 	SENS_ADC_BETA_R_DISPATCH \
@@ -141,8 +138,7 @@ extern _FLASH const sensor_dispatch_t sensor_dispatch[SENSOR_TYPE_COUNT];
 // These don't need to be in the same order as sensor_type_t and multiple
 // sensor types can use the same set
 typedef union {
-	SENS_ADC_LINEAR_R_CFG
-	SENS_ADC_LINEAR_V_CFG
+	SENS_ADC_LINEAR_CFG
 	SENS_ADC_LOOKUP_R_CFG
 	SENS_ADC_LOOKUP_V_CFG
 	SENS_ADC_OHM_CFG

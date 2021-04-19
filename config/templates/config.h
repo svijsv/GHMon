@@ -38,10 +38,8 @@
 // Sensors such as thermistors with reference values and beta coefficients
 // used to calculate non-linear resistance changes
 #define USE_BETA_R_SENSORS 1
-// Sensors with linear resistance changes
-#define USE_LINEAR_R_SENSORS 0
-// Sensors with linear voltage changes
-#define USE_LINEAR_V_SENSORS 0
+// Sensors with linear resistance or voltage changes
+#define USE_LINEAR_SENSORS 0
 // Sensors with resistance lookup tables
 #define USE_LOOKUP_R_SENSORS 0
 // Sensors with voltage lookup tables

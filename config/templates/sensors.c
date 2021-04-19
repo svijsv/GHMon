@@ -86,9 +86,9 @@ _FLASH const sensor_static_t SENSORS[SENSOR_COUNT] = {
 
 	.type = SENS_ADC_LINEAR_V,
 	.devcfg = {
-		.linear_V.ref_value = 0, // Reference value, here 0C
-		.linear_V.ref_mV = 600, // Voltage in mV at reference value
-		.linear_V.slope_mVx100 = -200, // Change in hundredths of a mV between value steps
+		.linear.ref_value = 0,   // Reference value, here 0C
+		.linear.ref_input = 600, // Voltage in mV at reference value
+		.linear.slopeX10 = -20,  // Change in tenths of a mV between value steps
 	},
 },
 
