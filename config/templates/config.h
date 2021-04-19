@@ -40,10 +40,8 @@
 #define USE_BETA_R_SENSORS 1
 // Sensors with linear resistance or voltage changes
 #define USE_LINEAR_SENSORS 0
-// Sensors with resistance lookup tables
-#define USE_LOOKUP_R_SENSORS 0
-// Sensors with voltage lookup tables
-#define USE_LOOKUP_V_SENSORS 0
+// Sensors with resistance or voltage lookup tables
+#define USE_LOOKUP_SENSORS 0
 // Digital pin sensors; either '1' (high) or '0' (low)
 #define USE_BINARY_SENSORS 0
 // DHT11 temperature and humidity sensor

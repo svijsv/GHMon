@@ -116,7 +116,7 @@ if param.outfile != "-":
 else:
 	outfile = sys.stdout
 
-outfile.write("{ .min = %d, .max = %d, .Vref = %d, .scale = %d, .table = {\n" % (int(round(tab_min)), int(round(tab_max)), param.sysVcc, param.scale))
+outfile.write("{ .min = %d, .max = %d, .Vref = %d, .scale = %d, .cflags = SENS_FLAG_VOLTS, .table = {\n" % (int(round(tab_min)), int(round(tab_max)), param.sysVcc, param.scale))
 outfile.write("   //min: %.2fmV max: %.2fmV step: %.2fmV scale: %.2f\n" % (tab_min, tab_max, step_size, param.scale))
 outfile.write("   //Tref: %.2fC Rref: %.2fR beta: %.2f\n" % (param.Tref, param.Rref, param.beta));
 outfile.write("   //Vcc: %umV Rseries: %.02fR" % (param.sysVcc, param.seriesR))

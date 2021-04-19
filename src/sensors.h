@@ -161,28 +161,6 @@ typedef struct {
 	// uint8_t i;
 } sensor_t;
 
-//
-// Lookup table for determining sensor status
-typedef struct {
-	// The voltage in mV or resistance in ohms represented by the first value
-	// in the table
-	uint32_t min;
-	// The voltage in mV or resistance in ohms represented by the last value
-	// in the table
-	uint32_t max;
-	// For voltage tables, the reference voltage in mV of the system the values
-	// were calculated for; used to calibrate steps against the ADC voltage
-	// reference when the sensor is operating off the same power supply and the
-	// output is Vcc-dependent.
-	// Ignored for resistance tables.
-	// Ignored if 0.
-	uint16_t Vref;
-	// Table values are scaled by this
-	uint16_t scale;
-
-	LUT_T table[LUT_SIZE];
-} sensor_LUT_t;
-
 
 /*
 * Variable declarations (defined in sensors.c)
@@ -196,9 +174,6 @@ extern sensor_t G_sensors[SENSOR_COUNT];
 // Array of sensor configuration structs representing available input
 // Defined in config/sensors.c
 extern _FLASH const sensor_static_t SENSORS[SENSOR_COUNT];
-// Array of lookup tables used for associated sensors
-// Defined in config/tables.c
-extern _FLASH const sensor_LUT_t LOOKUP_TABLES[];
 
 /*
 * Function prototypes (defined in sensors.c)

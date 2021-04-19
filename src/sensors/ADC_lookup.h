@@ -25,9 +25,9 @@
 #ifdef __cplusplus
  extern "C" {
 #endif
-#ifndef _SENSORS_ADC_LOOKUPR_H
-#define _SENSORS_ADC_LOOKUPR_H
-#if USE_LOOKUP_R_SENSORS
+#ifndef _SENSORS_ADC_LOOKUP_H
+#define _SENSORS_ADC_LOOKUP_H
+#if USE_LOOKUP_SENSORS
 
 //
 // Enable the appropriate peripheral to read this sensor
@@ -42,32 +42,63 @@
 
 //
 // Macros for the lists in sensors.h
-#define _SENS_ADC_LOOKUP_R    SENS_ADC_LOOKUP_R,
-#define SENS_ADC_LOOKUP_R_CFG sensor_opt_lookupR_t lookup_R;
-#define SENS_ADC_LOOKUP_R_DISPATCH { .init = sensor_init_adc_lookupR, .read = sensor_read_ADC, .update = sensor_update_adc_lookupR },
+#define _SENS_ADC_LOOKUP    SENS_ADC_LOOKUP,
+#define SENS_ADC_LOOKUP_CFG sensor_opt_lookup_t lookup;
+#define SENS_ADC_LOOKUP_DISPATCH { .init = sensor_init_adc_lookup, .read = sensor_read_ADC, .update = sensor_update_adc_lookup },
 //
 // Dispatch function declarations
-void sensor_init_adc_lookupR(uiter_t si);
-void sensor_update_adc_lookupR(uiter_t si, uint16_t adc);
+void sensor_init_adc_lookup(uiter_t si);
+void sensor_update_adc_lookup(uiter_t si, uint16_t adc);
 
 //
 // Sensor type-specific settings for SENS_*_CFG
 typedef struct {
-	// The value of the other resistor in the sensor's voltage divider
-	uint32_t series_R_ohms;
+	// For voltage sensors, ignored
+	// For resistance sensors, the value of the other resistor in the sensor's
+	// voltage divider
+	uint32_t calibration;
 	// The index of the lookup table in LOOKUP_TABLES[]
 	uint8_t lutno;
-} sensor_opt_lookupR_t;
+} sensor_opt_lookup_t;
+
+//
+// Lookup table for determining sensor status
+typedef struct {
+	// The voltage in mV or resistance in ohms corresponding to the first value
+	// in the table
+	uint32_t min;
+	// The voltage in mV or resistance in ohms corresponding to the last value
+	// in the table
+	uint32_t max;
+	// For voltage tables, the reference voltage in mV of the system the values
+	// were calculated for; used to calibrate steps against the ADC voltage
+	// reference when the sensor is operating off the same power supply and the
+	// output is Vcc-dependent.
+	// Ignored if 0.
+	//
+	// For resistance tables, ignored
+	uint16_t Vref;
+	// Interpret table values as being multiplied by this
+	uint16_t scale;
+	// Set to SENS_FLAG_OHMS or SENS_FLAG_VOLTS for resistance and voltage
+	// tables respectively
+	uint8_t cflags;
+
+	LUT_T table[LUT_SIZE];
+} sensor_LUT_t;
+
+// Array of lookup tables used for associated sensors
+// Defined in config/tables.c
+extern _FLASH const sensor_LUT_t LOOKUP_TABLES[];
 
 
+#else  // !USE_LOOKUP_SENSORS
+#define _SENS_ADC_LOOKUP
+#define SENS_ADC_LOOKUP_DISPATCH
+#define SENS_ADC_LOOKUP_CFG
 
-#else  // !USE_LOOKUP_R_SENSORS
-#define _SENS_ADC_LOOKUP_R
-#define SENS_ADC_LOOKUP_R_DISPATCH
-#define SENS_ADC_LOOKUP_R_CFG
-
-#endif // USE_LOOKUP_R_SENSORS
-#endif // _SENSORS_ADC_LOOKUPR_H
+#endif // USE_LOOKUP_SENSORS
+#endif // _SENSORS_ADC_LOOKUP_H
 #ifdef __cplusplus
  }
 #endif
