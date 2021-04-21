@@ -56,8 +56,6 @@
 // Power the various peripherals on and off
 void power_on_sensors(void);
 void power_off_sensors(void);
-void power_on_SD(void);
-void power_off_SD(void);
 void power_on_SPI(void);
 void power_off_SPI(void);
 void power_on_I2C(void);
@@ -73,12 +71,7 @@ void power_off_input(pin_t pin);
 /*
 * Macros
 */
-/*
-#define power_on_output(pin)  (GPIO_GET_BIAS(pin) == BIAS_HIGH) ? gpio_set_mode(pin, GPIO_MODE_PP, GPIO_LOW ) : gpio_set_mode(pin, GPIO_MODE_PP, GPIO_HIGH)
-#define power_off_output(pin) (GPIO_GET_BIAS(pin) == BIAS_HIGH) ? gpio_set_mode(pin, GPIO_MODE_PP, GPIO_HIGH) : (GPIO_GET_BIAS(pin) == BIAS_LOW) ? gpio_set_mode(pin, GPIO_MODE_PP, GPIO_LOW) : gpio_set_mode(pin, GPIO_MODE_HiZ, GPIO_FLOAT)
-#define power_on_input(pin) (GPIO_GET_BIAS(pin) == BIAS_HIGH) ? gpio_set_mode(pin, GPIO_MODE_IN, GPIO_HIGH) : (GPIO_GET_BIAS(pin) == BIAS_LOW) ? gpio_set_mode(pin, GPIO_MODE_IN, GPIO_LOW) : gpio_set_mode(pin, GPIO_MODE_IN, GPIO_FLOAT)
-#define power_off_input(pin) gpio_set_mode(pin, GPIO_MODE_HiZ, GPIO_FLOAT)
-*/
+
 
 #endif // _POWER_H
 #ifdef __cplusplus

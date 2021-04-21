@@ -139,9 +139,12 @@ void sensors_init(void) {
 		}
 	}
 
-	// Power off sensors last because it needs to know if any sensors are on
-	// the SPI or I2C buses which is only determined in the initialization
-	// functions
+#if USE_SPI_SENSORS
+	power_off_SPI();
+#endif
+#if USE_I2C_SENSORS
+	power_off_I2C();
+#endif
 	power_off_sensors();
 
 #if CALIBRATE_VREF == 1

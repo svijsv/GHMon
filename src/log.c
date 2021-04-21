@@ -680,12 +680,12 @@ FRESULT print_header(void) {
 }
 
 static void power_on(void) {
-	power_on_SD();
+	power_on_SPI();
 
 	return;
 }
 static void power_off(void) {
-	power_off_SD();
+	power_off_SPI();
 
 	return;
 }

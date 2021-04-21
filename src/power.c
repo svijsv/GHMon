@@ -193,7 +193,7 @@ void power_off_SPI(void) {
 		//   2. Turn off CS pins so that leaking current doesn't damage anything
 		//   3. Turn off SPI device power
 #if USE_SD
-		// Mark the card as 'unitialized' even when power isn't removed because
+		// Mark the card as 'uninitialized' even when power isn't removed because
 		// the card itself may be removed at some point and we won't be alerted
 		SD_initialized = false;
 #endif
