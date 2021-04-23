@@ -39,8 +39,9 @@
 //
 // Macros for the lists in sensors.h
 #define _SENS_ADC_LINEAR    SENS_ADC_LINEAR,
-#define SENS_ADC_LINEAR_CFG sensor_opt_linear_t linear;
 #define SENS_ADC_LINEAR_DISPATCH { .init = sensor_init_adc_linear, .read = sensor_read_ADC, .update = sensor_update_adc_linear },
+#define SENS_ADC_LINEAR_CFG sensor_opt_linear_t linear;
+#define SENS_ADC_LINEAR_CACHE sensor_cache_linear_t linear;
 //
 // Dispatch function declarations
 void sensor_init_adc_linear(uiter_t si);
@@ -57,7 +58,7 @@ typedef struct {
 	//
 	// For resistance sensors, the series resistor used between Vcc and the
 	// test pin in the voltage divider
-	uint32_t calibration;
+	int32_t calibration;
 	// For voltage sensors, the voltage in mV at the reference value
 	// For resistance sensors, the resistance in ohms at the reference value
 	int32_t ref_input;
@@ -69,11 +70,18 @@ typedef struct {
 	int16_t slopeX10;
 } sensor_opt_linear_t;
 
+typedef struct {
+	// The slopeX10 and ref_input adjusted for the calibration value with
+	// voltage sensors
+	int16_t slopeX10_adj;
+	int32_t ref_input_adj;
+} sensor_cache_linear_t;
 
 
 #else  // !USE_LINEAR_SENSORS
 #define _SENS_ADC_LINEAR
 #define SENS_ADC_LINEAR_CFG
+#define SENS_ADC_LINEAR_CACHE
 #define SENS_ADC_LINEAR_DISPATCH
 
 #endif // USE_LINEAR_SENSORS

@@ -29,6 +29,8 @@
 #define _SENSORS_ADC_BETAR_H
 #if USE_BETA_R_SENSORS
 
+#include "ulib/math.h"
+
 //
 // Enable the appropriate peripheral to read this sensor
 #if ! USE_ADC_SENSORS
@@ -39,8 +41,9 @@
 //
 // Macros for the lists in sensors.h
 #define _SENS_ADC_BETA_R    SENS_ADC_BETA_R,
-#define SENS_ADC_BETA_R_CFG sensor_opt_betaR_t beta_R;
 #define SENS_ADC_BETA_R_DISPATCH { .init = sensor_init_adc_betaR, .read = sensor_read_ADC, .update = sensor_update_adc_betaR },
+#define SENS_ADC_BETA_R_CFG sensor_opt_betaR_t beta_R;
+#define SENS_ADC_BETA_R_CACHE sensor_cache_betaR_t betaR;
 //
 // Dispatch function declarations
 void sensor_init_adc_betaR(uiter_t si);
@@ -59,12 +62,18 @@ typedef struct {
 	int32_t beta;
 } sensor_opt_betaR_t;
 
-
+typedef struct {
+	// Cache the terms (B/T0) and log(R0) used in sensor interpretation
+	// calculations in order to cut out a division and a log()
+	FIXEDP_ITYPE B_div_T0;
+	FIXEDP_ITYPE log_R0;
+} sensor_cache_betaR_t;
 
 #else  // !USE_BETA_R_SENSORS
 #define _SENS_ADC_BETA_R
 #define SENS_ADC_BETA_R_DISPATCH
 #define SENS_ADC_BETA_R_CFG
+#define SENS_ADC_BETA_R_CACHE
 
 #endif // USE_BETA_R_SENSORS
 #endif // _SENSORS_ADC_BETAR_H

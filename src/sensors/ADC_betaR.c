@@ -35,6 +35,9 @@
 
 #if USE_BETA_R_SENSORS
 
+#if USE_SMALL_SENSORS < 1
+# define CACHE_BETA_R_SENSORS 1
+#endif
 
 void sensor_init_adc_betaR(uiter_t si) {
 	_FLASH const sensor_opt_betaR_t *dev_cfg;
@@ -45,12 +48,12 @@ void sensor_init_adc_betaR(uiter_t si) {
 		SETUP_ERR(si, "Beta constant of 0 not allowed");
 	}
 
-#if USE_SMALL_SENSORS < 1
-	sensor_t *s;
+#if CACHE_BETA_R_SENSORS
+	sensor_cache_betaR_t *cache;
 
-	s = &G_sensors[si];
-	s->B_div_T0 = FIXEDP_DIV(FIXEDP_FROM(dev_cfg->beta), FIXEDP_FROM(dev_cfg->ref_value));
-	s->log_R0   = log_fixedp(FIXEDP_FROM(dev_cfg->ref_ohms));
+	cache = &G_sensors[si].dev_cache.betaR;
+	cache->B_div_T0 = FIXEDP_DIV(FIXEDP_FROM(dev_cfg->beta), FIXEDP_FROM(dev_cfg->ref_value));
+	cache->log_R0   = log_fixedp(FIXEDP_FROM(dev_cfg->ref_ohms));
 #endif
 
 	return;
@@ -68,9 +71,12 @@ void sensor_update_adc_betaR(uiter_t si, uint16_t adc) {
 	cfg = &SENSORS[si];
 	dev_cfg = &cfg->devcfg.beta_R;
 
-#if USE_SMALL_SENSORS < 1
-	BdivT0 = s->B_div_T0;
-	logR0 = s->log_R0;
+#if CACHE_BETA_R_SENSORS
+	sensor_cache_betaR_t *cache;
+
+	cache = &G_sensors[si].dev_cache.betaR;
+	BdivT0 = cache->B_div_T0;
+	logR0 = cache->log_R0;
 #else
 	BdivT0 = FIXEDP_DIV(FIXEDP_FROM(dev_cfg->beta), FIXEDP_FROM(dev_cfg->ref_value));
 	logR0   = log_fixedp(FIXEDP_FROM(dev_cfg->ref_ohms));

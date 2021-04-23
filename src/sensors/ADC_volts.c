@@ -56,7 +56,7 @@ void sensor_update_adc_volt(uiter_t si, uint16_t adc) {
 		adc = ADC_MAX - adc;
 	}
 
-	s->status = SCALE_INT(ADC_TO_VOLTAGE(adc) + adjust);
+	s->status = SCALE_INT(ADC_TO_V(adc) + adjust);
 
 	return;
 }

@@ -95,6 +95,14 @@ void sensors_init(void) {
 	sensor_t *s;
 	_FLASH const sensor_static_t *cfg;
 
+	// If Vref is going to be calibrated here, do it before the sensors are
+	// initialized so they have access to the calibrated value
+#if CALIBRATE_VREF == 1
+	adc_on();
+	G_vcc_voltage = adc_read_vref_mV();
+	adc_off();
+#endif
+
 	// Check for any problems with the sensor configuration
 	for (uiter_t i = 0; i < SENSOR_COUNT; ++i) {
 		s = &G_sensors[i];
@@ -146,12 +154,6 @@ void sensors_init(void) {
 	power_off_I2C();
 #endif
 	power_off_sensors();
-
-#if CALIBRATE_VREF == 1
-	adc_on();
-	G_vcc_voltage = adc_read_vref_mV();
-	adc_off();
-#endif
 
 	return;
 }

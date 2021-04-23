@@ -35,6 +35,13 @@
 
 #if USE_LINEAR_SENSORS
 
+// In theory checking for this in the header would allow the struct to be
+// skipped altogether but the configuration isn't parsed until after the
+// header is
+#if USE_SMALL_SENSORS < 1 && CALIBRATE_VREF <= 1
+# define CACHE_LINEAR_SENSORS 1
+#endif
+
 
 void sensor_init_adc_linear(uiter_t si) {
 	_FLASH const sensor_static_t *cfg;
@@ -56,6 +63,25 @@ void sensor_init_adc_linear(uiter_t si) {
 	if (!BIT_IS_SET(cfg->cflags, SENS_FLAG_OHMS|SENS_FLAG_VOLTS) || BITS_ARE_SET(cfg->cflags, SENS_FLAG_OHMS|SENS_FLAG_VOLTS)) {
 		SETUP_ERR(si, "Need to set one of SENS_FLAG_OHMS or SENS_FLAG_VOLTS");
 	}
+
+#if CACHE_LINEAR_SENSORS
+	if (BIT_IS_SET(cfg->cflags, SENS_FLAG_VOLTS)) {
+		sensor_cache_linear_t *cache;
+
+		cache = &G_sensors[si].dev_cache.linear;
+		if ((dev_cfg->calibration != 0) && (dev_cfg->calibration != G_vcc_voltage)) {
+			imath_t maxV;
+
+			maxV = dev_cfg->calibration;
+			// Round by adding 1/2 denominator
+			cache->slopeX10_adj = ((((imath_t )(dev_cfg->slopeX10) * G_vcc_voltage) + (maxV / 2)) / maxV);
+			cache->ref_input_adj = ((((imath_t )(dev_cfg->ref_input) * G_vcc_voltage) + (maxV / 2)) / maxV);
+		} else {
+			cache->slopeX10_adj = dev_cfg->slopeX10;
+			cache->ref_input_adj = dev_cfg->ref_input;
+		}
+	}
+#endif
 
 	return;
 }
@@ -85,26 +111,22 @@ void sensor_update_adc_linear(uiter_t si, uint16_t adc) {
 	}
 
 	if (BIT_IS_SET(cfg->cflags, SENS_FLAG_VOLTS)) {
-		imath_t maxV;
+#if CACHE_LINEAR_SENSORS
+		slopeX10 = s->dev_cache.linear.slopeX10_adj;
+		ref_input = s->dev_cache.linear.ref_input_adj;
+#else
+		if ((dev_cfg->calibration != 0) && (dev_cfg->calibration != G_vcc_voltage)) {
+			imath_t maxV;
 
-		maxV = dev_cfg->calibration;
-		// There's no need to actually figure out the ratio of the original
-		// reference voltage to ours, we can just convert from voltage steps
-		// to adc steps
-		input = adc;
-		if (maxV == 0) {
-			maxV = G_vcc_voltage;
+			maxV = dev_cfg->calibration;
+			// v1/V1 = v2/V2
+			// v1 = (v2*V1)/V2
+			// Round by adding 1/2 denominator
+			slopeX10 = (((slopeX10 * G_vcc_voltage) + (maxV / 2)) / maxV);
+			ref_input = (((ref_input * G_vcc_voltage) + (maxV / 2)) / maxV);
 		}
-		// Convert voltage slope to ADC slope
-		// ADCstep/ADC_MAX = Vstep/Vmax
-		// ADCstep = (Vstep/Vmax)*ADC_MAX
-		// ADCstep = (Vstep*ADC_MAX)/Vmax
-		slopeX10 = ((slopeX10 * ADC_MAX) / maxV);
-		// Convert voltage reference to ADC reference
-		// ADCref/ADC_MAX = Vref/Vmax
-		// ADCref = (Vref/Vmax)*ADC_MAX
-		// ADCref = (Vref*ADC_MAX)/Vmax
-		ref_input = (ref_input * ADC_MAX) / maxV;
+#endif
+		input = ADC_TO_V(adc);
 
 	} else {
 		// adc == ADC_MAX would cause a divide-by-0 in the R calculation

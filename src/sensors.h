@@ -141,13 +141,8 @@ typedef struct {
 // Description of the internal portion of a sensor struct
 typedef struct {
 #if USE_SMALL_SENSORS < 1
-#if USE_BETA_R_SENSORS
-	// Cache the terms (B/T0) and log(R0) used in sensor interpretation
-	// calculations in order to cut out a division and a log()
-	FIXEDP_ITYPE B_div_T0;
-	FIXEDP_ITYPE log_R0;
-#endif // USE_BETA_R_SENSORS
-#endif // USE_SMALL_SENSORS < 1
+	sensor_devcache_t dev_cache;
+#endif
 
 	// Converted sensor reading
 	status_t status;

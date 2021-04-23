@@ -140,6 +140,14 @@ typedef union {
 	SENS_ADC_OHM_CFG
 	SENS_ADC_BETA_R_CFG
 } sensor_devcfg_t;
+//
+// Sensor type-specific cache is contained in this union if desired
+// These don't need to be in the same order as sensor_type_t and multiple
+// sensor types can use the same set
+typedef union {
+	SENS_ADC_BETA_R_CACHE
+	SENS_ADC_LINEAR_CACHE
+} sensor_devcache_t;
 
 #endif // _SENSORS_CONFIG_H
 #ifdef __cplusplus

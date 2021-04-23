@@ -49,7 +49,7 @@ extern _FLASH const char sens_invalid_msg_e[];
 // Vo/Vs = adc/ADC_MAX
 // Vo = (adc/ADC_MAX)*Vs
 // Vo = (Vs*adc)/ADC_MAX
-#define ADC_TO_VOLTAGE(adc) (((imath_t )G_vcc_voltage * (imath_t )(adc)) / ADC_MAX)
+#define ADC_TO_V(adc) (((imath_t )G_vcc_voltage * (imath_t )(adc)) / ADC_MAX)
 //
 // Calculate a resistance from an ADC reading
 // The ADC values are proportional to the voltages so:
