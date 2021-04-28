@@ -88,65 +88,76 @@ uint16_t sensor_read_bmx280_i2c(uiter_t si) {
 }
 #endif // USE_BMx280_I2C_SENSORS
 
-#define READ_REG_SPI(cs, reg, buf, size) \
-	do { \
-		gpio_set_state((cs), GPIO_LOW); \
-		spi_exchange_byte(((reg) | 0x80), (buf), 100); \
-		spi_receive_block((buf), (size), 0xFF, 250); \
-		gpio_set_state((cs), GPIO_HIGH); \
-	} while (0);
-#define WRITE_REG_SPI(cs, buf, reg, data) \
-	do { \
-		(buf)[0] = ((reg) & 0x7F); \
-		(buf)[1] = (data); \
-		gpio_set_state((cs), GPIO_LOW); \
-		spi_transmit_block((buf), 2, 100); \
-		gpio_set_state((cs), GPIO_HIGH); \
-	} while (0);
+#if USE_BMx280_SPI_SENSORS
+static err_t read_reg_spi(uint8_t cs, uint8_t reg, uint8_t *buf, uint8_t size) {
+	err_t err = EOK;
 
-#define READ_REG_I2C(addr, reg, buf, size) \
-	do { \
-		(buf)[0] = (reg); \
-		i2c_transmit_block((addr), (buf), 1, 100); \
-		i2c_receive_block((addr), (buf), (size), 250); \
-	} while (0);
-#define WRITE_REG_I2C(addr, buf, reg, data) \
-	do { \
-		(buf)[0] = (reg); \
-		(buf)[1] = (data); \
- 		i2c_transmit_block((addr), (buf), 2, 100); \
-	} while (0);
+	gpio_set_state((cs), GPIO_LOW);
+	err = spi_exchange_byte(((reg) | 0x80), (buf), 100);
+	if (err == EOK) {
+		spi_receive_block((buf), (size), 0xFF, 250);
+	}
+	gpio_set_state((cs), GPIO_HIGH);
+
+	return err;
+}
+static err_t write_reg_spi(uint8_t cs, uint8_t reg, uint8_t data) {
+	err_t err = EOK;
+	uint8_t buf[2];
+
+	(buf)[0] = ((reg) & 0x7F);
+	(buf)[1] = (data);
+	gpio_set_state((cs), GPIO_LOW);
+	err = spi_transmit_block((buf), 2, 100);
+	gpio_set_state((cs), GPIO_HIGH);
+
+	return err;
+}
+#endif // USE_BMx280_SPI_SENSORS
+
+#if USE_BMx280_I2C_SENSORS
+static err_t read_reg_i2c(uint8_t addr, uint8_t reg, uint8_t *buf, uint8_t size) {
+	err_t err = EOK;
+
+	(buf)[0] = (reg);
+	err = i2c_transmit_block((addr), (buf), 1, 100);
+	if (err == EOK) {
+		i2c_receive_block((addr), (buf), (size), 250);
+	}
+
+	return err;
+}
+static err_t write_reg_i2c(uint8_t addr, uint8_t reg, uint8_t data) {
+	err_t err = EOK;
+	uint8_t buf[2];
+
+	(buf)[0] = (reg);
+	(buf)[1] = (data);
+	i2c_transmit_block((addr), (buf), 2, 100);
+
+	return err;
+}
+#endif // USE_BMx280_I2C_SENSORS
 
 #if USE_BMx280_SPI_SENSORS && USE_BMx280_I2C_SENSORS
 # define READ_REG(addr, reg, buf, size) \
-	do { \
-		if (use_spi) { \
-			READ_REG_SPI((addr), (reg), (buf), (size)); \
-		} else { \
-			READ_REG_I2C((addr), (reg), (buf), (size)); \
-		} \
-	} while (0);
-# define WRITE_REG(addr, buf, reg, data) \
-	do { \
-		if (use_spi) { \
-			WRITE_REG_SPI((addr), (buf), (reg), (data)); \
-		} else { \
-			WRITE_REG_I2C((addr), (buf), (reg), (data)); \
-		} \
-	} while (0);
+	((use_spi) ? read_reg_spi((addr), (reg), (buf), (size)) : read_reg_i2c((addr), (reg), (buf), (size)))
+# define WRITE_REG(addr, reg, data) \
+	((use_spi) ? write_reg_spi((addr), (reg), (data)) : write_reg_i2c((addr), (reg), (data)))
 
 #elif USE_BMx280_SPI_SENSORS
-# define READ_REG( addr, reg, buf, size) READ_REG_SPI( (addr), (reg), (buf), (size))
-# define WRITE_REG(addr, reg, buf, size) WRITE_REG_SPI((addr), (reg), (buf), (size))
+# define READ_REG( addr, reg, buf, size) read_reg_spi((addr), (reg), (buf), (size))
+# define WRITE_REG(addr, reg, data)      write_reg_spi((addr), (reg), (data))
 
 #else
-# define READ_REG( addr, reg, buf, size) READ_REG_I2C( (addr), (reg), (buf), (size))
-# define WRITE_REG(addr, reg, buf, size) WRITE_REG_I2C((addr), (reg), (buf), (size))
+# define READ_REG( addr, reg, buf, size) read_reg_i2c((addr), (reg), (buf), (size))
+# define WRITE_REG(addr, reg, data)      write_reg_i2c((addr), (reg), (data))
 #endif
 
 static uint16_t sensor_read_bmx280(uiter_t si, bool use_spi) {
+	err_t err = EOK;
 	pin_t addr;
-	uint8_t byte, cmd[2];
+	uint8_t byte;
 	bmx280_raw_t raw = { { 0 }, { 0 } };
 	bmx280_status_t status = { 0 };
 	bool do_humidity = false;
@@ -164,7 +175,9 @@ static uint16_t sensor_read_bmx280(uiter_t si, bool use_spi) {
 
 	// Check if this is a BMP280 (pressure and temperature) or a BME280 (that
 	// plus humidity)
-	READ_REG(addr, 0xD0, &byte, 1);
+	if ((err = READ_REG(addr, 0xD0, &byte, 1)) == ETIMEOUT) {
+		goto END;
+	}
 	if (byte == 0x60) {
 		do_humidity = true;
 	}
@@ -172,14 +185,16 @@ static uint16_t sensor_read_bmx280(uiter_t si, bool use_spi) {
 	if (do_humidity) {
 		// Set ctrl_hum to oversample humidity 1x
 		// This doesn't take effect until ctrl_meas has been set
-		WRITE_REG(addr, cmd, 0xF2, 0b001);
+		if (WRITE_REG(addr, 0xF2, 0b001) == ETIMEOUT) {
+			goto END;
+		}
 	}
 	//
 	// Set ctrl_meas register to oversample temperature and pressure 1x and
 	// begin measuring
-	// The most significant byte of the register address is used to indicate
-	// read/write mode: 0 is write, 1 is read
-	WRITE_REG(addr, cmd, 0xF4, 0b00100101);
+	if ((err = WRITE_REG(addr, 0xF4, 0b00100101)) == ETIMEOUT) {
+		goto END;
+	}
 
 	//
 	// Wait for measurement to finish
@@ -187,28 +202,40 @@ static uint16_t sensor_read_bmx280(uiter_t si, bool use_spi) {
 	timeout = SET_TIMEOUT(100);
 	do {
 		delay(10);
-		READ_REG(addr, 0xF3, &byte, 1);
+		if ((err = READ_REG(addr, 0xF3, &byte, 1)) == ETIMEOUT) {
+			goto END;
+		}
 	} while ((byte != 0) && (!TIMES_UP(timeout)));
 
 	//
 	// Read device calibration data part 1; 26 bytes
-	READ_REG(addr, 0x88, raw.cal, 26);
+	if ((err = READ_REG(addr, 0x88, raw.cal, 26)) == ETIMEOUT) {
+		goto END;
+	}
 	//
 	// Read device calibration data part 2; 16 bytes (but only 7 are used?)
 	if (do_humidity) {
-		READ_REG(addr, 0xE1, &raw.cal[26], 7);
+		if ((err = READ_REG(addr, 0xE1, &raw.cal[26], 7)) == ETIMEOUT) {
+			goto END;
+		}
 	}
 	//
 	// Read sensor measurement data; 8 bytes
 	// The humidity register is read even when it's not supported so that the
 	// registers can be read in a single go; it shouldn't hurt anything.
-	READ_REG(addr, 0xF7, raw.adc, 8);
+	if ((err = READ_REG(addr, 0xF7, raw.adc, 8)) == ETIMEOUT) {
+		goto END;
+	}
 
+END:
 #if USE_BMx280_SPI_SENSORS
 	if (use_spi) {
 		gpio_set_mode(addr, GPIO_MODE_PP, GPIO_HIGH);
 	}
 #endif
+	if (err != EOK) {
+		LOGGER("BMx280 sensor at 0x%02X: communication error: %u", (uint )addr, (uint )err);
+	}
 
 	calculate_bmx280(&status, &raw, do_humidity);
 #if DEBUG
