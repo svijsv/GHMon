@@ -189,15 +189,6 @@ void check_sensor_warnings(void);
 /*
 * Macros
 */
-// VDIV-to-scale calculation: (100) * (Rv + Rg) / Rg
-// Rv is resistance from the supply to the test point, Rg is test point to
-// ground.
-#define CALC_VDIV_SCALE(Rv, Rg) ((((uint64_t )100) * ((uint64_t )Rv + (uint64_t )Rg)) / (uint64_t )Rg)
-// Calculate a multiplier
-#define MULTIPLY_BY(mul) ((mul) * (100))
-// Calculate a divider
-#define DIVIDE_BY(div) ((100) / (div))
-
 // Determine the index in G_sensors of a sensor_t instance
 #define GET_SENSOR_I(s) ((uint )(s - G_sensors))
 //#define GET_SENSOR_I(s) ((s)->i)

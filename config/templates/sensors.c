@@ -1,7 +1,30 @@
 /*
+* Macros to aid in sensor configuration
+*/
+// VDIV-to-scale calculation: (100) * (Rv + Rg) / Rg
+// Rv is resistance from the supply to the test point, Rg is test point to
+// ground.
+#define CALC_VDIV_SCALE(Rv, Rg) ((((uint64_t )100) * ((uint64_t )Rv + (uint64_t )Rg)) / (uint64_t )Rg)
+// Calculate a multiplier
+#define MULTIPLY_BY(mul) ((mul) * (100))
+// Calculate a divider
+#define DIVIDE_BY(div) ((100) / (div))
+//
+// Convert Celsius temperature to Fahrenheit; both of these macros need to
+// be used
+// T(°F) = T(°C) × 1.8 + 32
+// The 'scale' argument is to allow all the possibilities of normal scaling
+#define C_TO_F_SCALE(scale) ((180 * (scale)) / 100)
+// The adjustment is applied before the scaling, so it needs to be converted
+// to Celsius
+// Add half the denominator to round to nearest instead of truncate
+#define C_TO_F_ADJUST() ((32.0f + 0.9f)/1.8f)
+
+
+/*
 *
 * Sensor definitions
-* See sensors.h for structure documentation
+* See src/sensors.h and the headers in src/sensors for structure documentation
 *
 */
 // Be sure to change SENSOR_COUNT in config.h if the number of sensors changes.
@@ -72,7 +95,7 @@ _FLASH const sensor_static_t SENSORS[SENSOR_COUNT] = {
 	.scale = 200, // Scale the final value to 200%, done here to account for the
 	              // voltage divider needed to read values > Vcc.
 	              // See also the macros MULTIPLY_BY(), DIVIDE_BY(), and
-	              // CALC_VDIV_SCALE() defined in sensors.h.
+	              // CALC_VDIV_SCALE() defined at the top of this file.
 },
 #define BATTERY 3
 

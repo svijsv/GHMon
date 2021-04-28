@@ -59,9 +59,9 @@
 // After engaging, recheck the conditions and run again if required
 // If the conditions are still met after CONTROLLER_RETRY_MAX attempts, the
 // controller stops trying and issues a warning.
-#define CTRL_FLAG_RETRY        0x08
+#define CTRL_FLAG_RETRY           0x08
 // The polling time is an offset from 12AM rather than a period
-#define CTRL_FLAG_USE_CLOCK_SCHEDULE 0x10
+#define CTRL_FLAG_USE_TIME_OF_DAY 0x10
 #endif // USE_SMALL_CONTROLLERS < 1
 
 //
@@ -112,7 +112,7 @@ typedef struct {
 #if USE_SMALL_CONTROLLERS < 1
 	// When to check the whether the controller should be engaged
 	// By default this represents the number of minutes between checks, but
-	// if the CTRL_FLAG_USE_CLOCK_SCHEDULE flag is set it represents the number
+	// if the CTRL_FLAG_USE_TIME_OF_DAY flag is set it represents the number
 	// of minutes after midnight to check.
 	uint16_t schedule;
 #endif // USE_SMALL_CONTROLLERS < 1
@@ -192,8 +192,6 @@ void check_controller_warnings(void);
 /*
 * Macros
 */
-#define SET_CLOCK_TIME(hours, minutes) (((hours) * 60) + (minutes))
-
 #define GET_CONTROLLER_I(c) ((uint )(c - G_controllers))
 //#define GET_CONTROLLER_I(c) ((c)->i)
 

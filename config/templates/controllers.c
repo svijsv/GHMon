@@ -1,4 +1,10 @@
 /*
+* Macros to aid in controller configuration
+*/
+// Set a schedule using a more natural notation than bare minutes
+#define SET_CLOCK_TIME(hours, minutes) (((hours) * 60) + (minutes))
+
+/*
 *
 * Controller definitions
 * See controllers.h for structure documentation
@@ -35,8 +41,8 @@ _FLASH const controller_static_t CONTROLLERS[CONTROLLER_COUNT] = {
 	.run_timeout = 30, // Run for 30 seconds when triggered
 	.schedule = SET_CLOCK_TIME(17, 30), // Check daily at 5:30PM (internal time)
 
-	.cflags = CTRL_FLAG_USE_CLOCK_SCHEDULE // The schedule is a clock time
-	                                       // rather than a time period
+	.cflags = CTRL_FLAG_USE_TIME_OF_DAY // The schedule is a specific time
+	                                    // rather than a time period
 	        | CTRL_FLAG_RETRY, // Re-check the input again after the timeout
 
 	.inputs = {

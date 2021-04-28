@@ -317,7 +317,7 @@ static uint32_t set_alarms(bool force) {
 		} else {
 			//
 			// Time of day
-			if (BIT_IS_SET(cfg->cflags, CTRL_FLAG_USE_CLOCK_SCHEDULE)) {
+			if (BIT_IS_SET(cfg->cflags, CTRL_FLAG_USE_TIME_OF_DAY)) {
 				tmp = SNAP_TO_FACTOR(now, DAYS) + (cfg->schedule * MINUTES);
 				//
 				// If the alarm is set but not for the normal time, that means it
