@@ -43,11 +43,8 @@
 */
 // Size of the output buffer
 // Set to 0 to disable.
-#if USE_SMALL_CODE < 1
-# define SERIAL_BUFFER_SIZE 64
-#else
-# define SERIAL_BUFFER_SIZE 0
-#endif
+// This is set in config_unify.h
+//#define SERIAL_BUFFER_SIZE 64
 
 
 /*

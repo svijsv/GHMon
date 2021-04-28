@@ -48,6 +48,10 @@
 # error "YEAR_0 must be >= 2000"
 #endif // YEAR_0 < 2000
 
+#if DEBUG
+# pragma message "TERMINAL_BUFFER_SIZE: " XTRINGIZE(TERMINAL_BUFFER_SIZE)
+#endif
+
 /*
 * Static values
 */
@@ -486,7 +490,7 @@ static void terminalcmd_test(char *line_in) {
 #endif // USE_SMALL_CONTROLLERS < 1
 
 #if USE_LOGGING
-	PRINTF("Log print buffer size: %u\r\n", (uint )PRINT_BUFFER_SIZE);
+	PRINTF("Log print buffer size: %u\r\n", (uint )SD_PRINT_BUFFER_SIZE);
 #endif
 
 #endif // DEBUG

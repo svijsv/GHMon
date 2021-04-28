@@ -40,6 +40,10 @@
 
 #if USE_SERIAL
 
+#if DEBUG
+# pragma message "SERIAL_BUFFER_SIZE: " XTRINGIZE(SERIAL_BUFFER_SIZE)
+#endif
+
 /*
 * Static values
 */

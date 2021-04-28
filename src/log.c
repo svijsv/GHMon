@@ -49,7 +49,7 @@
 #endif
 
 #if DEBUG
-# pragma message "PRINT_BUFFER_SIZE: " XTRINGIZE(PRINT_BUFFER_SIZE)
+# pragma message "SD_PRINT_BUFFER_SIZE: " XTRINGIZE(SD_PRINT_BUFFER_SIZE)
 #endif
 
 
@@ -92,15 +92,15 @@ typedef struct {
 	uint8_t  warnings;
 } log_buffer_t;
 
-#if PRINT_BUFFER_SIZE > 0
+#if SD_PRINT_BUFFER_SIZE > 0
 // We can't use a normal string_t to buffer output because those truncate
 // the line if we go over; instead we need to roll our own
 // The buffer does not need to be NUL-terminated.
 typedef struct {
 	uint16_t size;
-	uint8_t buffer[PRINT_BUFFER_SIZE];
+	uint8_t buffer[SD_PRINT_BUFFER_SIZE];
 } print_buffer_t;
-#endif // PRINT_BUFFER_SIZE > 0
+#endif // SD_PRINT_BUFFER_SIZE > 0
 
 
 /*
@@ -120,7 +120,7 @@ static char logfile_name[] = LOGFILE_NAME_PATTERN;
 // other areas like sensors/controllers/tables is more important. I also can't
 // think of anywhere else that uses a lot of temporary RAM except the input
 // buffer for the terminal.
-#if PRINT_BUFFER_SIZE > 0
+#if SD_PRINT_BUFFER_SIZE > 0
 static print_buffer_t print_buffer;
 #endif
 static FATFS fs;
@@ -526,21 +526,21 @@ static void new_name(void) {
 }
 #endif // LINES_PER_FILE > 0
 
-#if PRINT_BUFFER_SIZE > 0
+#if SD_PRINT_BUFFER_SIZE > 0
 static void lprintf_putc(int c) {
 	UINT bh;
 	FRESULT err;
 
-	assert(print_buffer.size < PRINT_BUFFER_SIZE);
+	assert(print_buffer.size < SD_PRINT_BUFFER_SIZE);
 
 	print_buffer.buffer[print_buffer.size] = c;
 	++print_buffer.size;
 
-	if (print_buffer.size == PRINT_BUFFER_SIZE) {
+	if (print_buffer.size == SD_PRINT_BUFFER_SIZE) {
 		print_buffer.size = 0;
 
 		bh = 0;
-		if ((err = f_write(&fh, print_buffer.buffer, PRINT_BUFFER_SIZE, &bh)) != FR_OK) {
+		if ((err = f_write(&fh, print_buffer.buffer, SD_PRINT_BUFFER_SIZE, &bh)) != FR_OK) {
 			// Not much else we can do about it here
 			++write_errors;
 			WRITE_ERR_MSG(err);
@@ -555,7 +555,7 @@ static void lprintf_putc(int c) {
 
 	return;
 }
-#else // !PRINT_BUFFER_SIZE > 0
+#else // !SD_PRINT_BUFFER_SIZE > 0
 static void lprintf_putc(int c) {
 	UINT bh, cb;
 	FRESULT err;
@@ -570,7 +570,7 @@ static void lprintf_putc(int c) {
 
 	return;
 }
-#endif // PRINT_BUFFER_SIZE > 0
+#endif // SD_PRINT_BUFFER_SIZE > 0
 
 __attribute__ ((format(printf, 1, 2)))
 static void lprintf(const char *format, ...) {
@@ -589,8 +589,8 @@ FRESULT close_file(void) {
 
 	res = FR_OK;
 
-#if PRINT_BUFFER_SIZE > 0
-	assert(print_buffer.size < PRINT_BUFFER_SIZE);
+#if SD_PRINT_BUFFER_SIZE > 0
+	assert(print_buffer.size < SD_PRINT_BUFFER_SIZE);
 
 	if (print_buffer.size != 0) {
 		if ((err = f_write(&fh, print_buffer.buffer, print_buffer.size, &bh)) != FR_OK) {
@@ -605,7 +605,7 @@ FRESULT close_file(void) {
 #endif
 		print_buffer.size = 0;
 	}
-#endif // PRINT_BUFFER_SIZE > 0
+#endif // SD_PRINT_BUFFER_SIZE > 0
 
 	if ((err = f_close(&fh)) != FR_OK) {
 		CLOSE_ERR_MSG(err);

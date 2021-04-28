@@ -44,11 +44,8 @@
 #define TERMINAL_TIMEOUT_S 3600 // 1Hr
 
 // Size of the input buffer
-#if USE_SMALL_CODE < 1
-# define TERMINAL_BUFFER_SIZE 64
-#else
-# define TERMINAL_BUFFER_SIZE 32 // This is just big enough to set the time
-#endif
+// This is set in config_unify.h
+//#define TERMINAL_BUFFER_SIZE 64
 
 /*
 * Types
