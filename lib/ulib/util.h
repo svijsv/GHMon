@@ -94,24 +94,29 @@ void vaprintf(printf_putc_t printf_putc, const char *fmt, va_list arp);
 #define READ_SPLITREG(combined, high, low) \
 	do { \
 		((combined) = (((uint32_t )(high)) << 16) | (((uint32_t )(low)) & 0xFFFF)); \
-	} while (((combined) & 0xFFFF0000) != (((uint32_t )(high)) << 16));
+	} while ((((combined) >> 16) & 0xFFFF) != (high));
 #define READ_SPLITREG16(combined, high, low) \
 	do { \
 		((combined) = (((uint16_t )(high)) << 8) | (((uint16_t )(low)) & 0xFF)); \
-	} while (((combined) & 0xFF00) != (((uint16_t )(high)) << 8));
+	} while ((((combined) >> 8) & 0xFF) != (high));
 
-// Write to a split register while making sure the low half doesn't overflow
-// into high in the process
+// Write to a split register
+// Certain registers (like the RTC counter on the STM32) aren't updated
+// immediately and so trying to check the writes on those will cause an
+// infinite loop; there aren't really any places where overflow during write
+// is possible, so just skip the check
 #define WRITE_SPLITREG(combined, high, low) \
 	do { \
 		(high) = (uint16_t )((combined) >> 16); \
 		(low)  = (uint16_t )((combined) & 0xFFFF); \
-	} while (((combined) & 0xFFFF0000) != (((uint32_t )(high)) << 16));
+	} while (0);
+	//} while ((((combined) >> 16) & 0xFFFF) != (high));
 #define WRITE_SPLITREG16(combined, high, low) \
 	do { \
 		(high) = (uint8_t )((combined) >> 8); \
 		(low)  = (uint8_t )((combined) & 0xFF); \
-	} while (((combined) & 0xFF00) != (((uint16_t )(high)) << 8));
+	} while (0);
+	//} while ((((combined) >> 8) & 0xFF) != (high));
 
 // Write a volatile variable without atomic access; this doesn't protect
 // anything trying to read it during the write
