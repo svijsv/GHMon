@@ -468,6 +468,8 @@ DRESULT disk_write (BYTE lun, const BYTE *buf, LBA_t sector, UINT count) {
 
 	assert(buf != NULL);
 
+	LOGGER("Syncing %u sectors to SD", (uint )count);
+
 	if (lun != 0) {
 		return RES_PARERR;
 	}

@@ -148,9 +148,9 @@ static void new_name(void);
 static void lprintf_putc(int c);
 static void lprintf(const char *format, ...)
 	__attribute__ ((format(printf, 1, 2)));
-FRESULT close_file(void);
-FRESULT next_line(void);
-FRESULT print_header(void);
+static FRESULT close_file(void);
+static FRESULT next_line(void);
+static FRESULT print_header(void);
 static void power_on(void);
 static void power_off(void);
 static char* format_uptime(utime_t uptime);
@@ -540,6 +540,7 @@ static void lprintf_putc(int c) {
 		print_buffer.size = 0;
 
 		bh = 0;
+		LOGGER("Writing %u bytes to SD from %u byte buffer", (uint )SD_PRINT_BUFFER_SIZE, (uint )SD_PRINT_BUFFER_SIZE);
 		if ((err = f_write(&fh, print_buffer.buffer, SD_PRINT_BUFFER_SIZE, &bh)) != FR_OK) {
 			// Not much else we can do about it here
 			++write_errors;
@@ -583,7 +584,7 @@ static void lprintf(const char *format, ...) {
 	return;
 }
 
-FRESULT close_file(void) {
+static FRESULT close_file(void) {
 	UINT bh;
 	FRESULT err, res;
 
@@ -593,6 +594,7 @@ FRESULT close_file(void) {
 	assert(print_buffer.size < SD_PRINT_BUFFER_SIZE);
 
 	if (print_buffer.size != 0) {
+		LOGGER("Writing %u bytes to SD from %u byte buffer", (uint )print_buffer.size, (uint )SD_PRINT_BUFFER_SIZE);
 		if ((err = f_write(&fh, print_buffer.buffer, print_buffer.size, &bh)) != FR_OK) {
 			++write_errors;
 			WRITE_ERR_MSG(err);
@@ -614,7 +616,7 @@ FRESULT close_file(void) {
 
 	return res;
 }
-FRESULT next_line(void) {
+static FRESULT next_line(void) {
 	FRESULT err, res;
 
 	res = FR_OK;
@@ -644,7 +646,7 @@ FRESULT next_line(void) {
 
 	return res;
 }
-FRESULT print_header(void) {
+static FRESULT print_header(void) {
 	FRESULT err;
 
 	LOGGER("Writing log header");

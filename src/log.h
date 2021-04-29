@@ -50,7 +50,8 @@
 #define SD_POWEROFF_DELAY_MS 1000
 
 // Use a print buffer this size for SD card writes
-// This is on top of any buffering provided by the FatFS library.
+// If FF_FS_TINY is set to 0 in ffconf.h there's a native 512 byte write
+// buffer in addition to this.
 // Set to 0 to disable.
 // This is set in config_unify.h
 //#define SD_PRINT_BUFFER_SIZE 0

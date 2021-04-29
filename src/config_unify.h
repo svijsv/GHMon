@@ -100,19 +100,20 @@
 #endif
 //
 // SD output
+// The FatFS library has an internal 512-byte buffer used to cache sector
+// writes, the only time our buffer matters is if the total size of a write
+// is multiple sectors (which it may well be, especially with larger log line
+// buffers)
 #if USE_LOGGING
-// Certain platforms (like AVR) will require additional memory for strings,
-// so for those just forgo the buffer entirely; there's no good way to predict
-// what's needed.
-# if USE_AVR
-#  define SD_PRINT_BUFFER_SIZE 0
-
-# elif USE_SMALL_CODE < 1
-// This is a very crude method of determining the needed buffer size based
-// on expected typical setups - 17 characters for uptime, 4 for MCU Vcc, 5
-// each per sensor, 10 each per controller, the tabs between them, and the
-// newline
-#  define SD_PRINT_BUF_PER_LINE (17 + 4 + (5*SENSOR_COUNT) + (10*CONTROLLER_COUNT) + (2 + CONTROLLER_COUNT + SENSOR_COUNT) + 1)
+# if USE_SMALL_CODE < 1
+// This is a crude method of determining the needed buffer size based on
+// maximum possible usage - 17 characters for uptime, 9 for warnings, 4 for
+// MCU Vcc, 5 per sensor, 5+3 per controller, the tabs between fields, any
+// '!'s, and the newline
+// This doesn't take the size of the header into account, so at least the
+// first write will be split in two
+#  define SD_PRINT_BUF_PER_LINE (17 + 9 + 4 + (5*SENSOR_COUNT) + (8*CONTROLLER_COUNT) + (2 + (CONTROLLER_COUNT*2) + SENSOR_COUNT) + (CONTROLLER_COUNT + SENSOR_COUNT) + 1)
+#  define SD_PRINT_BUF_TOTAL (SD_PRINT_BUF_PER_LINE * (LOGFILE_BUFFER_COUNT+1))
 // This is an even cruder method of determining how much space we need to
 // reserve for everything else - other IO, the log file buffer, the FatFS
 // internal buffers, the sensor and controller arrays, and general usage
@@ -120,21 +121,28 @@
 // but still needs to be taken into account because writing to the SD card
 // can happen from within the terminal
 #  if USE_CONTROLLERS
-#   define SD_PRINT_BUF_RESERVE_CTRL (CONTROLLER_COUNT * 16)
+// This includes both G_controllers[] and the memory used by the controller
+// fields in log_buffer_t
+#   define SD_PRINT_BUF_RESERVE_CTRL ((CONTROLLER_COUNT * 16) + (4 * LOGFILE_BUFFER_COUNT))
 #  else
 #   define SD_PRINT_BUF_RESERVE_CTRL 0
 #  endif
-#  define SD_PRINT_BUF_RESERVE (SERIAL_BUFFER_SIZE + TERMINAL_BUFFER_SIZE + (16 * LOGFILE_BUFFER_COUNT) + 1024 + (SENSOR_COUNT * 20) + SD_PRINT_BUF_RESERVE_CTRL + 256)
-#  if (SD_PRINT_BUF_PER_LINE * (LOGFILE_BUFFER_COUNT+1)) < (RAM_PRESENT - SD_PRINT_BUF_RESERVE)
-#   define SD_PRINT_BUFFER_SIZE (SD_PRINT_BUF_PER_LINE * (LOGFILE_BUFFER_COUNT+1))
-#  else
-// If this is <0 log.c will treat it as 0
+#  define SD_PRINT_BUF_RESERVE (SERIAL_BUFFER_SIZE + TERMINAL_BUFFER_SIZE + (12 * LOGFILE_BUFFER_COUNT) + 1024 + (SENSOR_COUNT * 16) + SD_PRINT_BUF_RESERVE_CTRL + 256)
+#  if SD_PRINT_BUF_TOTAL < (RAM_PRESENT - SD_PRINT_BUF_RESERVE)
+#   define SD_PRINT_BUFFER_SIZE SD_PRINT_BUF_TOTAL
+// No point in a local buffer if it's got to be smaller than the library's
+#  elif (RAM_PRESENT - SD_PRINT_BUF_RESERVE) > 512
 #   define SD_PRINT_BUFFER_SIZE (RAM_PRESENT - SD_PRINT_BUF_RESERVE)
+#  else
+// Use something non-zero just to prevent constant function calls
+#   define SD_PRINT_BUFFER_SIZE 32
 #  endif
+
 # else // ! USE_SMALL_CODE < 1
 #  define SD_PRINT_BUFFER_SIZE 0
 # endif
 #endif // USE_LOGGING
+
 
 #endif // _CONFIG_UNIFY_H
 #ifdef __cplusplus
