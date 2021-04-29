@@ -285,7 +285,12 @@ static uint32_t set_alarms(bool force) {
 		status_alarm = SNAP_TO_FACTOR(now + tmp, tmp);
 	}
 #if USE_CONTROLLERS
-#if USE_SMALL_CONTROLLERS < 1
+#if USE_SMALL_CONTROLLERS >= 1
+	if ((CONTROLLER_CHECK_PERIOD > 0) && ((controller_alarm == 0) || force)) {
+		tmp = CONTROLLER_CHECK_PERIOD * MINUTES;
+		controller_alarm = SNAP_TO_FACTOR(now + tmp, tmp);
+	}
+#else // !USE_SMALL_CONTROLLERS >= 1
 	controller_t *c;
 	_FLASH const controller_static_t *cfg;
 	utime_t alarm;
@@ -318,12 +323,15 @@ static uint32_t set_alarms(bool force) {
 			//
 			// Time of day
 			if (BIT_IS_SET(cfg->cflags, CTRL_FLAG_USE_TIME_OF_DAY)) {
-				tmp = SNAP_TO_FACTOR(now, DAYS) + (cfg->schedule * MINUTES);
+				utime_t sm;
+
+				sm = cfg->schedule * MINUTES;
+				tmp = SNAP_TO_FACTOR(now, DAYS) + sm;
 				//
 				// If the alarm is set but not for the normal time, that means it
 				// was set somewhere other than here and if we've made it to this
 				// point then we're in a forced update so check on the next round
-				if ((alarm != 0) && (tmp != alarm)) {
+				if ((alarm != 0) && ((alarm % DAYS) != sm)) {
 					c->next_check = now;
 				//
 				// If the scheduled time would be earlier than now, wait until
@@ -352,12 +360,7 @@ static uint32_t set_alarms(bool force) {
 			}
 		}
 	}
-#else // !USE_SMALL_CONTROLLERS < 1
-	if ((CONTROLLER_CHECK_PERIOD > 0) && ((controller_alarm == 0) || force)) {
-		tmp = CONTROLLER_CHECK_PERIOD * MINUTES;
-		controller_alarm = SNAP_TO_FACTOR(now + tmp, tmp);
-	}
-#endif // USE_SMALL_CONTROLLERS < 1
+#endif // USE_SMALL_CONTROLLERS >= 1
 #endif // USE_CONTROLLERS
 
 	// Check for the next alarm in a separate loop so that I don't have to keep
@@ -371,7 +374,11 @@ static uint32_t set_alarms(bool force) {
 		next = status_alarm;
 	}
 #if USE_CONTROLLERS
-#if USE_SMALL_CONTROLLERS < 1
+#if USE_SMALL_CONTROLLERS >= 1
+	if ((controller_alarm != 0) && (next > controller_alarm)) {
+		next = controller_alarm;
+	}
+#else // !USE_SMALL_CONTROLLERS >= 1
 	for (uiter_t i = 0; i < CONTROLLER_COUNT; ++i) {
 		c = &G_controllers[i];
 
@@ -379,11 +386,7 @@ static uint32_t set_alarms(bool force) {
 			next = c->next_check;
 		}
 	}
-#else // !USE_SMALL_CONTROLLERS < 1
-	if ((controller_alarm != 0) && (next > controller_alarm)) {
-		next = controller_alarm;
-	}
-#endif // USE_SMALL_CONTROLLERS < 1
+#endif // USE_SMALL_CONTROLLERS >= 1
 #endif // USE_CONTROLLERS
 
 	return next;
