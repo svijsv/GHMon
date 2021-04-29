@@ -415,7 +415,7 @@ static char* format_warnings(uint8_t warnings) {
 	static char wstr[10];
 	// The order of the symbols needs to correspond to the warning bits set in
 	// common.h
-	static _FLASH const char symbols[] = "BVSCclL";
+	static _FLASH const char symbols[] = "BVSClL";
 
 	if (warnings == 0) {
 		wstr[0] = 'O';
@@ -672,7 +672,7 @@ static FRESULT print_header(void) {
 
 	// This needs to be split to fit in the buffer for F()
 	lprintf(F("# Warnings: B=battery low, V=Vcc low, S=sensor warning, C=controller warning, "));
-	lprintf(F("c=controller check skipped, L=log error, l=log sync skipped\n"));
+	lprintf(F("L=log error, l=log sync skipped\n"));
 
 	if ((err = next_line()) == FR_OK) {
 		have_log_header = true;

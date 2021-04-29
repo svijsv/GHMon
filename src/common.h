@@ -53,9 +53,8 @@
 #define WARN_VCC_LOW     0x02
 #define WARN_SENSOR      0x04
 #define WARN_CONTROLLER  0x08
-#define WARN_CONTROLLER_SKIPPED 0x10
-#define WARN_SD_SKIPPED  0x20
-#define WARN_SD_FAILED   0x40
+#define WARN_SD_SKIPPED  0x10
+#define WARN_SD_FAILED   0x20
 
 
 /*

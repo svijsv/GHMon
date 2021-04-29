@@ -424,7 +424,7 @@ static void check_warnings(void) {
 	static _FLASH const uint8_t warn_SD         = (WARN_SD_SKIPPED|WARN_SD_SKIPPED);
 	static _FLASH const uint8_t warn_power      = (WARN_BATTERY_LOW|WARN_VCC_LOW);
 	static _FLASH const uint8_t warn_sensor     = (WARN_SENSOR);
-	static _FLASH const uint8_t warn_controller = (WARN_CONTROLLER|WARN_CONTROLLER_SKIPPED);
+	static _FLASH const uint8_t warn_controller = (WARN_CONTROLLER);
 
 	// Delay briefly first so that it doesn't blend into any
 	// acknowledgement flashes

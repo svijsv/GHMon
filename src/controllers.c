@@ -152,7 +152,7 @@ void check_controller(controller_t *c) {
 			LOGGER("Skipping %s check, battery or Vcc low", FROM_FSTR(cfg->name));
 		}
 
-		SET_BIT(G_warnings, WARN_CONTROLLER_SKIPPED);
+		SET_BIT(G_warnings, WARN_CONTROLLER);
 		SET_BIT(c->iflags, CTRL_FLAG_WARNING);
 		return;
 	}
