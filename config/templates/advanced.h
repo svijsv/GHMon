@@ -81,9 +81,6 @@
 // The utility of this calibration depends on the accuracy of INTERNAL_VREF
 #define CALIBRATE_VREF 0
 
-// Target ADC sampling time in uS
-// Depending on platform, this may be ignored
-#define ADC_SAMPLE_TIME 5
 // Number of samples to take and then average for every ADC reading
 #define ADC_SAMPLE_COUNT 1
 

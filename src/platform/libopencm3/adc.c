@@ -57,6 +57,9 @@
 // 1us max
 #define ADC_STAB_TIME_uS 1
 
+//#define SAMPLE_TIME ADC_SMPR_SMP_239DOT5CYC
+#define SAMPLE_TIME ADC_SMPR_SMP_71DOT5CYC
+
 
 /*
 * Types
@@ -73,7 +76,6 @@ uint32_t G_freq_ADC;
 * Local function prototypes
 */
 static uint32_t calculate_prescaler(uint32_t max_hz);
-static uint8_t calculate_sample_rate(uint32_t uS);
 static adc_t adc_read_channel(uint8_t channel);
 
 
@@ -111,10 +113,7 @@ void adc_init(void) {
 		default:
 			break;
 	}
-	adc_set_sample_time_on_all_channels(ADCx, calculate_sample_rate(ADC_SAMPLE_TIME));
-#if ADCx_IS_ADC1
-	adc_set_sample_time(ADCx, ADC_CHANNEL_TEMP, calculate_sample_rate(TEMP_SAMPLE_uS));
-#endif
+	adc_set_sample_time_on_all_channels(ADCx, SAMPLE_TIME);
 
 	adc_set_dual_mode(ADC_CR1_DUALMOD_IND);
 	adc_disable_scan_mode(ADCx);
@@ -159,30 +158,6 @@ static uint32_t calculate_prescaler(uint32_t max_hz) {
 	}
 
 	return prescaler;
-}
-static uint8_t calculate_sample_rate(uint32_t uS) {
-	uint8_t tmp;
-
-	tmp = (G_freq_ADC * uS) / 1000000;
-	if (tmp > 72) {
-		tmp = ADC_SMPR_SMP_239DOT5CYC;
-	} else if (tmp > 56) {
-		tmp = ADC_SMPR_SMP_71DOT5CYC;
-	} else if (tmp > 42) {
-		tmp = ADC_SMPR_SMP_55DOT5CYC;
-	} else if (tmp > 29) {
-		tmp = ADC_SMPR_SMP_41DOT5CYC;
-	} else if (tmp > 14) {
-		tmp = ADC_SMPR_SMP_28DOT5CYC;
-	} else if (tmp > 8) {
-		tmp = ADC_SMPR_SMP_13DOT5CYC;
-	} else if (tmp > 2) {
-		tmp = ADC_SMPR_SMP_7DOT5CYC;
-	} else {
-		tmp = ADC_SMPR_SMP_1DOT5CYC;
-	}
-
-	return tmp;
 }
 
 adc_t adc_read_pin(pin_t pin) {

@@ -110,7 +110,6 @@ void adc_init(void) {
 	//    Freq = 13000000/T
 	// But trying to figure that out while staying in the 50KHz-200KHz range
 	// is complicated so right now just aim for ~100KHz (really 93KHz)
-	// TODO: Calculate proper frequency for ADC_SAMPLE_TIME
 #if (G_freq_ADCCLK > 12000000)
 	G_freq_ADC = G_freq_ADCCLK / 128;
 	MODIFY_BITS(ADCSRA, PRESCALER_MASK, PRESCALER_DIV128);

@@ -70,7 +70,11 @@
 #define SAMPLE_TIME_55_5  0b101 // 55.5 cycles
 #define SAMPLE_TIME_71_5  0b110 // 71.5 cycles
 #define SAMPLE_TIME_239_5 0b111 // 239.5 cycles
-
+// The value of a register set entirely to the default sample time
+// 239.5 cycles:
+//#define SAMPLE_TIME_REG 0x3FFFFFFF
+// 71.5 cycles:
+#define SAMPLE_TIME_REG 0x36DB6DB6
 
 /*
 * Types
@@ -87,7 +91,6 @@ uint32_t G_freq_ADC;
 * Local function prototypes
 */
 static uint32_t calculate_prescaler(uint32_t max_hz);
-static uint32_t calculate_sample_rate(uint32_t uS);
 static adc_t adc_read_channel(uint32_t channel);
 
 
@@ -100,8 +103,6 @@ static adc_t adc_read_channel(uint32_t channel);
 * Functions
 */
 void adc_init(void) {
-	uint32_t tmp, reg;
-
 	// Set ADC prescaler
 	// On the STM32F1, ADC input clock must not exceed 14MHz
 	MODIFY_BITS(RCC->CFGR, RCC_CFGR_ADCPRE,
@@ -132,22 +133,12 @@ void adc_init(void) {
 		(0b1   << ADC_CR2_EXTTRIG_Pos)| // Enable the trigger
 		0);
 
-	// Make things simpler by setting the whole sample time registers at once
-	// Be sure G_freq_ADC is set before calculating the sample rate.
-	reg = 0;
-	tmp = calculate_sample_rate(ADC_SAMPLE_TIME);
-	for (uiter_t i = 0; i < 11; ++i) {
-		SET_BIT(reg, tmp << (i*3));
-	}
-	ADCx->SMPR1 = reg & 0x00FFFFFF; // Only 24 bits used
-	ADCx->SMPR2 = reg & 0x3FFFFFFF; // Only 30 bits used
-
-#if ADCx_IS_ADC1
-	tmp = calculate_sample_rate(TEMP_SAMPLE_uS);
-	MODIFY_BITS(ADCx->SMPR1, (0b111 << ((TEMP_CHANNEL-10)*3)),
-		(tmp << ((TEMP_CHANNEL-10)*3)) |
-		0);
-#endif // ADCx_IS_ADC1
+	// Set the sample time registers
+	// If the sample time might bit shorter than the minimum temperature sample
+	// time and the temperature might be read, it's sample time should be set
+	// separately.
+	ADCx->SMPR1 = SAMPLE_TIME_REG & 0x00FFFFFF; // Only 24 bits used
+	ADCx->SMPR2 = SAMPLE_TIME_REG & 0x3FFFFFFF; // Only 30 bits used
 
 	// When ADON is set the first time, wake from power-down mode
 	SET_BIT(ADCx->CR2, ADC_CR2_ADON);
@@ -202,31 +193,6 @@ static uint32_t calculate_prescaler(uint32_t max_hz) {
 		return (PRESCALER_DIV6 << RCC_CFGR_ADCPRE_Pos);
 	}
 	return ((uint32_t )PRESCALER_DIV8 << RCC_CFGR_ADCPRE_Pos);
-}
-static uint32_t calculate_sample_rate(uint32_t uS) {
-	uint32_t tmp;
-
-	tmp = (G_freq_ADC * uS) / 1000000;
-
-	if (tmp > 72) {
-		tmp = SAMPLE_TIME_239_5;
-	} else if (tmp > 56) {
-		tmp = SAMPLE_TIME_71_5;
-	} else if (tmp > 42) {
-		tmp = SAMPLE_TIME_55_5;
-	} else if (tmp > 29) {
-		tmp = SAMPLE_TIME_41_5;
-	} else if (tmp > 14) {
-		tmp = SAMPLE_TIME_28_5;
-	} else if (tmp > 8) {
-		tmp = SAMPLE_TIME_13_5;
-	} else if (tmp > 2) {
-		tmp = SAMPLE_TIME_7_5;
-	} else {
-		tmp = SAMPLE_TIME_1_5;
-	}
-
-	return tmp;
 }
 
 adc_t adc_read_pin(pin_t pin) {
