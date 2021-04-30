@@ -70,7 +70,9 @@ controller_t G_controllers[CONTROLLER_COUNT];
 /*
 * Local function prototypes
 */
+#if USE_SMALL_CONTROLLERS < 2
 static gpio_state_t read_stop(_FLASH const controller_static_t *cfg);
+#endif
 static void update_runtime(controller_t *c);
 
 
@@ -385,6 +387,9 @@ static void update_runtime(controller_t *c) {
 		LOGGER("Traveled %u seconds into the past, not updating %s run time", (uint )(*last - now), FROM_FSTR(cfg->name));
 	}
 	*last = now;
+
+#else
+	UNUSED(c);
 #endif // USE_SMALL_CONTROLLERS < 1
 
 	return;

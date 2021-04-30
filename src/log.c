@@ -585,12 +585,13 @@ static void lprintf(const char *format, ...) {
 }
 
 static FRESULT close_file(void) {
-	UINT bh;
 	FRESULT err, res;
 
 	res = FR_OK;
 
 #if SD_PRINT_BUFFER_SIZE > 0
+	UINT bh;
+
 	assert(print_buffer.size < SD_PRINT_BUFFER_SIZE);
 
 	if (print_buffer.size != 0) {

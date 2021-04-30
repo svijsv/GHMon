@@ -92,7 +92,6 @@ static void update_sensor_warning(uiter_t si);
 * Functions
 */
 void sensors_init(void) {
-	sensor_t *s;
 	_FLASH const sensor_static_t *cfg;
 
 	// If Vref is going to be calibrated here, do it before the sensors are
@@ -105,7 +104,6 @@ void sensors_init(void) {
 
 	// Check for any problems with the sensor configuration
 	for (uiter_t i = 0; i < SENSOR_COUNT; ++i) {
-		s = &G_sensors[i];
 		cfg = &SENSORS[i];
 
 		//s->i = i;
@@ -116,6 +114,8 @@ void sensors_init(void) {
 		}
 
 #if USE_SMALL_SENSORS < 2
+		sensor_t *s = &G_sensors[i];
+
 		switch (cfg->warn_above) {
 		case 0:
 			// If both warn_above and warn_below were 0, they almost certainly
@@ -273,6 +273,9 @@ static void update_sensor_warning(uiter_t si) {
 	} else if (high || low) {
 		SET_BIT(s->iflags, SENS_FLAG_WARNING);
 	}
+
+#else
+	UNUSED(si);
 #endif // USE_SMALL_SENSORS < 2
 
 	return;
