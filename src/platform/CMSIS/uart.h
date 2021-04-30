@@ -43,14 +43,14 @@
 //
 // Handle UARTx
 // USART1 remapped
-#if (PINID(UARTx_TX_PIN) == PINID_B6) && (PINID(UARTx_RX_PIN) == PINID_B7)
+#if (PINID(UART_TX_PIN) == PINID_B6) && (PINID(UART_RX_PIN) == PINID_B7)
 # define UART1_DO_REMAP 1
 #endif
 // USART2 and USART3 can be remapped, but the remapped pins aren't accessible
 // on the bluepill
 
 // USART1
-#if ((PINID(UARTx_TX_PIN) == PINID_A9) && (PINID(UARTx_RX_PIN) == PINID_A10)) || UART1_DO_REMAP
+#if ((PINID(UART_TX_PIN) == PINID_A9) && (PINID(UART_RX_PIN) == PINID_A10)) || UART1_DO_REMAP
 # define UARTx USART1
 # define UARTx_IRQn     USART1_IRQn
 # define UARTx_IRQHandler USART1_IRQHandler
@@ -60,7 +60,7 @@
 # define UARTx_BUSFREQ  G_freq_PCLK2
 
 // USART2
-#elif (PINID(UARTx_TX_PIN) == PINID_A2) && (PINID(UARTx_RX_PIN) == PINID_A3)
+#elif (PINID(UART_TX_PIN) == PINID_A2) && (PINID(UART_RX_PIN) == PINID_A3)
 # define UARTx USART2
 # define UARTx_IRQn     USART2_IRQn
 # define UARTx_IRQHandler USART2_IRQHandler
@@ -70,7 +70,7 @@
 # define UARTx_BUSFREQ  G_freq_PCLK1
 
 // USART3
-#elif (PINID(UARTx_TX_PIN) == PINID_B10) && (PINID(UARTx_RX_PIN) == PINID_B11)
+#elif (PINID(UART_TX_PIN) == PINID_B10) && (PINID(UART_RX_PIN) == PINID_B11)
 # define UARTx USART3
 # define UARTx_IRQn     USART3_IRQn
 # define UARTx_IRQHandler USART3_IRQHandler

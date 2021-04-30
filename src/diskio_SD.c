@@ -61,13 +61,13 @@ static BYTE drive_type;
 
 
 static void CS_HIGH(void) {
-	gpio_set_state(SPIx_CS_SD_PIN, GPIO_HIGH);
+	gpio_set_state(SPI_CS_SD_PIN, GPIO_HIGH);
 	delay(1);
 
 	return;
 }
 static void CS_LOW(void) {
-	gpio_set_state(SPIx_CS_SD_PIN, GPIO_LOW);
+	gpio_set_state(SPI_CS_SD_PIN, GPIO_LOW);
 	delay(1);
 
 	return;

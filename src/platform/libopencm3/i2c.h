@@ -45,19 +45,19 @@
 #if USE_I2C
 //
 // I2C1 remapped
-#if (PINID(I2Cx_SCL_PIN) == PINID_B8) && (PINID(I2Cx_SDA_PIN) == PINID_B9)
+#if (PINID(I2C_SCL_PIN) == PINID_B8) && (PINID(I2C_SDA_PIN) == PINID_B9)
 # define I2C1_DO_REMAP 1
 #endif
 //
 // I2C1
-#if ((PINID(I2Cx_SCL_PIN) == PINID_B6) && (PINID(I2Cx_SDA_PIN) == PINID_B7)) || I2C1_DO_REMAP
+#if ((PINID(I2C_SCL_PIN) == PINID_B6) && (PINID(I2C_SDA_PIN) == PINID_B7)) || I2C1_DO_REMAP
 # define I2Cx I2C1
 # define I2Cx_RCC RCC_I2C1
 # define I2Cx_RST RST_I2C1
 # define I2Cx_BUSFREQ rcc_apb1_frequency
 //
 // I2C2
-#elif (PINID(I2Cx_SCL_PIN) == PINID_B10) && (PINID(I2Cx_SDA_PIN) == PINID_B11)
+#elif (PINID(I2C_SCL_PIN) == PINID_B10) && (PINID(I2C_SDA_PIN) == PINID_B11)
 # define I2Cx I2C2
 # define I2Cx_RCC RCC_I2C2
 # define I2Cx_RST RST_I2C2

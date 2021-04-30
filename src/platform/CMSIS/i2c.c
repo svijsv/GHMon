@@ -137,16 +137,16 @@ void i2c_on(void) {
 	SET_BIT(I2Cx->CR1, I2C_CR1_PE);
 
 	// Reference manual section 9.1.11 lists pin configuration for peripherals.
-	gpio_set_mode(I2Cx_SCL_PIN, GPIO_MODE_OD_AF, GPIO_FLOAT);
-	gpio_set_mode(I2Cx_SDA_PIN, GPIO_MODE_OD_AF, GPIO_FLOAT);
+	gpio_set_mode(I2C_SCL_PIN, GPIO_MODE_OD_AF, GPIO_FLOAT);
+	gpio_set_mode(I2C_SDA_PIN, GPIO_MODE_OD_AF, GPIO_FLOAT);
 
 	return;
 }
 void i2c_off(void) {
 	// Switch the pin GPIO mode before disabling the peripheral to prevent the
 	// pins from briefly pulling low
-	gpio_set_mode(I2Cx_SCL_PIN, GPIO_MODE_HiZ, GPIO_LOW);
-	gpio_set_mode(I2Cx_SDA_PIN, GPIO_MODE_HiZ, GPIO_LOW);
+	gpio_set_mode(I2C_SCL_PIN, GPIO_MODE_HiZ, GPIO_LOW);
+	gpio_set_mode(I2C_SDA_PIN, GPIO_MODE_HiZ, GPIO_LOW);
 
 	CLEAR_BIT(I2Cx->CR1, I2C_CR1_PE);
 	clock_disable(&I2Cx_APBxENR, I2Cx_CLOCKEN);

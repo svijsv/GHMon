@@ -39,7 +39,7 @@
 
 #if USE_SPI
 
-#if (PINID(SPIx_SCK_PIN) != PINID_B5) || (PINID(SPIx_SS_PIN) != PINID_B2) || (PINID(SPIx_MOSI_PIN) != PINID_B3) || (PINID(SPIx_MISO_PIN) != PINID_B4)
+#if (PINID(SPI_SCK_PIN) != PINID_B5) || (PINID(SPI_SS_PIN) != PINID_B2) || (PINID(SPI_MOSI_PIN) != PINID_B3) || (PINID(SPI_MISO_PIN) != PINID_B4)
 # error "Incorrect pin(s) set for SPI"
 #endif
 
@@ -117,18 +117,18 @@ void spi_on(void) {
 	// by the peripheral
 	// Per the datasheet, SS must be either an output or held high while SPI
 	// is enabled or else it will automatically switch to slave mode
-	gpio_set_mode(SPIx_SCK_PIN,  GPIO_MODE_PP, GPIO_LOW);
-	gpio_set_mode(SPIx_MOSI_PIN, GPIO_MODE_PP, GPIO_LOW);
+	gpio_set_mode(SPI_SCK_PIN,  GPIO_MODE_PP, GPIO_LOW);
+	gpio_set_mode(SPI_MOSI_PIN, GPIO_MODE_PP, GPIO_LOW);
 	// MISO will be forced into input when SPI is enabled, all this does is
 	// turn on the pullup
-	gpio_set_mode(SPIx_MISO_PIN, GPIO_MODE_IN, GPIO_HIGH);
-#if GPIO_GET_BIAS(SPIx_SS_PIN) == BIAS_HIGH
-	gpio_set_mode(SPIx_SS_PIN, GPIO_MODE_PP, GPIO_HIGH);
+	gpio_set_mode(SPI_MISO_PIN, GPIO_MODE_IN, GPIO_HIGH);
+#if GPIO_GET_BIAS(SPI_SS_PIN) == BIAS_HIGH
+	gpio_set_mode(SPI_SS_PIN, GPIO_MODE_PP, GPIO_HIGH);
 #else
 	// Setting low has a smaller chance of causing problems for switched
 	// devices and it can be set to whatever by wherever this is called from
 	// soon enough
-	gpio_set_mode(SPIx_SS_PIN, GPIO_MODE_PP, GPIO_LOW);
+	gpio_set_mode(SPI_SS_PIN, GPIO_MODE_PP, GPIO_LOW);
 #endif
 
 	// Enable the SPI peripheral
@@ -140,11 +140,11 @@ void spi_off(void) {
 	CLEAR_BIT(SPCR, _BV(SPE));
 	power_spi_disable();
 
-	gpio_set_mode(SPIx_SCK_PIN,  GPIO_MODE_HiZ, GPIO_FLOAT);
-	gpio_set_mode(SPIx_MOSI_PIN, GPIO_MODE_HiZ, GPIO_FLOAT);
-	gpio_set_mode(SPIx_MISO_PIN, GPIO_MODE_HiZ, GPIO_FLOAT);
+	gpio_set_mode(SPI_SCK_PIN,  GPIO_MODE_HiZ, GPIO_FLOAT);
+	gpio_set_mode(SPI_MOSI_PIN, GPIO_MODE_HiZ, GPIO_FLOAT);
+	gpio_set_mode(SPI_MISO_PIN, GPIO_MODE_HiZ, GPIO_FLOAT);
 	// Leave it to the caller to handle this part, they know more than we do
-	//gpio_set_mode(SPIx_SS_PIN, GPIO_MODE_HiZ, GPIO_FLOAT);
+	//gpio_set_mode(SPI_SS_PIN, GPIO_MODE_HiZ, GPIO_FLOAT);
 
 	return;
 }

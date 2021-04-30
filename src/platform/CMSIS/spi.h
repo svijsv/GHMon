@@ -44,12 +44,12 @@
 // Handle SPIx
 #if USE_SPI
 // SPI1 remapped
-#if (PINID(SPIx_SCK_PIN) == PINID_B3) && (PINID(SPIx_MISO_PIN) == PINID_B4) && (PINID(SPIx_MOSI_PIN) == PINID_B5)
+#if (PINID(SPI_SCK_PIN) == PINID_B3) && (PINID(SPI_MISO_PIN) == PINID_B4) && (PINID(SPI_MOSI_PIN) == PINID_B5)
 # define SPI1_DO_REMAP 1
 #endif
 
 // SPI1
-#if ((PINID(SPIx_SCK_PIN) == PINID_A5) && (PINID(SPIx_MISO_PIN) == PINID_A6) && (PINID(SPIx_MOSI_PIN) == PINID_A7)) || SPI1_DO_REMAP
+#if ((PINID(SPI_SCK_PIN) == PINID_A5) && (PINID(SPI_MISO_PIN) == PINID_A6) && (PINID(SPI_MOSI_PIN) == PINID_A7)) || SPI1_DO_REMAP
 # define SPIx SPI1
 # define SPIx_APBxENR  RCC->APB2ENR
 # define SPIx_APBxRSTR RCC->APB2RSTR
@@ -57,14 +57,14 @@
 # define SPIx_BUSFREQ  G_freq_PCLK2
 
 // SPI2
-#elif (PINID(SPIx_SCK_PIN) == PINID_B13) && (PINID(SPIx_MISO_PIN) == PINID_B14) && (PINID(SPIx_MOSI_PIN) == PINID_B15)
+#elif (PINID(SPI_SCK_PIN) == PINID_B13) && (PINID(SPI_MISO_PIN) == PINID_B14) && (PINID(SPI_MOSI_PIN) == PINID_B15)
 # define SPIx SPI2
 # define SPIx_APBxENR  RCC->APB1ENR
 # define SPIx_APBxRSTR RCC->APB1RSTR
 # define SPIx_CLOCKEN  RCC_APB1ENR_SPI2EN
 # define SPIx_BUSFREQ  G_freq_PCLK1
 
-#elif !defined(SPIx_SCK_PIN) && !defined(SPIx_MISO_PIN) && !defined(SPIx_MOSI_PIN)
+#elif !defined(SPI_SCK_PIN) && !defined(SPI_MISO_PIN) && !defined(SPI_MOSI_PIN)
 # error "No SPI peripheral set"
 #else
 # error "Can't determine SPI peripheral"

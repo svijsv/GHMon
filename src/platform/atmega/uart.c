@@ -40,7 +40,7 @@
 
 #if USE_SERIAL
 
-#if (PINID(UARTx_RX_PIN) != PINID_D0) || (PINID(UARTx_TX_PIN) != PINID_D1)
+#if (PINID(UART_RX_PIN) != PINID_D0) || (PINID(UART_TX_PIN) != PINID_D1)
 # error "Incorrect pin(s) set for UART"
 #endif
 

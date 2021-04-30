@@ -144,7 +144,7 @@ void power_on_SPI(void) {
 #if SPI_POWER_PIN
 		power_on_output(SPI_POWER_PIN);
 #if USE_SD
-		gpio_set_mode(SPIx_CS_SD_PIN, GPIO_MODE_PP, GPIO_HIGH);
+		gpio_set_mode(SPI_CS_SD_PIN, GPIO_MODE_PP, GPIO_HIGH);
 #endif // USE_SD
 #if USE_SPI_SENSORS
 		for (uiter_t i = 0; i < SENSOR_COUNT; ++i) {
@@ -199,7 +199,7 @@ void power_off_SPI(void) {
 #endif
 #if SPI_POWER_PIN
 #if USE_SD
-		gpio_set_mode(SPIx_CS_SD_PIN, GPIO_MODE_HiZ, GPIO_LOW);
+		gpio_set_mode(SPI_CS_SD_PIN, GPIO_MODE_HiZ, GPIO_LOW);
 #endif // USE_SD
 #if USE_SPI_SENSORS
 		for (uiter_t i = 0; i < SENSOR_COUNT; ++i) {
@@ -212,7 +212,7 @@ void power_off_SPI(void) {
 
 #else // !SPI_POWER_PIN
 #if USE_SD
-		gpio_set_mode(SPIx_CS_SD_PIN, GPIO_MODE_PP, GPIO_HIGH);
+		gpio_set_mode(SPI_CS_SD_PIN, GPIO_MODE_PP, GPIO_HIGH);
 #endif // USE_SD
 #if USE_SPI_SENSORS
 		for (uiter_t i = 0; i < SENSOR_COUNT; ++i) {

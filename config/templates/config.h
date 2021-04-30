@@ -178,20 +178,20 @@
 //
 // UART pins; hardware-specified
 // PIN_A9-PIN_A10: UART1
-#define UARTx_TX_PIN PIN_A9
-#define UARTx_RX_PIN PIN_A10
+#define UART_TX_PIN PIN_A9
+#define UART_RX_PIN PIN_A10
 //
 // SPI pins; hardware-specified
 // PIN_B12-PIN_B15: SPI2
-#define SPIx_CS_SD_PIN PIN_B12
-#define SPIx_SCK_PIN   PIN_B13
-#define SPIx_MISO_PIN  PIN_B14
-#define SPIx_MOSI_PIN  PIN_B15
+#define SPI_CS_SD_PIN PIN_B12
+#define SPI_SCK_PIN   PIN_B13
+#define SPI_MISO_PIN  PIN_B14
+#define SPI_MOSI_PIN  PIN_B15
 //
 // I2C pins; hardware-specified
 // PIN_B6-PIN_B7: I2C1
-#define I2Cx_SCL_PIN PIN_B6
-#define I2Cx_SDA_PIN PIN_B7
+#define I2C_SCL_PIN PIN_B6
+#define I2C_SDA_PIN PIN_B7
 
 #endif // USE_STM32
 
@@ -230,21 +230,21 @@
 //#define I2C_POWER_PIN   PIN_8
 //
 // UART pins; hardware-specified
-#define UARTx_TX_PIN PIN_TX
-#define UARTx_RX_PIN PIN_RX
+#define UART_TX_PIN PIN_TX
+#define UART_RX_PIN PIN_RX
 //
 // SPI pins; hardware-specified
-// The hardware SS pin must be used as a slave-select pin because if it's
+// The hardware SS pin should be used as a slave-select pin because if it's
 // ever set low as an input it will force the MCU into SPI slave mode
-#define SPIx_SS_PIN    PIN_10
-#define SPIx_CS_SD_PIN SPIx_SS_PIN
-#define SPIx_SCK_PIN   PIN_13
-#define SPIx_MISO_PIN  PIN_12
-#define SPIx_MOSI_PIN  PIN_11
+#define SPI_SS_PIN    PIN_10
+#define SPI_CS_SD_PIN SPI_SS_PIN
+#define SPI_SCK_PIN   PIN_13
+#define SPI_MISO_PIN  PIN_12
+#define SPI_MOSI_PIN  PIN_11
 //
 // I2C pins; hardware-specified
 // The SCL and SDA pins are the same as pins A4 and A5, even though they may
 // have separate pins broken out
-#define I2Cx_SCL_PIN PIN_A4
-#define I2Cx_SDA_PIN PIN_A5
+#define I2C_SCL_PIN PIN_A4
+#define I2C_SDA_PIN PIN_A5
 #endif // USE_AVR

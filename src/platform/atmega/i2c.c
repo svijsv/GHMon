@@ -39,7 +39,7 @@
 
 #if USE_I2C
 
-#if (PINID(I2Cx_SCL_PIN) != PINID_C5) || (PINID(I2Cx_SDA_PIN) != PINID_C4)
+#if (PINID(I2C_SCL_PIN) != PINID_C5) || (PINID(I2C_SDA_PIN) != PINID_C4)
 # error "Incorrect pin(s) set for I2C"
 #endif
 
@@ -115,14 +115,14 @@ void i2c_on(void) {
 	// Enable the I2C peripheral
 	SET_BIT(TWCR, _BV(TWEN));
 	// The peripheral controls the pins, we don't need to set anything
-	//gpio_set_mode(I2Cx_SCL_PIN, GPIO_MODE_OD, GPIO_HIGH);
-	//gpio_set_mode(I2Cx_SDA_PIN, GPIO_MODE_OD, GPIO_HIGH);
+	//gpio_set_mode(I2C_SCL_PIN, GPIO_MODE_OD, GPIO_HIGH);
+	//gpio_set_mode(I2C_SDA_PIN, GPIO_MODE_OD, GPIO_HIGH);
 
 	return;
 }
 void i2c_off(void) {
-	//gpio_set_mode(I2Cx_SCL_PIN, GPIO_MODE_HiZ, GPIO_FLOAT);
-	//gpio_set_mode(I2Cx_SDA_PIN, GPIO_MODE_HiZ, GPIO_FLOAT);
+	//gpio_set_mode(I2C_SCL_PIN, GPIO_MODE_HiZ, GPIO_FLOAT);
+	//gpio_set_mode(I2C_SDA_PIN, GPIO_MODE_HiZ, GPIO_FLOAT);
 
 	CLEAR_BIT(TWCR, _BV(TWEN));
 	power_twi_disable();

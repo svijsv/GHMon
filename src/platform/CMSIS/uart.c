@@ -96,8 +96,8 @@ err_t uart_init(void) {
 	UARTx->BRR = calculate_baud_div(UART_BAUDRATE);
 
 	// Peripheral pin modes specified in reference manual section 9.1.11
-	gpio_set_mode(UARTx_TX_PIN, GPIO_MODE_PP_AF, GPIO_LOW);
-	gpio_set_mode(UARTx_RX_PIN, GPIO_MODE_IN,    GPIO_FLOAT);
+	gpio_set_mode(UART_TX_PIN, GPIO_MODE_PP_AF, GPIO_LOW);
+	gpio_set_mode(UART_RX_PIN, GPIO_MODE_IN,    GPIO_FLOAT);
 
 	NVIC_SetPriority(UARTx_IRQn, UARTx_IRQp);
 
@@ -111,16 +111,16 @@ void uart_on(void) {
 	clock_enable(&UARTx_APBxENR, UARTx_CLOCKEN);
 
 	// Peripheral pin modes specified in reference manual section 9.1.11
-	gpio_set_mode(UARTx_TX_PIN, GPIO_MODE_PP_AF, GPIO_LOW);
-	gpio_set_mode(UARTx_RX_PIN, GPIO_MODE_IN,    GPIO_FLOAT);
+	gpio_set_mode(UART_TX_PIN, GPIO_MODE_PP_AF, GPIO_LOW);
+	gpio_set_mode(UART_RX_PIN, GPIO_MODE_IN,    GPIO_FLOAT);
 
 	return;
 }
 void uart_off(void) {
 	clock_disable(&UARTx_APBxENR, UARTx_CLOCKEN);
 
-	gpio_set_mode(UARTx_TX_PIN, GPIO_MODE_HiZ, GPIO_FLOAT);
-	gpio_set_mode(UARTx_RX_PIN, GPIO_MODE_HiZ, GPIO_FLOAT);
+	gpio_set_mode(UART_TX_PIN, GPIO_MODE_HiZ, GPIO_FLOAT);
+	gpio_set_mode(UART_RX_PIN, GPIO_MODE_HiZ, GPIO_FLOAT);
 
 	return;
 }
