@@ -41,6 +41,18 @@
 #include "platform.h"
 #include "config.h"
 
+// Because platform.h is (and needs to be) included before config.h, anything
+// that might be set in platform.h and overridden in config.h needs to be
+// handled specially
+#if ! INTERNAL_VREF && _INTERNAL_VREF
+# define INTERNAL_VREF _INTERNAL_VREF
+#endif
+#if ! REGULATED_VOLTAGE && _REGULATED_VOLTAGE
+# define REGULATED_VOLTAGE _REGULATED_VOLTAGE
+#endif
+#if ! REGULATED_VOLTAGE_LOW && _REGULATED_VOLTAGE_LOW
+# define REGULATED_VOLTAGE_LOW _REGULATED_VOLTAGE_LOW
+#endif
 
 /*
 * Static values

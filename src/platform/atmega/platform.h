@@ -78,16 +78,16 @@ typedef struct {
 // Ideal voltage output by the on-board voltage regulator
 #if ! REGULATED_VOLTAGE
 # if BOARD_VCC
-#  define REGULATED_VOLTAGE BOARD_VCC
+#  define _REGULATED_VOLTAGE BOARD_VCC
 # elif F_CPU > 8000000
-#  define REGULATED_VOLTAGE 5000
+#  define _REGULATED_VOLTAGE 5000
 # else
-#  define REGULATED_VOLTAGE 3300
+#  define _REGULATED_VOLTAGE 3300
 # endif
 #endif
 // Voltage of the internal reference in mV
 #ifndef INTERNAL_VREF
-# define INTERNAL_VREF 1100
+# define _INTERNAL_VREF 1100
 #endif
 
 
