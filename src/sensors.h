@@ -83,6 +83,10 @@
 #define STATUS_MIN (-32768)
 #define STATUS_MAX 32767
 
+// Set sensors below/above their supported range to these
+#define SENSOR_LOW  STATUS_MIN
+#define SENSOR_HIGH STATUS_MAX
+
 // Ignore a sensor warning threshold if set to this value
 #define SENS_THRESHOLD_IGNORE STATUS_MIN
 

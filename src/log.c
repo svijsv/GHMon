@@ -259,7 +259,21 @@ void log_status(bool force_write) {
 			} else {
 				prefix = prefix_std;
 			}
+#if USE_SMALL_CODE < 2
+			switch (line->status[i]) {
+			case SENSOR_LOW:
+				lprintf("%s(LOW)", prefix);
+				break;
+			case SENSOR_HIGH:
+				lprintf("%s(HIGH)", prefix);
+				break;
+			default:
+				lprintf("%s%d", prefix, (int )line->status[i]);
+				break;
+			}
+#else // !USE_SMALL_CODE < 2
 			lprintf("%s%d", prefix, (int )line->status[i]);
+#endif // USE_SMALL_CODE < 2
 		}
 #if USE_CONTROLLERS
 #if USE_SMALL_CONTROLLERS < 1
@@ -299,7 +313,22 @@ void log_status(bool force_write) {
 			} else {
 				prefix = prefix_std;
 			}
+#if USE_SMALL_CODE < 2
+			switch (G_sensors[i].status) {
+			case SENSOR_LOW:
+				lprintf("%s(LOW)", prefix);
+				break;
+			case SENSOR_HIGH:
+				lprintf("%s(HIGH)", prefix);
+				break;
+			default:
+				lprintf("%s%d", prefix, (int )G_sensors[i].status);
+				break;
+			}
+#else // !USE_SMALL_CODE < 2
 			lprintf("%s%d", prefix, (int )G_sensors[i].status);
+#endif // USE_SMALL_CODE < 2
+
 		}
 #if USE_CONTROLLERS
 #if USE_SMALL_CONTROLLERS < 1

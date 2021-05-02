@@ -46,11 +46,6 @@
 // setting it to 8 would use 12 bytes).
 #define DEVICE_NAME_LEN 7
 
-// If the status of a sensor would be higher or lower than it's supported range,
-// set it to these
-#define SENSOR_HIGH ( 9999)
-#define SENSOR_LOW  (-9999)
-
 // The type used for elements in lookup tables
 #define LUT_T int16_t
 
