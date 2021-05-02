@@ -226,7 +226,7 @@ void stop_RTC_alarm(void) {
 	return;
 }
 //
-// Configure the sleep() and uscounter timers
+// Configure the sleep_ms() and uscounter timers
 static void timers_init(void) {
 	// Timers 2-7 and 12-14 are on APB1
 	// Timers 1 and 8-11 are on APB2
@@ -241,7 +241,7 @@ static void timers_init(void) {
 		(0b0 << TIM_CR1_DIR_Pos  ) | // 0 to use as an upcounter
 		(0b1 << TIM_CR1_OPM_Pos  ) | // 1 to automatically disable on update events
 		0);
-	SLEEP_ALARM_TIM->PSC = calculate_TIM2_5_prescaler(1000*TIM_MS_PERIOD);
+	SLEEP_ALARM_TIM->PSC = calculate_TIM2_5_prescaler(1000*TIM_MS_TICKS);
 	NVIC_SetPriority(SLEEP_ALARM_IRQn, SLEEP_ALARM_IRQp);
 
 	//
@@ -287,14 +287,14 @@ static uint16_t calculate_TIM2_5_prescaler(uint32_t hz) {
 }
 void set_sleep_alarm(uint16_t ms) {
 	assert(ms != 0);
-#if TIM_MS_PERIOD > 1
-	assert((0xFFFF/TIM_MS_PERIOD) >= ms);
-#endif // TIM_MS_PERIOD > 1
+#if TIM_MS_TICKS > 1
+	assert((0xFFFF/TIM_MS_TICKS) >= ms);
+#endif // TIM_MS_TICKS > 1
 
 	clock_enable(&RCC->APB1ENR, SLEEP_ALARM_CLOCKEN);
 
 	// Set the reload value and generate an update event to load it
-	SLEEP_ALARM_TIM->ARR = ms * TIM_MS_PERIOD;
+	SLEEP_ALARM_TIM->ARR = ms * TIM_MS_TICKS;
 	SET_BIT(SLEEP_ALARM_TIM->EGR, TIM_EGR_UG);
 
 	SLEEP_ALARM_TIM->SR = 0x0000;                 // Clear all event flags
@@ -327,15 +327,15 @@ void uscounter_off(void) {
 	return;
 }
 
-void delay(utime_t ms) {
+void delay_ms(utime_t ms) {
 	utime_t timer;
 
 #if DEBUG && USE_SERIAL
 	uint32_t systick_mask = SysTick_CTRL_TICKINT_Msk|SysTick_CTRL_ENABLE_Msk;
 	if (SELECT_BITS(SysTick->CTRL, systick_mask) != systick_mask) {
 		uart_on();
-		LOGGER("Someone is using delay() without systick...");
-		dumb_delay(ms);
+		LOGGER("Someone is using delay_ms() without systick...");
+		dumb_delay_ms(ms);
 		return;
 	}
 #endif
@@ -348,7 +348,7 @@ void delay(utime_t ms) {
 	return;
 }
 // https:// stackoverflow.com/questions/7083482/how-to-prevent-gcc-from-optimizing-out-a-busy-wait-loop
-void dumb_delay(utime_t ms) {
+void dumb_delay_ms(utime_t ms) {
 	uint32_t cycles;
 
 	cycles = ms * (G_freq_HCLK/(1000*DUMB_DELAY_DIV));
@@ -360,7 +360,7 @@ void dumb_delay(utime_t ms) {
 
 	return;
 }
-void dumber_delay(uint32_t cycles) {
+void dumb_delay_cycles(uint32_t cycles) {
 	for (uint32_t i = 0; i < cycles; ++i) {
 		// Count some clock cycles
 		__asm__ volatile("" : "+g" (i) : :);

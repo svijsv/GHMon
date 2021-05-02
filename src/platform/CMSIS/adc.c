@@ -171,7 +171,7 @@ void adc_on(void) {
 		// Nothing to do here
 	}
 	// Wait for stabilization
-	dumber_delay(ADC_STAB_TIME_uS * (G_freq_HCLK/1000000U));
+	dumb_delay_cycles(ADC_STAB_TIME_uS * (G_freq_HCLK/1000000U));
 
 	return;
 }
@@ -267,12 +267,12 @@ int16_t adc_read_vref_mV(void) {
 	// (adc / max) * vref = 1200mV
 	// vref = 1200mV / (adc / max)
 	// vref = (1200mV * max) / adc
-	vref = (INTERNAL_VREF * ADC_MAX) / (uint32_t )adc;
+	vref = (INTERNAL_VREF_mV * ADC_MAX) / (uint32_t )adc;
 
 	CLEAR_BIT(ADCx->CR2, ADC_CR2_TSVREFE);
 
 #else // !ADCx_IS_ADC1
-	vref = REGULATED_VOLTAGE;
+	vref = REGULATED_VOLTAGE_mV;
 #endif // ADCx_IS_ADC1
 
 	return vref;

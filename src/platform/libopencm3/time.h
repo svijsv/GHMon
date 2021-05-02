@@ -45,7 +45,7 @@
 // the ratio were kept at 1.
 // Increasing this decreases the maximum duration proportionately.
 // Must be at least 1.
-#define TIM_MS_PERIOD 1
+#define TIM_MS_TICKS 1
 
 //
 // Timers

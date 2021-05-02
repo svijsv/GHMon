@@ -44,14 +44,14 @@
 // Because platform.h is (and needs to be) included before config.h, anything
 // that might be set in platform.h and overridden in config.h needs to be
 // handled specially
-#if ! INTERNAL_VREF && _INTERNAL_VREF
-# define INTERNAL_VREF _INTERNAL_VREF
+#if ! INTERNAL_VREF_mV && _INTERNAL_VREF_mV
+# define INTERNAL_VREF_mV _INTERNAL_VREF_mV
 #endif
-#if ! REGULATED_VOLTAGE && _REGULATED_VOLTAGE
-# define REGULATED_VOLTAGE _REGULATED_VOLTAGE
+#if ! REGULATED_VOLTAGE_mV && _REGULATED_VOLTAGE_mV
+# define REGULATED_VOLTAGE_mV _REGULATED_VOLTAGE_mV
 #endif
-#if ! REGULATED_VOLTAGE_LOW && _REGULATED_VOLTAGE_LOW
-# define REGULATED_VOLTAGE_LOW _REGULATED_VOLTAGE_LOW
+#if ! REGULATED_VOLTAGE_LOW_mV && _REGULATED_VOLTAGE_LOW_mV
+# define REGULATED_VOLTAGE_LOW_mV _REGULATED_VOLTAGE_LOW_mV
 #endif
 
 /*
@@ -118,12 +118,12 @@
 #endif
 
 // Ideal voltage output by the on-board voltage regulator in millivolts
-#if ! REGULATED_VOLTAGE
-# define REGULATED_VOLTAGE 3300
+#if ! REGULATED_VOLTAGE_mV
+# define REGULATED_VOLTAGE_mV 3300
 #endif
 // Consider the regulated voltage low if it falls below this
-#if ! REGULATED_VOLTAGE_LOW
-# define REGULATED_VOLTAGE_LOW (REGULATED_VOLTAGE-(REGULATED_VOLTAGE/20))
+#if ! REGULATED_VOLTAGE_LOW_mV
+# define REGULATED_VOLTAGE_LOW_mV (REGULATED_VOLTAGE_mV-(REGULATED_VOLTAGE_mV/20))
 #endif
 
 
@@ -198,10 +198,10 @@ extern volatile uint8_t G_IRQs;
 // Initialize the platform hardware
 void platform_init(void);
 // Sleep (low-power mode) for ms milliseconds
-void sleep(utime_t ms);
+void sleep_ms(utime_t ms);
 // Hibernate (lower-power mode) for s seconds
 // If CFG_ALLOW_INTERRUPTS is set in flags, exit when an interrupt is received
-void hibernate(utime_t s, uint8_t flags);
+void hibernate_s(utime_t s, uint8_t flags);
 // Print platform-specific information about the running system using printf_putc()
 void print_platform_info(printf_putc_t printf_putc);
 
@@ -302,12 +302,12 @@ utime_t get_RTC_seconds(void);
 void uscounter_on(void);
 void uscounter_off(void);
 // Don't do anything for a bit
-void delay(utime_t ms);
+void delay_ms(utime_t ms);
 // A 'dumb' delay that doesn't know about ticks
 // Don't expect this to be very accurate.
-void dumb_delay(utime_t ms);
+void dumb_delay_ms(utime_t ms);
 // A 'dumber' delay that doesn't even know about milliseconds
-void dumber_delay(uint32_t cycles);
+void dumb_delay_cycles(uint32_t cycles);
 
 #if USE_ADC
 //
@@ -317,7 +317,7 @@ void adc_on(void);
 void adc_off(void);
 // Return the analog voltage reference value in millivolts
 // Depending on the platform and configuration this may always return
-// REGULATED_VOLTAGE
+// REGULATED_VOLTAGE_mV
 int16_t adc_read_vref_mV(void);
 // Read the value on an analog pin
 // If the pin selected doesn't support analog reading, 0 is returned
@@ -325,7 +325,7 @@ adc_t adc_read_pin(pin_t pin);
 #else
 # define adc_on()  ((void )0)
 # define adc_off() ((void )0)
-# define adc_read_vref_mV() REGULATED_VOLTAGE
+# define adc_read_vref_mV() REGULATED_VOLTAGE_mV
 # define adc_read_pin(p) 0
 #endif
 

@@ -69,8 +69,8 @@ typedef struct {
 // Voltage of the internal reference in mV
 // Per the STM32F1 datasheet the internal Vref can be between 1.16V and 1.24V,
 // with 1.20V being typical.
-#ifndef INTERNAL_VREF
-# define INTERNAL_VREF 1200
+#ifndef INTERNAL_VREF_mV
+# define INTERNAL_VREF_mV 1200
 #endif
 
 //

@@ -104,8 +104,8 @@ ISR(BUTTON_ISR) {
 
 	// Let the user know we got the interrupt even if we're not going to do
 	// anything for a while
-	// Can't use led_flash(), we may not have delay() if we're coming out of
-	// hibernate() or sleep().
+	// Can't use led_flash(), we may not have delay_ms() if we're coming out of
+	// hibernate_s() or sleep_ms().
 	// led_flash(1, DELAY_ACK);
 	sysflash();
 
@@ -231,9 +231,9 @@ void sysflash(void) {
 }
 
 // set_sleep_mode() must be called with the appropriate argument prior to
-// calling _sleep()
+// calling _sleep_ms()
 OPTIMIZE_FUNCTION \
-static void _sleep(utime_t ms, uint8_t flags) {
+static void _sleep_ms(utime_t ms, uint8_t flags) {
 	uint16_t period, try;
 
 	while (ms != 0) {
@@ -241,11 +241,11 @@ static void _sleep(utime_t ms, uint8_t flags) {
 		period = set_wakeup_alarm(try);
 		ms -= period;
 
-		// The alarm can't always be set to an exact period, so delay() off any
+		// The alarm can't always be set to an exact period, so delay_ms() off any
 		// excess
-		// Make sure systick is enabled for delay()
+		// Make sure systick is enabled for delay_ms()
 		if (period == 0) {
-			delay(ms);
+			delay_ms(ms);
 			break;
 		}
 
@@ -295,14 +295,14 @@ static void _sleep(utime_t ms, uint8_t flags) {
 	return;
 }
 OPTIMIZE_FUNCTION \
-void sleep(utime_t ms) {
+void sleep_ms(utime_t ms) {
 	set_sleep_mode(SLEEP_MODE_IDLE);
-	_sleep(ms, 0);
+	_sleep_ms(ms, 0);
 
 	return;
 }
 OPTIMIZE_FUNCTION \
-void hibernate(utime_t s, uint8_t flags) {
+void hibernate_s(utime_t s, uint8_t flags) {
 	if (s == 0) {
 		return;
 	}
@@ -312,27 +312,27 @@ void hibernate(utime_t s, uint8_t flags) {
 		uint16_t w;
 
 		button_wakeup = false;
-		w = ((LIGHT_SLEEP_PERIOD + MIN_DEEP_SLEEP_PERIOD) > s) ? s: LIGHT_SLEEP_PERIOD;
+		w = ((LIGHT_SLEEP_SECONDS + MIN_DEEP_SLEEP_SECONDS) > s) ? s: LIGHT_SLEEP_SECONDS;
 		s -= w;
 
 		LOGGER("Waiting %u seconds for UART input", (uint )w);
 		uart_listen_on();
 		set_sleep_mode(SLEEP_MODE_IDLE);
-		_sleep(w*1000, flags);
+		_sleep_ms(w*1000, flags);
 		uart_listen_off();
 	} else
 #endif // USE_TERMINAL
-	if (s < MIN_DEEP_SLEEP_PERIOD) {
+	if (s < MIN_DEEP_SLEEP_SECONDS) {
 		LOGGER("Sleeping lightly %u seconds", (uint )s);
 		set_sleep_mode(SLEEP_MODE_IDLE);
-		_sleep(s*1000, flags);
+		_sleep_ms(s*1000, flags);
 		s = 0;
 	}
 
 	if ((G_IRQs == 0) && (s != 0)) {
 		LOGGER("Sleeping deeply %u seconds", (uint )s);
 		set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-		_sleep(s*1000, flags);
+		_sleep_ms(s*1000, flags);
 	}
 	if (G_IRQs != 0) {
 		LOGGER("Hibernation ending with G_IRQs at 0x%02X", (uint )G_IRQs);

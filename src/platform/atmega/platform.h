@@ -76,18 +76,18 @@ typedef struct {
 // on ARef minux 1 LSB
 #define ADC_MAX (0x03FF+1)
 // Ideal voltage output by the on-board voltage regulator
-#if ! REGULATED_VOLTAGE
+#if ! REGULATED_VOLTAGE_mV
 # if BOARD_VCC
-#  define _REGULATED_VOLTAGE BOARD_VCC
+#  define _REGULATED_VOLTAGE_mV BOARD_VCC
 # elif F_CPU > 8000000
-#  define _REGULATED_VOLTAGE 5000
+#  define _REGULATED_VOLTAGE_mV 5000
 # else
-#  define _REGULATED_VOLTAGE 3300
+#  define _REGULATED_VOLTAGE_mV 3300
 # endif
 #endif
 // Voltage of the internal reference in mV
-#ifndef INTERNAL_VREF
-# define _INTERNAL_VREF 1100
+#ifndef INTERNAL_VREF_mV
+# define _INTERNAL_VREF_mV 1100
 #endif
 
 

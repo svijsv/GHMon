@@ -134,7 +134,7 @@ void adc_on(void) {
 	adc_power_on(ADCx);
 	// ADC stabilization time is specified under Tstab in the datasheet as
 	// 1us max
-	dumber_delay(ADC_STAB_TIME_uS * (rcc_ahb_frequency/1000000U));
+	dumb_delay_cycles(ADC_STAB_TIME_uS * (rcc_ahb_frequency/1000000U));
 
 	return;
 }
@@ -224,12 +224,12 @@ int16_t adc_read_vref_mV(void) {
 	// (adc / max) * vref = 1200mV
 	// vref = 1200mV / (adc / max)
 	// vref = (1200mV * max) / adc
-	vref = (INTERNAL_VREF * ADC_MAX) / (uint32_t )adc;
+	vref = (INTERNAL_VREF_mV * ADC_MAX) / (uint32_t )adc;
 
 	adc_disable_temperature_sensor();
 
 #else // !ADCx_IS_ADC1
-	vref = REGULATED_VOLTAGE;
+	vref = REGULATED_VOLTAGE_mV;
 #endif // ADCx_IS_ADC1
 
 	return vref;

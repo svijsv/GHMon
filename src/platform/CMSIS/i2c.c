@@ -88,7 +88,7 @@ void i2c_init(void) {
 	// of math calculating the time periods.
 	// The desired frequency is multiplied by 2 because we're actually
 	// calculating the period of a half-cycle
-	tmp = I2Cx_BUSFREQ/(I2C_SPEED*2);
+	tmp = I2Cx_BUSFREQ/(I2C_FREQUENCY*2);
 	MODIFY_BITS(I2Cx->CCR, I2C_CCR_FS|I2C_CCR_CCR,
 		(0b0 << I2C_CCR_FS_Pos ) | // Use Sm mode
 		(tmp << I2C_CCR_CCR_Pos) | // Set prescaler
@@ -102,7 +102,7 @@ void i2c_init(void) {
 	//    F*1 cycles = 10^6 ns
 	//    1 cycle = 10^6 ns / F
 	//    1/2 cycle = (10^6 ns / F)/2 = (10^6) / (F*2)
-	i2c_ns = (1000000 / (I2C_SPEED*2));
+	i2c_ns = (1000000 / (I2C_FREQUENCY*2));
 	//    F*10^6 cycles = 10^9 ns
 	//    F*1 cycles = 10^3 ns
 	//    1 cycle = 10^3 ns / F

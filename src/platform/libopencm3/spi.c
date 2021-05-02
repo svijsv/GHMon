@@ -80,7 +80,7 @@ void spi_init(void) {
 	spi_set_full_duplex_mode(SPIx);
 	spi_set_master_mode(SPIx);
 	spi_enable_software_slave_management(SPIx);
-	spi_set_baudrate_prescaler(SPIx, calculate_prescaler(SPI_SPEED));
+	spi_set_baudrate_prescaler(SPIx, calculate_prescaler(SPI_FREQUENCY));
 
 	// There doesn't seem to be a function for setting the SS pin high
 	// internally

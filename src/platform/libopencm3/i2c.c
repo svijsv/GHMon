@@ -91,7 +91,7 @@ void i2c_init(void) {
 	// of math calculating the time periods.
 	// The desired frequency is multiplied by 2 because we're actually
 	// calculating the period of a half-cycle
-	i2c_set_ccr(I2Cx, I2Cx_BUSFREQ/(I2C_SPEED*2));
+	i2c_set_ccr(I2Cx, I2Cx_BUSFREQ/(I2C_FREQUENCY*2));
 	//
 	// Configure the I2C maximum rise time
 	// The reference manual gives the formula (1000ns/Tpclk)+1, which becomes

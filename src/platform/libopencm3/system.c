@@ -52,8 +52,8 @@
 #define gpio_set_mode gpio_set_mode_OVERRIDE
 
 
-#if LIGHT_SLEEP_PERIOD > MAX_SLEEP_PERIOD
-# error "LIGHT_SLEEP_PERIOD must be <= MAX_SLEEP_PERIOD"
+#if LIGHT_SLEEP_SECONDS > MAX_SLEEP_SECONDS
+# error "LIGHT_SLEEP_SECONDS must be <= MAX_SLEEP_SECONDS"
 #endif
 
 
@@ -78,8 +78,8 @@ uint32_t G_freq_PCLK2;
 /*
 * Local function prototypes
 */
-static void light_sleep(utime_t ms, uint8_t flags);
-static void deep_sleep(utime_t s, uint8_t flags);
+static void light_sleep_ms(utime_t ms, uint8_t flags);
+static void deep_sleep_s(utime_t s, uint8_t flags);
 static void clocks_init(void);
 
 static inline __attribute__((always_inline)) \
@@ -99,8 +99,8 @@ void Button_IRQHandler(void) {
 
 	// Let the user know we got the interrupt even if we're not going to do
 	// anything for a while
-	// Can't use led_flash(), we may not have delay() if we're coming out of
-	// hibernate() or sleep().
+	// Can't use led_flash(), we may not have delay_ms() if we're coming out of
+	// hibernate_s() or sleep_ms().
 	//led_flash(1, DELAY_ACK);
 	sysflash();
 
@@ -262,13 +262,13 @@ static void clocks_init(void) {
 }
 
 OPTIMIZE_FUNCTION \
-void sleep(utime_t ms) {
-	light_sleep(ms, 0);
+void sleep_ms(utime_t ms) {
+	light_sleep_ms(ms, 0);
 
 	return;
 }
 OPTIMIZE_FUNCTION \
-void hibernate(utime_t s, uint8_t flags) {
+void hibernate_s(utime_t s, uint8_t flags) {
 	uint32_t sleep_s;
 
 	if (s == 0) {
@@ -286,21 +286,21 @@ void hibernate(utime_t s, uint8_t flags) {
 	// few seconds before entering deep sleep in order to detect them
 	// The user will have to use the button or wait for the RTC alarm to enter
 	// the serial terminal.
-	sleep_s = (s > (LIGHT_SLEEP_PERIOD + MIN_DEEP_SLEEP_PERIOD)) ? LIGHT_SLEEP_PERIOD : s;
+	sleep_s = (s > (LIGHT_SLEEP_SECONDS + MIN_DEEP_SLEEP_SECONDS)) ? LIGHT_SLEEP_SECONDS : s;
 	if ((G_IRQs == 0) && (s > 0)) {
 		// LOGGER("Just a %u second nap...zZz...", (uint )sleep_s);
 		LOGGER("Sleeping lightly %u seconds", (uint )sleep_s);
-		light_sleep(sleep_s * 1000, flags);
+		light_sleep_ms(sleep_s * 1000, flags);
 	}
 
 	// TODO: Handle the case where the RTC isn't clocked by the LSE and the RTC
 	// alarm therefore can't be used
 	s -= sleep_s;
 	if ((G_IRQs == 0) && (s > 0)) {
-		sleep_s = (s > MAX_SLEEP_PERIOD) ? MAX_SLEEP_PERIOD : s;
+		sleep_s = (s > MAX_SLEEP_SECONDS) ? MAX_SLEEP_SECONDS : s;
 		// LOGGER("Wake me in %u seconds...ZZz...Zzz...zzZZZZZzzzZz", (uint )sleep_s);
 		LOGGER("Sleeping deeply %u seconds", (uint )sleep_s);
-		deep_sleep(sleep_s, flags);
+		deep_sleep_s(sleep_s, flags);
 	}
 
 	if (G_IRQs != 0) {
@@ -315,7 +315,7 @@ void hibernate(utime_t s, uint8_t flags) {
 	return;
 }
 OPTIMIZE_FUNCTION \
-static void light_sleep(utime_t ms, uint8_t flags) {
+static void light_sleep_ms(utime_t ms, uint8_t flags) {
 	uint16_t period;
 
 	// The systick interrupt will wake us from sleep if left enabled
@@ -325,12 +325,12 @@ static void light_sleep(utime_t ms, uint8_t flags) {
 	CLEAR_BIT(SCB_SCR, SCB_SCR_SLEEPDEEP);
 
 	while (ms > 0) {
-		if (ms < (0xFFFF/TIM_MS_PERIOD)) {
+		if (ms < (0xFFFF/TIM_MS_TICKS)) {
 			period = ms;
 			ms = 0;
 		} else {
-			period = (0xFFFF/TIM_MS_PERIOD);
-			ms -= (0xFFFF/TIM_MS_PERIOD);
+			period = (0xFFFF/TIM_MS_TICKS);
+			ms -= (0xFFFF/TIM_MS_TICKS);
 		}
 
 		set_sleep_alarm(period);
@@ -358,7 +358,7 @@ static void light_sleep(utime_t ms, uint8_t flags) {
 	return;
 }
 OPTIMIZE_FUNCTION \
-static void deep_sleep(utime_t s, uint8_t flags) {
+static void deep_sleep_s(utime_t s, uint8_t flags) {
 	if (s == 0) {
 		return;
 	}

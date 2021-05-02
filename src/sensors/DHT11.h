@@ -31,9 +31,9 @@
 
 // The datasheet says to wait 1 second before issuing commands, but I had
 // problems with anything less than 1.5
-#if SENSOR_POWER_UP_DELAY < 1500
-# undef  SENSOR_POWER_UP_DELAY
-# define SENSOR_POWER_UP_DELAY 1500
+#if SENSOR_POWER_UP_DELAY_MS < 1500
+# undef  SENSOR_POWER_UP_DELAY_MS
+# define SENSOR_POWER_UP_DELAY_MS 1500
 #endif
 //
 // Macros for the lists in sensors.h

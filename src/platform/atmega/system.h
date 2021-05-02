@@ -41,10 +41,10 @@
 // Enter light sleep for this many seconds before entering deep sleep to give
 // time to enter the command terminal because UART interrupts are disabled
 // during stop mode
-#define LIGHT_SLEEP_PERIOD (5) // 5 seconds
+#define LIGHT_SLEEP_SECONDS (5) // 5 seconds
 // If a deep sleep would last fewer than this many seconds, light sleep a bit
 // longer instead
-#define MIN_DEEP_SLEEP_PERIOD 2
+#define MIN_DEEP_SLEEP_SECONDS 2
 
 
 /*

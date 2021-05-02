@@ -45,7 +45,7 @@
 
 // To simplify things the I2C prescaler is always '1', which limits the core
 // clock:I2C clock ratio
-#if (((G_freq_CPUCLK/(I2C_SPEED*2)) - 8) < 0) || (((G_freq_CPUCLK/(I2C_SPEED*2)) - 8) > 0xFF)
+#if (((G_freq_CPUCLK/(I2C_FREQUENCY*2)) - 8) < 0) || (((G_freq_CPUCLK/(I2C_FREQUENCY*2)) - 8) > 0xFF)
 # error "This combination of core clock frequency and I2C clock frequency won't work"
 #endif
 
@@ -105,7 +105,7 @@ void i2c_on(void) {
 	//    cpu_clk/freq = (16 + 2*twbr)
 	//    2*twbr = cpu_clk/freq - 16
 	//    twbr = cpu_clk/(freq*2) - 8
-	TWBR = ((G_freq_CPUCLK/(I2C_SPEED*2)) - 8);
+	TWBR = ((G_freq_CPUCLK/(I2C_FREQUENCY*2)) - 8);
 	//
 	// Set the bit rate prescaler
 	MODIFY_BITS(TWSR, (0b11 << TWPS0),

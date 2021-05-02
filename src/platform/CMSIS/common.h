@@ -55,17 +55,17 @@
 // Enter light sleep for this many seconds before entering deep sleep to give
 // time to enter the command terminal because UART interrupts are disabled
 // during stop mode
-#define LIGHT_SLEEP_PERIOD (5) // 5 seconds
+#define LIGHT_SLEEP_SECONDS (5) // 5 seconds
 // If a deep sleep would last fewer than this many seconds, light sleep a bit
 // longer instead
-#define MIN_DEEP_SLEEP_PERIOD 2
+#define MIN_DEEP_SLEEP_SECONDS 2
 
 // Sleep for no more than this many seconds; this will generally be a hardware
 // constraint or a guard against any programming errors that may result in an
 // erroneous wakeup time because there's no other reason to wake up without
-// one of the other periods elapsing. MAX_WAKEUP_PERIOD should be small enough
+// one of the other periods elapsing. MAX_WAKEUP_SECONDS should be small enough
 // that it won't overflow a 32 bit integer when added to the current uptime.
-#define MAX_SLEEP_PERIOD (24 * 60 * 60) // 24 hours
+#define MAX_SLEEP_SECONDS (24 * 60 * 60) // 24 hours
 
 // Frequency of the low-speed external oscillator (Hz)
 #define LSE_VALUE 32768
@@ -102,8 +102,8 @@
 * Macros
 */
 // An LED flash for use when debugging
-//#define DFLASH(t) do { gpio_set_state(LED_PIN, GPIO_HIGH); dumb_delay(t); gpio_set_state(LED_PIN, GPIO_LOW); } while (0);
-#define DFLASH(t) do { gpio_toggle_state(LED_PIN); dumb_delay(t); gpio_toggle_state(LED_PIN); } while (0);
+//#define DFLASH(t) do { gpio_set_state(LED_PIN, GPIO_HIGH); dumb_delay_ms(t); gpio_set_state(LED_PIN, GPIO_LOW); } while (0);
+#define DFLASH(t) do { gpio_toggle_state(LED_PIN); dumb_delay_ms(t); gpio_toggle_state(LED_PIN); } while (0);
 
 
 #endif // _PLATFORM_CMSIS_COMMON_H

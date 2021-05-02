@@ -60,13 +60,13 @@
 // Since wdt_calibration is only 8 bits and needs to store the number of ms
 // elapsed in this period, this shouldn't be more than WDTO_120MS to be on
 // the safe side
-#define WDT_CALIBRATE_PERIOD WDTO_60MS
+#define WDT_CALIBRATE_CYCLES WDTO_60MS
 // This is the number of times the WDT can be called before recalibration;
 // right now it's only used in set_wakeup_alarm() and should fit in a uint16_t
 // It's hard to associate this with a period of time because the duration of
 // each sleep is different; 1000 works out to ~2 hours if every sleep is 8s
 // and nothing else much happens
-#define WDT_CALIBRATE_FREQUENCY 200
+#define WDT_CALIBRATE_INTERVAL 200
 
 #define TIM01_PRESCALER_1    0b001
 #define TIM01_PRESCALER_8    0b010
@@ -367,7 +367,7 @@ static void calibrate_WDT(void) {
 
 	DISABLE_INTERRUPTS(sreg);
 	wdt_reset();
-	wdt_enable(WDT_CALIBRATE_PERIOD);
+	wdt_enable(WDT_CALIBRATE_CYCLES);
 	ENABLE_WDT_ISR();
 	// Enable interrupts without concern for initial state, which is already
 	// saved
@@ -395,7 +395,7 @@ static void calibrate_WDT(void) {
 //
 // For convenience sake, set_wakeup_alarm() helps keep track of RTC_ticks
 uint16_t set_wakeup_alarm(uint16_t ms) {
-	static uint16_t calib_counter = WDT_CALIBRATE_FREQUENCY;
+	static uint16_t calib_counter = WDT_CALIBRATE_INTERVAL;
 	uint16_t period_ms;
 	uint8_t shifts, adjust_ms = 0;
 
@@ -408,7 +408,7 @@ uint16_t set_wakeup_alarm(uint16_t ms) {
 		--calib_counter;
 
 		if (calib_counter == 0) {
-			calib_counter = WDT_CALIBRATE_FREQUENCY;
+			calib_counter = WDT_CALIBRATE_INTERVAL;
 			calibrate_WDT();
 
 			adjust_ms = wdt_calibration;
@@ -426,7 +426,7 @@ uint16_t set_wakeup_alarm(uint16_t ms) {
 	// to figure out which we should use given only the wdt_calibration value
 	// Start by checking the highest duration and work down from there
 	shifts = 0;
-	period_ms = (uint16_t )wdt_calibration << (WDTO_8S - WDT_CALIBRATE_PERIOD);
+	period_ms = (uint16_t )wdt_calibration << (WDTO_8S - WDT_CALIBRATE_CYCLES);
 
 	while ((period_ms > ms) && (shifts <= WDTO_8S)) {
 		++shifts;
@@ -521,7 +521,7 @@ void uscounter_off(void) {
 	return;
 }
 
-void delay(utime_t ms) {
+void delay_ms(utime_t ms) {
 	utime_t timer;
 
 	timer = SET_TIMEOUT(ms);
@@ -531,11 +531,11 @@ void delay(utime_t ms) {
 
 	return;
 }
-void dumb_delay(utime_t ms) {
+void dumb_delay_ms(utime_t ms) {
 	utime_t count;
 
 	// 4 cycles per iteration in _delay_loop_2(), plus a little for the
-	// overhead of dumb_delay() itself
+	// overhead of dumb_delay_ms() itself
 	count = (G_freq_CORECLK/5000) * ms;
 	while (count > 0xFFFF) {
 		_delay_loop_2(0xFFFF);
@@ -545,7 +545,7 @@ void dumb_delay(utime_t ms) {
 
 	return;
 }
-void dumber_delay(uint32_t cycles) {
+void dumb_delay_cycles(uint32_t cycles) {
 	uint32_t i;
 
 	// Compensate a bit for how much longer than a clock cycle each iteration

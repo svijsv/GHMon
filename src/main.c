@@ -85,14 +85,14 @@ static void button_IRQHandler(void) {
 	G_button_pressed = 1;
 	// First timeout is shorter to account for time taken to wake up
 	timeout = SET_TIMEOUT((CTRL_PRESS*3)/4);
-	// Use a delay of 10ms to limit the influence of delay() overhead
+	// Use a delay of 10ms to limit the influence of delay_ms() overhead
 	do {
 		if (TIMES_UP(timeout)) {
 			++G_button_pressed;
 			led_flash(1, DELAY_ACK);
 			timeout = SET_TIMEOUT(CTRL_PRESS);
 		}
-		delay(10);
+		delay_ms(10);
 	} while (gpio_get_state(BUTTON_PIN) == GPIO_HIGH);
 #endif // BUTTON_PIN
 
@@ -132,11 +132,11 @@ int main(void) {
 		now = NOW();
 
 		if ((next_wakeup > now) && (G_IRQs == 0)) {
-			hibernate(next_wakeup - now, CFG_ALLOW_INTERRUPTS);
+			hibernate_s(next_wakeup - now, CFG_ALLOW_INTERRUPTS);
 		} else {
 			// This message would have saved me many hours tracking down a bug in
 			// set_alarms(); don't remove without a good reason.
-			LOGGER("Skipping hibernate()");
+			LOGGER("Skipping hibernate_s()");
 		}
 		if (BIT_IS_SET(G_IRQs, BUTTON_IRQf)) {
 			CLEAR_BIT(G_IRQs, BUTTON_IRQf);
@@ -170,11 +170,11 @@ int main(void) {
 			switch (G_button_pressed-1) {
 				case 0:
 					led_flash(1, DELAY_ACK);
-					if (CONTROLLER_CHECK_PERIOD == 0) {
+					if (CONTROLLER_CHECK_MINUTES == 0) {
 						do_controllers = true;
 						LOGGER("Checking controllers");
 					}
-					if (LOG_APPEND_PERIOD == 0) {
+					if (LOG_APPEND_MINUTES == 0) {
 						do_log = true;
 						LOGGER("Appending to log");
 					}
@@ -277,18 +277,18 @@ static uint32_t set_alarms(bool force) {
 	// been zeroed allows us to catch missed alarms, such as when a controller
 	// ran longer than the wait period would have been
 	now = NOW();
-	if ((LOG_APPEND_PERIOD > 0) && ((log_alarm == 0) || force)) {
-		tmp = LOG_APPEND_PERIOD * MINUTES;
+	if ((LOG_APPEND_MINUTES > 0) && ((log_alarm == 0) || force)) {
+		tmp = LOG_APPEND_MINUTES * MINUTES;
 		log_alarm = SNAP_TO_FACTOR(now + tmp, tmp);
 	}
-	if ((STATUS_CHECK_PERIOD > 0) && ((status_alarm == 0) || force)) {
-		tmp = STATUS_CHECK_PERIOD * MINUTES;
+	if ((STATUS_CHECK_MINUTES > 0) && ((status_alarm == 0) || force)) {
+		tmp = STATUS_CHECK_MINUTES * MINUTES;
 		status_alarm = SNAP_TO_FACTOR(now + tmp, tmp);
 	}
 #if USE_CONTROLLERS
 #if USE_SMALL_CONTROLLERS >= 1
-	if ((CONTROLLER_CHECK_PERIOD > 0) && ((controller_alarm == 0) || force)) {
-		tmp = CONTROLLER_CHECK_PERIOD * MINUTES;
+	if ((CONTROLLER_CHECK_MINUTES > 0) && ((controller_alarm == 0) || force)) {
+		tmp = CONTROLLER_CHECK_MINUTES * MINUTES;
 		controller_alarm = SNAP_TO_FACTOR(now + tmp, tmp);
 	}
 #else // !USE_SMALL_CONTROLLERS >= 1
@@ -308,8 +308,8 @@ static uint32_t set_alarms(bool force) {
 		//
 		// Default polling frequency
 		if (cfg->schedule == 0) {
-			if (CONTROLLER_CHECK_PERIOD > 0) {
-				tmp = (CONTROLLER_CHECK_PERIOD * MINUTES);
+			if (CONTROLLER_CHECK_MINUTES > 0) {
+				tmp = (CONTROLLER_CHECK_MINUTES * MINUTES);
 				c->next_check = SNAP_TO_FACTOR(now + tmp, tmp);
 			//
 			// If the alarm is set but there's no default scheduled time, that
@@ -408,10 +408,10 @@ void led_toggle(void) {
 void led_flash(uint8_t count, uint16_t ms) {
 	for (uiter_t i = 0; i < count; ++i) {
 		led_toggle();
-		sleep(ms);
+		sleep_ms(ms);
 		led_toggle();
 		// Slight delay to keep separate flashes distinct
-		sleep(75);
+		sleep_ms(75);
 	}
 
 	return;
@@ -429,21 +429,21 @@ static void check_warnings(void) {
 
 	// Delay briefly first so that it doesn't blend into any
 	// acknowledgement flashes
-	sleep(DELAY_LONG);
+	sleep_ms(DELAY_LONG);
 	if (G_warnings & warn_power) {
 		led_flash(1, DELAY_ERR);
 	} else {
 		if (G_warnings & warn_sensor) {
 			led_flash(2, DELAY_ERR);
-			delay(DELAY_LONG);
+			delay_ms(DELAY_LONG);
 		}
 		if (G_warnings & warn_controller) {
 			led_flash(3, DELAY_ERR);
-			delay(DELAY_LONG);
+			delay_ms(DELAY_LONG);
 		}
 		if (G_warnings & warn_SD) {
 			led_flash(4, DELAY_ERR);
-			delay(DELAY_LONG);
+			delay_ms(DELAY_LONG);
 		}
 	}
 
@@ -453,7 +453,7 @@ static void check_warnings(void) {
 void error_state_crude(void) {
 	while (1) {
 		led_toggle();
-		dumb_delay(DELAY_ERR);
+		dumb_delay_ms(DELAY_ERR);
 	}
 	return;
 }
@@ -476,7 +476,7 @@ void error_state(const char *file_path, uint32_t lineno, const char *func_name, 
 		}
 
 		led_toggle();
-		dumb_delay(DELAY_ERR);
+		dumb_delay_ms(DELAY_ERR);
 	}
 	return;
 }

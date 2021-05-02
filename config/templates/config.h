@@ -55,9 +55,9 @@
 // Sensor configuration
 //
 // Check the status and emit warning blinks if called for every
-// STATUS_CHECK_PERIOD minutes
+// STATUS_CHECK_MINUTES minutes
 // If 0, it's checked when the user button is pressed
-#define STATUS_CHECK_PERIOD 15
+#define STATUS_CHECK_MINUTES 15
 
 // The number of sensors used
 // Be sure to change the G_sensors[] definition in config.c if this changes.
@@ -72,13 +72,13 @@
 // Controller configuration
 //
 // Check whether any controllers need to be engaged every
-// CONTROLLER_CHECK_PERIOD minutes
+// CONTROLLER_CHECK_MINUTES minutes
 // If 0, they're checked when the user button is pressed.
 // Individual controllers may have their own periods specified, in which case
 // they ignore this.
 // Press the user button and release after the third LED flash to force a
 // check of all controllers, even those with their own schedules.
-#define CONTROLLER_CHECK_PERIOD 15
+#define CONTROLLER_CHECK_MINUTES 15
 
 // Number of controllers to manage
 // Be sure to change the G_controllers[] definition in config.c if this changes.
@@ -89,9 +89,9 @@
 //
 // Data logging configuration
 //
-// Check the status and append it to the log every LOG_APPEND_PERIOD minutes
+// Check the status and append it to the log every LOG_APPEND_MINUTES minutes
 // If 0, it's checked when the user button is pressed.
-#define LOG_APPEND_PERIOD 15
+#define LOG_APPEND_MINUTES 15
 
 // Log file name pattern
 // Names are 8.3 format (8 characters for the name + 3 for an extension), but
@@ -117,7 +117,7 @@
 // current one
 // If set, this must be > 1.
 // Set to 0 to disable.
-#define LINES_PER_FILE ((14 * 24 * 60) / LOG_APPEND_PERIOD) // 14 days per file
+#define LINES_PER_FILE ((14 * 24 * 60) / LOG_APPEND_MINUTES) // 14 days per file
 
 
 //

@@ -201,7 +201,7 @@ static uint16_t sensor_read_bmx280(uiter_t si, bool use_spi) {
 	// The datasheet gives 5.5-6.4ms measurement time for 1x oversampling
 	timeout = SET_TIMEOUT(100);
 	do {
-		delay(10);
+		delay_ms(10);
 		if ((err = READ_REG(addr, 0xF3, &byte, 1)) == ETIMEOUT) {
 			goto END;
 		}

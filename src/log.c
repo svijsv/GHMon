@@ -342,7 +342,7 @@ END:
 	// TODO: Wait for the card to be not-busy
 #if SPI_POWER_PIN
 	if (!BIT_IS_SET(G_warnings, WARN_SD_SKIPPED)) {
-		sleep(SD_POWEROFF_DELAY_MS);
+		sleep_ms(SD_POWEROFF_DELAY_MS_MS);
 	}
 #endif
 	power_off();

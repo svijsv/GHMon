@@ -50,7 +50,7 @@ uint16_t sensor_read_dht11(uiter_t si) {
 
 	// Pull the data pin low at least 18ms to signal the sensor to start
 	gpio_set_mode(pin, GPIO_MODE_PP, GPIO_LOW);
-	sleep(20);
+	sleep_ms(20);
 
 	gpio_quickread_prepare(&qpin, pin);
 	uscounter_on();

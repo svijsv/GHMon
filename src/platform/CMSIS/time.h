@@ -44,7 +44,7 @@
 // the ratio were kept at 1.
 // Increasing this decreases the maximum duration proportionately.
 // Must be at least 1.
-#define TIM_MS_PERIOD 1
+#define TIM_MS_TICKS 1
 
 // The EXTI line used for the RTC alarm; 17 on STM32F103
 #define RTC_ALARM_EXTI_LINE_Pos 17

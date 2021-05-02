@@ -47,7 +47,7 @@
 // by way of
 // https:// thecavepearlproject.org/2017/05/21/switching-off-sd-cards-for-low-power-data-logging/
 // Delay is in milliseconds.
-#define SD_POWEROFF_DELAY_MS 1000
+#define SD_POWEROFF_DELAY_MS_MS 1000
 
 // Use a print buffer this size for SD card writes
 // If FF_FS_TINY is set to 0 in ffconf.h there's a native 512 byte write

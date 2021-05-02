@@ -80,22 +80,22 @@ void spi_init(void) {
 void spi_on(void) {
 	power_spi_enable();
 
-#if ((G_freq_SPICLK/128) >= (SPI_SPEED - (SPI_SPEED/20)))
+#if ((G_freq_SPICLK/128) >= (SPI_FREQUENCY - (SPI_FREQUENCY/20)))
 # define USE_2X 0b0
 # define SPRx   0b11
-#elif ((G_freq_SPICLK/64) >= (SPI_SPEED - (SPI_SPEED/20)))
+#elif ((G_freq_SPICLK/64) >= (SPI_FREQUENCY - (SPI_FREQUENCY/20)))
 # define USE_2X 0b0
 # define SPRx   0b10
-#elif ((G_freq_SPICLK/32) >= (SPI_SPEED - (SPI_SPEED/20)))
+#elif ((G_freq_SPICLK/32) >= (SPI_FREQUENCY - (SPI_FREQUENCY/20)))
 # define USE_2X 0b1
 # define SPRx   0b10
-#elif ((G_freq_SPICLK/16) >= (SPI_SPEED - (SPI_SPEED/20)))
+#elif ((G_freq_SPICLK/16) >= (SPI_FREQUENCY - (SPI_FREQUENCY/20)))
 # define USE_2X 0b0
 # define SPRx   0b01
-#elif ((G_freq_SPICLK/8) >= (SPI_SPEED - (SPI_SPEED/20)))
+#elif ((G_freq_SPICLK/8) >= (SPI_FREQUENCY - (SPI_FREQUENCY/20)))
 # define USE_2X 0b1
 # define SPRx   0b01
-#elif ((G_freq_SPICLK/4) >= (SPI_SPEED - (SPI_SPEED/20)))
+#elif ((G_freq_SPICLK/4) >= (SPI_FREQUENCY - (SPI_FREQUENCY/20)))
 # define USE_2X 0b0
 # define SPRx   0b00
 #else

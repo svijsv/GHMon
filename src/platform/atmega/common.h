@@ -65,7 +65,7 @@
 * Macros
 */
 // An LED flash for use when debugging
-#define DFLASH(t) do { gpio_toggle_state(LED_PIN); dumb_delay(t); gpio_toggle_state(LED_PIN); dumb_delay(t/2); } while (0);
+#define DFLASH(t) do { gpio_toggle_state(LED_PIN); dumb_delay_ms(t); gpio_toggle_state(LED_PIN); dumb_delay_ms(t/2); } while (0);
 
 
 #endif // _PLATFORM_ATMEGA_COMMON_H

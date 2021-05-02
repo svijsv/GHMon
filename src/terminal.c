@@ -211,7 +211,7 @@ static txsize_t terminal_gets(char *line_in, txsize_t size) {
 		if (!started_line) {
 			PUTS_NOF(FROM_FSTR(TERMINAL_PROMPT), 0);
 		}
-		if (uart_receive_block(&c, 1, (uint32_t )TERMINAL_TIMEOUT_S*1000) == ETIMEOUT) {
+		if (uart_receive_block(&c, 1, (uint32_t )TERMINAL_TIMEOUT_SECONDS*1000) == ETIMEOUT) {
 			PUTS("Timed out waiting for input\r\n", 0);
 			line_in[0] = 0;
 			return 0;
@@ -430,9 +430,9 @@ static void terminalcmd_delay_S(char *line_in) {
 
 	PRINTF("Delaying %u seconds...", (uint )n);
 	n += NOW();
-	//delay(n * 1000);
+	//delay_ms(n * 1000);
 	while (NOW() != n) {
-		delay(50);
+		delay_ms(50);
 	}
 	PRINTF("done.\r\n");
 

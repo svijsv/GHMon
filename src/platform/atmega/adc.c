@@ -192,8 +192,8 @@ static adc_t adc_read_channel(uint8_t channel) {
 
 	// Select the ADC channel to convert
 	MODIFY_BITS(ADMUX, CHANNEL_MASK, channel << MUX0);
-	// The readings are inaccurate without this delay()
-	delay(5);
+	// The readings are inaccurate without this delay_ms()
+	delay_ms(5);
 
 	adc = 0;
 	for (uiter_t i = ADC_SAMPLE_COUNT; i != 0; --i) {
@@ -222,7 +222,7 @@ int16_t adc_read_vref_mV(void) {
 	// (adc / max) * vref = 1100mV
 	// vref = 1100mV / (adc / max)
 	// vref = (1100mV * max) / adc
-	return ((uint32_t )INTERNAL_VREF * (uint32_t )ADC_MAX) / (uint32_t )adc;
+	return ((uint32_t )INTERNAL_VREF_mV * (uint32_t )ADC_MAX) / (uint32_t )adc;
 }
 
 

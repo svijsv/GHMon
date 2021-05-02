@@ -187,7 +187,7 @@ err_t set_RTC_seconds(utime_t s) {
 }
 
 //
-// Configure the sleep() and uscounter timers
+// Configure the sleep_ms() and uscounter timers
 static void timers_init(void) {
 	//
 	// Sleep timer
@@ -199,7 +199,7 @@ static void timers_init(void) {
 	timer_set_alignment(SLEEP_ALARM_TIM, TIM_CR1_CMS_EDGE);
 	timer_direction_up(SLEEP_ALARM_TIM);
 	timer_one_shot_mode(SLEEP_ALARM_TIM);
-	timer_set_prescaler(SLEEP_ALARM_TIM, calculate_TIM2_5_prescaler(1000*TIM_MS_PERIOD));
+	timer_set_prescaler(SLEEP_ALARM_TIM, calculate_TIM2_5_prescaler(1000*TIM_MS_TICKS));
 
 	nvic_set_priority(SLEEP_ALARM_IRQn, SLEEP_ALARM_IRQp);
 	rcc_periph_clock_disable(SLEEP_ALARM_RCC);
@@ -247,14 +247,14 @@ static uint16_t calculate_TIM2_5_prescaler(uint32_t hz) {
 }
 void set_sleep_alarm(uint16_t ms) {
 	assert(ms != 0);
-#if TIM_MS_PERIOD > 1
-	assert((0xFFFF/TIM_MS_PERIOD) >= ms);
+#if TIM_MS_TICKS > 1
+	assert((0xFFFF/TIM_MS_TICKS) >= ms);
 #endif
 
 	rcc_periph_clock_enable(SLEEP_ALARM_RCC);
 
 	// Set the reload value and generate an update event to load it
-	timer_set_period(SLEEP_ALARM_TIM, ms * TIM_MS_PERIOD);
+	timer_set_period(SLEEP_ALARM_TIM, ms * TIM_MS_TICKS);
 	timer_generate_event(SLEEP_ALARM_TIM, TIM_EGR_UG);
 
 	timer_clear_flag(SLEEP_ALARM_TIM, TIM_SR_UIF);
@@ -288,7 +288,7 @@ void uscounter_off(void) {
 	return;
 }
 
-void delay(utime_t ms) {
+void delay_ms(utime_t ms) {
 	utime_t timer;
 
 	timer = SET_TIMEOUT(ms);
@@ -299,7 +299,7 @@ void delay(utime_t ms) {
 	return;
 }
 // https:// stackoverflow.com/questions/7083482/how-to-prevent-gcc-from-optimizing-out-a-busy-wait-loop
-void dumb_delay(utime_t ms) {
+void dumb_delay_ms(utime_t ms) {
 	uint32_t cycles;
 
 	cycles = ms * (rcc_ahb_frequency/(1000*DUMB_DELAY_DIV));
@@ -311,7 +311,7 @@ void dumb_delay(utime_t ms) {
 
 	return;
 }
-void dumber_delay(uint32_t cycles) {
+void dumb_delay_cycles(uint32_t cycles) {
 	for (uint32_t i = cycles; i > 0; --i) {
 		// Count some clock cycles
 		__asm__ volatile("" : "+g" (i) : :);

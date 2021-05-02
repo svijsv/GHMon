@@ -68,7 +68,7 @@ static _FLASH const char sens_unknown_msg[] = "Unknown sensor type '%u' at " __F
 /*
 * Variables
 */
-int16_t G_vcc_voltage = REGULATED_VOLTAGE;
+int16_t G_vcc_voltage = REGULATED_VOLTAGE_mV;
 utime_t cooldown = 0;
 sensor_t G_sensors[SENSOR_COUNT];
 
@@ -285,7 +285,7 @@ void check_sensor_warnings(void) {
 	CLEAR_BIT(G_warnings, (WARN_BATTERY_LOW|WARN_VCC_LOW|WARN_SENSOR));
 
 #if CALIBRATE_VREF >= 2
-	if (G_vcc_voltage < REGULATED_VOLTAGE_LOW) {
+	if (G_vcc_voltage < REGULATED_VOLTAGE_LOW_mV) {
 		SET_BIT(G_warnings, WARN_VCC_LOW);
 	}
 #endif

@@ -33,11 +33,11 @@
 // SPI communication parameters
 // Target speed of the SPI bus; it will generally be somewhat higher due to
 // hardware limitations
-#define SPI_SPEED 100000
+#define SPI_FREQUENCY 100000
 
 // I2C/TWI communication parameters
 // Target speed of the I2C bus
-#define I2C_SPEED 50000
+#define I2C_FREQUENCY 50000
 
 // Maximum length of sensor and controller names
 // Increasing this will increase the ROM space used, but depending on struct
@@ -59,10 +59,10 @@
 // warning
 #define CONTROLLER_RETRY_MAX 2
 // Wait this many seconds between attempts when CTRL_FLAG_RETRY is set
-#define CONTROLLER_RETRY_DELAY_S 30
+#define CONTROLLER_RETRY_DELAY_SECONDS 30
 // Wait this many seconds between checking the controller 'stop' pin when it's
 // set
-#define CONTROLLER_STOP_CHECK_S 5
+#define CONTROLLER_STOP_CHECK_SECONDS 5
 // The number of sensors associated with each controller.
 // Must be >= 1 and <= 255.
 #define CONTROLLER_SENS_COUNT 1
@@ -78,7 +78,7 @@
 // ADC
 // This must be set to 2 to warn if the regulated voltage drops below the
 // warning threshold
-// The utility of this calibration depends on the accuracy of INTERNAL_VREF
+// The utility of this calibration depends on the accuracy of INTERNAL_VREF_mV
 #define CALIBRATE_VREF 0
 
 // Number of samples to take and then average for every ADC reading
@@ -91,12 +91,12 @@
 //
 // The voltage of the internal reference used to calibrate the ADC reference
 // If not set, use platform-specific default
-//#define INTERNAL_VREF 1200
+//#define INTERNAL_VREF_mV 1200
 
 // Ideal voltage output by the on-board voltage regulator
 // If not set, use platform-specific default
-//#define REGULATED_VOLTAGE 3300
+//#define REGULATED_VOLTAGE_mV 3300
 
 // Consider the regulated voltage low if it falls below this
 // If not set, use platform-specific default
-//#define REGULATED_VOLTAGE_LOW 3100
+//#define REGULATED_VOLTAGE_LOW_mV 3100

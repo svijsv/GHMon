@@ -228,7 +228,7 @@ void check_controller(controller_t *c) {
 
 		if (cfg->run_timeout > 0) {
 			if (cfg->stop_pin != 0) {
-				c->next_check = now + ((cfg->run_timeout > CONTROLLER_STOP_CHECK_S) ? CONTROLLER_STOP_CHECK_S : cfg->run_timeout);
+				c->next_check = now + ((cfg->run_timeout > CONTROLLER_STOP_CHECK_SECONDS) ? CONTROLLER_STOP_CHECK_SECONDS : cfg->run_timeout);
 			} else {
 				c->next_check = now + cfg->run_timeout;
 			}
@@ -260,7 +260,7 @@ void check_controller(controller_t *c) {
 			DISENGAGE(c, cfg, "run timeout");
 			if (BIT_IS_SET(cfg->cflags, CTRL_FLAG_RETRY)) {
 				if (c->try_count <= CONTROLLER_RETRY_MAX) {
-					c->next_check = now + ((cfg->run_timeout > CONTROLLER_RETRY_DELAY_S) ? CONTROLLER_RETRY_DELAY_S : cfg->run_timeout);
+					c->next_check = now + ((cfg->run_timeout > CONTROLLER_RETRY_DELAY_SECONDS) ? CONTROLLER_RETRY_DELAY_SECONDS : cfg->run_timeout);
 					LOGGER("Re-checking %s in %us", FROM_FSTR(cfg->name), (uint )(c->next_check - now));
 					SET_BIT(c->iflags, CTRL_FLAG_INVALIDATE);
 				} else {
@@ -276,7 +276,7 @@ void check_controller(controller_t *c) {
 
 		} else {
 			if (cfg->stop_pin != 0) {
-				c->next_check = now + ((timeout > CONTROLLER_STOP_CHECK_S) ? CONTROLLER_STOP_CHECK_S : timeout);
+				c->next_check = now + ((timeout > CONTROLLER_STOP_CHECK_SECONDS) ? CONTROLLER_STOP_CHECK_SECONDS : timeout);
 			} else {
 				c->next_check = now + timeout;
 			}
@@ -308,9 +308,9 @@ void check_controller(controller_t *c) {
 
 			if (cfg->stop_pin != 0) {
 				while (timeout > 0) {
-					wakeup = ((timeout > CONTROLLER_STOP_CHECK_S) ? CONTROLLER_STOP_CHECK_S : timeout);
+					wakeup = ((timeout > CONTROLLER_STOP_CHECK_SECONDS) ? CONTROLLER_STOP_CHECK_SECONDS : timeout);
 					timeout -= wakeup;
-					hibernate(wakeup, 0);
+					hibernate_s(wakeup, 0);
 					if (read_stop(cfg) == GPIO_HIGH) {
 						DISENGAGE(c, cfg, "stop pin is high");
 						break;
@@ -319,7 +319,7 @@ void check_controller(controller_t *c) {
 			} else
 #endif // USE_SMALL_CONTROLLERS < 2
 			{
-				hibernate(timeout, 0);
+				hibernate_s(timeout, 0);
 				timeout = 0;
 			}
 			if (timeout == 0) {

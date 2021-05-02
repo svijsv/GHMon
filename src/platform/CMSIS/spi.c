@@ -84,7 +84,7 @@ void spi_init(void) {
 		(0b1 << SPI_CR1_SSI_Pos     )  | // Keep SS pin high internally
 		(0b1 << SPI_CR1_SSM_Pos     )  | // Enable software slave management
 		(0b0 << SPI_CR1_DFF_Pos     )  | // 8 bit frames
-		calculate_prescaler(SPI_SPEED) | // Baud rate prescaler
+		calculate_prescaler(SPI_FREQUENCY) | // Baud rate prescaler
 		0);
 
 	spi_off();
@@ -147,7 +147,7 @@ void spi_off(void) {
 			// If for whatever reason there are still bytes coming in we have no
 			// way of knowing how many so just wait until we've gone an arbitrary
 			// period of time without seeing any
-			delay(1);
+			delay_ms(1);
 		}
 		rx = rx; // Shut the compiler up
 		while (!BIT_IS_SET(SPIx->SR, SPI_SR_TXE) || BIT_IS_SET(SPIx->SR, SPI_SR_BSY)) {

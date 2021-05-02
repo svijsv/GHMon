@@ -41,7 +41,7 @@
 */
 // Timeout in seconds for the command terminal (that is, when it gives up
 // listening)
-#define TERMINAL_TIMEOUT_S 3600 // 1Hr
+#define TERMINAL_TIMEOUT_SECONDS 3600 // 1Hr
 
 // Size of the input buffer
 // This is set in config_unify.h
