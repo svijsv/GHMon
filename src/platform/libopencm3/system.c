@@ -173,7 +173,7 @@ void platform_init(void) {
 
 #if BUTTON_PIN
 	// Configure the EXTI interrupt on the rising edge for the wakeup button
-	gpio_set_mode(BUTTON_PIN, GPIO_MODE_IN, GPIO_LOW);
+	gpio_set_mode(BUTTON_PIN, GPIO_MODE_IN, GPIO_BIAS_TO_STATE(BUTTON_PIN));
 	exti_select_source(GPIO_GET_PINMASK(BUTTON_PIN), GPIO_GET_PORT(BUTTON_PIN));
 	exti_set_trigger(GPIO_GET_PINMASK(BUTTON_PIN), EXTI_TRIGGER_RISING);
 	exti_enable_request(GPIO_GET_PINMASK(BUTTON_PIN));

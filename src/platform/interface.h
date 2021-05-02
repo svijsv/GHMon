@@ -431,8 +431,8 @@ void issue_warning(void);
 // Get the bias of a given pin
 #ifndef GPIO_GET_BIAS
 # define GPIO_GET_BIAS(pin) ((pin) & GPIO_BIAS_MASK)
-//# define GPIO_GET_BIAS(pin) ((((pin) & GPIO_BIAS_MASK) == BIAS_HIGH) ? GPIO_HIGH : (((pin) & GPIO_BIAS_MASK) == BIAS_LOW) ? GPIO_LOW : GPIO_FLOAT)
 #endif
+#define GPIO_BIAS_TO_STATE(pin) ((((pin) & GPIO_BIAS_MASK) == BIAS_HIGH) ? GPIO_HIGH : (((pin) & GPIO_BIAS_MASK) == BIAS_LOW) ? GPIO_LOW : GPIO_FLOAT)
 
 // Get the identifier of a given pin
 #ifndef PINID

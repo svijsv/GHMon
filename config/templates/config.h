@@ -166,7 +166,9 @@
 //
 // UI pins
 #define LED_PIN    PIN_B3
-#define BUTTON_PIN PIN_B4
+// Using the internal pulldown removes an external component at the cost of
+// very slightly increased power usage
+#define BUTTON_PIN (PIN_B4|BIAS_LOW)
 //
 // Power pins
 // Power for sensors not on the SPI or I2C buses

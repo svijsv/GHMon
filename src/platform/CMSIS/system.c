@@ -199,7 +199,7 @@ void platform_init(void) {
 #endif // GPIO_GET_PINNO(BUTTON_PIN)
 
 	// Configure the EXTI interrupt on the rising edge for the wakeup button
-	gpio_set_mode(BUTTON_PIN, GPIO_MODE_IN, GPIO_LOW);
+	gpio_set_mode(BUTTON_PIN, GPIO_MODE_IN, GPIO_BIAS_TO_STATE(BUTTON_PIN));
 	SET_BIT(EXTI->IMR,  GPIO_GET_PINMASK(BUTTON_PIN));
 	SET_BIT(EXTI->RTSR, GPIO_GET_PINMASK(BUTTON_PIN));
 	NVIC_SetPriority(BUTTON_IRQn, BUTTON_IRQp);
