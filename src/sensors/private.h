@@ -61,12 +61,12 @@ extern _FLASH const char sens_invalid_msg_e[];
 // It's assumed the sensor's SENSOR[] member has been assigned to a pointer
 // named 'cfg'.
 #if USE_SMALL_SENSORS < 2
-# define SCALE_INT(x) ((cfg->scale == 0) ? (imath_t )(x) : \
-	((imath_t )(x) * (imath_t )cfg->scale) / (imath_t )100)
-# define SCALE_FLOAT(x) ((cfg->scale == 0) ? (float )(x) : \
-	((float )(x) * (float )cfg->scale) / 100.0f)
-# define SCALE_FIXED(x) ((cfg->scale == 0) ? (FIXEDP_ITYPE )(x) : \
-	FIXEDP_DIVI(((FIXEDP_MTYPE )(x) * (FIXEDP_MTYPE )cfg->scale), (FIXEDP_MTYPE )100))
+# define SCALE_INT(x) ((cfg->scale_percent == 0) ? (imath_t )(x) : \
+	((imath_t )(x) * (imath_t )cfg->scale_percent) / (imath_t )100)
+# define SCALE_FLOAT(x) ((cfg->scale_percent == 0) ? (float )(x) : \
+	((float )(x) * (float )cfg->scale_percent) / 100.0f)
+# define SCALE_FIXED(x) ((cfg->scale_percent == 0) ? (FIXEDP_ITYPE )(x) : \
+	FIXEDP_DIVI(((FIXEDP_MTYPE )(x) * (FIXEDP_MTYPE )cfg->scale_percent), (FIXEDP_MTYPE )100))
 #else
 # define SCALE_INT(x) (x)
 # define SCALE_FLOAT(x) (x)

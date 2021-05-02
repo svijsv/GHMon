@@ -3,7 +3,7 @@
 * Valid for any thermistor with a beta coefficient of 3950 and a series
 * resistor equal to it's resistance at the reference temperature
 */
-{ .min = 871, .max = 2689, .Vref = 3300, .scale = 100, .cflags = SENS_FLAG_VOLTS, .table = {
+{ .min = 871, .max = 2689, .Vref = 3300, .table_multiplier = 100, .cflags = SENS_FLAG_VOLTS, .table = {
    // min: 871.42mV max: 2689.42mV step: 202.00mV scale: 100.00
    // Tref: 298.15C Rref: 10000.00R beta: 3950.00
    // Vcc: 3300mV Rseries: 10000.00R

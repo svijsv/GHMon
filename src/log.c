@@ -309,7 +309,7 @@ void log_status(bool force_write) {
 			} else {
 				prefix = prefix_std;
 			}
-			lprintf("%s%u\t%u", prefix, (uint )G_controllers[i].run_count, (uint )G_controllers[i].run_time);
+			lprintf("%s%u\t%u", prefix, (uint )G_controllers[i].run_count, (uint )G_controllers[i].run_time_seconds);
 		}
 #endif // USE_SMALL_CONTROLLERS < 1
 #endif // USE_CONTROLLERS
@@ -459,7 +459,7 @@ static void buffer_line(utime_t now) {
 #if USE_CONTROLLERS
 #if USE_SMALL_CONTROLLERS < 1
 	for (uiter_t i = 0; i < CONTROLLER_COUNT; ++i) {
-		line->run_time[i] = G_controllers[i].run_time;
+		line->run_time[i] = G_controllers[i].run_time_seconds;
 		line->run_count[i] = G_controllers[i].run_count;
 		line->controller_iflags[i] = G_controllers[i].iflags;
 	}

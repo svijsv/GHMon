@@ -114,7 +114,7 @@ typedef struct {
 	// By default this represents the number of minutes between checks, but
 	// if the CTRL_FLAG_USE_TIME_OF_DAY flag is set it represents the number
 	// of minutes after midnight to check.
-	uint16_t schedule;
+	uint16_t schedule_minutes;
 #endif // USE_SMALL_CONTROLLERS < 1
 
 	// Seconds to keep control_pin high after it's turned on
@@ -122,7 +122,7 @@ typedef struct {
 	// the stop pin goes high.
 	// If 0, the pin is kept high until a future controller check stops it or
 	// the stop pin goes high.
-	uint8_t run_timeout;
+	uint8_t run_timeout_seconds;
 
 	// Control flags
 	uint8_t cflags;
@@ -157,7 +157,7 @@ typedef struct {
 	uint8_t run_count;
 	// Total number of seconds controller has run
 	// Rolls over after ~18 hours
-	uint16_t run_time;
+	uint16_t run_time_seconds;
 #endif // USE_SMALL_CONTROLLERS < 1
 
 	// Internal flags

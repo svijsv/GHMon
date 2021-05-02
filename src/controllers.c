@@ -226,11 +226,11 @@ void check_controller(controller_t *c) {
 		c->run_start = now;
 		++c->run_count;
 
-		if (cfg->run_timeout > 0) {
+		if (cfg->run_timeout_seconds > 0) {
 			if (cfg->stop_pin != 0) {
-				c->next_check = now + ((cfg->run_timeout > CONTROLLER_STOP_CHECK_SECONDS) ? CONTROLLER_STOP_CHECK_SECONDS : cfg->run_timeout);
+				c->next_check = now + ((cfg->run_timeout_seconds > CONTROLLER_STOP_CHECK_SECONDS) ? CONTROLLER_STOP_CHECK_SECONDS : cfg->run_timeout_seconds);
 			} else {
-				c->next_check = now + cfg->run_timeout;
+				c->next_check = now + cfg->run_timeout_seconds;
 			}
 		}
 		last_check[GET_CONTROLLER_I(c)] = now;
@@ -240,7 +240,7 @@ void check_controller(controller_t *c) {
 		utime_t now, timeout;
 
 		update_runtime(c);
-		if (cfg->run_timeout == 0) {
+		if (cfg->run_timeout_seconds == 0) {
 			goto END;
 		}
 
@@ -248,7 +248,7 @@ void check_controller(controller_t *c) {
 		// The time may have been changed between when we started and now
 		if (now > c->run_start) {
 			timeout = (now - c->run_start);
-			timeout = (cfg->run_timeout > timeout) ? cfg->run_timeout - timeout : 0;
+			timeout = (cfg->run_timeout_seconds > timeout) ? cfg->run_timeout_seconds - timeout : 0;
 		} else {
 			// Not much else we can do in this case but assume the timeout has
 			// been reached
@@ -260,7 +260,7 @@ void check_controller(controller_t *c) {
 			DISENGAGE(c, cfg, "run timeout");
 			if (BIT_IS_SET(cfg->cflags, CTRL_FLAG_RETRY)) {
 				if (c->try_count <= CONTROLLER_RETRY_MAX) {
-					c->next_check = now + ((cfg->run_timeout > CONTROLLER_RETRY_DELAY_SECONDS) ? CONTROLLER_RETRY_DELAY_SECONDS : cfg->run_timeout);
+					c->next_check = now + ((cfg->run_timeout_seconds > CONTROLLER_RETRY_DELAY_SECONDS) ? CONTROLLER_RETRY_DELAY_SECONDS : cfg->run_timeout_seconds);
 					LOGGER("Re-checking %s in %us", FROM_FSTR(cfg->name), (uint )(c->next_check - now));
 					SET_BIT(c->iflags, CTRL_FLAG_INVALIDATE);
 				} else {
@@ -299,9 +299,9 @@ void check_controller(controller_t *c) {
 #endif // USE_SMALL_CONTROLLERS < 2
 
 		ENGAGE(c, cfg);
-		if (cfg->run_timeout > 0) {
+		if (cfg->run_timeout_seconds > 0) {
 			utime_t timeout;
-			timeout = cfg->run_timeout;
+			timeout = cfg->run_timeout_seconds;
 
 #if USE_SMALL_CONTROLLERS < 2
 			utime_t wakeup;
@@ -381,7 +381,7 @@ static void update_runtime(controller_t *c) {
 			LOGGER("Traveled %u seconds into the future, not updating %s run time", (uint )(now - *last), FROM_FSTR(cfg->name));
 		} else {
 			LOGGER("%s has been running %us", FROM_FSTR(cfg->name), (uint )(now - *last));
-			c->run_time += now - *last;
+			c->run_time_seconds += now - *last;
 		}
 	} else {
 		LOGGER("Traveled %u seconds into the past, not updating %s run time", (uint )(*last - now), FROM_FSTR(cfg->name));

@@ -307,7 +307,7 @@ static uint32_t set_alarms(bool force) {
 
 		//
 		// Default polling frequency
-		if (cfg->schedule == 0) {
+		if (cfg->schedule_minutes == 0) {
 			if (CONTROLLER_CHECK_MINUTES > 0) {
 				tmp = (CONTROLLER_CHECK_MINUTES * MINUTES);
 				c->next_check = SNAP_TO_FACTOR(now + tmp, tmp);
@@ -326,7 +326,7 @@ static uint32_t set_alarms(bool force) {
 			if (BIT_IS_SET(cfg->cflags, CTRL_FLAG_USE_TIME_OF_DAY)) {
 				utime_t sm;
 
-				sm = cfg->schedule * MINUTES;
+				sm = cfg->schedule_minutes * MINUTES;
 				tmp = SNAP_TO_FACTOR(now, DAYS) + sm;
 				//
 				// If the alarm is set but not for the normal time, that means it
@@ -346,7 +346,7 @@ static uint32_t set_alarms(bool force) {
 			//
 			// Periodic
 			} else {
-				tmp = (cfg->schedule * MINUTES);
+				tmp = (cfg->schedule_minutes * MINUTES);
 				tmp = SNAP_TO_FACTOR(now + tmp, tmp);
 
 				// If the alarm is set but not for the normal time, that means it

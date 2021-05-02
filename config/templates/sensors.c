@@ -92,10 +92,10 @@ _FLASH const sensor_static_t SENSORS[SENSOR_COUNT] = {
 	.warn_below =  4000, // Warn if below 4000mV
 
 	.type = SENS_ADC_VOLT, // Voltage sensors need no further device configuration
-	.scale = 200, // Scale the final value to 200%, done here to account for the
-	              // voltage divider needed to read values > Vcc.
-	              // See also the macros MULTIPLY_BY(), DIVIDE_BY(), and
-	              // CALC_VDIV_SCALE() defined at the top of this file.
+	.scale_percent = 200, // Scale the final value to 200%, done here to account
+	                      // for the voltage divider needed to read values > Vcc.
+	                      // See also the macros MULTIPLY_BY(), DIVIDE_BY(),
+	                      // CALC_VDIV_SCALE() defined at the top of this file.
 },
 #define BATTERY 3
 

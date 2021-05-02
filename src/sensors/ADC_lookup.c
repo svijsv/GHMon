@@ -79,7 +79,7 @@ void sensor_update_adc_lookup(uiter_t si, uint16_t adc) {
 	lut    = table_cfg->table;
 	min    = table_cfg->min;
 	max    = table_cfg->max;
-	scale  = table_cfg->scale;
+	scale  = table_cfg->table_multiplier;
 	size   = LUT_SIZE;
 	if (scale == 0) {
 		scale = 1;

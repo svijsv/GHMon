@@ -123,7 +123,7 @@ typedef struct {
 	// Used for (for example) voltage dividers on sources greater than the
 	// ADC reference voltage. May be useful for soft calibration too.
 	// Set to 0 to disable.
-	int16_t scale;
+	int16_t scale_percent;
 #endif // USE_SMALL_SENSORS < 2
 
 	// Control flags

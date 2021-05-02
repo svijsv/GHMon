@@ -79,7 +79,7 @@ typedef struct {
 	// For resistance tables, ignored
 	uint16_t Vref;
 	// Interpret table values as being multiplied by this
-	uint16_t scale;
+	uint16_t table_multiplier;
 	// Set to SENS_FLAG_OHMS or SENS_FLAG_VOLTS for resistance and voltage
 	// tables respectively
 	uint8_t cflags;
