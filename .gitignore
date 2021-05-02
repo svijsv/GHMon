@@ -10,3 +10,4 @@ platformio-device-monitor-*
 /config/sensors.c
 /config/tables.c
 /config/controllers.c
+/config/saved

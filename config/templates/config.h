@@ -12,7 +12,7 @@
 
 //
 // Optional components
-// Set to '0' or comment out or line to disable corresponding feature
+// Set to '0' or comment out a line to disable corresponding feature
 //
 // Cut down the size of internal components at the expense of functionality
 // If 1, use smaller structures for data in RAM

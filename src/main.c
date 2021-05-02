@@ -180,6 +180,7 @@ int main(void) {
 					}
 					do_status = true;
 					LOGGER("Forcing sensor status check");
+					invalidate_sensors();
 					break;
 				case 1:
 					led_flash(2, DELAY_LONG);

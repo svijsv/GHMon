@@ -446,7 +446,7 @@ static void buffer_line(utime_t now) {
 	assert(log_buffer.tail <  LOGFILE_BUFFER_COUNT);
 	assert(log_buffer.size <= LOGFILE_BUFFER_COUNT);
 
-	LOGGER("Buffering log line");
+	LOGGER("Buffering log line %u of %u", (uint )(log_buffer.size+1), (uint )LOGFILE_BUFFER_COUNT);
 
 	line = &log_buffer.lines[log_buffer.tail];
 	line->uptime      = now;
