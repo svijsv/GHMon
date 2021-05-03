@@ -79,14 +79,36 @@
 // Set internally if there was a warning issued for the sensor
 #define SENS_FLAG_WARNING   0x80
 
-// The value range a status_t can hold
-#define STATUS_MIN (-32768)
-#define STATUS_MAX 32767
+//
+// Determine parameters of status_t
+//
+#if ! STATUS_BITS && _STATUS_BITS
+# undef  STATUS_BITS
+# define STATUS_BITS _STATUS_BITS
+#endif
+#if STATUS_BITS > 32
+# error "Unsupported sensor status size; expected <= 32"
 
+#elif STATUS_BITS > 16
+# define STATUS_MIN ((int32_t )0x80000000)
+# define STATUS_MAX ((int32_t )0x7FFFFFFF)
+typedef int32_t status_t;
+
+#elif STATUS_BITS > 8 || STATUS_BITS == 0
+# define STATUS_MIN ((int16_t )0x8000)
+# define STATUS_MAX ((int16_t )0x7FFF)
+typedef int16_t status_t;
+
+#else
+# define STATUS_MIN ((int8_t )0x80)
+# define STATUS_MAX ((int8_t )0x7F)
+typedef int8_t status_t;
+#endif // STATUS_BITS
+//
 // Set sensors below/above their supported range to these
 #define SENSOR_LOW  STATUS_MIN
 #define SENSOR_HIGH STATUS_MAX
-
+//
 // Ignore a sensor warning threshold if set to this value
 #define SENS_THRESHOLD_IGNORE STATUS_MIN
 
@@ -94,8 +116,6 @@
 /*
 * Types
 */
-typedef int16_t status_t;
-
 //
 // Description of the user-configured portion of a sensor struct
 typedef struct {

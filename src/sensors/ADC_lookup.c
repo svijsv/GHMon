@@ -136,6 +136,9 @@ void sensor_update_adc_lookup(uiter_t si, uint16_t adc) {
 	}
 	status += (adjust * scale);
 	status = SCALE_INT(status) / scale;
+#if USE_SMALL_CODE < 2 && STATUS_BITS < 32
+	status = (status < STATUS_MIN) ? SENSOR_LOW : (status > STATUS_MAX) ? SENSOR_HIGH : status;
+#endif
 	s->status = status;
 
 	return;

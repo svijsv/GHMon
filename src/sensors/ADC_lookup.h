@@ -39,6 +39,12 @@
 # undef  USE_LOOKUP_TABLES
 # define USE_LOOKUP_TABLES 1
 #endif
+//
+// Resistance readings can easily go higher than what an int16_t can hold
+#if USE_SMALL_SENSORS < 1 && _STATUS_BITS < 32
+# undef _STATUS_BITS
+# define _STATUS_BITS 32
+#endif
 
 //
 // Macros for the lists in sensors.h

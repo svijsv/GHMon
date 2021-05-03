@@ -81,6 +81,11 @@ void sensor_update_adc_ohm(uiter_t si, uint16_t adc) {
 	r = ADC_TO_R(adc, sR);
 
 	r = SCALE_INT(r + adjust);
+	// Check for >= 1 here because this (kind of) works around the reduced
+	// status_t size
+#if USE_SMALL_CODE < 2 && STATUS_BITS < 32
+	r = (r < STATUS_MIN) ? SENSOR_LOW : (r > STATUS_MAX) ? SENSOR_HIGH : r;
+#endif
 	s->status = r;
 
 	return;

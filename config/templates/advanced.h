@@ -46,6 +46,10 @@
 // setting it to 8 would use 12 bytes).
 #define DEVICE_NAME_LEN 7
 
+// Number of bits used for the signed integer holding sensor statuses
+// Normally defaults to 16, but certain sensors may override that.
+#define STATUS_BITS 0
+
 // The type used for elements in lookup tables
 #define LUT_T int16_t
 

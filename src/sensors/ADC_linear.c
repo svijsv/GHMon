@@ -142,6 +142,9 @@ void sensor_update_adc_linear(uiter_t si, uint16_t adc) {
 	input = (input - ref_input) * 10;
 	ref_value += adjust;
 	input = (SCALE_INT(input) / slopeX10) + SCALE_INT(ref_value);
+#if USE_SMALL_CODE < 2 && STATUS_BITS < 32
+	input = (input < STATUS_MIN) ? SENSOR_LOW : (input > STATUS_MAX) ? SENSOR_HIGH : input;
+#endif
 	s->status = input;
 
 	return;
