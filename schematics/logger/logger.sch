@@ -270,17 +270,17 @@ F 3 "~" H 2100 4300 50  0001 C CNN
 	1    2100 4300
 	-1   0    0    1   
 $EndComp
-Text GLabel 2600 4300 2    50   Input ~ 0
+Text GLabel 2850 4300 2    50   Input ~ 0
 WATER_CTRL
 $Comp
 L power:GND #PWR04
 U 1 1 6046ABCD
-P 2000 4100
-F 0 "#PWR04" H 2000 3850 50  0001 C CNN
-F 1 "GND" H 2005 3927 50  0000 C CNN
-F 2 "" H 2000 4100 50  0001 C CNN
-F 3 "" H 2000 4100 50  0001 C CNN
-	1    2000 4100
+P 2000 4000
+F 0 "#PWR04" H 2000 3750 50  0001 C CNN
+F 1 "GND" H 2005 3827 50  0000 C CNN
+F 2 "" H 2000 4000 50  0001 C CNN
+F 3 "" H 2000 4000 50  0001 C CNN
+	1    2000 4000
 	-1   0    0    1   
 $EndComp
 Text GLabel 2000 5100 3    50   Input ~ 0
@@ -288,73 +288,73 @@ BAT+
 $Comp
 L Relay:G5Q-1A K2
 U 1 1 6046EE8F
-P 1800 6350
-F 0 "K2" H 2130 6396 50  0000 L CNN
-F 1 "G5Q-1A" H 2130 6305 50  0000 L CNN
-F 2 "Relay_THT:Relay_SPST_Omron-G5Q-1A" H 2150 6300 50  0001 L CNN
-F 3 "https://www.omron.com/ecb/products/pdf/en-g5q.pdf" H 1800 6350 50  0001 C CNN
-	1    1800 6350
+P 1800 6750
+F 0 "K2" H 2130 6796 50  0000 L CNN
+F 1 "G5Q-1A" H 2130 6705 50  0000 L CNN
+F 2 "Relay_THT:Relay_SPST_Omron-G5Q-1A" H 2150 6700 50  0001 L CNN
+F 3 "https://www.omron.com/ecb/products/pdf/en-g5q.pdf" H 1800 6750 50  0001 C CNN
+	1    1800 6750
 	-1   0    0    1   
 $EndComp
 $Comp
 L power:GND #PWR02
 U 1 1 6046EE95
-P 1600 6050
-F 0 "#PWR02" H 1600 5800 50  0001 C CNN
-F 1 "GND" H 1605 5877 50  0000 C CNN
-F 2 "" H 1600 6050 50  0001 C CNN
-F 3 "" H 1600 6050 50  0001 C CNN
-	1    1600 6050
+P 1600 6450
+F 0 "#PWR02" H 1600 6200 50  0001 C CNN
+F 1 "GND" H 1605 6277 50  0000 C CNN
+F 2 "" H 1600 6450 50  0001 C CNN
+F 3 "" H 1600 6450 50  0001 C CNN
+	1    1600 6450
 	-1   0    0    1   
 $EndComp
-Text GLabel 1600 6650 3    50   Input ~ 0
+Text GLabel 1600 7050 3    50   Input ~ 0
 Fan
 $Comp
 L Device:Q_NPN_CBE Q2
 U 1 1 6046EE9C
-P 2100 5850
-F 0 "Q2" H 2291 5804 50  0000 L CNN
-F 1 "Q_NPN_CBE" H 1650 6000 50  0000 L CNN
-F 2 "" H 2300 5950 50  0001 C CNN
-F 3 "~" H 2100 5850 50  0001 C CNN
-	1    2100 5850
+P 2100 6250
+F 0 "Q2" H 2291 6204 50  0000 L CNN
+F 1 "Q_NPN_CBE" H 1650 6400 50  0000 L CNN
+F 2 "" H 2300 6350 50  0001 C CNN
+F 3 "~" H 2100 6250 50  0001 C CNN
+	1    2100 6250
 	-1   0    0    1   
 $EndComp
-Text GLabel 2600 5850 2    50   Input ~ 0
+Text GLabel 2900 6250 2    50   Input ~ 0
 FAN_CTRL
 $Comp
 L power:GND #PWR05
 U 1 1 6046EEA3
-P 2000 5650
-F 0 "#PWR05" H 2000 5400 50  0001 C CNN
-F 1 "GND" H 2005 5477 50  0000 C CNN
-F 2 "" H 2000 5650 50  0001 C CNN
-F 3 "" H 2000 5650 50  0001 C CNN
-	1    2000 5650
+P 2000 5950
+F 0 "#PWR05" H 2000 5700 50  0001 C CNN
+F 1 "GND" H 2005 5777 50  0000 C CNN
+F 2 "" H 2000 5950 50  0001 C CNN
+F 3 "" H 2000 5950 50  0001 C CNN
+	1    2000 5950
 	-1   0    0    1   
 $EndComp
-Text GLabel 2000 6650 3    50   Input ~ 0
+Text GLabel 2000 7050 3    50   Input ~ 0
 BAT+
 $Comp
 L Device:R R4
 U 1 1 6047CDB4
-P 2450 5850
-F 0 "R4" V 2243 5850 50  0000 C CNN
-F 1 "1K" V 2334 5850 50  0000 C CNN
-F 2 "" V 2380 5850 50  0001 C CNN
-F 3 "~" H 2450 5850 50  0001 C CNN
-	1    2450 5850
+P 2750 6250
+F 0 "R4" V 2543 6250 50  0000 C CNN
+F 1 "1K" V 2634 6250 50  0000 C CNN
+F 2 "" V 2680 6250 50  0001 C CNN
+F 3 "~" H 2750 6250 50  0001 C CNN
+	1    2750 6250
 	0    1    1    0   
 $EndComp
 $Comp
 L Device:R R3
 U 1 1 6047D832
-P 2450 4300
-F 0 "R3" V 2243 4300 50  0000 C CNN
-F 1 "1K" V 2334 4300 50  0000 C CNN
-F 2 "" V 2380 4300 50  0001 C CNN
-F 3 "~" H 2450 4300 50  0001 C CNN
-	1    2450 4300
+P 2700 4300
+F 0 "R3" V 2493 4300 50  0000 C CNN
+F 1 "1K" V 2584 4300 50  0000 C CNN
+F 2 "" V 2630 4300 50  0001 C CNN
+F 3 "~" H 2700 4300 50  0001 C CNN
+	1    2700 4300
 	0    1    1    0   
 $EndComp
 Text GLabel 8050 5000 0    50   Input ~ 0
@@ -543,17 +543,17 @@ Wire Wire Line
 $Comp
 L power:GND #PWR011
 U 1 1 604998B2
-P 3600 2100
-F 0 "#PWR011" H 3600 1850 50  0001 C CNN
-F 1 "GND" V 3605 1972 50  0000 R CNN
-F 2 "" H 3600 2100 50  0001 C CNN
-F 3 "" H 3600 2100 50  0001 C CNN
-	1    3600 2100
+P 3500 2350
+F 0 "#PWR011" H 3500 2100 50  0001 C CNN
+F 1 "GND" V 3505 2222 50  0000 R CNN
+F 2 "" H 3500 2350 50  0001 C CNN
+F 3 "" H 3500 2350 50  0001 C CNN
+	1    3500 2350
 	0    1    1    0   
 $EndComp
 Text GLabel 4850 4000 0    50   Input ~ 0
 SD_PWR
-Text GLabel 3800 2700 3    50   Input ~ 0
+Text GLabel 3800 2850 3    50   Input ~ 0
 SD_PWR
 $Comp
 L Device:C C1
@@ -588,12 +588,12 @@ Q4 should expect\nto see peaks above\n200mA
 $Comp
 L Device:R R13
 U 1 1 60454112
-P 3800 2550
-F 0 "R13" H 3870 2596 50  0000 L CNN
-F 1 "47K" H 3870 2505 50  0000 L CNN
-F 2 "" V 3730 2550 50  0001 C CNN
-F 3 "~" H 3800 2550 50  0001 C CNN
-	1    3800 2550
+P 3800 2700
+F 0 "R13" H 3870 2746 50  0000 L CNN
+F 1 "1K" H 3870 2655 50  0000 L CNN
+F 2 "" V 3730 2700 50  0001 C CNN
+F 3 "~" H 3800 2700 50  0001 C CNN
+	1    3800 2700
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -608,7 +608,7 @@ F 3 "~" H 4000 1700 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 Connection ~ 4000 1550
-Text Notes 2200 5550 0    50   ~ 0
+Text Notes 2400 5300 0    50   ~ 0
 Q1 and Q2 should\nbe sized to the\ncurrent needs of\ntheir respective\nrelays
 Wire Wire Line
 	2850 2150 3200 2150
@@ -659,4 +659,69 @@ Text Notes 9000 3300 0    50   ~ 0
 The series resistors for\nsensors should be roughly\nin the middle of the range\nto be measured
 Text Notes 900  1150 0    50   ~ 0
 Care should be taken to feed the SD card\nmodule the voltage it expects both on Vcc\nand at the IO pins - some (like this jury-\nrigged adapter) only work with 3.3V MCUs,\nothers have integrated level shifters and\nonly work with 5V MCUs
+$Comp
+L Device:R R17
+U 1 1 60906F86
+P 3650 2550
+F 0 "R17" V 3443 2550 50  0000 C CNN
+F 1 "10K" V 3534 2550 50  0000 C CNN
+F 2 "" V 3580 2550 50  0001 C CNN
+F 3 "~" H 3650 2550 50  0001 C CNN
+	1    3650 2550
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	3800 2550 3800 2400
+Connection ~ 3800 2550
+Wire Wire Line
+	3500 2550 3500 2350
+Wire Wire Line
+	3500 2350 3500 2100
+Wire Wire Line
+	3500 2100 3600 2100
+Connection ~ 3500 2350
+$Comp
+L Device:R R16
+U 1 1 6090B236
+P 2450 6100
+F 0 "R16" H 2520 6146 50  0000 L CNN
+F 1 "10K" H 2520 6055 50  0000 L CNN
+F 2 "" V 2380 6100 50  0001 C CNN
+F 3 "~" H 2450 6100 50  0001 C CNN
+	1    2450 6100
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2450 5950 2000 5950
+Wire Wire Line
+	2000 5950 2000 6050
+Connection ~ 2000 5950
+Wire Wire Line
+	2300 6250 2450 6250
+Wire Wire Line
+	2450 6250 2600 6250
+Connection ~ 2450 6250
+$Comp
+L Device:R R15
+U 1 1 6090EFF6
+P 2400 4150
+F 0 "R15" H 2470 4196 50  0000 L CNN
+F 1 "10K" H 2470 4105 50  0000 L CNN
+F 2 "" V 2330 4150 50  0001 C CNN
+F 3 "~" H 2400 4150 50  0001 C CNN
+	1    2400 4150
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2400 4000 2000 4000
+Wire Wire Line
+	2000 4100 2000 4000
+Connection ~ 2000 4000
+Wire Wire Line
+	2300 4300 2400 4300
+Wire Wire Line
+	2400 4300 2550 4300
+Connection ~ 2400 4300
+Text Notes 2250 5750 0    50   ~ 0
+The internal pulldowns can be\nenabled on the controlling pins\nin place of R15 and R16 on\nplatforms that support them
 $EndSCHEMATC
