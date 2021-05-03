@@ -143,12 +143,14 @@ END:
 				// To preserve the fraction part for scaling, shift it all left
 				// then right - effectively multiply by 2^8 then divide by same
 				tmp = ((uint16_t )reading[0] << 8) | reading[1];
-				G_sensors[i].status = (SCALE_INT(tmp + adjust)) >> 8;
+				tmp = (SCALE_INT(tmp + adjust)) >> 8;
+				G_sensors[i].status = tmp;
 				break;
 			case SENS_DHT11_TEMPERATURE:
 				SET_BIT(G_sensors[i].iflags, SENS_FLAG_DONE);
 				tmp = ((uint16_t )reading[2] << 8) | reading[3];
-				G_sensors[i].status = (SCALE_INT(tmp + adjust)) >> 8;
+				tmp = (SCALE_INT(tmp + adjust)) >> 8;
+				G_sensors[i].status = tmp;
 				break;
 			default:
 				// There may be accidental matches with non-pin 'pins' like the

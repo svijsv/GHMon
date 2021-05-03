@@ -248,7 +248,7 @@ END:
 #if USE_BMx280_SPI_SENSORS
 	for (uiter_t i = 0; i < SENSOR_COUNT; ++i) {
 		if (PINID(SENSORS[i].pin) == PINID(addr)) {
-			imath_t adjust;
+			imath_t tmp, adjust;
 
 			cfg = &SENSORS[i];
 #if USE_SMALL_SENSORS < 2
@@ -267,12 +267,14 @@ END:
 			case SENS_BMx280_SPI_TEMPERATURE:
 				SET_BIT(G_sensors[i].iflags, SENS_FLAG_DONE);
 				adjust *= 100;
-				G_sensors[i].status = (SCALE_INT(status.temp + adjust)) / 100;
+				tmp = (SCALE_INT(status.temp + adjust)) / 100;
+				G_sensors[i].status = tmp;
 				break;
 			case SENS_BMx280_SPI_HUMIDITY:
 				SET_BIT(G_sensors[i].iflags, SENS_FLAG_DONE);
 				adjust <<= 10;
-				G_sensors[i].status = (SCALE_INT(status.hum + adjust)) >> 10;
+				tmp = (SCALE_INT(status.hum + adjust)) >> 10;
+				G_sensors[i].status = tmp;
 				break;
 			default:
 				// There may be accidental matches with other 'pins' like the
@@ -290,7 +292,7 @@ END:
 	for (uiter_t i = 0; i < SENSOR_COUNT; ++i) {
 		// The 'pin' is actually the I2C address so don't use PINID()
 		if (SENSORS[i].pin == addr) {
-			imath_t adjust;
+			imath_t tmp, adjust;
 
 			cfg = &SENSORS[i];
 #if USE_SMALL_SENSORS < 2
@@ -309,12 +311,14 @@ END:
 			case SENS_BMx280_I2C_TEMPERATURE:
 				SET_BIT(G_sensors[i].iflags, SENS_FLAG_DONE);
 				adjust *= 100;
-				G_sensors[i].status = (SCALE_INT(status.temp + adjust)) / 100;
+				tmp = (SCALE_INT(status.temp + adjust)) / 100;
+				G_sensors[i].status = tmp;
 				break;
 			case SENS_BMx280_I2C_HUMIDITY:
 				SET_BIT(G_sensors[i].iflags, SENS_FLAG_DONE);
 				adjust <<= 10;
-				G_sensors[i].status = (SCALE_INT(status.hum + adjust)) >> 10;
+				tmp = (SCALE_INT(status.hum + adjust)) >> 10;
+				G_sensors[i].status = tmp;
 				break;
 			default:
 				// There may be accidental matches with actual pins

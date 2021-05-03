@@ -124,10 +124,11 @@ void sensor_update_adc_betaR(uiter_t si, uint16_t adc) {
 	// B / ^
 	if (tmp != 0) {
 		tmp = FIXEDP_DIV(beta, tmp);
-		s->status = FIXEDP_AWAY(SCALE_FIXED(tmp + adjust));
+		tmp = FIXEDP_AWAY(SCALE_FIXED(tmp + adjust));
 	} else {
-		s->status = (beta > 0) ? SENSOR_HIGH : SENSOR_LOW;
+		tmp = (beta > 0) ? SENSOR_HIGH : SENSOR_LOW;
 	}
+	s->status = tmp;
 
 	return;
 }

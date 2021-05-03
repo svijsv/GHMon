@@ -135,7 +135,8 @@ void sensor_update_adc_lookup(uiter_t si, uint16_t adc) {
 		status = (((input-I1)*(T2-T1))/(I2-I1)) + T1;
 	}
 	status += (adjust * scale);
-	s->status = SCALE_INT(status) / scale;
+	status = SCALE_INT(status) / scale;
+	s->status = status;
 
 	return;
 }

@@ -80,7 +80,8 @@ void sensor_update_adc_ohm(uiter_t si, uint16_t adc) {
 	}
 	r = ADC_TO_R(adc, sR);
 
-	s->status = SCALE_INT(r + adjust);
+	r = SCALE_INT(r + adjust);
+	s->status = r;
 
 	return;
 }

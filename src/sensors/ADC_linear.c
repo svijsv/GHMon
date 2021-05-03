@@ -141,7 +141,8 @@ void sensor_update_adc_linear(uiter_t si, uint16_t adc) {
 	// slope is in tenths of a unit, so multiply input by 10 to compensate
 	input = (input - ref_input) * 10;
 	ref_value += adjust;
-	s->status = (SCALE_INT(input) / slopeX10) + SCALE_INT(ref_value);
+	input = (SCALE_INT(input) / slopeX10) + SCALE_INT(ref_value);
+	s->status = input;
 
 	return;
 }
