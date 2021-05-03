@@ -226,15 +226,34 @@ void check_controller(controller_t *c) {
 		c->run_start = now;
 		++c->run_count;
 
-		if (cfg->run_timeout_seconds > 0) {
+		last_check[GET_CONTROLLER_I(c)] = now;
+		SET_BIT(c->iflags, CTRL_FLAG_INVALIDATE);
+		if ((cfg->stop_pin != 0) && ((CONTROLLER_STOP_CHECK_SECONDS == 0) || BIT_IS_SET(cfg->cflags, CTRL_FLAG_STOP_CHECK_CONTINUOUS))) {
+			utime_t timeout;
+
+			if (cfg->run_timeout_seconds > 0) {
+				timeout = SET_TIMEOUT(cfg->run_timeout_seconds * 1000);
+			} else {
+				timeout = (uint32_t )0xFFFFFFFF;
+			}
+
+			power_on_input(cfg->stop_pin);
+			while ((gpio_get_state(cfg->stop_pin) != GPIO_HIGH) && !TIMES_UP(timeout)) {
+				// Nothing to do here
+			}
+			power_off_input(cfg->stop_pin);
+			if (TIMES_UP(timeout)) {
+				DISENGAGE(c, cfg, "run timeout while waiting for stop pin");
+			} else {
+				DISENGAGE(c, cfg, "stop pin is high");
+			}
+		} else if (cfg->run_timeout_seconds > 0) {
 			if (cfg->stop_pin != 0) {
 				c->next_check = now + ((cfg->run_timeout_seconds > CONTROLLER_STOP_CHECK_SECONDS) ? CONTROLLER_STOP_CHECK_SECONDS : cfg->run_timeout_seconds);
 			} else {
 				c->next_check = now + cfg->run_timeout_seconds;
 			}
 		}
-		last_check[GET_CONTROLLER_I(c)] = now;
-		SET_BIT(c->iflags, CTRL_FLAG_INVALIDATE);
 
 	} else if (do_engage && is_engaged) {
 		utime_t now, timeout;
@@ -299,6 +318,29 @@ void check_controller(controller_t *c) {
 #endif // USE_SMALL_CONTROLLERS < 2
 
 		ENGAGE(c, cfg);
+
+#if USE_SMALL_CONTROLLERS < 2
+		if ((cfg->stop_pin != 0) && ((CONTROLLER_STOP_CHECK_SECONDS == 0) || BIT_IS_SET(cfg->cflags, CTRL_FLAG_STOP_CHECK_CONTINUOUS))) {
+			utime_t timeout;
+
+			if (cfg->run_timeout_seconds > 0) {
+				timeout = SET_TIMEOUT(cfg->run_timeout_seconds * 1000);
+			} else {
+				timeout = (uint32_t )0xFFFFFFFF;
+			}
+
+			power_on_input(cfg->stop_pin);
+			while ((gpio_get_state(cfg->stop_pin) != GPIO_HIGH) && !TIMES_UP(timeout)) {
+				// Nothing to do here
+			}
+			power_off_input(cfg->stop_pin);
+			if (TIMES_UP(timeout)) {
+				DISENGAGE(c, cfg, "run timeout while waiting for stop pin");
+			} else {
+				DISENGAGE(c, cfg, "stop pin is high");
+			}
+		} else
+#endif // USE_SMALL_CONTROLLERS < 2
 		if (cfg->run_timeout_seconds > 0) {
 			utime_t timeout;
 			timeout = cfg->run_timeout_seconds;

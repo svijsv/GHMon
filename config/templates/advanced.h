@@ -61,6 +61,8 @@
 #define CONTROLLER_RETRY_DELAY_SECONDS 30
 // Wait this many seconds between checking the controller 'stop' pin when it's
 // set
+// If set to 0, poll the stop pin continuously; nothing else will happen until
+// either the stop pin goes high or the controller times out.
 #define CONTROLLER_STOP_CHECK_SECONDS 5
 // The number of sensors associated with each controller.
 // Must be >= 1 and <= 255.
