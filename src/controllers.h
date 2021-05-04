@@ -121,22 +121,22 @@ typedef struct {
 	uint16_t schedule_minutes;
 #endif // USE_SMALL_CONTROLLERS < 1
 
-	// Seconds to keep control_pin high after it's turned on
-	// The control pin is kept high until either this timeout is reached or
+	// Seconds to keep control_pins high after theyre turned on
+	// The control pins are kept high until either this timeout is reached or
 	// the stop pin goes high.
-	// If 0, the pin is kept high until a future controller check stops it or
-	// the stop pin goes high.
+	// If 0, the pins are kept high until a future controller check stops them
+	// or the stop pin goes high.
 	uint8_t run_timeout_seconds;
 
 	// Control flags
 	uint8_t cflags;
 
-	// MCU pin used to engage the device
-	// If biased, this pin is always in push-pull mode and kept at it's bias
-	// state normally, then reversed when conditions are met.
-	// If not biased, this pin is normally in high-impedence mode and set to
-	// output high when conditions are met.
-	pin_t control_pin;
+	// MCU pin(s) used to engage the device(s)
+	// If biased, these pins are always in push-pull mode and kept at their
+	// bias state normally, then reversed when conditions are met.
+	// If not biased, these pins are normally in high-impedence mode and set
+	// to push-pull high when conditions are met.
+	pin_t control_pins[CONTROLLER_CTRL_PIN_COUNT];
 #if USE_SMALL_CONTROLLERS < 2
 	// MCU pin used tell the controller that the device should stop running
 	// This pin should be high when the controller should halt; the internal

@@ -64,9 +64,12 @@
 // If set to 0, poll the stop pin continuously; nothing else will happen until
 // either the stop pin goes high or the controller times out.
 #define CONTROLLER_STOP_CHECK_SECONDS 5
-// The number of sensors associated with each controller.
-// Must be >= 1 and <= 255.
+// The number of sensors associated with each controller
+// Must be >= 1.
 #define CONTROLLER_SENS_COUNT 1
+// The number of control pins associated with each controller
+// Must be >=1.
+#define CONTROLLER_CTRL_PIN_COUNT 1
 
 // Use the less-accurate but lower-power internal oscillator for the system
 // clock where supported instead of the external crystal

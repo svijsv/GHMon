@@ -16,7 +16,7 @@ _FLASH const controller_static_t CONTROLLERS[CONTROLLER_COUNT] = {
 /*
 * 0: Fan control */ {
 	.name = "FAN_CTL", // Logging name, max size 7 characters by default
-	.control_pin = CONTROL_FAN_PIN, // FAN_CONTROL_PIN is defined in config.h
+	.control_pins = { CONTROL_FAN_PIN }, // FAN_CONTROL_PIN is defined in config.h
 
 	.run_timeout_seconds = 0,  // Once triggered, run continuously until the
 	                           // temperature is low enough
@@ -36,7 +36,7 @@ _FLASH const controller_static_t CONTROLLERS[CONTROLLER_COUNT] = {
 /*
 * 1: Irrigation control */ {
 	.name = "WAT_CTL",
-	.control_pin = CONTROL_WATER_PIN,
+	.control_pins = { CONTROL_WATER_PIN },
 
 	.run_timeout_seconds = 30, // Run for 30 seconds when triggered
 	.schedule_minutes = SET_CLOCK_TIME(17, 30), // Check daily at 5:30PM (internal time)
@@ -60,7 +60,7 @@ _FLASH const controller_static_t CONTROLLERS[CONTROLLER_COUNT] = {
 // X: An everythings-OK alarm, goes off every minute as long as everything's OK
 {
 	.name = "OK_ALRM",
-	.control_pin = CONTROL_OKALARM_PIN,
+	.control_pins = { CONTROL_OKALARM_PIN },
 	.stop_pin = CONTROL_NOTOK_PIN, // Don't run the alarm if something is holding
 	                               // CONTROL_NOTOK_PIN high
 

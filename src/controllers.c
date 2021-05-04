@@ -70,6 +70,8 @@ controller_t G_controllers[CONTROLLER_COUNT];
 /*
 * Local function prototypes
 */
+void power_on_control_pins(_FLASH const controller_static_t *cfg);
+void power_off_control_pins(_FLASH const controller_static_t *cfg);
 #if USE_SMALL_CONTROLLERS < 2
 static gpio_state_t read_stop(_FLASH const controller_static_t *cfg);
 #endif
@@ -87,14 +89,14 @@ static void update_runtime(controller_t *c);
 	do { \
 		LOGGER("Engaging %s", FROM_FSTR((cfg)->name)); \
 		SET_ENGAGED((c)); \
-		power_on_output((cfg)->control_pin); \
+		power_on_control_pins((cfg)); \
 	} while (0);
 
 #define DISENGAGE(c, cfg, msg) \
 	do { \
 		LOGGER("Halting %s: " msg, FROM_FSTR((cfg)->name)); \
 		UNSET_ENGAGED((c)); \
-		power_off_output((cfg)->control_pin); \
+		power_off_control_pins((cfg)); \
 	} while (0);
 
 
@@ -129,7 +131,7 @@ void controllers_init(void) {
 		}
 
 		//G_controllers[i].i = i;
-		power_off_output(cfg->control_pin);
+		power_off_control_pins(cfg);
 	}
 
 	return;
@@ -367,7 +369,7 @@ void check_controller(controller_t *c) {
 			if (timeout == 0) {
 				DISENGAGE(c, cfg, "run timeout");
 			}
-			power_off_output(cfg->control_pin);
+			power_off_control_pins(cfg);
 		}
 
 	} else if (!do_engage && is_engaged) {
@@ -437,23 +439,44 @@ static void update_runtime(controller_t *c) {
 	return;
 }
 
+void power_on_control_pins(_FLASH const controller_static_t *cfg) {
+	for (uiter_t i = 0; i < CONTROLLER_CTRL_PIN_COUNT; ++i) {
+		if (cfg->control_pins[i] != 0) {
+			power_on_output(cfg->control_pins[i]);
+		}
+	}
+
+	return;
+}
+void power_off_control_pins(_FLASH const controller_static_t *cfg) {
+	for (uiter_t i = 0; i < CONTROLLER_CTRL_PIN_COUNT; ++i) {
+		bool still_needed = false;
+
+		if (cfg->control_pins[i] != 0) {
+			for (uiter_t ci = 0; (ci < CONTROLLER_COUNT) && !still_needed; ++ci) {
+				if ((cfg == &CONTROLLERS[ci]) || (!BIT_IS_SET(G_controllers[ci].iflags, CTRL_FLAG_ENGAGED))) {
+					continue;
+				}
+
+				for (uiter_t pi = 0; pi < CONTROLLER_CTRL_PIN_COUNT; ++pi) {
+					if (PINID(cfg->control_pins[i]) == PINID(CONTROLLERS[ci].control_pins[pi])) {
+						still_needed = true;
+						break;
+					}
+				}
+			}
+			if (!still_needed) {
+				power_off_output(cfg->control_pins[i]);
+			} else {
+				LOGGER("Leaving pin 0x%02X engaged; another controller requires it", (uint )cfg->control_pins[i]);
+			}
+		}
+	}
+
+	return;
+}
+
 #if USE_SMALL_CONTROLLERS < 2
-/*
-static void stop_on(_FLASH const controller_static_t *cfg) {
-	if (cfg->stop_pin != 0) {
-		gpio_set_mode(cfg->stop_pin, GPIO_MODE_IN, GPIO_LOW);
-	}
-
-	return;
-}
-static void stop_off(_FLASH const controller_static_t *cfg) {
-	if (cfg->stop_pin != 0) {
-		gpio_set_mode(cfg->stop_pin, GPIO_MODE_HiZ, GPIO_FLOAT);
-	}
-
-	return;
-}
-*/
 static gpio_state_t read_stop(_FLASH const controller_static_t *cfg) {
 	gpio_state_t pstate;
 
@@ -467,52 +490,6 @@ static gpio_state_t read_stop(_FLASH const controller_static_t *cfg) {
 	return pstate;
 }
 #endif // USE_SMALL_CONTROLLERS < 2
-
-/*
-static bool check_engaged(pin_t pin) {
-	bool is_engaged;
-
-	is_engaged = false;
-	if (gpio_get_mode(pin) == GPIO_MODE_PP) {
-		gpio_state_t pstate;
-
-		pstate = gpio_get_state(pin);
-		switch (GPIO_GET_BIAS(pin)) {
-		case BIAS_HIGH:
-			is_engaged = (pstate != GPIO_HIGH);
-			break;
-		default:
-			is_engaged = (pstate == GPIO_HIGH);
-			break;
-		}
-	}
-
-	return is_engaged;
-}
-*/
-/*
-static void disengage(controller_t *c, const char *msg) {
-	uint8_t ci;
-	_FLASH const char *shared = NULL;
-
-	ci = GET_CONTROLLER_I(c);
-	for (uiter_t i = 0; i < SENSOR_COUNT; ++i) {
-		if ((i != ci) && (PINID(CONTROLLERS[i].control_pin) == PINID(CONTROLLERS[ci].control_pin)) && (BIT_IS_SET(G_controllers[i].iflags, CTRL_FLAG_ENGAGED))) {
-			shared = CONTROLLERS[i].name;
-			break;
-		}
-	}
-	if (shared != NULL) {
-		LOGGER("Halting %s: %s", FROM_FSTR(CONTROLLERS[ci].name), msg);
-		UNSET_ENGAGED(c);
-		power_off_output(CONTROLLERS[ci].control_pin);
-	} else {
-		LOGGER("Holding %s on: shares pin with %s", FROM_FSTR(CONTROLLERS[ci].name), FROM_FSTR2(CONTROLLERS[ci].name));
-	}
-
-	return;
-}
-*/
 
 
 #endif // USE_CONTROLLERS
