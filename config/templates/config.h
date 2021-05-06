@@ -243,8 +243,8 @@
 #define SPI_MOSI_PIN  PIN_11
 //
 // I2C pins; hardware-specified
-// The SCL and SDA pins are the same as pins A4 and A5, even though they may
+// The SDA and SCL pins are the same as pins A4 and A5, even though they may
 // have separate pins broken out
-#define I2C_SCL_PIN PIN_A4
-#define I2C_SDA_PIN PIN_A5
+#define I2C_SDA_PIN PIN_A4
+#define I2C_SCL_PIN PIN_A5
 #endif // USE_AVR
