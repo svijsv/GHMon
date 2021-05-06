@@ -107,12 +107,11 @@ _FLASH const sensor_static_t SENSORS[SENSOR_COUNT] = {
 	.name  = "DIT_SEN",
 	.pin   = SENSOR_TEMP_PIN,
 
-	.type = SENS_ADC_LINEAR,
-	.cflags = SENS_FLAG_VOLTS,
+	.type = SENS_ADC_VOLT,
 	.devcfg = {
-		.linear.ref_value = 0,   // Reference value, here 0C
-		.linear.ref_input = 600, // Voltage in mV at reference value
-		.linear.slopeX10 = -20,  // Change in tenths of a mV between value steps
+		.volt.ref_value = 0,   // Reference value, here 0C
+		.volt.ref_mV = 600, // Voltage in mV at reference value
+		.volt.slopeX10 = -20,  // Change in tenths of a mV between value steps
 	},
 },
 

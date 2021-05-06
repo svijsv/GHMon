@@ -31,15 +31,13 @@
 //
 // Supported sensor types
 //
-// Direct reading of voltage, measured in millivolts
+// Sensors with a linear relationship between voltage output and sensor value
 #define USE_VOLT_SENSORS 1
-// Direct reading of resistance, measured in ohms
+// Sensors with a linear relationship between resistance and sensor value
 #define USE_OHM_SENSORS 1
 // Sensors such as thermistors with reference values and beta coefficients
 // used to calculate non-linear resistance changes
 #define USE_BETA_R_SENSORS 1
-// Sensors with linear resistance or voltage changes
-#define USE_LINEAR_SENSORS 0
 // Sensors with resistance or voltage lookup tables
 #define USE_LOOKUP_SENSORS 0
 // Digital pin sensors; either '1' (high) or '0' (low)

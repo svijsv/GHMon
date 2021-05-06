@@ -56,7 +56,16 @@ void sensor_update_adc_ohm(uiter_t si, uint16_t adc);
 // Sensor type-specific settings for SENS_*_CFG
 typedef struct {
 	// The value of the other resistor in the voltage divider
-	uint32_t series_R_ohms;
+	int32_t series_R_ohms;
+	// The resistance in ohms at the reference value
+	// Leave unset or set to 0 for direct resistance measurement
+	int32_t ref_ohms;
+	// The reference value
+	// Leave unset or set to 0 for direct resistance measurement
+	int16_t ref_value;
+	// The resistance change in 1/10 ohms when the value increases by 1
+	// Leave unset or set to 0 for direct resistance measurement
+	int16_t slopeX10;
 } sensor_opt_ohm_t;
 
 
