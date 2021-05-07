@@ -37,6 +37,13 @@
 
 #include "fatfs/diskio.h"
 
+#if SENSOR_POWER_PIN && ((PINID(SENSOR_POWER_PIN) == PINID(SPI_POWER_PIN)) || (PINID(SENSOR_POWER_PIN) == PINID(I2C_POWER_PIN)))
+# error "SENSOR_POWER_PIN can not be the same as SPI_POWER_PIN or I2C_POWER_PIN"
+#endif
+#if SPI_POWER_PIN && (PINID(SPI_POWER_PIN) == PINID(I2C_POWER_PIN))
+# error "SPI_POWER_PIN can not be the same as I2C_POWER_PIN"
+#endif
+
 
 /*
 * Static values
