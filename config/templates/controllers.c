@@ -2,16 +2,16 @@
 * Macros to aid in controller configuration
 */
 // Set a schedule using a more natural notation than bare minutes
-#define SET_CLOCK_TIME(hours, minutes) (((hours) * 60) + (minutes))
+#define CLOCK_TIME(hours, minutes) (((hours) * 60) + (minutes))
 
 /*
 *
 * Controller definitions
-* See controllers.h for structure documentation
+* See src/controllers.h for structure documentation
 *
+* Be sure to change CONTROLLER_COUNT in config.h if the number of controllers
+* changes.
 */
-// Be sure to change CONTROLLER_COUNT in config.h if the number of controllers
-// changes.
 _FLASH const controller_static_t CONTROLLERS[CONTROLLER_COUNT] = {
 /*
 * 0: Fan control */ {
@@ -39,7 +39,7 @@ _FLASH const controller_static_t CONTROLLERS[CONTROLLER_COUNT] = {
 	.control_pins = { CONTROL_WATER_PIN },
 
 	.run_timeout_seconds = 30, // Run for 30 seconds when triggered
-	.schedule_minutes = SET_CLOCK_TIME(17, 30), // Check daily at 5:30PM (internal time)
+	.schedule_minutes = CLOCK_TIME(17, 30), // Check daily at 5:30PM (internal time)
 
 	.cflags = CTRL_FLAG_USE_TIME_OF_DAY // The schedule is a specific time
 	                                    // rather than a time period

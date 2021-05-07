@@ -23,6 +23,8 @@
 //   These sensors have two different interfaces, SPI and I2C, which are
 //   managed separately
 //
+//   Temperature is reported in degrees celsius, humidity in %, and air
+//   pressure in millibars
 
 #ifdef __cplusplus
  extern "C" {

@@ -13,12 +13,12 @@
 // Convert Celsius temperature to Fahrenheit; both of these macros need to
 // be used
 // T(°F) = T(°C) × 1.8 + 32
-// The 'scale' argument is to allow all the possibilities of normal scaling
-#define C_TO_F_SCALE(scale) ((180 * (scale)) / 100)
+#define C_TO_F_SCALE (180)
 // The adjustment is applied before the scaling, so it needs to be converted
 // to Celsius
-// Add half the denominator to round to nearest instead of truncate
-#define C_TO_F_ADJUST() ((32.0f + 0.9f)/1.8f)
+// Add half the denominator to round to nearest instead of truncating when it's
+// converted to an int
+#define C_TO_F_ADJUST ((32.0f + 0.9f)/1.8f)
 
 
 /*
@@ -26,11 +26,15 @@
 * Sensor definitions
 * See src/sensors.h and the headers in src/sensors for structure documentation
 *
+* Be sure to change SENSOR_COUNT in config.h if the number of sensors changes.
+*
+* If using controllers, the indexes of the sensors should be tracked to make
+* referencing them less error-prone. The easy way to do this is just to #define
+* a name for each sensor index after it's definition.
+*
+* Status adjustments are made prior to scaling.
+*
 */
-// Be sure to change SENSOR_COUNT in config.h if the number of sensors changes.
-// If using controllers, the indexes of the sensors should be tracked to make
-// referencing them less error-prone. The easy way to do this is just to #define
-// a name for each sensor after it's definition.
 _FLASH const sensor_static_t SENSORS[SENSOR_COUNT] = {
 /*
 * 0: Greenhouse temperature */ {

@@ -164,6 +164,7 @@ void power_on_SPI(void) {
 		sleep_ms(SPI_POWER_UP_DELAY_MS);
 	}
 #if USE_SD
+	// http://elm-chan.org/docs/mmc/mmc_e.html#spibus
 	// The SD card needs to be initialized or it may interfere with
 	// anything else on the SPI bus
 	// We're assuming here that the card won't have been removed and then

@@ -20,7 +20,7 @@
 // DHT11.h
 // Manage DHT11 sensors
 // NOTES:
-//
+//   Temperature is reported in degrees celsius and humidity in %
 
 #ifdef __cplusplus
  extern "C" {

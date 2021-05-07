@@ -24,16 +24,21 @@
 //    added should be in this file to avoid a circular dependency between
 //    sensors.h and config_unify.h
 //
+//    Units used for sensor output should favor degrees Celsius for temperature,
+//    % for humidity, millibars for pressure, ohms for resistance, and
+//    millivolts for voltage.
+//
 //    Steps for a new sensor type:
 //       * Copy a sensors/*.[ch] pair and modify to suit the new sensor
 //          * Make sure any needed USE_{ADC,SPI,I2C}_SENSORS macro is set for
 //            the underlying peripheral
-//       * #include the header below
+//       * #include the new header with the rest down below
 //       * Add it to sensor_type_t
 //       * Add it to SENSOR_DISPATCHES
 //       * Add it to sensor_devcfg_t if required
+//       * Add it to sensor_devcache_t if required
 //       * Add USE_x_SENSORS to config/templates/config.h
-//
+
 
 #ifdef __cplusplus
  extern "C" {

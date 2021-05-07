@@ -2,13 +2,14 @@
 GHMon is a configurable low-power firmware for autonomous small-scale
 greenhouse control and data logging. At present it supports STM32F103-based
 Bluepill and ATMega328-based Arduino devices with wired resistance- and
-voltage-based sensors.
+voltage-based sensors, DHT11 temperature/humidity sensors, and BMP280/BME280
+temperature/air pressure/humidity sensors.
 
 
 ## Configuring
-Configuration is spread over 3-5 files (depending on enabled features) in
-`config/` and examples for all the files can be found in `config/templates/`.
-More detailed configuration information can be found in `config/README.md`.
+Configuration files are located in `config/` and examples for all the files
+can be found in `config/templates/`. More detailed configuration information
+can be found in `config/README.md`.
 
 
 ## Installing
@@ -17,14 +18,16 @@ GHMon uses [PlatformIO](https://platformio.org/) for building and installing.
 Build configuration files are provided for a few boards and can be found in
 `pio_inis/`; they're included by `platformio.ini` by default. New (compatible)
 boards can be added by copying an existing .ini file and editing it where
-appropriate, typically just by changing the `board = X` line.
+appropriate.
 
 
 ## Usage
 The primary user interface is a button in combination with an LED.
 
 * Pressing the button briefly will wake the monitor, blink the LED once, then
-check the sensors and blink a few times if there are any warnings.
+check the sensors and blink a few times if there are any warnings - one flash
+to aknowledge, two flashes for a power warning, three for a sensor warning,
+four for a controller warning, and five for a logging warning.
 * Holding the button until it has blinked a total of two times will sync any
 cached log data to the SD card (if it's enabled); it will blink once when done
 if everything's OK or a few times if there was an error.
