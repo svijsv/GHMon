@@ -377,7 +377,6 @@ static void deep_sleep_s(utime_t s, uint8_t flags) {
 	// Use the low-power voltage regulator
 	pwr_voltage_regulator_low_power_in_stop();
 
-	gpio_set_mode(LED_PIN, GPIO_MODE_HiZ, GPIO_FLOAT);
 	set_RTC_alarm(s);
 	while (RTC_alarm_is_set) {
 		// Wait for an interrupt
@@ -391,14 +390,11 @@ static void deep_sleep_s(utime_t s, uint8_t flags) {
 		if (!RTC_alarm_is_set || BIT_IS_SET(flags, CFG_ALLOW_INTERRUPTS)) {
 			break;
 		} else {
-			gpio_set_mode(LED_PIN, GPIO_MODE_PP, GPIO_LOW);
 			// Let the user know we can't do anything right now
 			sysflash();
 			sysflash();
-			gpio_set_mode(LED_PIN, GPIO_MODE_HiZ, GPIO_FLOAT);
 		}
 	}
-	gpio_set_mode(LED_PIN, GPIO_MODE_PP, GPIO_LOW);
 	stop_RTC_alarm();
 
 	// The SYSCLK is always HSI on wakeup

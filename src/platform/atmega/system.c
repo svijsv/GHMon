@@ -249,7 +249,6 @@ static void _sleep_ms(utime_t ms, uint8_t flags) {
 			break;
 		}
 
-		gpio_set_mode(LED_PIN, GPIO_MODE_HiZ, GPIO_FLOAT);
 		// The systick is disabled during sleep so that the interrupts don't
 		// wake us up
 		disable_systick();
@@ -281,10 +280,8 @@ static void _sleep_ms(utime_t ms, uint8_t flags) {
 					ms = 0;
 					break;
 				} else {
-					gpio_set_mode(LED_PIN, GPIO_MODE_PP, GPIO_LOW);
 					sysflash();
 					sysflash();
-					gpio_set_mode(LED_PIN, GPIO_MODE_HiZ, GPIO_FLOAT);
 				}
 			}
 			disable_systick();
@@ -294,7 +291,6 @@ static void _sleep_ms(utime_t ms, uint8_t flags) {
 		enable_systick();
 		stop_wakeup_alarm();
 	}
-	gpio_set_mode(LED_PIN, GPIO_MODE_PP, GPIO_LOW);
 
 	return;
 }
