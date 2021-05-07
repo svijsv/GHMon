@@ -43,9 +43,6 @@
 #if CONTROLLER_COUNT > 255 || CONTROLLER_COUNT < 1
 # error "CONTROLLER_COUNT not between 1 and 255"
 #endif
-#if CONTROLLER_SENS_COUNT < 1 || CONTROLLER_SENS_COUNT > 255
-# error "CONTROLLER_SENS_COUNT not between 1 and 127"
-#endif
 
 
 /*
@@ -121,6 +118,7 @@ void controllers_init(void) {
 			ERROR_STATE("Unset name in CONTROLLERS[]; is CONTROLLER_COUNT correct?");
 		}
 
+#if CONTROLLER_SENS_COUNT > 0
 		for (uiter_t j = 0; j < CONTROLLER_SENS_COUNT; ++j) {
 			if (cfg->inputs[j].si >= SENSOR_COUNT) {
 				LOGGER("Controller %u input %u index >= SENSOR_COUNT", (uint )i, (uint )j);
@@ -129,6 +127,7 @@ void controllers_init(void) {
 				SET_BIT(G_controllers[i].iflags, CTRL_FLAG_USES_SENSORS);
 			}
 		}
+#endif
 
 		//G_controllers[i].i = i;
 		power_off_control_pins(cfg);
@@ -169,6 +168,7 @@ void check_controller(controller_t *c) {
 	CLEAR_BIT(c->iflags, CTRL_FLAG_INVALIDATE);
 
 	do_engage = true;
+#if CONTROLLER_SENS_COUNT > 0
 	if (BIT_IS_SET(c->iflags, CTRL_FLAG_USES_SENSORS)) {
 		bool any_met = false, any_unmet = false;
 		bool high = false, low = false, inside = false;
@@ -205,6 +205,7 @@ void check_controller(controller_t *c) {
 			do_engage = false;
 		}
 	}
+#endif // CONTROLLER_SENS_COUNT > 0
 	is_engaged = CHECK_ENGAGED(c);
 
 	if ((do_engage) && (BIT_IS_SET(cfg->cflags, CTRL_FLAG_WARN_WHEN_ON))) {
@@ -314,7 +315,6 @@ void check_controller(controller_t *c) {
 		DISENGAGE(c, cfg, "conditions not met");
 		update_runtime(c);
 		c->try_count = 0;
-
 	}
 
 #else // !USE_SMALL_CONTROLLERS < 1 // Don't have check period but may have stop

@@ -111,8 +111,10 @@ typedef struct {
 	// The size of name[] includes a trailing NUL byte.
 	char name[DEVICE_NAME_LEN+1];
 
+#if CONTROLLER_SENS_COUNT > 0
 	// The sensor(s) used to determine whether the controller is activated.
 	controller_sens_t inputs[CONTROLLER_SENS_COUNT];
+#endif
 
 // schedule only makes sense with individual controller wakeup times, which
 // are absent when USE_SMALL_CONTROLLERS >= 1
