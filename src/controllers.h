@@ -51,21 +51,24 @@
 #define CTRL_FLAG_TRIGGER_ANY  0x01
 // Issue a warning when the controller is engaged
 #define CTRL_FLAG_WARN_WHEN_ON 0x02
+// Issue a warning when a controller runs until timeout; mostly useful in
+// conjuction with stop pins
+#define CTRL_FLAG_WARN_WHEN_TIMEOUT 0x04
 // Run the controller even if in a low-battery or low-Vcc state
-#define CTRL_FLAG_IGNORE_POWER 0x04
+#define CTRL_FLAG_IGNORE_POWER 0x08
 //
 // These features depend on fields removed from sensor_t in small builds
 #if USE_SMALL_CONTROLLERS < 1
 // After engaging, recheck the conditions and run again if required
 // If the conditions are still met after CONTROLLER_RETRY_MAX attempts, the
 // controller stops trying and issues a warning.
-# define CTRL_FLAG_RETRY           0x08
+# define CTRL_FLAG_RETRY           0x10
 // The polling time is an offset from 12AM rather than a period
-# define CTRL_FLAG_USE_TIME_OF_DAY 0x10
+# define CTRL_FLAG_USE_TIME_OF_DAY 0x20
 #endif // USE_SMALL_CONTROLLERS < 1
 #if USE_SMALL_CONTROLLERS < 2
 // Monitor the stop pin continuously instead of periodic polling
-# define CTRL_FLAG_STOP_CHECK_CONTINUOUS 0x20
+# define CTRL_FLAG_STOP_CHECK_CONTINUOUS 0x40
 #endif
 
 //

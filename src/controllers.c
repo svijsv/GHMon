@@ -245,7 +245,11 @@ void check_controller(controller_t *c) {
 			}
 			power_off_input(cfg->stop_pin);
 			if (TIMES_UP(timeout)) {
+				if (BIT_IS_SET(cfg->cflags, CTRL_FLAG_WARN_WHEN_TIMEOUT)) {
+					SET_BIT(c->iflags, CTRL_FLAG_WARNING);
+				}
 				DISENGAGE(c, cfg, "run timeout while waiting for stop pin");
+
 			} else {
 				DISENGAGE(c, cfg, "stop pin is high");
 			}
@@ -278,6 +282,9 @@ void check_controller(controller_t *c) {
 		}
 
 		if (timeout == 0) {
+			if (BIT_IS_SET(cfg->cflags, CTRL_FLAG_WARN_WHEN_TIMEOUT)) {
+				SET_BIT(c->iflags, CTRL_FLAG_WARNING);
+			}
 			DISENGAGE(c, cfg, "run timeout");
 			if (BIT_IS_SET(cfg->cflags, CTRL_FLAG_RETRY)) {
 				if (c->try_count <= CONTROLLER_RETRY_MAX) {
@@ -337,6 +344,9 @@ void check_controller(controller_t *c) {
 			}
 			power_off_input(cfg->stop_pin);
 			if (TIMES_UP(timeout)) {
+				if (BIT_IS_SET(cfg->cflags, CTRL_FLAG_WARN_WHEN_TIMEOUT)) {
+					SET_BIT(c->iflags, CTRL_FLAG_WARNING);
+				}
 				DISENGAGE(c, cfg, "run timeout while waiting for stop pin");
 			} else {
 				DISENGAGE(c, cfg, "stop pin is high");
@@ -367,6 +377,9 @@ void check_controller(controller_t *c) {
 				timeout = 0;
 			}
 			if (timeout == 0) {
+				if (BIT_IS_SET(cfg->cflags, CTRL_FLAG_WARN_WHEN_TIMEOUT)) {
+					SET_BIT(c->iflags, CTRL_FLAG_WARNING);
+				}
 				DISENGAGE(c, cfg, "run timeout");
 			}
 			power_off_control_pins(cfg);
