@@ -227,9 +227,8 @@ void gpio_set_state(pin_t pin, gpio_state_t new_state);
 // For other modes this shouldn't have an effect
 void gpio_toggle_state(pin_t pin);
 // Get the state of a pin
-// For inputs, get the value of the input data register
-// For outputs, get the value of either the output or input data register
-// depending on platform
+// Get the value of the input data register (which should match the output
+// register on output pins)
 gpio_state_t gpio_get_state(pin_t pin);
 // Prepare to read the state of a pin quickly
 // qpin can be passed to GPIO_QUICK_READ() after being set up here

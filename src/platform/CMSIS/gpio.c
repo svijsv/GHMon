@@ -136,28 +136,7 @@ gpio_state_t gpio_get_state(pin_t pin) {
 	port = GPIO_GET_PORT(pin);
 	pinmask = GPIO_GET_PINMASK(pin);
 
-	if (is_output(pin)) {
-		switch (BIT_IS_SET(port->ODR, pinmask)) {
-		case 0:
-			return GPIO_LOW;
-			break;
-		default:
-			return GPIO_HIGH;
-			break;
-		}
-	} else {
-		switch (BIT_IS_SET(port->IDR, pinmask)) {
-		case 0:
-			return GPIO_LOW;
-			break;
-		default:
-			return GPIO_HIGH;
-			break;
-		}
-	}
-
-	// Won't actually reach down here
-	return GPIO_FLOAT;
+	return (BIT_IS_SET(port->IDR, pinmask)) ? GPIO_HIGH : GPIO_LOW;
 }
 
 void gpio_quickread_prepare(volatile gpio_quick_t *qpin, pin_t pin) {
