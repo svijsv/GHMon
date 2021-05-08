@@ -57,8 +57,6 @@
 /*
 * Variable declarations (defined in adc.c)
 */
-// Frequency of the ADC bus
-extern uint32_t G_freq_ADC;
 
 
 /*

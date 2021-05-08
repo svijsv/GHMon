@@ -57,9 +57,6 @@
 /*
 * Variables
 */
-uint32_t G_freq_HCLK;
-uint32_t G_freq_PCLK1;
-uint32_t G_freq_PCLK2;
 
 
 /*
@@ -229,6 +226,8 @@ void sysflash(void) {
 	}
 }
 static void clocks_init(void) {
+	uint32_t reg;
+
 	// Don't use clock source protection
 	CLEAR_BIT(RCC->CR, RCC_CR_CSSON);
 
@@ -245,6 +244,7 @@ static void clocks_init(void) {
 	while (GATHER_BITS(RCC->CFGR, 0b11, RCC_CFGR_SWS_Pos) != 0b00) {
 		// Nothing to do here
 	}
+	// Disable HSE
 	CLEAR_BIT(RCC->CR, RCC_CR_HSEON);
 
 #else // !USE_INTERNAL_CLOCK
@@ -260,14 +260,76 @@ static void clocks_init(void) {
 	while (GATHER_BITS(RCC->CFGR, 0b11, RCC_CFGR_SWS_Pos) != 0b01) {
 		// Nothing to do here
 	}
+	// Disable HSI
 	CLEAR_BIT(RCC->CR, RCC_CR_HSION);
 #endif // USE_INTERNAL_CLOCK
 
-	MODIFY_BITS(RCC->CFGR, RCC_CFGR_PPRE2|RCC_CFGR_PPRE1|RCC_CFGR_HPRE,
-		(0b000  << RCC_CFGR_PPRE2_Pos)  | // Use HCLK as APB2 clock
-		(0b100  << RCC_CFGR_PPRE1_Pos)  | // Use HCLK/2 as APB1 clock
-		(0b1000 << RCC_CFGR_HPRE_Pos )  | // Use SYSCLK/2 as HCLK
-		0);
+	reg = 0;
+#if G_freq_HCLK == G_freq_OSC
+	// Nothing to do here
+#elif G_freq_HCLK == (G_freq_OSC / 2)
+	reg |= 0b1000 << RCC_CFGR_HPRE_Pos;
+#elif G_freq_HCLK == (G_freq_OSC / 4)
+	reg |= 0b1001 << RCC_CFGR_HPRE_Pos;
+#elif G_freq_HCLK == (G_freq_OSC / 8)
+	reg |= 0b1010 << RCC_CFGR_HPRE_Pos;
+#elif G_freq_HCLK == (G_freq_OSC / 16)
+	reg |= 0b1011 << RCC_CFGR_HPRE_Pos;
+#elif G_freq_HCLK == (G_freq_OSC / 64)
+	reg |= 0b1100 << RCC_CFGR_HPRE_Pos;
+#elif G_freq_HCLK == (G_freq_OSC / 128)
+	reg |= 0b1101 << RCC_CFGR_HPRE_Pos;
+#elif G_freq_HCLK == (G_freq_OSC / 256)
+	reg |= 0b1110 << RCC_CFGR_HPRE_Pos;
+#elif G_freq_HCLK == (G_freq_OSC / 512)
+	reg |= 0b1111 << RCC_CFGR_HPRE_Pos;
+#else
+# error "G_freq_HCLK must be a G_freq_OSC / (1|2|4|8|16|64)"
+#endif
+
+#if G_freq_PCLK1 == G_freq_HCLK
+	// Nothing to do here
+#elif G_freq_PCLK1 == (G_freq_HCLK / 2)
+	reg |= 0b100 << RCC_CFGR_PPRE1_Pos;
+#elif G_freq_PCLK1 == (G_freq_HCLK / 4)
+	reg |= 0b101 << RCC_CFGR_PPRE1_Pos;
+#elif G_freq_PCLK1 == (G_freq_HCLK / 8)
+	reg |= 0b110 << RCC_CFGR_PPRE1_Pos;
+#elif G_freq_PCLK1 == (G_freq_HCLK / 16)
+	reg |= 0b111 << RCC_CFGR_PPRE1_Pos;
+#else
+# error "G_freq_PCLK1 must be a G_freq_HCLK / (1|2|4|8|16)"
+#endif
+
+#if G_freq_PCLK2 == G_freq_HCLK
+	// Nothing to do here
+#elif G_freq_PCLK2 == (G_freq_HCLK / 2)
+	reg |= 0b100 << RCC_CFGR_PPRE2_Pos;
+#elif G_freq_PCLK2 == (G_freq_HCLK / 4)
+	reg |= 0b101 << RCC_CFGR_PPRE2_Pos;
+#elif G_freq_PCLK2 == (G_freq_HCLK / 8)
+	reg |= 0b110 << RCC_CFGR_PPRE2_Pos;
+#elif G_freq_PCLK2 == (G_freq_HCLK / 16)
+	reg |= 0b111 << RCC_CFGR_PPRE2_Pos;
+#else
+# error "G_freq_PCLK2 must be a G_freq_HCLK / (1|2|4|8|16)"
+#endif
+
+#if   G_freq_ADC == (G_freq_PCLK2 / 2)
+	// Nothing to do here
+#elif G_freq_ADC == (G_freq_PCLK2 / 4)
+	reg |= 0b01 << RCC_CFGR_ADCPRE_Pos;
+#elif G_freq_ADC == (G_freq_PCLK2 / 6)
+	reg |= 0b10 << RCC_CFGR_ADCPRE_Pos;
+#elif G_freq_ADC == (G_freq_PCLK2 / 8)
+	reg |= 0b11 << RCC_CFGR_ADCPRE_Pos;
+#else
+# error "G_freq_ADC must be a G_freq_PCLK2 / (2|4|6|8)"
+#endif
+
+	MODIFY_BITS(RCC->CFGR, RCC_CFGR_HPRE|RCC_CFGR_PPRE1|RCC_CFGR_PPRE2|RCC_CFGR_ADCPRE,
+		reg
+		);
 
 	// Set flash latency and prefetch buffer
 	// According to the reference manual, you should use a flash latency of 0
@@ -292,14 +354,6 @@ static void clocks_init(void) {
 		// Nothing to do here
 	}
 	BD_write_disable();
-
-#if USE_INTERNAL_CLOCK
-	G_freq_HCLK = G_freq_HSI/2;
-#else
-	G_freq_HCLK = G_freq_HSE/2;
-#endif
-	G_freq_PCLK1 = G_freq_HCLK/2;
-	G_freq_PCLK2 = G_freq_HCLK;
 
 	return;
 }

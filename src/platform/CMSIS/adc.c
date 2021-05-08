@@ -57,11 +57,6 @@
 // 1us max
 #define ADC_STAB_TIME_uS 1
 
-#define PRESCALER_DIV2 0b00 // PCLK2/2
-#define PRESCALER_DIV4 0b01 // PCLK2/4
-#define PRESCALER_DIV6 0b10 // PCLK2/6
-#define PRESCALER_DIV8 0b11 // PCLK2/8
-
 #define SAMPLE_TIME_1_5   0b000 //  1.5 cycles
 #define SAMPLE_TIME_7_5   0b001 //  7.5 cycles
 #define SAMPLE_TIME_13_5  0b010 // 13.5 cycles
@@ -84,13 +79,11 @@
 /*
 * Variables
 */
-uint32_t G_freq_ADC;
 
 
 /*
 * Local function prototypes
 */
-static uint32_t calculate_prescaler(uint32_t max_hz);
 static adc_t adc_read_channel(uint32_t channel);
 
 
@@ -103,28 +96,6 @@ static adc_t adc_read_channel(uint32_t channel);
 * Functions
 */
 void adc_init(void) {
-	// Set ADC prescaler
-	// On the STM32F1, ADC input clock must not exceed 14MHz
-	MODIFY_BITS(RCC->CFGR, RCC_CFGR_ADCPRE,
-		calculate_prescaler(14000000)
-		);
-	switch (GATHER_BITS(RCC->CFGR, 0b11, RCC_CFGR_ADCPRE_Pos)) {
-	case PRESCALER_DIV2:
-		G_freq_ADC = G_freq_PCLK2/2;
-		break;
-	case PRESCALER_DIV4:
-		G_freq_ADC = G_freq_PCLK2/4;
-		break;
-	case PRESCALER_DIV6:
-		G_freq_ADC = G_freq_PCLK2/6;
-		break;
-	case PRESCALER_DIV8:
-		G_freq_ADC = G_freq_PCLK2/8;
-		break;
-	default:
-		break;
-	}
-
 	clock_init(&RCC->APB2ENR, &RCC->APB2RSTR, RCC_APB2ENR_ADCxEN);
 
 	MODIFY_BITS(ADCx->CR2, ADC_CR2_CONT|ADC_CR2_EXTSEL|ADC_CR2_EXTTRIG,
@@ -181,18 +152,6 @@ void adc_off(void) {
 	clock_disable(&RCC->APB2ENR, RCC_APB2ENR_ADCxEN);
 
 	return;
-}
-static uint32_t calculate_prescaler(uint32_t max_hz) {
-	if ((G_freq_PCLK2 / 2) < max_hz) {
-		return (PRESCALER_DIV2 << RCC_CFGR_ADCPRE_Pos);
-	}
-	if ((G_freq_PCLK2 / 4) < max_hz) {
-		return (PRESCALER_DIV4 << RCC_CFGR_ADCPRE_Pos);
-	}
-	if ((G_freq_PCLK2 / 6) < max_hz) {
-		return (PRESCALER_DIV6 << RCC_CFGR_ADCPRE_Pos);
-	}
-	return ((uint32_t )PRESCALER_DIV8 << RCC_CFGR_ADCPRE_Pos);
 }
 
 adc_t adc_read_pin(pin_t pin) {

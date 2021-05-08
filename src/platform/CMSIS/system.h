@@ -84,10 +84,6 @@
 /*
 * Variable declarations (defined in system.c)
 */
-// Bus frequencies
-extern uint32_t G_freq_HCLK;
-extern uint32_t G_freq_PCLK1;
-extern uint32_t G_freq_PCLK2;
 
 
 /*

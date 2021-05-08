@@ -52,6 +52,12 @@
 /*
 * Static values
 */
+#if USE_INTERNAL_CLOCK
+# define G_freq_OSC G_freq_HSI
+#else
+# define G_freq_OSC G_freq_HSE
+#endif
+
 // Enter light sleep for this many seconds before entering deep sleep to give
 // time to enter the command terminal because UART interrupts are disabled
 // during stop mode
@@ -66,11 +72,6 @@
 // one of the other periods elapsing. MAX_WAKEUP_SECONDS should be small enough
 // that it won't overflow a 32 bit integer when added to the current uptime.
 #define MAX_SLEEP_SECONDS (24 * 60 * 60) // 24 hours
-
-// Frequency of the low-speed external oscillator (Hz)
-#define LSE_VALUE 32768
-// Frequency of the high-speed external oscillator (Hz)
-#define HSE_VALUE 8000000
 
 //
 // Interrupt priorities
