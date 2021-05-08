@@ -66,13 +66,6 @@
 // longer instead
 #define MIN_DEEP_SLEEP_SECONDS 2
 
-// Sleep for no more than this many seconds; this will generally be a hardware
-// constraint or a guard against any programming errors that may result in an
-// erroneous wakeup time because there's no other reason to wake up without
-// one of the other periods elapsing. MAX_WAKEUP_SECONDS should be small enough
-// that it won't overflow a 32 bit integer when added to the current uptime.
-#define MAX_SLEEP_SECONDS (24 * 60 * 60) // 24 hours
-
 //
 // Interrupt priorities
 // Range 0-15, overlap is OK

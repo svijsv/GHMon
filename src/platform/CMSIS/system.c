@@ -39,11 +39,6 @@
 #include "i2c.h"
 
 
-#if LIGHT_SLEEP_SECONDS > MAX_SLEEP_SECONDS
-# error "LIGHT_SLEEP_SECONDS must be <= MAX_SLEEP_SECONDS"
-#endif // LIGHT_SLEEP_SECONDS > MAX_SLEEP_SECONDS
-
-
 /*
 * Static values
 */
@@ -394,10 +389,9 @@ void hibernate_s(utime_t s, uint8_t flags) {
 	// alarm therefore can't be used
 	s -= sleep_s;
 	if ((G_IRQs == 0) && (s > 0)) {
-		sleep_s = (s > MAX_SLEEP_SECONDS) ? MAX_SLEEP_SECONDS : s;
 		// LOGGER("Wake me in %u seconds...ZZz...Zzz...zzZZZZZzzzZz", (uint )sleep_s);
-		LOGGER("Sleeping deeply %u seconds", (uint )sleep_s);
-		deep_sleep_s(sleep_s, flags);
+		LOGGER("Sleeping deeply %u seconds", (uint )s);
+		deep_sleep_s(s, flags);
 	}
 
 	if (G_IRQs != 0) {
