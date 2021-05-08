@@ -176,8 +176,8 @@ extern volatile utime_t G_sys_msticks;
 
 // Quick pin access, for when you know what you want:
 #define IS_GPIO_INPUT_HIGH(pin)  (BIT_IS_SET(GPIO_GET_PORT(pin)->IDR, GPIO_GET_PINMASK(pin)))
-#define SET_GPIO_OUTPUT_HIGH(pin) SET_BIT(GPIO_GET_PORT(pin)->ODR, GPIO_GET_PINMASK(pin))
-#define SET_GPIO_OUTPUT_LOW(pin)  CLEAR_BIT(GPIO_GET_PORT(pin)->ODR, GPIO_GET_PINMASK(pin))
+#define SET_GPIO_OUTPUT_HIGH(pin) (GPIO_GET_PORT(pin)->BSRR = GPIO_GET_PINMASK(pin))
+#define SET_GPIO_OUTPUT_LOW(pin)  (GPIO_GET_PORT(pin)->BRR  = GPIO_GET_PINMASK(pin))
 
 // Use the micro-second counter
 # define USCOUNTER_START() \
@@ -188,7 +188,7 @@ extern volatile utime_t G_sys_msticks;
 # define USCOUNTER_STOP(counter) \
 	do { \
 		CLEAR_BIT(TIM3->CR1, TIM_CR1_CEN); /* Disable the timer */ \
-		counter = TIM3->CNT; \
+		(counter) = TIM3->CNT; \
 	} while (0);
 
 #endif // _PLATFORM_CMSIS_H

@@ -101,10 +101,10 @@ void gpio_set_state(pin_t pin, gpio_state_t new_state) {
 
 	switch (new_state) {
 	case GPIO_HIGH:
-		SET_BIT(port->ODR, pinmask);
+		port->BSRR = pinmask;
 		break;
 	case GPIO_LOW:
-		CLEAR_BIT(port->ODR, pinmask);
+		port->BRR = pinmask;
 		break;
 	case GPIO_FLOAT:
 		break;
@@ -114,14 +114,15 @@ void gpio_set_state(pin_t pin, gpio_state_t new_state) {
 }
 void gpio_toggle_state(pin_t pin) {
 	GPIO_TypeDef* port;
-	uint32_t pinmask;
+	uint32_t pinmask, dr;
 
 	assert(pin != 0);
 
 	port = GPIO_GET_PORT(pin);
 	pinmask = GPIO_GET_PINMASK(pin);
+	dr = (is_output(pin)) ? port->ODR : port->IDR;
 
-	TOGGLE_BIT(port->ODR, pinmask);
+	port->BSRR = ((pinmask & dr) == 0) ? pinmask : pinmask << 16;
 
 	return;
 }
@@ -237,7 +238,7 @@ void gpio_set_mode(pin_t pin, gpio_mode_t mode, gpio_state_t istate) {
 	case GPIO_MODE_RESET:
 	case GPIO_MODE_AIN:
 	case GPIO_MODE_HiZ:
-		CLEAR_BIT(port->ODR, pinmask);
+		port->BRR = pinmask;
 		break;
 	case GPIO_MODE_PP_AF:
 	case GPIO_MODE_OD_AF:
@@ -245,10 +246,10 @@ void gpio_set_mode(pin_t pin, gpio_mode_t mode, gpio_state_t istate) {
 	default:
 		switch (istate) {
 		case GPIO_HIGH:
-			SET_BIT(port->ODR, pinmask);
+			port->BSRR = pinmask;
 			break;
 		case GPIO_LOW:
-			CLEAR_BIT(port->ODR, pinmask);
+			port->BRR = pinmask;
 			break;
 		default:
 			break;
