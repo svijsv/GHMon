@@ -26,8 +26,9 @@ The primary user interface is a button in combination with an LED.
 
 * Pressing the button briefly will wake the monitor, blink the LED once, then
 check the sensors and blink a few times if there are any warnings - one flash
-to aknowledge, two flashes for a power warning, three for a sensor warning,
-four for a controller warning, and five for a logging warning.
+to aknowledge followed by one flash for a power warning, two for a sensor
+warning, three for a controller warning, and four for a logging warning.
+Multiple warnings may be issued in succession.
 * Holding the button until it has blinked a total of two times will sync any
 cached log data to the SD card (if it's enabled); it will blink once when done
 if everything's OK or a few times if there was an error.
