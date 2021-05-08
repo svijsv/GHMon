@@ -472,7 +472,11 @@ void error_state(const char *file_path, uint32_t lineno, const char *func_name, 
 			} else {
 				msg_timeout = SET_TIMEOUT(5 * 60000);
 			}
-			PRINTF("Err %s:%u in %s(): %s\r\n", basename, (uint )lineno, func_name, msg);
+			// F() and F1() were likely both used for arguments and using any of
+			// the other F() macros would cause another buffer to be used, so
+			// using a plain string for the format saves RAM in this particular
+			// case
+			PRINTF_NOF("Err %s:%u in %s(): %s\r\n", basename, (uint )lineno, func_name, msg);
 		}
 
 		led_toggle();
