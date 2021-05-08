@@ -234,11 +234,11 @@ END:
 	}
 #endif
 	if (err != EOK) {
-		LOGGER("BMx280 sensor at 0x%02X: communication error: %u", (uint )addr, (uint )err);
+		PRINTF("BMx280 sensor at 0x%02X: communication error: %u", (uint )addr, (uint )err);
 	}
 
 	calculate_bmx280(&status, &raw, do_humidity);
-#if DEBUG
+#if USE_SERIAL
 	if ((status.temp | status.press | status.hum) == 0) {
 		LOGGER("BMx280 sensor at 0x%02X: all readings were invalid", (uint )addr);
 	}

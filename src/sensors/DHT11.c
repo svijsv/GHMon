@@ -113,13 +113,13 @@ END:
 	power_off_input(pin);
 	uscounter_off();
 
-#if DEBUG
+#if USE_SERIAL
 	uint16_t cksum = (uint16_t )reading[0] + (uint16_t )reading[1] + (uint16_t )reading[2] + (uint16_t )reading[3];
 	if ((cksum & 0xFF) != reading[4]) {
-		LOGGER("DHT11 sensor on pin 0x%02X: invalid checksum: have %u, expected %u", (uint )pin, (uint )(cksum & 0xFF), (uint )reading[4]);
+		PRINTF("DHT11 sensor on pin 0x%02X: invalid checksum: have %u, expected %u", (uint )pin, (uint )(cksum & 0xFF), (uint )reading[4]);
 	}
 	if ((reading[0] == 0) && (reading[1] == 0) && (reading[2] == 0) && (reading[3] == 0) && (reading[4] == 0)) {
-		LOGGER("DHT11 sensor on pin 0x%02X: all readings were 0", (uint )pin);
+		PRINTF("DHT11 sensor on pin 0x%02X: all readings were 0", (uint )pin);
 	}
 #endif
 

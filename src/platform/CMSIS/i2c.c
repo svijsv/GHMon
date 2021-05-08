@@ -281,7 +281,7 @@ END:
 		timeout = SET_TIMEOUT(100);
 		while (BIT_IS_SET(I2Cx->SR2, I2C_SR2_BUSY)) {
 			if (TIMES_UP(timeout)) {
-				LOGGER("I2C RX Timed out waiting for busy to end");
+				PRINTF("I2C RX Timed out waiting for busy to end");
 				res = ETIMEOUT;
 				break;
 			}
@@ -368,7 +368,7 @@ END:
 		timeout = SET_TIMEOUT(100);
 		while (BIT_IS_SET(I2Cx->SR2, I2C_SR2_BUSY)) {
 			if (TIMES_UP(timeout)) {
-				LOGGER("I2C TX Timed out waiting for busy to end");
+				PRINTF("I2C TX Timed out waiting for busy to end");
 				res = ETIMEOUT;
 				break;
 			}

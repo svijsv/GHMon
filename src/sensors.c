@@ -56,9 +56,6 @@
 _FLASH const char sens_invalid_msg_l[] = "Invalid sensor %u configuration: %s";
 _FLASH const char sens_invalid_msg_e[] = "Invalid sensor configuration";
 
-static _FLASH const char sens_unknown_msg[] = "Unknown sensor type '%u' at " __FILE__ ":%u";
-#define UNKNOWN_MSG(i) LOGGER_NOF(FROM_FSTR(sens_unknown_msg), (uint )(i), (uint )__LINE__);
-
 
 /*
 * Types
@@ -109,8 +106,7 @@ void sensors_init(void) {
 		//s->i = i;
 
 		if (cfg->name[0] == 0) {
-			LOGGER("Unset name in SENSORS[%u]; is SENSOR_COUNT correct?", (uint )i);
-			ERROR_STATE("Unset name in SENSORS[]; is SENSOR_COUNT correct?");
+			SETUP_ERR(i, "No name set; is SENSOR_COUNT correct?");
 		}
 
 #if USE_SMALL_SENSORS < 2
@@ -138,7 +134,6 @@ void sensors_init(void) {
 		if (cfg->type == SENS_NONE) {
 			SETUP_ERR(i, "No sensor type specified");
 		} else if (cfg->type >= SENSOR_TYPE_COUNT) {
-			UNKNOWN_MSG(cfg->type);
 			SETUP_ERR(i, "Unknown sensor type");
 		}
 

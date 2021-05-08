@@ -315,7 +315,7 @@ void hibernate_s(utime_t s, uint8_t flags) {
 		w = ((LIGHT_SLEEP_SECONDS + MIN_DEEP_SLEEP_SECONDS) > s) ? s: LIGHT_SLEEP_SECONDS;
 		s -= w;
 
-		LOGGER("Waiting %u seconds for UART input", (uint )w);
+		PRINTF("Waiting %u seconds for UART input", (uint )w);
 		uart_listen_on();
 		set_sleep_mode(SLEEP_MODE_IDLE);
 		_sleep_ms(w*1000, flags);
