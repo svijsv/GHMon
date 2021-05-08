@@ -117,10 +117,10 @@ void uart_on(void) {
 	return;
 }
 void uart_off(void) {
-	clock_disable(&UARTx_APBxENR, UARTx_CLOCKEN);
-
 	gpio_set_mode(UART_TX_PIN, GPIO_MODE_HiZ, GPIO_FLOAT);
 	gpio_set_mode(UART_RX_PIN, GPIO_MODE_HiZ, GPIO_FLOAT);
+
+	clock_disable(&UARTx_APBxENR, UARTx_CLOCKEN);
 
 	return;
 }
