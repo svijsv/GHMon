@@ -42,7 +42,7 @@ typedef adcm_t imath_t;
 extern _FLASH const char sens_invalid_msg_l[];
 extern _FLASH const char sens_invalid_msg_e[];
 #define SETUP_ERR(i, msg) \
-	PRINTF_NOF(FROM_FSTR(sens_invalid_msg_l), (uint )(i), F1(msg)); \
+	NOTIFY_NOF(FROM_FSTR(sens_invalid_msg_l), (uint )(i), F1(msg)); \
 	ERROR_STATE_NOF(FROM_FSTR(sens_invalid_msg_e))
 //
 // Calculate a voltage from an ADC reading

@@ -234,7 +234,7 @@ END:
 	}
 #endif
 	if (err != EOK) {
-		PRINTF("BMx280 sensor at 0x%02X: communication error: %u", (uint )addr, (uint )err);
+		NOTIFY("BMx280 sensor at 0x%02X: communication error: %u", (uint )addr, (uint )err);
 	}
 
 	calculate_bmx280(&status, &raw, do_humidity);

@@ -109,7 +109,7 @@ err_t format_SD(void) {
 		break;
 	}
 	if (res != FR_OK) {
-		PRINTF("SD formatting error %d (fatfs error %d)", (int )err, (int )res);
+		NOTIFY("SD formatting error %d (fatfs error %d)", (int )err, (int )res);
 	}
 
 	power_off_SD();

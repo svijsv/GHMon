@@ -476,7 +476,7 @@ void error_state(const char *file_path, uint32_t lineno, const char *func_name, 
 			// the other F() macros would cause another buffer to be used, so
 			// using a plain string for the format saves RAM in this particular
 			// case
-			PRINTF_NOF("Err %s:%u in %s(): %s\r\n", basename, (uint )lineno, func_name, msg);
+			NOTIFY_NOF("Err %s:%u in %s(): %s\r\n", basename, (uint )lineno, func_name, msg);
 		}
 
 		led_toggle();

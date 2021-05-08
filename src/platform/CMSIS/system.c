@@ -391,7 +391,7 @@ void hibernate_s(utime_t s, uint8_t flags) {
 			button_wakeup = false;
 			w = (s > (LIGHT_SLEEP_SECONDS + MIN_DEEP_SLEEP_SECONDS)) ? LIGHT_SLEEP_SECONDS : s;
 			// LOGGER("Just a %u second nap...zZz...", (uint )w);
-			PRINTF("Waiting %u seconds for UART input", (uint )w);
+			NOTIFY("Waiting %u seconds for UART input", (uint )w);
 			light_sleep_ms(w * 1000, flags);
 			s -= w;
 		}

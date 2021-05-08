@@ -62,16 +62,16 @@ static const char *prefix_warn = "\t!";
 
 // Store multi-use strings in const arrays so they aren't duplicated
 static _FLASH const char open_err_msg[] = "f_open(): fatfs error %u";
-#define OPEN_ERR_MSG(err) PRINTF_NOF(FROM_FSTR(open_err_msg),  (uint )(err))
+#define OPEN_ERR_MSG(err) NOTIFY_NOF(FROM_FSTR(open_err_msg),  (uint )(err))
 
 static _FLASH const char write_err_msg[] = "f_write(): fatfs error %u";
-#define WRITE_ERR_MSG(err) PRINTF_NOF(FROM_FSTR(write_err_msg), (uint )(err))
+#define WRITE_ERR_MSG(err) NOTIFY_NOF(FROM_FSTR(write_err_msg), (uint )(err))
 
 static _FLASH const char close_err_msg[] = "f_close(): fatfs error %u";
-#define CLOSE_ERR_MSG(err) PRINTF_NOF(FROM_FSTR(close_err_msg), (uint )(err))
+#define CLOSE_ERR_MSG(err) NOTIFY_NOF(FROM_FSTR(close_err_msg), (uint )(err))
 
 static _FLASH const char unmount_err_msg[] = "f_unmount(): fatfs error %u";
-#define UNMOUNT_ERR_MSG(err) PRINTF_NOF(FROM_FSTR(unmount_err_msg),  (uint )(err))
+#define UNMOUNT_ERR_MSG(err) NOTIFY_NOF(FROM_FSTR(unmount_err_msg),  (uint )(err))
 
 /*
 * Types

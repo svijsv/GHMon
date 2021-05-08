@@ -114,14 +114,14 @@ void controllers_init(void) {
 		cfg = &CONTROLLERS[i];
 
 		if (cfg->name[0] == 0) {
-			PRINTF("Unset name in CONTROLLERS[%u]; is CONTROLLER_COUNT correct?", (uint )i);
+			NOTIFY("Unset name in CONTROLLERS[%u]; is CONTROLLER_COUNT correct?", (uint )i);
 			ERROR_STATE("Unset name in CONTROLLERS[]; is CONTROLLER_COUNT correct?");
 		}
 
 #if CONTROLLER_SENS_COUNT > 0
 		for (uiter_t j = 0; j < CONTROLLER_SENS_COUNT; ++j) {
 			if (cfg->inputs[j].si >= SENSOR_COUNT) {
-				PRINTF("Controller %u input %u index >= SENSOR_COUNT", (uint )i, (uint )j);
+				NOTIFY("Controller %u input %u index >= SENSOR_COUNT", (uint )i, (uint )j);
 				ERROR_STATE("Controller input index >= SENSOR_COUNT");
 			} else if (cfg->inputs[j].si >= 0) {
 				SET_BIT(G_controllers[i].iflags, CTRL_FLAG_USES_SENSORS);

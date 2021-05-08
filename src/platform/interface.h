@@ -380,6 +380,13 @@ void issue_warning(void);
 # define LOGGER(...)      ((void )0U)
 # define LOGGER_NOF(...)  ((void )0U)
 #endif
+#if USE_SERIAL
+# define NOTIFY(fmt, ...)      logger(F1(fmt), ## __VA_ARGS__)
+# define NOTIFY_NOF(fmt, ...)  logger(fmt, ## __VA_ARGS__)
+#else
+# define NOTIFY(...)      ((void )0U)
+# define NOTIFY_NOF(...)  ((void )0U)
+#endif
 
 #if USE_SERIAL
 # define PRINTF(fmt, ...)     serial_printf(F1(fmt), ## __VA_ARGS__)
