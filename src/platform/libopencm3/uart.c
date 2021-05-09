@@ -107,9 +107,13 @@ void uart_on(void) {
 	gpio_set_mode(UART_TX_PIN, GPIO_MODE_PP_AF, GPIO_LOW);
 	gpio_set_mode(UART_RX_PIN, GPIO_MODE_IN,    GPIO_FLOAT);
 
+	usart_enable(UARTx);
+
 	return;
 }
 void uart_off(void) {
+	usart_disable(UARTx);
+
 	gpio_set_mode(UART_TX_PIN, GPIO_MODE_HiZ, GPIO_FLOAT);
 	gpio_set_mode(UART_RX_PIN, GPIO_MODE_HiZ, GPIO_FLOAT);
 
