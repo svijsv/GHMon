@@ -149,7 +149,9 @@ typedef struct {
 #define PINID_Z1  (GPIO_PORTZ_MASK|0x01)
 //
 // Arduino digital pin mappings
+#define PIN_0  PINID_D0
 #define PIN_RX PINID_D0 // UART RX
+#define PIN_1  PINID_D1
 #define PIN_TX PINID_D1 // UART TX
 #define PIN_2  PINID_D2
 #define PIN_3  PINID_D3
