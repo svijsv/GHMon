@@ -92,7 +92,9 @@ void Button_IRQHandler(void) {
 	SET_BIT(EXTI->PR, GPIO_GET_PINMASK(BUTTON_PIN));
 	NVIC_ClearPendingIRQ(BUTTON_IRQn);
 
+#if USE_TERMINAL
 	button_wakeup = true;
+#endif
 
 	return;
 }
@@ -381,8 +383,7 @@ void hibernate_s(utime_t s, uint8_t flags) {
 
 	// UART interrupts can't wake us up from deep sleep so sleep lightly for a
 	// few seconds before entering deep sleep in order to detect them
-	// The user will have to use the button or wait for the RTC alarm to enter
-	// the serial terminal.
+	// The user will have to use the button to enter the serial terminal.
 #if USE_TERMINAL
 	if (button_wakeup && (BIT_IS_SET(flags, CFG_ALLOW_INTERRUPTS))) {
 		if ((G_IRQs == 0) && (s > 0)) {
