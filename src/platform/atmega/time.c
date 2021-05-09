@@ -399,7 +399,9 @@ uint16_t set_wakeup_alarm(uint16_t ms) {
 	uint16_t period_ms;
 	uint8_t shifts, adjust_ms = 0;
 
-	assert(ms > 0);
+	if (ms == 0) {
+		return 0;
+	}
 
 	wakeup_alarm_is_set = false;
 

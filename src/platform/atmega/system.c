@@ -53,6 +53,13 @@
 /*
 * Static values
 */
+// Section 9 of the reference manual includes startup time tables
+// for the various oscillators; they vary... quite a bit and I can't
+// find a way to detect the right one at run-time, but the most
+// likely value for a given board seems to be ~16K cycles
+// See also: https://www.avrfreaks.net/comment/3020151#comment-3020151
+#define WAKEUP_MILLIS (16000/(G_freq_CORECLK/1000))
+
 #if BUTTON_PIN
 # if PINID(BUTTON_PIN) == PINID_D2
 #  define BUTTON_ISR INT0_vect
@@ -235,8 +242,16 @@ void sysflash(void) {
 OPTIMIZE_FUNCTION \
 static void _sleep_ms(utime_t ms, uint8_t flags) {
 	uint16_t period, try;
+	bool is_deep_sleep;
+
+	is_deep_sleep = (SELECT_BITS(SMCR, _BV(SM2)|_BV(SM1)|_BV(SM0)) == _BV(SM1));
 
 	while (ms != 0) {
+		// Every deep sleep includes an additional time period during which
+		// the oscillator is starting up that needs to be taken into account
+		if (is_deep_sleep) {
+			ms = (ms > WAKEUP_MILLIS) ? (ms - WAKEUP_MILLIS) : 0;
+		}
 		try = (ms <= 0xFFFF) ? ms : 0xFFFF;
 		period = set_wakeup_alarm(try);
 		ms -= period;
@@ -261,17 +276,9 @@ static void _sleep_ms(utime_t ms, uint8_t flags) {
 			sleep_disable();
 			enable_systick();
 
-			// https://www.avrfreaks.net/comment/3020151#comment-3020151
-			// Theres a 16000 cycle penalty on wakeup from deep sleep while the
-			// clock stabilizes
-			// Section 9 of the reference manual includes startup time tables
-			// for the various oscillators; they vary... quite a bit and I can't
-			// find a way to detect the right one at run-time, but the most
-			// likely value for a given board seems to be ~16K cycles which is
-			// 4ms @ 4MHz
-			if (SELECT_BITS(SMCR, _BV(SM2)|_BV(SM1)|_BV(SM0)) == _BV(SM1)) {
-				add_RTC_millis(16000/(G_freq_CORECLK/1000));
-				//add_RTC_millis(4);
+			// Add to the RTC time to compensate for oscillator startup time
+			if (is_deep_sleep) {
+				add_RTC_millis(WAKEUP_MILLIS);
 			}
 
 			// If desired keep sleeping until the wakeup alarm triggers
