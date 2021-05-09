@@ -121,13 +121,13 @@ static uint8_t calculate_prescaler(uint32_t goal) {
 }
 
 void spi_on(void) {
+	rcc_periph_clock_enable(SPIx_RCC);
+	spi_enable(SPIx);
+
 	// Reference manual section 9.1.11 lists pin configuration for peripherals.
 	gpio_set_mode(SPI_SCK_PIN,  GPIO_MODE_PP_AF, GPIO_LOW);
 	gpio_set_mode(SPI_MOSI_PIN, GPIO_MODE_PP_AF, GPIO_LOW);
 	gpio_set_mode(SPI_MISO_PIN, GPIO_MODE_IN,    GPIO_HIGH);
-
-	rcc_periph_clock_enable(SPIx_RCC);
-	spi_enable(SPIx);
 
 	return;
 }
@@ -143,12 +143,13 @@ void spi_off(void) {
 			// Nothing to do here
 		}
 	}
-	spi_disable(SPIx);
-	rcc_periph_clock_disable(SPIx_RCC);
 
 	gpio_set_mode(SPI_SCK_PIN,  GPIO_MODE_HiZ, GPIO_LOW);
 	gpio_set_mode(SPI_MOSI_PIN, GPIO_MODE_HiZ, GPIO_LOW);
 	gpio_set_mode(SPI_MISO_PIN, GPIO_MODE_HiZ, GPIO_LOW);
+
+	spi_disable(SPIx);
+	rcc_periph_clock_disable(SPIx_RCC);
 
 	return;
 }

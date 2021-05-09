@@ -104,21 +104,21 @@ void i2c_init(void) {
 }
 
 void i2c_on(void) {
+	rcc_periph_clock_enable(I2Cx_RCC);
+	i2c_peripheral_enable(I2Cx);
+
 	// Reference manual section 9.1.11 lists pin configuration for peripherals.
 	gpio_set_mode(I2C_SCL_PIN, GPIO_MODE_OD_AF, GPIO_HIGH);
 	gpio_set_mode(I2C_SDA_PIN, GPIO_MODE_OD_AF, GPIO_HIGH);
 
-	rcc_periph_clock_enable(I2Cx_RCC);
-	i2c_peripheral_enable(I2Cx);
-
 	return;
 }
 void i2c_off(void) {
-	i2c_peripheral_disable(I2Cx);
-	rcc_periph_clock_disable(I2Cx_RCC);
-
 	gpio_set_mode(I2C_SCL_PIN, GPIO_MODE_HiZ, GPIO_LOW);
 	gpio_set_mode(I2C_SDA_PIN, GPIO_MODE_HiZ, GPIO_LOW);
+
+	i2c_peripheral_disable(I2Cx);
+	rcc_periph_clock_disable(I2Cx_RCC);
 
 	return;
 }

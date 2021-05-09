@@ -101,19 +101,19 @@ err_t uart_init(void) {
 	return EOK;
 }
 void uart_on(void) {
+	rcc_periph_clock_enable(UARTx_RCC);
+
 	// Peripheral pin modes specified in reference manual section 9.1.11
 	gpio_set_mode(UART_TX_PIN, GPIO_MODE_PP_AF, GPIO_LOW);
 	gpio_set_mode(UART_RX_PIN, GPIO_MODE_IN,    GPIO_FLOAT);
 
-	rcc_periph_clock_enable(UARTx_RCC);
-
 	return;
 }
 void uart_off(void) {
-	rcc_periph_clock_disable(UARTx_RCC);
-
 	gpio_set_mode(UART_TX_PIN, GPIO_MODE_HiZ, GPIO_FLOAT);
 	gpio_set_mode(UART_RX_PIN, GPIO_MODE_HiZ, GPIO_FLOAT);
+
+	rcc_periph_clock_disable(UARTx_RCC);
 
 	return;
 }
