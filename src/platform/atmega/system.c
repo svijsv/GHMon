@@ -82,7 +82,9 @@
 /*
 * Variables
 */
-static volatile bool button_wakeup = false;
+#if USE_TERMINAL
+static volatile bool button_wakeup = true;
+#endif
 
 
 /*
@@ -117,7 +119,9 @@ ISR(BUTTON_ISR) {
 	sysflash();
 
 	SET_BIT(G_IRQs, BUTTON_IRQf);
+#if USE_TERMINAL
 	button_wakeup = true;
+#endif
 }
 #endif // BUTTON_PIN
 
@@ -315,7 +319,7 @@ void hibernate_s(utime_t s, uint8_t flags) {
 	}
 
 #if USE_TERMINAL
-	if (button_wakeup) {
+	if (button_wakeup && (BIT_IS_SET(flags, CFG_ALLOW_INTERRUPTS))) {
 		uint16_t w;
 
 		button_wakeup = false;
