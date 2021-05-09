@@ -197,7 +197,7 @@ void platform_init(void) {
 static inline __attribute__((always_inline)) \
 void sysflash(void) {
 	SET_GPIO_OUTPUT_HIGH(LED_PIN);
-	// Hopefully ~100 ms counting overhead time @4GHz
+	// Hopefully ~100 ms counting overhead time @4MHz
 	for (uint32_t i = 100000; i > 0; --i) {
 		// Count some clock cycles
 		__asm__ volatile("" : "+g" (i) : :);
@@ -205,7 +205,7 @@ void sysflash(void) {
 
 	SET_GPIO_OUTPUT_LOW(LED_PIN);
 	// Short delay to keep flashes from bleeding into each other
-	// Hopefully ~20ms counting overhead time @4GHz
+	// Hopefully ~20ms counting overhead time @4MHz
 	for (uint32_t i = 20000; i > 0; --i) {
 		// Count some clock cycles
 		__asm__ volatile("" : "+g" (i) : :);
