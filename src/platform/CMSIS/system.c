@@ -286,7 +286,7 @@ static void clocks_init(void) {
 #elif G_freq_HCLK == (G_freq_OSC / 512)
 	reg |= 0b1111 << RCC_CFGR_HPRE_Pos;
 #else
-# error "G_freq_HCLK must be a G_freq_OSC / (1|2|4|8|16|64)"
+# error "G_freq_HCLK must be a G_freq_OSC / (1|2|4|8|16|64|128|256|512)"
 #endif
 
 #if G_freq_PCLK1 == G_freq_HCLK
