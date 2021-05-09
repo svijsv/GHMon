@@ -54,14 +54,14 @@
 # define I2Cx I2C1
 # define I2Cx_RCC RCC_I2C1
 # define I2Cx_RST RST_I2C1
-# define I2Cx_BUSFREQ rcc_apb1_frequency
+# define I2Cx_BUSFREQ G_freq_PCLK1
 //
 // I2C2
 #elif (PINID(I2C_SCL_PIN) == PINID_B10) && (PINID(I2C_SDA_PIN) == PINID_B11)
 # define I2Cx I2C2
 # define I2Cx_RCC RCC_I2C2
 # define I2Cx_RST RST_I2C2
-# define I2Cx_BUSFREQ rcc_apb1_frequency
+# define I2Cx_BUSFREQ G_freq_PCLK1
 
 #else
 # error "Can't determine I2C peripheral"

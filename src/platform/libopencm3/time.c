@@ -127,7 +127,7 @@ static void systick_init(void) {
 	systick_interrupt_disable();
 
 	nvic_set_priority(NVIC_SYSTICK_IRQ, SYSTICK_IRQp);
-	systick_set_frequency(1000, rcc_ahb_frequency);
+	systick_set_frequency(1000, G_freq_HCLK);
 	systick_clear();
 	G_sys_msticks = 0;
 
@@ -224,7 +224,7 @@ static void timers_init(void) {
 static uint16_t calculate_TIM2_5_prescaler(uint32_t hz) {
 	uint16_t prescaler;
 
-	assert(((rcc_apb1_frequency/hz) <= (0xFFFF/2)) || (rcc_apb1_frequency == rcc_ahb_frequency));
+	assert(((G_freq_PCLK1/hz) <= (0xFFFF/2)) || (G_freq_PCLK1 == G_freq_HCLK));
 
 	// Clocks:
 	// Timers 2-7 and 12-14
@@ -234,8 +234,8 @@ static uint16_t calculate_TIM2_5_prescaler(uint32_t hz) {
 	//   PCLK2*1 if PCLK2 prescaler is 1
 	//   PCLK2*2 otherwise
 	// The maximum prescaler is 0xFFFF
-	prescaler = rcc_apb1_frequency / hz;
-	if (rcc_apb1_frequency != rcc_ahb_frequency) {
+	prescaler = G_freq_PCLK1 / hz;
+	if (G_freq_PCLK1 != G_freq_HCLK) {
 		prescaler *= 2;
 	}
 
@@ -302,7 +302,7 @@ void delay_ms(utime_t ms) {
 void dumb_delay_ms(utime_t ms) {
 	uint32_t cycles;
 
-	cycles = ms * (rcc_ahb_frequency/(1000*DUMB_DELAY_DIV));
+	cycles = ms * (G_freq_HCLK/(1000*DUMB_DELAY_DIV));
 
 	for (uint32_t i = cycles; i > 0; --i) {
 		// Count some clock cycles

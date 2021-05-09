@@ -45,6 +45,12 @@
 /*
 * Static values
 */
+#if USE_INTERNAL_CLOCK
+# define G_freq_OSC G_freq_HSI
+#else
+# define G_freq_OSC G_freq_HSE
+#endif
+
 // Enter light sleep for this many seconds before entering deep sleep to give
 // time to enter the command terminal because UART interrupts are disabled
 // during stop mode

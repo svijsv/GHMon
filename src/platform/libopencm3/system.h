@@ -84,10 +84,6 @@
 /*
 * Variable declarations
 */
-// Bus frequencies; defined in lib/stm32/f1/rcc.c in the libopencm3 source
-extern uint32_t rcc_apb1_frequency;
-extern uint32_t rcc_apb2_frequency;
-extern uint32_t rcc_ahb_frequency;
 
 
 /*

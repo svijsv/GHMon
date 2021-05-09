@@ -115,9 +115,9 @@ void print_platform_info(printf_putc_t printf_putc) {
 	);
 
 	vvprintf(printf_putc, "HCLK: %uHz, PCLK1: %uHz, PCLK2: %uHz, ADC: %uHz\r\n",
-		(uint )rcc_ahb_frequency,
-		(uint )rcc_apb1_frequency,
-		(uint )rcc_apb2_frequency,
+		(uint )G_freq_HCLK,
+		(uint )G_freq_PCLK1,
+		(uint )G_freq_PCLK2,
 #if USE_ADC
 		(uint )G_freq_ADC
 #else

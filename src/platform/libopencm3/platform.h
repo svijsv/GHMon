@@ -57,12 +57,20 @@ typedef struct {
 #define RAM_PRESENT 0x5000
 #define RAM_BASE    0x20000000
 
+//
 // Oscillator frequencies
 // The reference manual gives a range of 30KHz-60KHz for the LSI
 #define G_freq_LSI 40000
 #define G_freq_HSI 8000000
 #define G_freq_HSE 8000000
 #define G_freq_LSE 32768
+//
+// Clock frequencies
+#define G_freq_HCLK  4000000
+#define G_freq_PCLK1 2000000
+#define G_freq_PCLK2 4000000
+// On the STM32F1, the ADC input clock must not exceed 14MHz
+#define G_freq_ADC   1000000
 
 // 12-bit ADC maximum value
 #define ADC_MAX 0x0FFF

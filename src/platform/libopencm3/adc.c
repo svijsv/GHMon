@@ -69,13 +69,11 @@
 /*
 * Variables
 */
-uint32_t G_freq_ADC;
 
 
 /*
 * Local function prototypes
 */
-static uint32_t calculate_prescaler(uint32_t max_hz);
 static adc_t adc_read_channel(uint8_t channel);
 
 
@@ -88,31 +86,10 @@ static adc_t adc_read_channel(uint8_t channel);
 * Functions
 */
 void adc_init(void) {
-	uint32_t prescaler;
-
 	rcc_periph_clock_enable(RCC_ADCx);
 	adc_power_off(ADCx);
 	rcc_periph_reset_pulse(RST_ADCx);
 
-	// Max 14MHz on STM32F1
-	prescaler = calculate_prescaler(14000000);
-	rcc_set_adcpre(prescaler);
-	switch (prescaler) {
-		case RCC_CFGR_ADCPRE_PCLK2_DIV2:
-			G_freq_ADC = rcc_apb2_frequency/2;
-			break;
-		case RCC_CFGR_ADCPRE_PCLK2_DIV4:
-			G_freq_ADC = rcc_apb2_frequency/4;
-			break;
-		case RCC_CFGR_ADCPRE_PCLK2_DIV6:
-			G_freq_ADC = rcc_apb2_frequency/6;
-			break;
-		case RCC_CFGR_ADCPRE_PCLK2_DIV8:
-			G_freq_ADC = rcc_apb2_frequency/8;
-			break;
-		default:
-			break;
-	}
 	adc_set_sample_time_on_all_channels(ADCx, SAMPLE_TIME);
 
 	adc_set_dual_mode(ADC_CR1_DUALMOD_IND);
@@ -134,7 +111,7 @@ void adc_on(void) {
 	adc_power_on(ADCx);
 	// ADC stabilization time is specified under Tstab in the datasheet as
 	// 1us max
-	dumb_delay_cycles(ADC_STAB_TIME_uS * (rcc_ahb_frequency/1000000U));
+	dumb_delay_cycles(ADC_STAB_TIME_uS * (G_freq_HCLK/1000000U));
 
 	return;
 }
@@ -143,21 +120,6 @@ void adc_off(void) {
 	rcc_periph_clock_disable(RCC_ADCx);
 
 	return;
-}
-static uint32_t calculate_prescaler(uint32_t max_hz) {
-	uint32_t prescaler;
-
-	if ((rcc_apb2_frequency / 2) < max_hz) {
-		prescaler = RCC_CFGR_ADCPRE_PCLK2_DIV2;
-	} else if ((rcc_apb2_frequency / 4) < max_hz) {
-		prescaler = RCC_CFGR_ADCPRE_PCLK2_DIV4;
-	} else if ((rcc_apb2_frequency / 6) < max_hz) {
-		prescaler = RCC_CFGR_ADCPRE_PCLK2_DIV6;
-	} else {
-		prescaler = RCC_CFGR_ADCPRE_PCLK2_DIV8;
-	}
-
-	return prescaler;
 }
 
 adc_t adc_read_pin(pin_t pin) {

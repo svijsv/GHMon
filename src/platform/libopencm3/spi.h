@@ -52,14 +52,14 @@
 # define SPIx SPI1
 # define SPIx_RCC RCC_SPI1
 # define SPIx_RST RST_SPI1
-# define SPIx_BUSFREQ rcc_apb2_frequency
+# define SPIx_BUSFREQ G_freq_PCLK2
 //
 // SPI2
 #elif (PINID(SPI_SCK_PIN) == PINID_B13) && (PINID(SPI_MISO_PIN) == PINID_B14) && (PINID(SPI_MOSI_PIN) == PINID_B15)
 # define SPIx SPI2
 # define SPIx_RCC RCC_SPI2
 # define SPIx_RST RST_SPI2
-# define SPIx_BUSFREQ rcc_apb1_frequency
+# define SPIx_BUSFREQ G_freq_PCLK1
 //
 #else
 # error "Can't determine SPI peripheral"

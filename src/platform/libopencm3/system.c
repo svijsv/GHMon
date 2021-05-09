@@ -70,10 +70,12 @@
 /*
 * Variables
 */
-uint32_t G_freq_HCLK;
-uint32_t G_freq_PCLK1;
-uint32_t G_freq_PCLK2;
-
+// Bus frequencies; defined in lib/stm32/f1/rcc.c in the libopencm3 source
+// If not using the rcc_clock_setup_*() functions, these need to be set
+// when the clock is initialized because some libopencm3 code uses them
+extern uint32_t rcc_apb1_frequency;
+extern uint32_t rcc_apb2_frequency;
+extern uint32_t rcc_ahb_frequency;
 
 /*
 * Local function prototypes
@@ -221,18 +223,73 @@ static void clocks_init(void) {
 	rcc_osc_off(RCC_HSI);
 #endif // USE_INTERNAL_CLOCK
 
-	// Use SYSCLK/2 as HCLK
 	// The names of these flags are different in the online docs than they are
 	// in the source used by platformio, which I take to mean they're going to
 	// change at some point.
-	//rcc_set_hpre(RCC_CFGR_HPRE_DIV2);
+#if G_freq_HCLK == G_freq_OSC
+	//rcc_set_hpre(RCC_CFGR_HPRE_NODIV);
+	rcc_set_hpre(RCC_CFGR_HPRE_SYSCLK_NODIV);
+#elif G_freq_HCLK == (G_freq_OSC / 2)
 	rcc_set_hpre(RCC_CFGR_HPRE_SYSCLK_DIV2);
-	// Use HCLK/2 as APB1 clock
-	//rcc_set_ppre1(RCC_CFGR_PPRE_DIV2);
+#elif G_freq_HCLK == (G_freq_OSC / 4)
+	rcc_set_hpre(RCC_CFGR_HPRE_SYSCLK_DIV4);
+#elif G_freq_HCLK == (G_freq_OSC / 8)
+	rcc_set_hpre(RCC_CFGR_HPRE_SYSCLK_DIV8);
+#elif G_freq_HCLK == (G_freq_OSC / 16)
+	rcc_set_hpre(RCC_CFGR_HPRE_SYSCLK_DIV16);
+#elif G_freq_HCLK == (G_freq_OSC / 64)
+	rcc_set_hpre(RCC_CFGR_HPRE_SYSCLK_DIV64);
+#elif G_freq_HCLK == (G_freq_OSC / 128)
+	rcc_set_hpre(RCC_CFGR_HPRE_SYSCLK_DIV128);
+#elif G_freq_HCLK == (G_freq_OSC / 256)
+	rcc_set_hpre(RCC_CFGR_HPRE_SYSCLK_DIV256);
+#elif G_freq_HCLK == (G_freq_OSC / 512)
+	rcc_set_hpre(RCC_CFGR_HPRE_SYSCLK_DIV512);
+#else
+# error "G_freq_HCLK must be a G_freq_OSC / (1|2|4|8|16|64|128|256|512)"
+#endif
+
+#if G_freq_PCLK1 == G_freq_HCLK
+	//rcc_set_ppre1(RCC_CFGR_PPRE_NODIV);
+	rcc_set_ppre1(RCC_CFGR_PPRE1_HCLK_NODIV);
+#elif G_freq_PCLK1 == (G_freq_HCLK / 2)
 	rcc_set_ppre1(RCC_CFGR_PPRE1_HCLK_DIV2);
-	// Use HCLK as APB2 clock
+#elif G_freq_PCLK1 == (G_freq_HCLK / 4)
+	rcc_set_ppre1(RCC_CFGR_PPRE1_HCLK_DIV4);
+#elif G_freq_PCLK1 == (G_freq_HCLK / 8)
+	rcc_set_ppre1(RCC_CFGR_PPRE1_HCLK_DIV8);
+#elif G_freq_PCLK1 == (G_freq_HCLK / 16)
+	rcc_set_ppre1(RCC_CFGR_PPRE1_HCLK_DIV16);
+#else
+# error "G_freq_PCLK1 must be a G_freq_HCLK / (1|2|4|8|16)"
+#endif
+
+#if G_freq_PCLK2 == G_freq_HCLK
 	//rcc_set_ppre2(RCC_CFGR_PPRE_NODIV);
 	rcc_set_ppre2(RCC_CFGR_PPRE2_HCLK_NODIV);
+#elif G_freq_PCLK2 == (G_freq_HCLK / 2)
+	rcc_set_ppre2(RCC_CFGR_PPRE2_HCLK_DIV2);
+#elif G_freq_PCLK2 == (G_freq_HCLK / 4)
+	rcc_set_ppre2(RCC_CFGR_PPRE2_HCLK_DIV4);
+#elif G_freq_PCLK2 == (G_freq_HCLK / 8)
+	rcc_set_ppre2(RCC_CFGR_PPRE2_HCLK_DIV8);
+#elif G_freq_PCLK2 == (G_freq_HCLK / 16)
+	rcc_set_ppre2(RCC_CFGR_PPRE2_HCLK_DIV16);
+#else
+# error "G_freq_PCLK2 must be a G_freq_HCLK / (1|2|4|8|16)"
+#endif
+
+#if   G_freq_ADC == (G_freq_PCLK2 / 2)
+	rcc_set_adcpre(RCC_CFGR_ADCPRE_PCLK2_DIV2);
+#elif G_freq_ADC == (G_freq_PCLK2 / 4)
+	rcc_set_adcpre(RCC_CFGR_ADCPRE_PCLK2_DIV4);
+#elif G_freq_ADC == (G_freq_PCLK2 / 6)
+	rcc_set_adcpre(RCC_CFGR_ADCPRE_PCLK2_DIV6);
+#elif G_freq_ADC == (G_freq_PCLK2 / 8)
+	rcc_set_adcpre(RCC_CFGR_ADCPRE_PCLK2_DIV8);
+#else
+# error "G_freq_ADC must be a G_freq_PCLK2 / (2|4|6|8)"
+#endif
 
 	// Set flash latency and prefetch buffer
 	// According to the reference manual, you should use a flash latency of 0
@@ -254,9 +311,9 @@ static void clocks_init(void) {
 
 	// If not using the rcc_clock_setup_*() functions, these need to be set
 	// here because some libopencm3 code uses them
-	rcc_ahb_frequency = G_freq_HSE/2;
-	rcc_apb1_frequency = rcc_ahb_frequency/2;
-	rcc_apb2_frequency = rcc_ahb_frequency;
+	rcc_ahb_frequency = G_freq_HCLK;
+	rcc_apb1_frequency = G_freq_PCLK1;
+	rcc_apb2_frequency = G_freq_PCLK2;
 
 	return;
 }
