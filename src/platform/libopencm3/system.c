@@ -72,6 +72,12 @@ extern uint32_t rcc_apb1_frequency;
 extern uint32_t rcc_apb2_frequency;
 extern uint32_t rcc_ahb_frequency;
 
+#if USE_TERMINAL
+// Treat the first sleep as user-initiated to make entering the terminal
+// more convenient
+static bool button_wakeup = true;
+#endif
+
 /*
 * Local function prototypes
 */
@@ -103,6 +109,10 @@ void Button_IRQHandler(void) {
 
 	exti_reset_request(GPIO_GET_PINMASK(BUTTON_PIN));
 	nvic_clear_pending_irq(BUTTON_IRQn);
+
+#if USE_TERMINAL
+	button_wakeup = true;
+#endif
 
 	return;
 }
@@ -321,8 +331,6 @@ void sleep_ms(utime_t ms) {
 }
 OPTIMIZE_FUNCTION \
 void hibernate_s(utime_t s, uint8_t flags) {
-	uint32_t sleep_s;
-
 	if (s == 0) {
 		return;
 	}
@@ -336,15 +344,20 @@ void hibernate_s(utime_t s, uint8_t flags) {
 
 	// UART interrupts can't wake us up from deep sleep so sleep lightly for a
 	// few seconds before entering deep sleep in order to detect them
-	// The user will have to use the button or wait for the RTC alarm to enter
-	// the serial terminal.
-	sleep_s = (s > (LIGHT_SLEEP_SECONDS + MIN_DEEP_SLEEP_SECONDS)) ? LIGHT_SLEEP_SECONDS : s;
-	if ((G_IRQs == 0) && (s > 0)) {
-		// LOGGER("Just a %u second nap...zZz...", (uint )sleep_s);
-		LOGGER("Sleeping lightly %u seconds", (uint )sleep_s);
-		light_sleep_ms(sleep_s * 1000, flags);
+	// The user will have to use the button to enter the serial terminal.
+#if USE_TERMINAL
+	if (button_wakeup && (BIT_IS_SET(flags, CFG_ALLOW_INTERRUPTS))) {
+		if ((G_IRQs == 0) && (s > 0)) {
+			uint32_t w;
+
+			button_wakeup = false;
+			w = (s > (LIGHT_SLEEP_SECONDS + MIN_DEEP_SLEEP_SECONDS)) ? LIGHT_SLEEP_SECONDS : s;
+			NOTIFY("Waiting %u seconds for UART input", (uint )w);
+			light_sleep_ms(w * 1000, flags);
+			s -= w;
+		}
 	}
-	s -= sleep_s;
+#endif
 
 	// TODO: Handle the case where the RTC isn't clocked by the LSE and the RTC
 	// alarm therefore can't be used
