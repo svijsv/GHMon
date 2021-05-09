@@ -183,6 +183,7 @@ void log_status(bool force_write) {
 	check_sensors();
 	check_sensor_warnings();
 	check_controller_warnings();
+	write_errors = 0;
 
 	if (!force_write && !buffer_is_full()) {
 		buffer_line(now);
@@ -201,7 +202,6 @@ void log_status(bool force_write) {
 	// From this point on, don't return - go to END instead.
 	//
 	power_on();
-	write_errors = 0;
 
 	if ((err = f_mount(&fs, "", 1)) != FR_OK) {
 		LOGGER("Skipping log sync: fatfs error %u", (uint )err);
