@@ -183,7 +183,6 @@ void log_status(bool force_write) {
 	check_sensors();
 	check_sensor_warnings();
 	check_controller_warnings();
-	write_errors = 0;
 
 	if (!force_write && !buffer_is_full()) {
 		buffer_line(now);
@@ -357,6 +356,8 @@ void log_status(bool force_write) {
 END:
 	if (write_errors != 0) {
 		SET_BIT(G_warnings, WARN_SD_FAILED);
+		LOGGER("%u log write errors", (uint )write_errors);
+		write_errors = 0;
 	}
 	if (is_opened && ((err = close_file()) != FR_OK)) {
 		// close_file() handles the error message
@@ -515,6 +516,8 @@ static void buffer_line(utime_t now) {
 	if (log_buffer.size != LOGFILE_BUFFER_COUNT) {
 		++log_buffer.size;
 	}
+
+	CLEAR_BIT(G_warnings, WARN_SD_SKIPPED|WARN_SD_FAILED);
 
 	return;
 }
