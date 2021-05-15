@@ -695,9 +695,11 @@ static FRESULT print_header(void) {
 	}
 #if USE_CONTROLLERS
 #if USE_SMALL_CONTROLLERS < 1
+	char name[DEVICE_NAME_LEN+1];
+
 	for (uiter_t i = 0; i < CONTROLLER_COUNT; ++i) {
-		const char *n = FROM_FSTR(CONTROLLERS[i].name);
-		lprintf(F("\t[!]%s_count\t%s_time"), n, n);
+		FROM_FSTR_TO_BUF(CONTROLLERS[i].name, name);
+		lprintf(F("\t[!]%s_count\t%s_time"), name, name);
 	}
 #endif // USE_SMALL_CONTROLLERS < 1
 #endif // USE_CONTROLLERS
