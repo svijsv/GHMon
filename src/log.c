@@ -156,6 +156,7 @@ static void power_off(void);
 static char* format_uptime(utime_t uptime);
 static char* format_warnings(uint8_t warnings);
 
+#define LPRINTF(fmt, ...) lprintf(F1(fmt), ## __VA_ARGS__)
 
 /*
 * Interrupt handlers
@@ -251,7 +252,7 @@ void log_status(bool force_write) {
 	while (log_buffer.size > 0) {
 		line = &log_buffer.lines[head];
 
-		lprintf("%s\t%s\t%u", format_uptime(line->uptime), format_warnings(line->warnings), (uint )line->vcc_voltage);
+		LPRINTF("%s\t%s\t%u", format_uptime(line->uptime), format_warnings(line->warnings), (uint )line->vcc_voltage);
 		for (uiter_t i = 0; i < SENSOR_COUNT; ++i) {
 			if (BIT_IS_SET(line->sensor_iflags[i], SENS_FLAG_WARNING)) {
 				prefix = prefix_warn;
@@ -261,17 +262,17 @@ void log_status(bool force_write) {
 #if USE_SMALL_CODE < 2
 			switch (line->status[i]) {
 			case SENSOR_LOW:
-				lprintf("%s(LOW)", prefix);
+				LPRINTF("%s(LOW)", prefix);
 				break;
 			case SENSOR_HIGH:
-				lprintf("%s(HIGH)", prefix);
+				LPRINTF("%s(HIGH)", prefix);
 				break;
 			default:
-				lprintf("%s%d", prefix, (int )line->status[i]);
+				LPRINTF("%s%d", prefix, (int )line->status[i]);
 				break;
 			}
 #else // !USE_SMALL_CODE < 2
-			lprintf("%s%d", prefix, (int )line->status[i]);
+			LPRINTF("%s%d", prefix, (int )line->status[i]);
 #endif // USE_SMALL_CODE < 2
 		}
 #if USE_CONTROLLERS
@@ -282,7 +283,7 @@ void log_status(bool force_write) {
 			} else {
 				prefix = prefix_std;
 			}
-			lprintf("%s%u\t%u", prefix, (uint )line->run_count[i], (uint )line->run_time[i]);
+			LPRINTF("%s%u\t%u", prefix, (uint )line->run_count[i], (uint )line->run_time[i]);
 		}
 #endif // USE_SMALL_CONTROLLERS < 1
 #endif // USE_CONTROLLERS
@@ -305,7 +306,7 @@ void log_status(bool force_write) {
 	// We only need to add the latest measurements if this is a scheduled call;
 	// otherwise the duration between lines won't be even.
 	if (!force_write) {
-		lprintf("%s\t%s\t%u", format_uptime(now), format_warnings(G_warnings), (uint )G_vcc_voltage);
+		LPRINTF("%s\t%s\t%u", format_uptime(now), format_warnings(G_warnings), (uint )G_vcc_voltage);
 		for (uiter_t i = 0; i < SENSOR_COUNT; ++i) {
 			if (BIT_IS_SET(G_sensors[i].iflags, SENS_FLAG_WARNING)) {
 				prefix = prefix_warn;
@@ -315,17 +316,17 @@ void log_status(bool force_write) {
 #if USE_SMALL_CODE < 2
 			switch (G_sensors[i].status) {
 			case SENSOR_LOW:
-				lprintf("%s(LOW)", prefix);
+				LPRINTF("%s(LOW)", prefix);
 				break;
 			case SENSOR_HIGH:
-				lprintf("%s(HIGH)", prefix);
+				LPRINTF("%s(HIGH)", prefix);
 				break;
 			default:
-				lprintf("%s%d", prefix, (int )G_sensors[i].status);
+				LPRINTF("%s%d", prefix, (int )G_sensors[i].status);
 				break;
 			}
 #else // !USE_SMALL_CODE < 2
-			lprintf("%s%d", prefix, (int )G_sensors[i].status);
+			LPRINTF("%s%d", prefix, (int )G_sensors[i].status);
 #endif // USE_SMALL_CODE < 2
 
 		}
@@ -337,7 +338,7 @@ void log_status(bool force_write) {
 			} else {
 				prefix = prefix_std;
 			}
-			lprintf("%s%u\t%u", prefix, (uint )G_controllers[i].run_count, (uint )G_controllers[i].run_time_seconds);
+			LPRINTF("%s%u\t%u", prefix, (uint )G_controllers[i].run_count, (uint )G_controllers[i].run_time_seconds);
 		}
 #endif // USE_SMALL_CONTROLLERS < 1
 #endif // USE_CONTROLLERS
@@ -685,12 +686,12 @@ static FRESULT print_header(void) {
 	LOGGER("Writing log header");
 	lines_logged_this_file = 0;
 
-	lprintf(F("# uptime\twarnings\tVcc_mV"));
+	LPRINTF("# uptime\twarnings\tVcc_mV");
 	for (uiter_t i = 0; i < SENSOR_COUNT; ++i) {
 		if (BIT_IS_SET(G_sensors[i].iflags, SENS_FLAG_MONITORED)) {
-			lprintf("\t[!]%s", FROM_FSTR(SENSORS[i].name));
+			LPRINTF("\t[!]%s", FROM_FSTR(SENSORS[i].name));
 		} else {
-			lprintf("\t%s", FROM_FSTR(SENSORS[i].name));
+			LPRINTF("\t%s", FROM_FSTR(SENSORS[i].name));
 		}
 	}
 #if USE_CONTROLLERS
@@ -699,15 +700,15 @@ static FRESULT print_header(void) {
 
 	for (uiter_t i = 0; i < CONTROLLER_COUNT; ++i) {
 		FROM_FSTR_TO_BUF(CONTROLLERS[i].name, name);
-		lprintf(F("\t[!]%s_count\t%s_time"), name, name);
+		LPRINTF("\t[!]%s_count\t%s_time", name, name);
 	}
 #endif // USE_SMALL_CONTROLLERS < 1
 #endif // USE_CONTROLLERS
 	lprintf_putc('\n');
 
 	// This needs to be split to fit in the buffer for F()
-	lprintf(F("# Warnings: B=battery low, V=Vcc low, S=sensor warning, C=controller warning, "));
-	lprintf(F("L=log error, l=log sync skipped\n"));
+	LPRINTF("# Warnings: B=battery low, V=Vcc low, S=sensor warning, C=controller warning, ");
+	LPRINTF("L=log error, l=log sync skipped\n");
 
 	if ((err = next_line()) == FR_OK) {
 		have_log_header = true;
