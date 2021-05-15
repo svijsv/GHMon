@@ -69,6 +69,18 @@
 /*
 * Functions
 */
+char* FROM_FSTR_TO_BUF(_FLASH_STR_T *fs, char *buf) {
+	uint8_t i;
+
+	assert(fs != (_FLASH_STR_T *)0);
+	assert(buf != NULL);
+
+	for (i = 0; (buf[i] = fs[i]) != 0; ++i) {
+		// Nothing to do here
+	}
+
+	return buf;
+}
 char* FROM_FSTR(_FLASH_STR_T *fs) {
 	static char _FLASH_TMP[_FLASH_TMP_SIZE];
 	uint8_t i;

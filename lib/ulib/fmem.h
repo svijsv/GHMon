@@ -109,6 +109,7 @@ char* FROM_FSTR(_FLASH_STR_T *fs);
 char* FROM_FSTR1(_FLASH_STR_T *fs);
 char* FROM_FSTR2(_FLASH_STR_T *fs);
 char* FROM_FSTR3(_FLASH_STR_T *fs);
+char* FROM_FSTR_TO_BUF(_FLASH_STR_T *fs, char *buf);
 
 /*
 * Macros
