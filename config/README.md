@@ -26,11 +26,15 @@ SPI sensors (at present only the BM[EP]280) must either *all* be switched with
 `SPI_POWER_PIN` defined in `config.h` or *all* be unswitched; leaving a device
 unpowered when SPI is enabled may damage it when the SPI pins are high.
 Additionally, the SD card (if used) must also be switched with them.
+The chip select pin of an spi sensor is set using the 'pin' field of the
+configuration struct.
 
 I2C sensors (at present only the BM[EP]280) must either *all* be switched -
 along with the I2C pullups - with `I2C_POWER_PIN` defined in `config.h` or
 *all* be unswitched; leaving a device unpowered when I2C is enabled may damage
 it when the pullups are high.
+The address of an I2C sensor is set using the 'pin' field of the configuration
+struct.
 
 Any used sensor type must be enabled in `config.h`.
 
