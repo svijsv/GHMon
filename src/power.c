@@ -100,14 +100,52 @@ static bool SD_initialized = false;
 * Functions
 */
 void power_on_sensors(void) {
+	bool powered_on = false;
+
 #if SENSOR_POWER_PIN
 	power_on_output(SENSOR_POWER_PIN);
-	sleep_ms(SENSOR_POWER_UP_DELAY_MS);
+	powered_on = true;
 #endif
 
+#if USE_SMALL_SENSORS < 2
+	_FLASH const sensor_static_t *cfg;
+
+	for (uiter_t i = 0; i < SENSOR_COUNT; ++i) {
+		cfg = &SENSORS[i];
+
+		if (cfg->power_pin != 0) {
+			if ((cfg->power_duty_cycle > 0) && (cfg->power_duty_cycle < 100)) {
+				pwm_on(cfg->power_pin, cfg->power_duty_cycle);
+			} else {
+				power_on_output(cfg->power_pin);
+			}
+			powered_on = true;
+		}
+	}
+#endif
+
+	if (powered_on) {
+		sleep_ms(SENSOR_POWER_UP_DELAY_MS);
+	}
 	return;
 }
 void power_off_sensors(void) {
+#if USE_SMALL_SENSORS < 2
+	_FLASH const sensor_static_t *cfg;
+
+	for (uiter_t i = 0; i < SENSOR_COUNT; ++i) {
+		cfg = &SENSORS[i];
+
+		if (cfg->power_pin != 0) {
+			if ((cfg->power_duty_cycle > 0) && (cfg->power_duty_cycle < 100)) {
+				pwm_off(cfg->power_pin);
+			} else {
+				power_off_output(cfg->power_pin);
+			}
+		}
+	}
+#endif
+
 #if SENSOR_POWER_PIN
 	power_off_output(SENSOR_POWER_PIN);
 #endif

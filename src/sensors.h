@@ -57,7 +57,7 @@
 // Use this if the sensor is on the high side of the voltage divider.
 #define SENS_FLAG_INVERT  0x04
 //
-// This flag depends on structure members that may not exist
+// These flags depend on structure members that may not exist
 #if USE_SMALL_SENSORS < 2
 // If set, this sensor falling below warn_below indicates a low battery
 # define SENS_FLAG_BATTERY 0x10
@@ -150,12 +150,20 @@ typedef struct {
 	int16_t scale_percent;
 #endif // USE_SMALL_SENSORS < 2
 
-	// Control flags
-	uint8_t cflags;
-
 	// MCU pin used to check the sensor
 	pin_t pin;
+#if USE_SMALL_SENSORS < 2
+	// MCU pin used to power the sensor; use global default if 0 or unset
+	// This doesn't apply to SPI or I2C sensors.
+	pin_t power_pin;
+	// If power_pin is set and this is set to >0 and <100, set the duty cycle
+	// of the power pin to this
+	// The pin must have hardware PWM support to use this.
+	uint8_t power_duty_cycle;
+#endif
 
+	// Control flags
+	uint8_t cflags;
 	// The type of device
 	// this can be any value of sensor_type_t; it's specified as uint8_t to
 	// keep the size down.
