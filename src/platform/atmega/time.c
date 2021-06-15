@@ -22,7 +22,13 @@
 //
 // NOTES:
 //    The systick timer is timer 2 (8-bit)
+//
 //    The micro-second timer is timer 0 (8-bit)
+//
+//    The PWM timer is either timer 0 (8-bit) or timer 1 (16-bit) depending
+//    on the output pin. Timer 0 will conflict with anything using the micro-
+//    second timer at the same time. Timer 2 supports PWM but there's no way
+//    I can think of to use it at the same time as the systick timer.
 //
 
 #ifdef __cplusplus
@@ -82,6 +88,22 @@
 #define TIM2_PRESCALER_256  0b110
 #define TIM2_PRESCALER_1024 0b111
 
+// Timer 1 could have a wider range of frequencies if the 9 and 10 bit MAX
+// values were checked but that would complicate things
+#if ((G_freq_TIM01CLK/0xFF)/1) < PWM_MAX_FREQUENCY
+# define TIM01_PWM_PRESCALER TIM01_PRESCALER_1
+#elif ((G_freq_TIM01CLK/0xFF)/8) < PWM_MAX_FREQUENCY
+# define TIM01_PWM_PRESCALER TIM01_PRESCALER_8
+#elif ((G_freq_TIM01CLK/0xFF)/64) < PWM_MAX_FREQUENCY
+# define TIM01_PWM_PRESCALER TIM01_PRESCALER_64
+#elif ((G_freq_TIM01CLK/0xFF)/256) < PWM_MAX_FREQUENCY
+# define TIM01_PWM_PRESCALER TIM01_PRESCALER_256
+#elif ((G_freq_TIM01CLK/0xFF)/1024) < PWM_MAX_FREQUENCY
+# define TIM01_PWM_PRESCALER TIM01_PRESCALER_1024
+#else
+# error "PWM_MAX_FREQUENCY is too low for this core clock frequency"
+#endif
+
 
 /*
 * Types
@@ -115,7 +137,8 @@ static void WDT_init(void);
 static void calibrate_WDT(void);
 static void calc_timer2_1ms(uint8_t *cnt, uint8_t *psc);
 //static uint16_t calc_timer2_Xms(uint16_t ms, uint8_t *cnt, uint8_t *psc);
-static void uscounter_init(void);
+static void timer0_init(void);
+static void timer1_init(void);
 
 
 /*
@@ -179,7 +202,8 @@ ISR(WDT_vect) {
 void time_init(void) {
 	systick_init();
 	WDT_init();
-	uscounter_init();
+	timer0_init();
+	timer1_init();
 
 	return;
 }
@@ -191,8 +215,8 @@ static void systick_init(void) {
 	SYSTICK_POWER_ENABLE();
 	DISABLE_COUNTER(TCCR2B);
 
-	// Set the timer to reset when it reaches OCR2A
-	MODIFY_BITS(TCCR2A, 0b11 << WGM20, 0b10);
+	// Set the timer counter to reset when it reaches OCR2A
+	MODIFY_BITS(TCCR2A, 0b11 << WGM20, 0b10 << WGM20);
 	CLEAR_BIT(TCCR2B, 1 << WGM22);
 
 	// Calculate the proper counter and prescaler to get 1ms
@@ -494,24 +518,40 @@ void add_RTC_millis(uint16_t ms) {
 	return;
 }
 //
-// Set up the micro-second timer
-static void uscounter_init(void) {
-	USCOUNTER_POWER_ENABLE();
+// Initialize the general-purpose timers
+static void timer0_init(void) {
+	power_timer0_enable();
 	DISABLE_COUNTER(TCCR0B);
 
-	// Set the timer to reset when it reaches OxFF
+	// Normal mode; no PWM and the timer counter resets when it reaches OxFF
 	CLEAR_BIT(TCCR0A, 0b11 << WGM00);
 	CLEAR_BIT(TCCR0B, 0b1  << WGM02);
 
-	// Setting the prescaler re-enables the counter, so don't do it here
-	//SET_TIMER_PRESCALER(TCCR0B, TIM01_PRESCALER_1);
-	//SET_TIMER_PRESCALER(TCCR0B, TIM01_PRESCALER_8);
-	//SET_TIMER_PRESCALER(TCCR0B, TIM01_PRESCALER_1024);
+	OCR0A = 0;
+	OCR0B = 0;
 
-	USCOUNTER_POWER_DISABLE();
+	power_timer0_disable();
 
 	return;
 }
+static void timer1_init(void) {
+	power_timer1_enable();
+	DISABLE_COUNTER(TCCR1B);
+
+	// Normal mode; no PWM and the timer counter resets when it reaches OxFFFF
+	CLEAR_BIT(TCCR1A, 0b11 << WGM10);
+	CLEAR_BIT(TCCR1B, 0b11 << WGM12);
+
+	OCR1A = 0;
+	OCR1B = 0;
+
+	power_timer1_disable();
+
+	return;
+}
+//
+// Set up the micro-second timer; assume it's already set to the default of
+// normal mode
 void uscounter_on(void) {
 	USCOUNTER_POWER_ENABLE();
 
@@ -519,6 +559,136 @@ void uscounter_on(void) {
 }
 void uscounter_off(void) {
 	USCOUNTER_POWER_DISABLE();
+
+	return;
+}
+//
+// Set up a PWM timer
+static void timer0_pwm_on(pin_t pin, uint8_t off_at) {
+	power_timer0_enable();
+	// Don't disable the counter in case the other output is already in
+	// use; this may result in the first cycle being too long
+	//DISABLE_COUNTER(TCCR0B);
+
+	// Fast PWM mode; timer counter resets when it reaches OxFF
+	MODIFY_BITS(TCCR0A, 0b11 << WGM00, 0b11 << WGM00);
+	MODIFY_BITS(TCCR0B, 0b1  << WGM02, 0b0  << WGM02);
+
+	if (PINID(pin) == PINID_OC0A) {
+		OCR0A = off_at;
+		MODIFY_BITS(TCCR0A, 0b11 << COM0A0, 0b10 << COM0A0);
+	} else {
+		OCR0B = off_at;
+		MODIFY_BITS(TCCR0A, 0b11 << COM0B0, 0b10 << COM0B0);
+	}
+	// Enable the timer by setting the prescaler
+	SET_TIMER_PRESCALER(TCCR0B, TIM01_PWM_PRESCALER);
+
+	return;
+}
+static void timer1_pwm_on(pin_t pin, uint8_t off_at) {
+	power_timer1_enable();
+	// Don't disable the counter in case the other output is already in
+	// use; this may result in the first cycle being too long
+	//DISABLE_COUNTER(TCCR1B);
+
+	// Fast PWM mode, 8 bit mode; timer counter resets when it reaches OxFF
+	MODIFY_BITS(TCCR1A, 0b11 << WGM10, 0b01 << WGM10);
+	MODIFY_BITS(TCCR1B, 0b11 << WGM12, 0b01 << WGM12);
+	// Fast PWM mode, 10 bit mode; timer resets when it reaches Ox3FF
+	//MODIFY_BITS(TCCR1A, 0b11 << WGM10, 0b11 << WGM10);
+	//MODIFY_BITS(TCCR1B, 0b11 << WGM12, 0b01 << WGM12);
+
+	if (PINID(pin) == PINID_OC1A) {
+		OCR1A = off_at;
+		MODIFY_BITS(TCCR1A, 0b11 << COM1A0, 0b10 << COM1A0);
+	} else {
+		OCR1B = off_at;
+		MODIFY_BITS(TCCR1A, 0b11 << COM1B0, 0b10 << COM1B0);
+	}
+	// Enable the timer by setting the prescaler
+	SET_TIMER_PRESCALER(TCCR1B, TIM01_PWM_PRESCALER);
+
+	return;
+}
+void pwm_on(pin_t pin, uint8_t duty_cycle) {
+	uint8_t off_at;
+
+	assert(duty_cycle <= 100);
+
+	off_at = ((uint16_t )duty_cycle * 0xFF) / 100;
+
+	switch (PINID(pin)) {
+	case PINID_OC0A:
+	case PINID_OC0B:
+		timer0_pwm_on(pin, off_at);
+		break;
+	case PINID_OC1A:
+	case PINID_OC1B:
+		timer1_pwm_on(pin, off_at);
+		break;
+	default:
+		LOGGER("Attempted PWM with incapable pin 0x%02X", (uint )pin);
+		break;
+	}
+
+	// Enable output by setting DDR for the output pin
+	gpio_set_mode(pin, GPIO_MODE_PP, GPIO_FLOAT);
+
+	return;
+}
+static void timer0_pwm_off(pin_t pin) {
+	if (PINID(pin) == (PINID_OC0A)) {
+		CLEAR_BIT(TCCR0A, 0b11 << COM0A0);
+		OCR0A = 0;
+	} else {
+		CLEAR_BIT(TCCR0A, 0b11 << COM0B0);
+		OCR0B = 0;
+	}
+	if ((OCR0A == 0) && (OCR0B == 0)) {
+		timer0_init();
+	}
+
+	return;
+}
+static void timer1_pwm_off(pin_t pin) {
+	if (PINID(pin) == (PINID_OC1A)) {
+		CLEAR_BIT(TCCR1A, 0b11 << COM1A0);
+		OCR1A = 0;
+	} else {
+		CLEAR_BIT(TCCR1A, 0b11 << COM1B0);
+		OCR1B = 0;
+	}
+	if ((OCR1A == 0) && (OCR1B == 0)) {
+		timer1_init();
+	}
+
+	return;
+}
+void pwm_off(pin_t pin) {
+	// Disable output
+	switch (GPIO_GET_BIAS(pin)) {
+	case BIAS_HIGH:
+		gpio_set_mode(pin, GPIO_MODE_PP, GPIO_HIGH);
+		break;
+	case BIAS_LOW:
+		gpio_set_mode(pin, GPIO_MODE_PP, GPIO_LOW);
+		break;
+	default:
+		gpio_set_mode(pin, GPIO_MODE_HiZ, GPIO_FLOAT);
+		break;
+	}
+
+	switch (PINID(pin)) {
+	case PINID_OC0A:
+	case PINID_OC0B:
+		timer0_pwm_off(pin);
+		break;
+	case PINID_OC1A:
+	case PINID_OC1B:
+		timer1_pwm_off(pin);
+		break;
+	}
 
 	return;
 }

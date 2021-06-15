@@ -39,6 +39,9 @@
 // Target speed of the I2C bus
 #define I2C_FREQUENCY 50000
 
+// Maximum frequency for PWM output
+#define PWM_MAX_FREQUENCY 1000
+
 // Maximum length of sensor and controller names
 // Increasing this will increase the ROM space used, but depending on struct
 // layout it may not be a direct relationship; typically rounding the number

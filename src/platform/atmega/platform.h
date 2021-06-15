@@ -148,6 +148,33 @@ typedef struct {
 #define PINID_Z0  (GPIO_PORTZ_MASK|0x00)
 #define PINID_Z1  (GPIO_PORTZ_MASK|0x01)
 //
+// Alternate function pins
+// Communication
+#define PINID_RXD  PINID_D0
+#define PINID_TXD  PINID_D1
+#define PINID_MISO PINID_B4
+#define PINID_MOSI PINID_B3
+#define PINID_SCK  PINID_B5
+#define PINID_SS   PINID_B2
+#define PINID_SCL  PINID_C5
+#define PINID_SDA  PINID_C4
+// Timer output/PWM
+#define PINID_OC0A PINID_D6
+#define PINID_OC0B PINID_D5
+#define PINID_OC1A PINID_B1
+#define PINID_OC1B PINID_B2
+#define PINID_OC2A PINID_B3
+#define PINID_OC2B PINID_D3
+// ADC input
+#define PINID_ADC0 PINID_C0
+#define PINID_ADC1 PINID_C1
+#define PINID_ADC2 PINID_C2
+#define PINID_ADC3 PINID_C3
+#define PINID_ADC4 PINID_C4
+#define PINID_ADC5 PINID_C5
+#define PINID_ADC6 PINID_Z0
+#define PINID_ADC7 PINID_Z1
+//
 // Arduino digital pin mappings
 #define PIN_0  PINID_D0
 #define PIN_RX PINID_D0 // UART RX
