@@ -114,7 +114,7 @@ void power_on_sensors(void) {
 		cfg = &SENSORS[i];
 
 		if (cfg->power_pin != 0) {
-			if ((cfg->power_duty_cycle > 0) && (cfg->power_duty_cycle < 100)) {
+			if ((cfg->power_duty_cycle > 0) && (cfg->power_duty_cycle < PWM_DUTY_CYCLE_SCALE)) {
 				pwm_on(cfg->power_pin, cfg->power_duty_cycle);
 			} else {
 				power_on_output(cfg->power_pin);
@@ -137,7 +137,7 @@ void power_off_sensors(void) {
 		cfg = &SENSORS[i];
 
 		if (cfg->power_pin != 0) {
-			if ((cfg->power_duty_cycle > 0) && (cfg->power_duty_cycle < 100)) {
+			if ((cfg->power_duty_cycle > 0) && (cfg->power_duty_cycle < PWM_DUTY_CYCLE_SCALE)) {
 				pwm_off(cfg->power_pin);
 			} else {
 				power_off_output(cfg->power_pin);

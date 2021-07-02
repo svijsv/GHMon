@@ -40,7 +40,9 @@
 #define I2C_FREQUENCY 50000
 
 // Maximum frequency for PWM output
-#define PWM_MAX_FREQUENCY 1000
+#define PWM_MAX_FREQUENCY 250
+// PWM duty cycle is defined as a number between 0 and PWM_DUTY_CYCLE_SCALE
+#define PWM_DUTY_CYCLE_SCALE 100
 
 // Maximum length of sensor and controller names
 // Increasing this will increase the ROM space used, but depending on struct

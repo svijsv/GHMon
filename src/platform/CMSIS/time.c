@@ -268,8 +268,8 @@ static void timers_init(void) {
 	//
 	// PWM timers
 	//
-	psc_apb1 = calculate_APB1_TIM_prescaler(PWM_MAX_FREQUENCY*100);
-	psc_apb2 = calculate_APB2_TIM_prescaler(PWM_MAX_FREQUENCY*100);
+	psc_apb1 = calculate_APB1_TIM_prescaler(PWM_MAX_FREQUENCY*PWM_DUTY_CYCLE_SCALE);
+	psc_apb2 = calculate_APB2_TIM_prescaler(PWM_MAX_FREQUENCY*PWM_DUTY_CYCLE_SCALE);
 	// Auto-reload register buffer is suggested by the reference manual for
 	// reliability in PWM mode
 	cr1 = TIM_CR1_ARPE;
@@ -458,7 +458,7 @@ void dumb_delay_cycles(uint32_t cycles) {
 }
 //
 // PWM management
-void pwm_on(pin_t pin, uint8_t duty_cycle) {
+void pwm_on(pin_t pin, uint16_t duty_cycle) {
 	uint8_t channel;
 	TIM_TypeDef *TIMx;
 

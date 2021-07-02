@@ -611,12 +611,12 @@ static void timer1_pwm_on(pin_t pin, uint8_t off_at) {
 
 	return;
 }
-void pwm_on(pin_t pin, uint8_t duty_cycle) {
+void pwm_on(pin_t pin, uint16_t duty_cycle) {
 	uint8_t off_at;
 
 	assert(duty_cycle <= 100);
 
-	off_at = ((uint16_t )duty_cycle * 0xFF) / 100;
+	off_at = (duty_cycle * 0xFF) / PWM_DUTY_CYCLE_SCALE;
 
 	switch (PINID(pin)) {
 	case PINID_OC0A:
