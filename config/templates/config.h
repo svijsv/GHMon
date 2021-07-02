@@ -117,7 +117,6 @@
 // Set to 0 to disable.
 #define LINES_PER_FILE ((14 * 24 * 60) / LOG_APPEND_MINUTES) // 14 days per file
 
-
 //
 // Pin configuration
 // Platform-specific
@@ -135,6 +134,13 @@
 // voltage to the IO pins of an unpowered device or current leaking through
 // the IO pins
 //
+// A duty cycle can be specified for any power pin which supports PWM. By
+// default it's a percentage (e.g. '50' means on 50% of the time) but this
+// can be adjusted along with the frequency in advanced.h. A duty cycle of 0
+// is taken as a duty cycle of 100%.
+//
+// Power pins for SPI and I2C can't be the same as any other power pin.
+//
 // The UART pins are only used if serial output is enabled
 // The SPI pins are only used if logging or an SPI sensor are enabled
 // The I2C pins are only used if an I2C sensor is enabled
@@ -150,6 +156,8 @@
 // like that (like an SD card) if it will be present at those times
 //
 // Some pins (like A12) may have external pullups or pulldowns
+//
+// Pins A8-A11 and B6-B9 support PWM
 #if USE_STM32
 //
 // Sensor inputs
@@ -170,11 +178,15 @@
 //
 // Power pins
 // Power for sensors not on the SPI or I2C buses
-#define SENSOR_POWER_PIN PIN_B11
+// Use a comma-separated list for multiple pins
+#define SENSOR_POWER_PINS PIN_B11
 // Power for SPI devices
 //#define SPI_POWER_PIN (PIN_B5 | BIAS_LOW)
 // Power for I2C devices
 //#define I2C_POWER_PIN (PIN_A11)
+// PWM mappings
+// Comma-separated pin/duty cycle pairs
+//#define PWM_PINS { PIN_B11, 50 }
 //
 // UART pins; hardware-specified
 // PIN_A9-PIN_A10: UART1
@@ -205,6 +217,8 @@
 //
 // There are internal pullups but no internal pulldowns
 //
+// Pins 9 and 10 support PWM. Pins 5 and 6 also support PWM if no DHT11
+// sensors are used.
 #if USE_AVR
 //
 // Sensor inputs
@@ -223,11 +237,15 @@
 //
 // Power pins
 // Power for sensors not on the SPI or I2C buses
-#define SENSOR_POWER_PIN PIN_6
+// Use a comma-separated list for multiple pins
+#define SENSOR_POWER_PINS PIN_6
 // Power for SPI devices
 //#define SPI_POWER_PIN   PIN_7
 // Power for I2C devices
 //#define I2C_POWER_PIN   PIN_8
+// PWM mappings
+// Comma-separated pin/duty cycle pairs
+//#define PWM_PINS { PIN_6, 50 }
 //
 // UART pins; hardware-specified
 #define UART_TX_PIN PIN_TX

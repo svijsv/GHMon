@@ -152,15 +152,6 @@ typedef struct {
 
 	// MCU pin used to check the sensor
 	pin_t pin;
-#if USE_SMALL_SENSORS < 2
-	// MCU pin used to power the sensor; use global default if 0 or unset
-	// This doesn't apply to SPI or I2C sensors.
-	pin_t power_pin;
-	// If power_pin is set and this is set to >0 and <100, set the duty cycle
-	// of the power pin to this
-	// The pin must have hardware PWM support to use this.
-	uint8_t power_duty_cycle;
-#endif
 
 	// Control flags
 	uint8_t cflags;

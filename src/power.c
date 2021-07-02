@@ -37,13 +37,6 @@
 
 #include "fatfs/diskio.h"
 
-#if SENSOR_POWER_PIN && ((PINID(SENSOR_POWER_PIN) == PINID(SPI_POWER_PIN)) || (PINID(SENSOR_POWER_PIN) == PINID(I2C_POWER_PIN)))
-# error "SENSOR_POWER_PIN can not be the same as SPI_POWER_PIN or I2C_POWER_PIN"
-#endif
-#if SPI_POWER_PIN && (PINID(SPI_POWER_PIN) == PINID(I2C_POWER_PIN))
-# error "SPI_POWER_PIN can not be the same as I2C_POWER_PIN"
-#endif
-
 
 /*
 * Static values
@@ -63,6 +56,17 @@
 # define I2C_POWER_UP_DELAY_MS POWER_UP_DELAY_MS
 #endif
 
+#ifdef PWM_PINS
+# define PWM_PIN_COUNT (sizeof(pwm_pins))
+static const _FLASH struct {
+	pin_t    pin;
+	uint16_t duty_cycle;
+} pwm_pins[] = { PWM_PINS };
+#endif
+#ifdef SENSOR_POWER_PINS
+# define SENSOR_POWER_PIN_COUNT (sizeof(power_pins))
+static const _FLASH pin_t power_pins[] = { SENSOR_POWER_PINS };
+#endif
 
 /*
 * Types
@@ -100,54 +104,21 @@ static bool SD_initialized = false;
 * Functions
 */
 void power_on_sensors(void) {
-	bool powered_on = false;
+#ifdef SENSOR_POWER_PINS
+	for (uiter_t i = 0; i < SENSOR_POWER_PIN_COUNT; ++i) {
+		power_on_output(power_pins[i]);
+	}
 
-#if SENSOR_POWER_PIN
-	power_on_output(SENSOR_POWER_PIN);
-	powered_on = true;
+	sleep_ms(SENSOR_POWER_UP_DELAY_MS);
 #endif
 
-#if USE_SMALL_SENSORS < 2
-	_FLASH const sensor_static_t *cfg;
-
-	for (uiter_t i = 0; i < SENSOR_COUNT; ++i) {
-		cfg = &SENSORS[i];
-
-		if (cfg->power_pin != 0) {
-			if ((cfg->power_duty_cycle > 0) && (cfg->power_duty_cycle < PWM_DUTY_CYCLE_SCALE)) {
-				pwm_on(cfg->power_pin, cfg->power_duty_cycle);
-			} else {
-				power_on_output(cfg->power_pin);
-			}
-			powered_on = true;
-		}
-	}
-#endif
-
-	if (powered_on) {
-		sleep_ms(SENSOR_POWER_UP_DELAY_MS);
-	}
 	return;
 }
 void power_off_sensors(void) {
-#if USE_SMALL_SENSORS < 2
-	_FLASH const sensor_static_t *cfg;
-
-	for (uiter_t i = 0; i < SENSOR_COUNT; ++i) {
-		cfg = &SENSORS[i];
-
-		if (cfg->power_pin != 0) {
-			if ((cfg->power_duty_cycle > 0) && (cfg->power_duty_cycle < PWM_DUTY_CYCLE_SCALE)) {
-				pwm_off(cfg->power_pin);
-			} else {
-				power_off_output(cfg->power_pin);
-			}
-		}
+#ifdef SENSOR_POWER_PINS
+	for (uiter_t i = 0; i < SENSOR_POWER_PIN_COUNT; ++i) {
+		power_off_output(power_pins[i]);
 	}
-#endif
-
-#if SENSOR_POWER_PIN
-	power_off_output(SENSOR_POWER_PIN);
 #endif
 
 	return;
@@ -312,32 +283,62 @@ void power_off_I2C(void) {
 #endif // USE_I2C
 
 void power_on_output(pin_t pin) {
+	uint16_t duty_cycle = 0;
+
 	assert(pin != 0);
 
-	switch (GPIO_GET_BIAS(pin)) {
-	case BIAS_HIGH:
-		gpio_set_mode(pin, GPIO_MODE_PP, GPIO_LOW);
-		break;
-	default:
-		gpio_set_mode(pin, GPIO_MODE_PP, GPIO_HIGH);
-		break;
+#ifdef PWM_PINS
+	for (uiter_t i = 0; i < PWM_PIN_COUNT; ++i) {
+		if (PINID(pin) == PINID(pwm_pins[i].pin)) {
+			duty_cycle = pwm_pins[i].duty_cycle;
+			break;
+		}
+	}
+#endif
+
+	if ((duty_cycle == 0) || (duty_cycle == PWM_DUTY_CYCLE_SCALE)) {
+		switch (GPIO_GET_BIAS(pin)) {
+		case BIAS_HIGH:
+			gpio_set_mode(pin, GPIO_MODE_PP, GPIO_LOW);
+			break;
+		default:
+			gpio_set_mode(pin, GPIO_MODE_PP, GPIO_HIGH);
+			break;
+		}
+	} else {
+		pwm_on(pin, duty_cycle);
 	}
 
 	return;
 }
 void power_off_output(pin_t pin) {
+	uint16_t duty_cycle = 0;
+
 	assert(pin != 0);
 
-	switch (GPIO_GET_BIAS(pin)) {
-	case BIAS_HIGH:
-		gpio_set_mode(pin, GPIO_MODE_PP, GPIO_HIGH);
-		break;
-	case BIAS_LOW:
-		gpio_set_mode(pin, GPIO_MODE_PP, GPIO_LOW);
-		break;
-	default:
-		gpio_set_mode(pin, GPIO_MODE_HiZ, GPIO_FLOAT);
-		break;
+#ifdef PWM_PINS
+	for (uiter_t i = 0; i < PWM_PIN_COUNT; ++i) {
+		if (PINID(pin) == PINID(pwm_pins[i].pin)) {
+			duty_cycle = pwm_pins[i].duty_cycle;
+			break;
+		}
+	}
+#endif
+
+	if ((duty_cycle == 0) || (duty_cycle == PWM_DUTY_CYCLE_SCALE)) {
+		switch (GPIO_GET_BIAS(pin)) {
+		case BIAS_HIGH:
+			gpio_set_mode(pin, GPIO_MODE_PP, GPIO_HIGH);
+			break;
+		case BIAS_LOW:
+			gpio_set_mode(pin, GPIO_MODE_PP, GPIO_LOW);
+			break;
+		default:
+			gpio_set_mode(pin, GPIO_MODE_HiZ, GPIO_FLOAT);
+			break;
+		}
+	} else {
+		pwm_off(pin);
 	}
 
 	return;

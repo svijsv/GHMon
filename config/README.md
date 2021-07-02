@@ -19,8 +19,8 @@ as well as DHT11 and BME280 and BMP280 sensors.
 
 Resistance and voltage sensors are read through the internal ADC. They, along
 with generic digital sensors like the DHT11, can be power-switched using
-`SENSOR_POWER_PIN` defined in `config.h`; any, all, or none can be connected
-to the pin.
+`SENSOR_POWER_PINS` defined in `config.h`; any, all, or none can be connected
+to the pin(s).
 
 SPI sensors (at present only the BM[EP]280) must either *all* be switched with
 `SPI_POWER_PIN` defined in `config.h` or *all* be unswitched; leaving a device
