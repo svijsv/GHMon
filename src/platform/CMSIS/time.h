@@ -55,7 +55,17 @@
 // Timers must be on APB1 (alarms 2-7 or 12-14) because that's the bus I
 // check when setting up the prescalers
 //
+// The actual timers available vary by MCU, only 2 and 3 seem to be universal:
+//    STM32F103x6    has timers 1-3
+//    STM32F103x[B8] has timers 1-4
+//    STM32F103x[EG] has timers 1-8
+// Other STM32 MCUs may have more or less than these
+// Only the clocks for timers 1-4 are currently initialized in timers_init(),
+// if any others are used they need to be added there.
+//
 // Sleep alarm timer
+// If this changes, uncomment the code for timer 2 PWM and comment out the
+// PWM code for the new timer in time.c
 #define SLEEP_ALARM_TIM TIM2
 #define SLEEP_ALARM_CLOCKEN_Pos RCC_APB1ENR_TIM2EN_Pos
 #define SLEEP_ALARM_CLOCKEN     (1 << SLEEP_ALARM_CLOCKEN_Pos)
@@ -63,9 +73,34 @@
 #define SleepAlarm_IRQHandler TIM2_IRQHandler
 //
 // Micro-second counter timer
-#define USCOUNTER_TIM TIM3
+// USCOUNTER_TIM is #defined in platform.h for convenience
+//#define USCOUNTER_TIM TIM3
 #define USCOUNTER_CLOCKEN_Pos RCC_APB1ENR_TIM3EN_Pos
 #define USCOUNTER_CLOCKEN     (1 << USCOUNTER_CLOCKEN_Pos)
+//
+// Timers used for PWM output
+// The timers used for the sleep alarm and the microsecond counter can't be
+// used for PWM
+//
+// Some timer-to-pin mappings are specified in platform.h. All such mappings
+// for a given MCU should be in the datasheet (NOT the reference manual, which
+// as far as I can tell only lists the alternate pin mappings) in the Pinouts
+// and Pin Description section.
+//
+// Timers 1-4 are the 'primary' PWM timers, they control 4 pins each and
+// correspond to the labeled pins on bluepill/compatible board schematics so
+// when additional timers are present 1-4 should be reserved for PWM
+//
+// Timer 1 conflicts with UART1 and USB
+// Timer 2 conflicts with the ADC and UART2
+// Timer 3 conflicts with the ADC and SPI1
+// Timer 4 conflicts with I2C1 and remapped UART1
+// As long as a specific pin is never used with both PWM and the conflicting
+// peripheral at the same time it shouldn't cause any problems.
+#define USE_TIMER1_PWM 1
+#define USE_TIMER2_PWM 0
+#define USE_TIMER3_PWM 0
+#define USE_TIMER4_PWM 1
 
 /*
 * Types

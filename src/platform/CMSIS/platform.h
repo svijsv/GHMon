@@ -126,7 +126,32 @@ typedef struct {
 #define PINID_B13 (GPIO_PORTB_MASK|0x0D)
 #define PINID_B14 (GPIO_PORTB_MASK|0x0E)
 #define PINID_B15 (GPIO_PORTB_MASK|0x0F)
-
+//
+// Alternate function pins
+// Listings of mappings can be found in section 3 (Pinout and pin description)
+// of the datasheet and in section 9.3.7 (Timer alternate function remapping)
+// of the reference manual
+// This isn't all the mappings
+// Timer 1
+#define PINID_TIM1_CH1 PINID_A8
+#define PINID_TIM1_CH2 PINID_A9
+#define PINID_TIM1_CH3 PINID_A10
+#define PINID_TIM1_CH4 PINID_A11
+// Timer 2
+#define PINID_TIM2_CH1 PINID_A0
+#define PINID_TIM2_CH2 PINID_A1
+#define PINID_TIM2_CH3 PINID_A2
+#define PINID_TIM2_CH4 PINID_A3
+// Timer 3
+#define PINID_TIM3_CH1 PINID_A6
+#define PINID_TIM3_CH2 PINID_A7
+#define PINID_TIM3_CH3 PINID_B0
+#define PINID_TIM3_CH4 PINID_B1
+// Timer 4
+#define PINID_TIM4_CH1 PINID_B6
+#define PINID_TIM4_CH2 PINID_B7
+#define PINID_TIM4_CH3 PINID_B8
+#define PINID_TIM4_CH4 PINID_B9
 //
 // Bluepill pin mappings
 #define PIN_A0  PINID_A0
@@ -186,16 +211,18 @@ extern volatile utime_t G_sys_msticks;
 #define SET_GPIO_OUTPUT_LOW(pin)  (GPIO_GET_PORT(pin)->BRR  = GPIO_GET_PINMASK(pin))
 
 // Use the micro-second counter
+#define USCOUNTER_TIM TIM3
 # define USCOUNTER_START() \
 	do { \
-		SET_BIT(TIM3->EGR, TIM_EGR_UG); /* Generate an update event to reset the counter */ \
-		SET_BIT(TIM3->CR1, TIM_CR1_CEN); /* Enable the timer */ \
+		SET_BIT(USCOUNTER_TIM->EGR, TIM_EGR_UG); /* Generate an update event to reset the counter */ \
+		SET_BIT(USCOUNTER_TIM->CR1, TIM_CR1_CEN); /* Enable the timer */ \
 	} while (0);
 # define USCOUNTER_STOP(counter) \
 	do { \
-		CLEAR_BIT(TIM3->CR1, TIM_CR1_CEN); /* Disable the timer */ \
-		(counter) = TIM3->CNT; \
+		(counter) = USCOUNTER_TIM->CNT; \
+		CLEAR_BIT(USCOUNTER_TIM->CR1, TIM_CR1_CEN); /* Disable the timer */ \
 	} while (0);
+//# define USCOUNTER_GET() (USCOUNTER_TIM->CNT)
 
 #endif // _PLATFORM_CMSIS_H
 #ifdef __cplusplus

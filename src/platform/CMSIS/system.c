@@ -129,6 +129,9 @@ void platform_init(void) {
 	// disabled
 	// Unlike everything else, reading the JTAG part of AFIO_MAPR will always
 	// return '0' (fully-enabled) so it needs to be set everytime.
+	// NOJNTRST would have full JTAG and SWD but no JNTRST
+	// JTAGDISABLE disables JTAG while leaving SWD
+	// DISABLE would disable everything
 	remaps     |= AFIO_MAPR_SWJ_CFG_JTAGDISABLE;
 	MODIFY_BITS(AFIO->MAPR, AFIO_MAPR_SWJ_CFG|AFIO_MAPR_USART1_REMAP|AFIO_MAPR_SPI1_REMAP|AFIO_MAPR_CAN_REMAP,
 		remaps);
