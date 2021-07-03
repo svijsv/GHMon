@@ -47,7 +47,7 @@
 #define SENS_COOLDOWN 30
 
 //
-// Configuration flags for sensor_t structs
+// Configuration flags for sensor_static_t structs
 //
 // Choose between resistance and voltage sensing for sensor backends that
 // support both
@@ -56,6 +56,11 @@
 // Invert the relationship between the pin voltage reading and the value
 // Use this if the sensor is on the high side of the voltage divider.
 #define SENS_FLAG_INVERT  0x04
+// Rather than taking a direct ADC measurement, try to find the magnitude of
+// an AC voltage (assumed to be at the same frequency as PWM_MAX_FREQUENCY)
+// Please note that despite the flag's name your microcontroller almost
+// certainly won't like a negative voltage on it's pins.
+#define SENS_FLAG_AC 0x08
 //
 // These flags depend on structure members that may not exist
 #if USE_SMALL_SENSORS < 2

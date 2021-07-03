@@ -32,6 +32,9 @@
 #include "sensors.h"
 #include "private.h"
 
+#include "ulib/time.h"
+
+
 #if USE_ADC_SENSORS
 uint16_t sensor_read_ADC(uiter_t si) {
 	uint16_t value;
@@ -39,7 +42,13 @@ uint16_t sensor_read_ADC(uiter_t si) {
 
 	pin = SENSORS[si].pin;
 	gpio_set_mode(pin, GPIO_MODE_AIN, GPIO_FLOAT);
-	value = adc_read_pin(pin);
+
+	if (BIT_IS_SET(SENSORS[si].cflags, SENS_FLAG_AC)) {
+		value = adc_read_ac_amplitude(pin, HZ_TO_MS(PWM_MAX_FREQUENCY)+1);
+	} else {
+		value = adc_read_pin(pin);
+	}
+
 	gpio_set_mode(pin, GPIO_MODE_HiZ, GPIO_FLOAT);
 
 	return value;
