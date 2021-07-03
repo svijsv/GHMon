@@ -237,6 +237,89 @@ int16_t adc_read_vref_mV(void) {
 	return vref;
 }
 
+adc_t adc_read_ac_amplitude(pin_t pin, uint32_t period_ms) {
+	uint32_t channel = 0;
+	pin_t pinno;
+	adc_t adc, adc_min, adc_max;
+	adcm_t adcm_min, adcm_max;
+	utime_t timeout;
+
+	pinno = GPIO_GET_PINNO(pin);
+	switch (PINID(pin)) {
+	case PINID_A0:
+	case PINID_A1:
+	case PINID_A2:
+	case PINID_A3:
+	case PINID_A4:
+	case PINID_A5:
+	case PINID_A6:
+	case PINID_A7:
+		channel = pinno;
+		break;
+	case PINID_B0:
+	case PINID_B1:
+		channel = pinno + 8;
+		break;
+	default:
+		return 0;
+		break;
+	}
+
+	// Use continuous conversion mode
+	MODIFY_BITS(ADCx->CR2, ADC_CR2_CONT,
+		(0b1   << ADC_CR2_CONT_Pos  )
+		);
+	// Select the ADC channel to convert
+	MODIFY_BITS(ADCx->SQR3, 0b11111 << ADC_SQR3_SQ1_Pos,
+		(channel << ADC_SQR3_SQ1_Pos)
+		);
+
+	// Conversion can begin when ADON is set the second time after ADC power up
+	// If any bit other than ADON is changed when ADON is set, no conversion is
+	// triggered.
+	SET_BIT(ADCx->CR2, ADC_CR2_ADON);
+
+	adcm_max = 0;
+	adcm_min = 0;
+	SET_BIT(ADCx->CR2, ADC_CR2_SWSTART);
+	for (uiter_t i = 0; i < ADC_SAMPLE_COUNT; ++i) {
+		adc_min = ADC_MAX;
+		adc_max = 0;
+		timeout = SET_TIMEOUT(period_ms);
+		while (!TIMES_UP(timeout)) {
+			while (!BIT_IS_SET(ADCx->SR, ADC_SR_EOC)) {
+				// Nothing to do here
+			}
+			// Reading ADC_DR clears the EOC bit
+			adc = SELECT_BITS(ADCx->DR, ADC_MAX);
+
+			if (adc > adc_max) {
+				adc_max = adc;
+			} else if (adc < adc_min) {
+				adc_min = adc;
+			}
+		}
+		adcm_max += adc_max;
+		adcm_min += adc_min;
+	}
+
+	// Switch back to single conversion mode
+	MODIFY_BITS(ADCx->CR2, ADC_CR2_CONT,
+		(0b0   << ADC_CR2_CONT_Pos  )
+		);
+	// Wait for final conversion to finish
+	while (!BIT_IS_SET(ADCx->SR, ADC_SR_EOC)) {
+		// Nothing to do here
+	}
+	CLEAR_BIT(ADCx->SR, ADC_SR_EOC);
+
+	adcm_max /= ADC_SAMPLE_COUNT;
+	adcm_min /= ADC_SAMPLE_COUNT;
+	return (adcm_max - adcm_min);
+}
+
+
+
 #endif // USE_ADC
 
 #ifdef __cplusplus
