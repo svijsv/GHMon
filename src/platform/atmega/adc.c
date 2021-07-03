@@ -102,8 +102,7 @@ void adc_init(void) {
 
 	// Set the clock prescaler
 	// Per the data sheet the frequency needs to be between 50KHz and 200KHz
-	// to get the maximum resolution, which means we probably can't hit the
-	// desired sampling time, but we can try
+	// to get the maximum resolution
 	// There are 13 cycles in a normal conversion and the target sample time
 	// is micro seconds, so:
 	//    13/Freq = T/1000000
@@ -132,6 +131,9 @@ void adc_init(void) {
 	G_freq_ADC = G_freq_ADCCLK / 2;
 	MODIFY_BITS(ADCSRA, PRESCALER_MASK, PRESCALER_DIV2);
 #endif
+
+	// Use free-running mode when auto-triggering is enabled
+	MODIFY_BITS(ADCSRB, 0b111 << ADTS0, 0b000);
 
 	// Keep the voltage reference set to Vcc normally, it will be changed if
 	// needed
@@ -223,6 +225,78 @@ int16_t adc_read_vref_mV(void) {
 	// vref = 1100mV / (adc / max)
 	// vref = (1100mV * max) / adc
 	return ((uint32_t )INTERNAL_VREF_mV * (uint32_t )ADC_MAX) / (uint32_t )adc;
+}
+
+adc_t adc_read_ac_amplitude(pin_t pin, uint32_t period_ms) {
+	uint32_t channel = 0;
+	pin_t pinno;
+	adc_t adc, adc_min, adc_max;
+	adcm_t adcm_min, adcm_max;
+	utime_t timeout;
+
+	pinno = GPIO_GET_PINNO(pin);
+	switch (PINID(pin)) {
+	case PINID_C0:
+	case PINID_C1:
+	case PINID_C2:
+	case PINID_C3:
+	case PINID_C4:
+	case PINID_C5:
+		channel = pinno;
+		break;
+	case PINID_Z0:
+	case PINID_Z1:
+		channel = (pinno + 6);
+		break;
+	default:
+		return 0;
+		break;
+	}
+
+	// Enable auto-triggering
+	SET_BIT(ADCSRA, _BV(ADATE));
+
+	// Select the ADC channel to convert
+	MODIFY_BITS(ADMUX, CHANNEL_MASK, channel << MUX0);
+
+	adcm_max = 0;
+	adcm_min = 0;
+	// Start conversion
+	SET_BIT(ADCSRA, _BV(ADSC));
+	for (uiter_t i = 0; i < ADC_SAMPLE_COUNT; ++i) {
+		adc_min = ADC_MAX;
+		adc_max = 0;
+		timeout = SET_TIMEOUT(period_ms);
+		while (!TIMES_UP(timeout)) {
+			while (!BIT_IS_SET(ADCSRA, _BV(ADIF))) {
+				// Nothing to do here
+			}
+			// ADIF is cleared by writing 1 to it
+			SET_BIT(ADCSRA, _BV(ADIF));
+			// Must read ADCH after reading ADCL, reading ADCL locks the registers
+			// and reading ADCH unlocks them
+			adc  = ADCL;
+			adc |= (adc_t )ADCH << 8;
+
+			if (adc > adc_max) {
+				adc_max = adc;
+			} else if (adc < adc_min) {
+				adc_min = adc;
+			}
+		}
+		adcm_max += adc_max;
+		adcm_min += adc_min;
+	}
+
+	// Disable auto-triggering
+	CLEAR_BIT(ADCSRA, _BV(ADATE));
+	while (BIT_IS_SET(ADCSRA, _BV(ADSC))) {
+		// Nothing to do here
+	}
+
+	adcm_max /= ADC_SAMPLE_COUNT;
+	adcm_min /= ADC_SAMPLE_COUNT;
+	return (adcm_max - adcm_min);
 }
 
 
