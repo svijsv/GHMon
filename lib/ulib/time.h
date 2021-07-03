@@ -93,6 +93,17 @@ void seconds_to_time(utime_t seconds, uint8_t *hour, uint8_t *minute, uint8_t *s
 // and unsigned.
 #define DUMB_TIMEOUT(timer) ((timer == 0) || (--(timer) == 0))
 
+// Convert a frequency to a millisecond time period
+//#define HZ_TO_MS(freq) (1000 / freq)
+// Convert a frequency to a millisecond time period, rounded to the nearest
+#define HZ_TO_MS(freq) ((1000 + (freq/2)) / freq)
+
+// Convert a frequency to a microsecond time period
+//#define HZ_TO_US(freq) (1000000 / freq)
+// Convert a frequency to a microsecond time period, rounded to the nearest
+#define HZ_TO_US(freq) ((1000000 + (freq/2)) / freq)
+
+
 #endif // _LIB_TIME_H
 #ifdef __cplusplus
  }
