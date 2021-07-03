@@ -35,6 +35,7 @@
 #include "power.h"
 #include "sensors.h"
 
+#include "ulib/util.h"
 #include "fatfs/diskio.h"
 
 
@@ -63,14 +64,14 @@
 #endif
 
 #ifdef PWM_PINS
-# define PWM_PIN_COUNT (sizeof(pwm_pins))
+# define PWM_PIN_COUNT (SIZEOF_ARRAY(pwm_pins))
 static const _FLASH struct {
 	pin_t    pin;
 	uint16_t duty_cycle;
 } pwm_pins[] = { PWM_PINS };
 #endif
 #ifdef SENSOR_POWER_PINS
-# define SENSOR_POWER_PIN_COUNT (sizeof(power_pins))
+# define SENSOR_POWER_PIN_COUNT (SIZEOF_ARRAY(power_pins))
 static const _FLASH pin_t power_pins[] = { SENSOR_POWER_PINS };
 #endif
 
