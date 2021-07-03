@@ -146,6 +146,7 @@ void vaprintf(printf_putc_t printf_putc, const char *fmt, va_list arp);
 #define STRINGIZE(x) #x
 //#pragma message "The value of ABC: " XTRINGIZE(ABC)
 
+#define SIZEOF_ARRAY(a) (sizeof((a)) / sizeof((a)[0]))
 
 #endif // _LIB_UTIL_H
 #ifdef __cplusplus
