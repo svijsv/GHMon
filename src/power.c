@@ -42,7 +42,13 @@
 * Static values
 */
 // Wait this many ms for power to come up when it's turned on
-#define POWER_UP_DELAY_MS 10
+// In testing, 20ms was too short for reliable AC amplitude measurement and
+// may have been the cause of unreliable single-measurement ADC values
+// 50ms was much better but not as good as 75ms and 100ms wasn't signifantly
+// better than 75ms
+#if ! POWER_UP_DELAY_MS
+# define POWER_UP_DELAY_MS 75
+#endif
 #if SENSOR_POWER_UP_DELAY_MS < POWER_UP_DELAY_MS
 # undef SENSOR_POWER_UP_DELAY_MS
 # define SENSOR_POWER_UP_DELAY_MS POWER_UP_DELAY_MS
