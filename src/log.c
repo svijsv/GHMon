@@ -151,8 +151,6 @@ static void lprintf(const char *format, ...)
 static FRESULT close_file(void);
 static FRESULT next_line(void);
 static FRESULT print_header(void);
-static void power_on(void);
-static void power_off(void);
 static char* format_uptime(utime_t uptime);
 static char* format_warnings(uint8_t warnings);
 
@@ -167,7 +165,8 @@ static char* format_warnings(uint8_t warnings);
 * Functions
 */
 void log_init(void) {
-	power_off();
+	// Nothing needs to be initialized, I don't really know why this function
+	// even exists...
 
 	return;
 }
@@ -201,7 +200,7 @@ void log_status(bool force_write) {
 	//
 	// From this point on, don't return - go to END instead.
 	//
-	power_on();
+	power_on_SPI();
 
 	if ((err = f_mount(&fs, "", 1)) != FR_OK) {
 		LOGGER("Skipping log sync: fatfs error %u", (uint )err);
@@ -376,7 +375,7 @@ END:
 		sleep_ms(SD_POWEROFF_DELAY_MS_MS);
 	}
 #endif
-	power_off();
+	power_off_SPI();
 
 	// The warnings will have been erased on successful write; if they weren't
 	// we know to keep rotating the buffered data
@@ -717,16 +716,6 @@ static FRESULT print_header(void) {
 	return err;
 }
 
-static void power_on(void) {
-	power_on_SPI();
-
-	return;
-}
-static void power_off(void) {
-	power_off_SPI();
-
-	return;
-}
 
 #endif // USE_LOGGING
 

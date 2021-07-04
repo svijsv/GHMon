@@ -110,6 +110,18 @@ static bool SD_initialized = false;
 /*
 * Functions
 */
+void power_init(void) {
+#if USE_SPI
+	power_off_SPI();
+#endif
+#if USE_I2C
+	power_off_I2C();
+#endif
+	power_off_sensors();
+
+	return;
+}
+
 void power_on_sensors(void) {
 #ifdef SENSOR_POWER_PINS
 	for (uiter_t i = 0; i < SENSOR_POWER_PIN_COUNT; ++i) {

@@ -112,6 +112,10 @@ int main(void) {
 	platform_init();
 	led_flash(1, DELAY_SHORT);
 
+	// This doesn't warrant a flash
+	power_init();
+	//led_flash(1, DELAY_SHORT);
+
 #if USE_SERIAL
 	serial_init();
 	led_flash(1, DELAY_SHORT);

@@ -142,14 +142,6 @@ void sensors_init(void) {
 		}
 	}
 
-#if USE_SPI_SENSORS
-	power_off_SPI();
-#endif
-#if USE_I2C_SENSORS
-	power_off_I2C();
-#endif
-	power_off_sensors();
-
 	return;
 }
 

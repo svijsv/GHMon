@@ -53,6 +53,9 @@
 /*
 * Function prototypes (defined in power.c)
 */
+// Initialize the power-management system
+void power_init(void);
+
 // Power the various peripherals on and off
 void power_on_sensors(void);
 void power_off_sensors(void);
