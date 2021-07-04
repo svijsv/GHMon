@@ -209,6 +209,9 @@
 
 //
 // ATMega328
+//
+// The button needs to be on pin 2 or pin 3
+//
 // Sensors like thermistors need to be on a pin that supports ADC; that means
 // A0-A5 as well as A6 and A7 when present
 //
