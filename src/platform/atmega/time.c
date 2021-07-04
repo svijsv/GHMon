@@ -666,19 +666,6 @@ static void timer1_pwm_off(pin_t pin) {
 	return;
 }
 void pwm_off(pin_t pin) {
-	// Disable output
-	switch (GPIO_GET_BIAS(pin)) {
-	case BIAS_HIGH:
-		gpio_set_mode(pin, GPIO_MODE_PP, GPIO_HIGH);
-		break;
-	case BIAS_LOW:
-		gpio_set_mode(pin, GPIO_MODE_PP, GPIO_LOW);
-		break;
-	default:
-		gpio_set_mode(pin, GPIO_MODE_HiZ, GPIO_FLOAT);
-		break;
-	}
-
 	switch (PINID(pin)) {
 	case PINID_OC0A:
 	case PINID_OC0B:

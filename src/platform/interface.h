@@ -308,6 +308,8 @@ void dumb_delay_ms(utime_t ms);
 // A 'dumber' delay that doesn't even know about milliseconds
 void dumb_delay_cycles(uint32_t cycles);
 // Enable/disable hardware PWM output on an IO pin at the given duty cycle
+// The pin mode will be changed by the backend when PWM is enabled but won't
+// be switched back when it's disabled, the frontend needs to handle that
 void pwm_on(pin_t pin, uint16_t duty_cycle);
 void pwm_off(pin_t pin);
 

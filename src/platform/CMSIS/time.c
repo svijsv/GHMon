@@ -563,19 +563,6 @@ void pwm_off(pin_t pin) {
 	uint16_t TIMxEN;
 	TIM_TypeDef *TIMx;
 
-	// Disable output
-	switch (GPIO_GET_BIAS(pin)) {
-	case BIAS_HIGH:
-		gpio_set_mode(pin, GPIO_MODE_PP, GPIO_HIGH);
-		break;
-	case BIAS_LOW:
-		gpio_set_mode(pin, GPIO_MODE_PP, GPIO_LOW);
-		break;
-	default:
-		gpio_set_mode(pin, GPIO_MODE_HiZ, GPIO_FLOAT);
-		break;
-	}
-
 	channel = 4;
 	switch (PINID(pin)) {
 #if USE_TIMER1_PWM

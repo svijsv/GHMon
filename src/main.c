@@ -38,6 +38,7 @@
 #include "serial.h"
 #include "terminal.h"
 #include "calendar.h"
+#include "power.h"
 
 #include "ulib/cstrings.h"
 

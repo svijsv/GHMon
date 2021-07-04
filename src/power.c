@@ -344,20 +344,23 @@ void power_off_output(pin_t pin) {
 	}
 #endif
 
-	if ((duty_cycle == 0) || (duty_cycle == PWM_DUTY_CYCLE_SCALE)) {
-		switch (GPIO_GET_BIAS(pin)) {
-		case BIAS_HIGH:
-			gpio_set_mode(pin, GPIO_MODE_PP, GPIO_HIGH);
-			break;
-		case BIAS_LOW:
-			gpio_set_mode(pin, GPIO_MODE_PP, GPIO_LOW);
-			break;
-		default:
-			gpio_set_mode(pin, GPIO_MODE_HiZ, GPIO_FLOAT);
-			break;
-		}
-	} else {
+	// Any output connection that can tolerate PWM should be able to tolerate
+	// a briefly floating pin but there's no way to know how the backend will
+	// tolerate a pin being set before PWM is off so disable PWM then set the
+	// pin mode
+	if ((duty_cycle != 0) && (duty_cycle != PWM_DUTY_CYCLE_SCALE)) {
 		pwm_off(pin);
+	}
+	switch (GPIO_GET_BIAS(pin)) {
+	case BIAS_HIGH:
+		gpio_set_mode(pin, GPIO_MODE_PP, GPIO_HIGH);
+		break;
+	case BIAS_LOW:
+		gpio_set_mode(pin, GPIO_MODE_PP, GPIO_LOW);
+		break;
+	default:
+		gpio_set_mode(pin, GPIO_MODE_HiZ, GPIO_FLOAT);
+		break;
 	}
 
 	return;
