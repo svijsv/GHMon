@@ -325,7 +325,7 @@ int16_t adc_read_vref_mV(void);
 // If the pin selected doesn't support analog reading, 0 is returned
 adc_t adc_read_pin(pin_t pin);
 // Try to find the amplitude of an AC voltage
-// The value returned is the difference between the high and low peaks
+// The value returned is half the difference between the high and low peaks
 // The period is the time in milliseconds to spend monitoring, typically a
 // good value will be the time it takes for a full wave cycle
 adc_t adc_read_ac_amplitude(pin_t pin, uint32_t period_ms);

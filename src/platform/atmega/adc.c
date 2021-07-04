@@ -296,7 +296,7 @@ adc_t adc_read_ac_amplitude(pin_t pin, uint32_t period_ms) {
 
 	adcm_max /= ADC_SAMPLE_COUNT;
 	adcm_min /= ADC_SAMPLE_COUNT;
-	return (adcm_max - adcm_min);
+	return (adcm_max - adcm_min)/2;
 }
 
 
