@@ -194,8 +194,11 @@ static adc_t adc_read_channel(uint8_t channel) {
 
 	// Select the ADC channel to convert
 	MODIFY_BITS(ADMUX, CHANNEL_MASK, channel << MUX0);
-	// The readings are inaccurate without this delay_ms()
-	delay_ms(5);
+	// I can't find anything in the reference about this but the readings of
+	// the bandgap reference are inaccurate without this delay
+	if (channel == CHANNEL_Vbg) {
+		delay_ms(5);
+	}
 
 	adc = 0;
 	for (uiter_t i = ADC_SAMPLE_COUNT; i != 0; --i) {
@@ -263,6 +266,8 @@ adc_t adc_read_ac_amplitude(pin_t pin, uint32_t period_ms) {
 	adcm_min = 0;
 	// Start conversion
 	SET_BIT(ADCSRA, _BV(ADSC));
+	// ADIF is cleared by writing 1 to it
+	SET_BIT(ADCSRA, _BV(ADIF));
 	for (uiter_t i = 0; i < ADC_SAMPLE_COUNT; ++i) {
 		adc_min = ADC_MAX;
 		adc_max = 0;
