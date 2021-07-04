@@ -108,28 +108,28 @@ void adc_init(void) {
 	//    13/Freq = T/1000000
 	//    Freq = 13000000/T
 	// But trying to figure that out while staying in the 50KHz-200KHz range
-	// is complicated so right now just aim for ~100KHz (really 93KHz)
-#if (G_freq_ADCCLK > 12000000)
-	G_freq_ADC = G_freq_ADCCLK / 128;
-	MODIFY_BITS(ADCSRA, PRESCALER_MASK, PRESCALER_DIV128);
-#elif (G_freq_ADCCLK > 6000000)
-	G_freq_ADC = G_freq_ADCCLK / 64;
-	MODIFY_BITS(ADCSRA, PRESCALER_MASK, PRESCALER_DIV64);
-#elif (G_freq_ADCCLK > 3000000)
-	G_freq_ADC = G_freq_ADCCLK / 32;
-	MODIFY_BITS(ADCSRA, PRESCALER_MASK, PRESCALER_DIV32);
-#elif (G_freq_ADCCLK > 1500000)
-	G_freq_ADC = G_freq_ADCCLK / 16;
-	MODIFY_BITS(ADCSRA, PRESCALER_MASK, PRESCALER_DIV16);
-#elif (G_freq_ADCCLK > 750000)
-	G_freq_ADC = G_freq_ADCCLK / 8;
-	MODIFY_BITS(ADCSRA, PRESCALER_MASK, PRESCALER_DIV8);
-#elif (G_freq_ADCCLK > 300000)
-	G_freq_ADC = G_freq_ADCCLK / 4;
-	MODIFY_BITS(ADCSRA, PRESCALER_MASK, PRESCALER_DIV4);
-#else
+	// is complicated so right now just aim for ~190KHz
+#if   (G_freq_ADCCLK <= 375000)
 	G_freq_ADC = G_freq_ADCCLK / 2;
 	MODIFY_BITS(ADCSRA, PRESCALER_MASK, PRESCALER_DIV2);
+#elif (G_freq_ADCCLK <= 750000)
+	G_freq_ADC = G_freq_ADCCLK / 4;
+	MODIFY_BITS(ADCSRA, PRESCALER_MASK, PRESCALER_DIV4);
+#elif (G_freq_ADCCLK <= 1500000)
+	G_freq_ADC = G_freq_ADCCLK / 8;
+	MODIFY_BITS(ADCSRA, PRESCALER_MASK, PRESCALER_DIV8);
+#elif (G_freq_ADCCLK <= 3000000)
+	G_freq_ADC = G_freq_ADCCLK / 16;
+	MODIFY_BITS(ADCSRA, PRESCALER_MASK, PRESCALER_DIV16);
+#elif (G_freq_ADCCLK <= 6000000)
+	G_freq_ADC = G_freq_ADCCLK / 32;
+	MODIFY_BITS(ADCSRA, PRESCALER_MASK, PRESCALER_DIV32);
+#elif (G_freq_ADCCLK <= 12000000)
+	G_freq_ADC = G_freq_ADCCLK / 64;
+	MODIFY_BITS(ADCSRA, PRESCALER_MASK, PRESCALER_DIV64);
+#else
+	G_freq_ADC = G_freq_ADCCLK / 128;
+	MODIFY_BITS(ADCSRA, PRESCALER_MASK, PRESCALER_DIV128);
 #endif
 
 	// Use free-running mode when auto-triggering is enabled
