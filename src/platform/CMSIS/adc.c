@@ -96,7 +96,7 @@ static adc_t adc_read_channel(uint32_t channel);
 * Functions
 */
 void adc_init(void) {
-	clock_init(&RCC->APB2ENR, &RCC->APB2RSTR, RCC_APB2ENR_ADCxEN);
+	clock_init(ADCx_CLOCKEN);
 
 	MODIFY_BITS(ADCx->CR2, ADC_CR2_CONT|ADC_CR2_EXTSEL|ADC_CR2_EXTTRIG,
 		(0b0   << ADC_CR2_CONT_Pos  ) | // Keep at 0 for single conversion mode
@@ -125,12 +125,12 @@ void adc_init(void) {
 	}
 
 	CLEAR_BIT(ADCx->CR2, ADC_CR2_ADON);
-	clock_disable(&RCC->APB2ENR, RCC_APB2ENR_ADCxEN);
+	clock_disable(ADCx_CLOCKEN);
 
 	return;
 }
 void adc_on(void) {
-	clock_enable(&RCC->APB2ENR, RCC_APB2ENR_ADCxEN);
+	clock_enable(ADCx_CLOCKEN);
 
 	// When ADON is set the first time, wake from power-down mode
 	if (!BIT_IS_SET(ADCx->CR2, ADC_CR2_ADON)) {
@@ -149,7 +149,7 @@ void adc_on(void) {
 void adc_off(void) {
 	CLEAR_BIT(ADCx->CR2, ADC_CR2_ADON);
 
-	clock_disable(&RCC->APB2ENR, RCC_APB2ENR_ADCxEN);
+	clock_disable(ADCx_CLOCKEN);
 
 	return;
 }

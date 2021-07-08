@@ -90,9 +90,10 @@
 * Function prototypes (defined in system.c)
 */
 // Initialize/Enable/Disable one or more peripheral clocks
-void clock_init(__IO uint32_t *en_reg, __IO uint32_t *rst_reg, uint32_t enable_mask);
-void clock_enable(__IO uint32_t *reg, uint32_t enable_mask);
-void clock_disable(__IO uint32_t *reg, uint32_t enable_mask);
+// Multiple clocks can be ORed together if they're on the same bus
+void clock_init(rcc_periph_t periph_clock);
+void clock_enable(rcc_periph_t periph_clock);
+void clock_disable(rcc_periph_t periph_clock);
 
 // Enable/Disable writes to backup-domain registers
 void BD_write_enable(void);

@@ -72,7 +72,7 @@ static bool is_output(pin_t pin);
 void gpio_init(void) {
 	// Enable GPIO port clocks
 	// Only enable GPIO ports A and B since none of the rest are broken out
-	clock_init(&RCC->APB2ENR, &RCC->APB2RSTR, RCC_APB2ENR_IOPAEN|RCC_APB2ENR_IOPBEN);
+	clock_init(RCC_PERIPH_GPIOA|RCC_PERIPH_GPIOB);
 
 	// Set all pins to analog mode, which should be the lowest-power-drawing
 	// mode

@@ -52,32 +52,26 @@
 // USART1
 #if ((PINID(UART_TX_PIN) == PINID_A9) && (PINID(UART_RX_PIN) == PINID_A10)) || UART1_DO_REMAP
 # define UARTx USART1
-# define UARTx_IRQn     USART1_IRQn
+# define UARTx_IRQn       USART1_IRQn
 # define UARTx_IRQHandler USART1_IRQHandler
-# define UARTx_APBxENR  RCC->APB2ENR
-# define UARTx_APBxRSTR RCC->APB2RSTR
-# define UARTx_CLOCKEN  RCC_APB2ENR_USART1EN
-# define UARTx_BUSFREQ  G_freq_PCLK2
+# define UARTx_CLOCKEN    RCC_PERIPH_UART1
+# define UARTx_BUSFREQ    G_freq_PCLK2
 
 // USART2
 #elif (PINID(UART_TX_PIN) == PINID_A2) && (PINID(UART_RX_PIN) == PINID_A3)
 # define UARTx USART2
-# define UARTx_IRQn     USART2_IRQn
+# define UARTx_IRQn       USART2_IRQn
 # define UARTx_IRQHandler USART2_IRQHandler
-# define UARTx_APBxENR  RCC->APB1ENR
-# define UARTx_APBxRSTR RCC->APB1RSTR
-# define UARTx_CLOCKEN  RCC_APB1ENR_USART2EN
-# define UARTx_BUSFREQ  G_freq_PCLK1
+# define UARTx_CLOCKEN    RCC_PERIPH_UART2
+# define UARTx_BUSFREQ    G_freq_PCLK1
 
 // USART3
 #elif (PINID(UART_TX_PIN) == PINID_B10) && (PINID(UART_RX_PIN) == PINID_B11)
 # define UARTx USART3
-# define UARTx_IRQn     USART3_IRQn
+# define UARTx_IRQn       USART3_IRQn
 # define UARTx_IRQHandler USART3_IRQHandler
-# define UARTx_APBxENR  RCC->APB1ENR
-# define UARTx_APBxRSTR RCC->APB1RSTR
-# define UARTx_CLOCKEN  RCC_APB1ENR_USART3EN
-# define UARTx_BUSFREQ  G_freq_PCLK1
+# define UARTx_CLOCKEN    RCC_PERIPH_UART3
+# define UARTx_BUSFREQ    G_freq_PCLK1
 
 #else
 # error "Can't determine UART peripheral"

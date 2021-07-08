@@ -70,7 +70,7 @@ void i2c_init(void) {
 	pclk_MHz = I2Cx_BUSFREQ/1000000;
 
 	// Start the clock and reset the peripheral
-	clock_init(&I2Cx_APBxENR, &I2Cx_APBxRSTR, I2Cx_CLOCKEN);
+	clock_init(I2Cx_CLOCKEN);
 
 	//
 	// Set the frequency (in MHz) of the RCC bus the I2C peripheral is on so
@@ -133,7 +133,7 @@ void i2c_init(void) {
 void i2c_on(void) {
 	// Enable the peripheral before switching the pin GPIO mode to prevent the
 	// pins from briefly pulling low
-	clock_enable(&I2Cx_APBxENR, I2Cx_CLOCKEN);
+	clock_enable(I2Cx_CLOCKEN);
 	SET_BIT(I2Cx->CR1, I2C_CR1_PE);
 
 	// Reference manual section 9.1.11 lists pin configuration for peripherals.
@@ -149,7 +149,7 @@ void i2c_off(void) {
 	gpio_set_mode(I2C_SDA_PIN, GPIO_MODE_HiZ, GPIO_FLOAT);
 
 	CLEAR_BIT(I2Cx->CR1, I2C_CR1_PE);
-	clock_disable(&I2Cx_APBxENR, I2Cx_CLOCKEN);
+	clock_disable(I2Cx_CLOCKEN);
 
 	return;
 }

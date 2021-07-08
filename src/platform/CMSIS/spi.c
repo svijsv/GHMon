@@ -69,7 +69,7 @@ void spi_init(void) {
 	assert((SPIx == SPI1) || (SPIx == SPI2));
 
 	// Start the clock and reset the peripheral
-	clock_init(&SPIx_APBxENR, &SPIx_APBxRSTR, SPIx_CLOCKEN);
+	clock_init(SPIx_CLOCKEN);
 
 	// Set SPI parameters
 	// Per http:// elm-chan.org/docs/mmc/mmc_e.html, this needs to correspond
@@ -122,7 +122,7 @@ static uint32_t calculate_prescaler(uint32_t goal) {
 }
 
 void spi_on(void) {
-	clock_enable(&SPIx_APBxENR, SPIx_CLOCKEN);
+	clock_enable(SPIx_CLOCKEN);
 	SET_BIT(SPIx->CR1, SPI_CR1_SPE);
 
 	// Reference manual section 9.1.11 lists pin configuration for peripherals.
@@ -160,7 +160,7 @@ void spi_off(void) {
 	gpio_set_mode(SPI_MISO_PIN, GPIO_MODE_HiZ, GPIO_FLOAT);
 
 	CLEAR_BIT(SPIx->CR1, SPI_CR1_SPE);
-	clock_disable(&SPIx_APBxENR, SPIx_CLOCKEN);
+	clock_disable(SPIx_CLOCKEN);
 
 	return;
 }

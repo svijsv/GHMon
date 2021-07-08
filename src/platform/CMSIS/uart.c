@@ -78,7 +78,7 @@ void UARTx_IRQHandler(void) {
 * Functions
 */
 err_t uart_init(void) {
-	clock_init(&UARTx_APBxENR, &UARTx_APBxRSTR, UARTx_CLOCKEN);
+	clock_init(UARTx_CLOCKEN);
 
 	MODIFY_BITS(UARTx->CR1, USART_CR1_M|USART_CR1_PCE|USART_CR1_PS|USART_CR1_RXNEIE|USART_CR1_UE|USART_CR1_TE|USART_CR1_RE,
 		(0b0 << USART_CR1_M_Pos     ) | // 0 for 8 data bits
@@ -103,12 +103,12 @@ err_t uart_init(void) {
 
 	// Don't turn UART off after initializing; that's only done for hibernation
 	// to put the pins in HiZ mode.
-	// clock_disable(&UARTx_APBxENR, UARTx_CLOCKEN);
+	// clock_disable(UARTx_CLOCKEN);
 
 	return EOK;
 }
 void uart_on(void) {
-	clock_enable(&UARTx_APBxENR, UARTx_CLOCKEN);
+	clock_enable(UARTx_CLOCKEN);
 
 	// Peripheral pin modes specified in reference manual section 9.1.11
 	gpio_set_mode(UART_TX_PIN, GPIO_MODE_PP_AF, GPIO_LOW);
@@ -124,7 +124,7 @@ void uart_off(void) {
 	gpio_set_mode(UART_TX_PIN, GPIO_MODE_HiZ, GPIO_FLOAT);
 	gpio_set_mode(UART_RX_PIN, GPIO_MODE_HiZ, GPIO_FLOAT);
 
-	clock_disable(&UARTx_APBxENR, UARTx_CLOCKEN);
+	clock_disable(UARTx_CLOCKEN);
 
 	return;
 }

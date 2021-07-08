@@ -66,17 +66,15 @@
 // Sleep alarm timer
 // If this changes, uncomment the code for timer 2 PWM and comment out the
 // PWM code for the new timer in time.c
-#define SLEEP_ALARM_TIM TIM2
-#define SLEEP_ALARM_CLOCKEN_Pos RCC_APB1ENR_TIM2EN_Pos
-#define SLEEP_ALARM_CLOCKEN     (1 << SLEEP_ALARM_CLOCKEN_Pos)
-#define SLEEP_ALARM_IRQn TIM2_IRQn
+#define SLEEP_ALARM_TIM       TIM2
+#define SLEEP_ALARM_CLOCKEN   RCC_PERIPH_TIM2
+#define SLEEP_ALARM_IRQn      TIM2_IRQn
 #define SleepAlarm_IRQHandler TIM2_IRQHandler
 //
 // Micro-second counter timer
 // USCOUNTER_TIM is #defined in platform.h for convenience
-//#define USCOUNTER_TIM TIM3
-#define USCOUNTER_CLOCKEN_Pos RCC_APB1ENR_TIM3EN_Pos
-#define USCOUNTER_CLOCKEN     (1 << USCOUNTER_CLOCKEN_Pos)
+//#define USCOUNTER_TIM   TIM3
+#define USCOUNTER_CLOCKEN RCC_PERIPH_TIM3
 //
 // Timers used for PWM output
 // The timers used for the sleep alarm and the microsecond counter can't be

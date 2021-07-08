@@ -111,7 +111,7 @@ void platform_init(void) {
 	// The AFIO clock is needed to fix a few problems, remap the inputs, and
 	// to set up the button interrupt below, so enable it here and disable at
 	// the end of setup when it's no longer needed
-	clock_init(&RCC->APB2ENR, &RCC->APB2RSTR, RCC_APB2ENR_AFIOEN);
+	clock_init(RCC_PERIPH_AFIO);
 	remaps = 0;
 	// Remap CAN to PD[01] (per the errata sheet) so it doesn't interfere with
 	// USART1 (even though we don't use RTS...)
@@ -211,7 +211,7 @@ void platform_init(void) {
 #endif // BUTTON_PIN
 
 	// Only need the clock for AFIO->EXTICR[x] and AFIO->MAPR access
-	clock_disable(&RCC->APB2ENR, RCC_APB2ENR_AFIOEN);
+	clock_disable(RCC_PERIPH_AFIO);
 
 	return;
 }
@@ -353,7 +353,8 @@ static void clocks_init(void) {
 	// The LSE is configured in the backup domain so enable the power interface
 	// clock and the backup domain interface clock; keep it on afterwards
 	// because RTC access requires them too
-	clock_enable(&RCC->APB1ENR, RCC_APB1ENR_PWREN|RCC_APB1ENR_BKPEN);
+	clock_enable(RCC_PERIPH_PWR);
+	clock_enable(RCC_PERIPH_BKP);
 
 	BD_write_enable();
 	SET_BIT(RCC->BDCR, RCC_BDCR_LSEON);
@@ -535,37 +536,93 @@ static void deep_sleep_s(utime_t s, uint8_t flags) {
 	return;
 }
 
-void clock_enable(__IO uint32_t *reg, uint32_t enable_mask) {
-	__IO uint32_t tmpreg;
+void clock_enable(rcc_periph_t periph_clock) {
+	uint32_t mask;
+	__IO uint32_t *reg, tmpreg;
 
-	SET_BIT(*reg, enable_mask);
+	switch (SELECT_BITS(periph_clock, RCC_BUS_MASK)) {
+	case RCC_BUS_AHB1:
+		reg = &RCC->AHBENR;
+		break;
+	case RCC_BUS_APB1:
+		reg = &RCC->APB1ENR;
+		break;
+	case RCC_BUS_APB2:
+		reg = &RCC->APB2ENR;
+		break;
+	default:
+		return;
+	}
+
+	mask = MASK_BITS(periph_clock, RCC_BUS_MASK);
+	SET_BIT(*reg, mask);
+
 	// Delay after enabling clock; method copied from ST HAL
-	tmpreg = SELECT_BITS(*reg, enable_mask);
-	while (SELECT_BITS(*reg, enable_mask) != enable_mask) {
+	tmpreg = SELECT_BITS(*reg, mask);
+	while (SELECT_BITS(*reg, mask) != mask) {
 		// Nothing to do here
 	}
 	tmpreg = tmpreg; // Shut the compiler up
 
 	return;
 }
-void clock_disable(__IO uint32_t *reg, uint32_t enable_mask) {
-	CLEAR_BIT(*reg, enable_mask);
-	while (SELECT_BITS(*reg, enable_mask) != 0) {
+void clock_disable(rcc_periph_t periph_clock) {
+	uint32_t mask;
+	__IO uint32_t *reg, tmpreg;
+
+	switch (SELECT_BITS(periph_clock, RCC_BUS_MASK)) {
+	case RCC_BUS_AHB1:
+		reg = &RCC->AHBENR;
+		break;
+	case RCC_BUS_APB1:
+		reg = &RCC->APB1ENR;
+		break;
+	case RCC_BUS_APB2:
+		reg = &RCC->APB2ENR;
+		break;
+	default:
+		return;
+	}
+
+	mask = MASK_BITS(periph_clock, RCC_BUS_MASK);
+	CLEAR_BIT(*reg, mask);
+	while (SELECT_BITS(*reg, mask) != 0) {
 		// Nothing to do here
 	}
 
 	return;
 }
-void clock_init(__IO uint32_t *en_reg, __IO uint32_t *rst_reg, uint32_t enable_mask) {
-	clock_enable(en_reg, enable_mask);
+void clock_init(rcc_periph_t periph_clock) {
+	uint32_t mask;
+	__IO uint32_t *reg;
 
-	SET_BIT(*rst_reg, enable_mask);
-	while (SELECT_BITS(*rst_reg, enable_mask) != enable_mask) {
-		// Nothing to do here
+	clock_enable(periph_clock);
+
+	switch (SELECT_BITS(periph_clock, RCC_BUS_MASK)) {
+	// The STM32F1 series doesn't have a reset register for the AHB, so use
+	// a value present when it exists to test for it
+#if RCC_AHB1RSTR_GPIOARST
+	case RCC_BUS_AHB1:
+		reg = &RCC->AHB1RSTR;
+		break;
+#endif
+	case RCC_BUS_APB1:
+		reg = &RCC->APB1RSTR;
+		break;
+	case RCC_BUS_APB2:
+		reg = &RCC->APB2RSTR;
+		break;
+	default:
+		return;
 	}
 
-	CLEAR_BIT(*rst_reg, enable_mask);
-	while (SELECT_BITS(*rst_reg, enable_mask) != 0) {
+	mask = MASK_BITS(periph_clock, RCC_BUS_MASK);
+	SET_BIT(*reg, mask);
+	while (SELECT_BITS(*reg, mask) != mask) {
+		// Nothing to do here
+	}
+	CLEAR_BIT(*reg, mask);
+	while (SELECT_BITS(*reg, mask) != 0) {
 		// Nothing to do here
 	}
 
