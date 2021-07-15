@@ -76,9 +76,13 @@ int msb32_idx(uint32_t n);
 * Macros
 */
 // Set one or more bits in a field
-#define SET_BIT(field, bits) ((field) |= (bits))
+#ifndef SET_BIT
+# define SET_BIT(field, bits) ((field) |= (bits))
+#endif
 // Unset one or more bits in a field
-#define CLEAR_BIT(field, bits) ((field) &= ~(bits))
+#ifndef CLEAR_BIT
+# define CLEAR_BIT(field, bits) ((field) &= ~(bits))
+#endif
 // Toggle one or more bits in a field
 #define TOGGLE_BIT(field, bits) ((field) ^= (bits))
 // Set or clear bits in a field limited by a mask
