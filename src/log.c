@@ -39,6 +39,7 @@
 #include "serial.h"
 
 #include "ulib/cstrings.h"
+#include "ulib/fmem.h"
 
 
 // Need to check this *after* the headers are included

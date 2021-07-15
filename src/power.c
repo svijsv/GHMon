@@ -235,12 +235,12 @@ void power_off_SPI(void) {
 #endif
 #if SPI_POWER_PIN
 #if USE_SD
-		gpio_set_mode(SPI_CS_SD_PIN, GPIO_MODE_HiZ, GPIO_LOW);
+		gpio_set_mode(SPI_CS_SD_PIN, GPIO_MODE_HiZ, GPIO_FLOAT);
 #endif // USE_SD
 #if USE_SPI_SENSORS
 		for (uiter_t i = 0; i < SENSOR_COUNT; ++i) {
 			if (BIT_IS_SET(G_sensors[i].iflags, SENS_FLAG_SPI)) {
-				gpio_set_mode(SENSORS[i].pin, GPIO_MODE_HiZ, GPIO_LOW);
+				gpio_set_mode(SENSORS[i].pin, GPIO_MODE_HiZ, GPIO_FLOAT);
 			}
 		}
 #endif // USE_SPI_SENSORS

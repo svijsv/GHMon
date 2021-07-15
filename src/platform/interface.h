@@ -147,6 +147,7 @@ typedef enum {
 	GPIO_MODE_OD,    // Open-drain output
 	GPIO_MODE_OD_AF, // Alternate-function open-drain output
 	GPIO_MODE_IN,    // Input
+	GPIO_MODE_IN_AF, // Alternate-function input
 	GPIO_MODE_AIN,   // Analog input
 	GPIO_MODE_HiZ    // High-impedence mode
 } gpio_mode_t;
