@@ -153,6 +153,7 @@ typedef struct {
 #define FROM_FSTR1(s) (s)
 #define FROM_FSTR2(s) (s)
 #define FROM_FSTR3(s) (s)
+#define FROM_FSTR_TO_BUF(s, b) ({ for (uint8_t i = 0; (b[i] = s[i]) != 0; ++i); b; })
 #define F(s) (s)
 #define F1(s) (s)
 #define F2(s) (s)
