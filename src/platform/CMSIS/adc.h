@@ -43,10 +43,35 @@
 //
 // Handle ADCx
 // The ADC is internal, there's no reason for anyone to change it
-#define ADCx_IS_ADC1 1
+// Only ADC1 can read the internal voltage reference and temperature sensor
 #define ADCx ADC1
 #define ADCx_CLOCKEN RCC_PERIPH_ADC1
+#if ! USE_STM32F1_ADC
+# define ADCx_COMMON ADC1_COMMON
+#endif
 
+#if USE_STM32F1_ADC
+# define ADC_PRESCALER_Pos RCC_CFGR_ADCPRE_Pos
+# define ADC_PRESCALER_REG RCC->CFGR
+#else
+# define ADC_PRESCALER_Pos ADC_CCR_ADCPRE_Pos
+# define ADC_PRESCALER_REG ADC->CCR
+#endif
+#define ADC_PRESCALER_Msk (0b11 << ADC_PRESCALER_Pos)
+#define ADC_PRESCALER_2   (0b00 << ADC_PRESCALER_Pos)
+#define ADC_PRESCALER_4   (0b01 << ADC_PRESCALER_Pos)
+#define ADC_PRESCALER_6   (0b10 << ADC_PRESCALER_Pos)
+#define ADC_PRESCALER_8   (0b11 << ADC_PRESCALER_Pos)
+
+#if (ADCx_CLOCKEN & RCC_BUS_MASK) == RCC_BUS_APB1
+# define ADCx_BUSFREQ G_freq_PCLK1
+#elif (ADCx_CLOCKEN & RCC_BUS_MASK) == RCC_BUS_APB2
+# define ADCx_BUSFREQ G_freq_PCLK2
+#elif (ADCx_CLOCKEN & RCC_BUS_MASK) == RCC_BUS_AHB1
+# define ADCx_BUSFREQ G_freq_HCLK
+#else
+# error "Can't determine ADC bus clock"
+#endif
 
 /*
 * Types

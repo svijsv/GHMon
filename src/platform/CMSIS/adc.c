@@ -41,35 +41,83 @@
 * Static values
 */
 #define VREF_CHANNEL 17
-#define TEMP_CHANNEL 16
+#if USE_STM32F1_ADC
+# define TEMP_CHANNEL 16
+#else
+# define TEMP_CHANNEL 18
+#endif
 
+#if defined(STM32F1)
 // Datasheet value "Avg_Slope" converted from mV to uV
-#define TEMP_INT_SLOPE 4300
+# define TEMP_INT_SLOPE_uV 4300
 // Datasheet value "V25" converted from V to mV
-#define TEMP_INT_V25   1430
-// Temperature sensor startup time specified as Tstart in the datasheet is
-// 4-10us
-#define TEMP_START_TIME_uS 10
-// The recommended sample time for the internal temperature is 17.1us
-#define TEMP_SAMPLE_uS     17
+# define TEMP_INT_T25_MV   1430
+// Temperature sensor startup time specified as Tstart in the datasheet
+# define TEMP_START_TIME_u S 10
+// The recommended sample time for the internal temperature
+# define TEMP_SAMPLE_uS      17
 
-// ADC stabilization time is specified under Tstab in the datasheet as
-// 1us max
-#define ADC_STAB_TIME_uS 1
+// ADC stabilization time is specified under Tstab in the datasheet
+# define ADC_STAB_TIME_uS 1
 
-#define SAMPLE_TIME_1_5   0b000 //  1.5 cycles
-#define SAMPLE_TIME_7_5   0b001 //  7.5 cycles
-#define SAMPLE_TIME_13_5  0b010 // 13.5 cycles
-#define SAMPLE_TIME_28_5  0b011 // 28.5 cycles
-#define SAMPLE_TIME_41_5  0b100 // 41.5 cycles
-#define SAMPLE_TIME_55_5  0b101 // 55.5 cycles
-#define SAMPLE_TIME_71_5  0b110 // 71.5 cycles
-#define SAMPLE_TIME_239_5 0b111 // 239.5 cycles
+#else // ! STM32F1
+# define TEMP_INT_SLOPE_uV  2500
+# define TEMP_INT_T25_mV     760
+# define TEMP_START_TIME_uS   10
+// Datasheet gives a minimum sample time of 10uS but no max
+# define TEMP_SAMPLE_uS       20
+
+# define ADC_STAB_TIME_uS 3
+#endif // ! STM32F1
+
+
+#if USE_STM32F1_ADC
+# define SAMPLE_TIME_1_5   0b000 //  1.5 cycles
+# define SAMPLE_TIME_7_5   0b001 //  7.5 cycles
+# define SAMPLE_TIME_13_5  0b010 // 13.5 cycles
+# define SAMPLE_TIME_28_5  0b011 // 28.5 cycles
+# define SAMPLE_TIME_41_5  0b100 // 41.5 cycles
+# define SAMPLE_TIME_55_5  0b101 // 55.5 cycles
+# define SAMPLE_TIME_71_5  0b110 // 71.5 cycles
+# define SAMPLE_TIME_239_5 0b111 // 239.5 cycles
 // The value of a register set entirely to the default sample time
 // 239.5 cycles:
-//#define SAMPLE_TIME_REG 0x3FFFFFFF
+//# define SAMPLE_TIME_REG 0x3FFFFFFF
 // 71.5 cycles:
-#define SAMPLE_TIME_REG 0x36DB6DB6
+# define SAMPLE_TIME_REG 0x36DB6DB6
+# define SMPR1_MASK 0x00FFFFFF
+# define SMPR2_MASK 0x3FFFFFFF
+
+#else
+# define SAMPLE_TIME_3   0b000
+# define SAMPLE_TIME_15  0b001
+# define SAMPLE_TIME_28  0b010
+# define SAMPLE_TIME_56  0b011
+# define SAMPLE_TIME_84  0b100
+# define SAMPLE_TIME_112 0b101
+# define SAMPLE_TIME_144 0b110
+# define SAMPLE_TIME_480 0b111
+// The value of a register set entirely to the default sample time
+// 480 cycles:
+//# define SAMPLE_TIME_REG 0x3FFFFFFF
+// 84 cycles:
+# define SAMPLE_TIME_REG 0x24924924
+# define SMPR1_MASK 0x07FFFFFF
+# define SMPR2_MASK 0x3FFFFFFF
+#endif
+
+#if   G_freq_ADC == (ADCx_BUSFREQ / 2)
+# define PRESCALER ADC_PRESCALER_2
+#elif G_freq_ADC == (ADCx_BUSFREQ / 4)
+# define PRESCALER ADC_PRESCALER_4
+#elif G_freq_ADC == (ADCx_BUSFREQ / 6)
+# define PRESCALER ADC_PRESCALER_6
+#elif G_freq_ADC == (ADCx_BUSFREQ / 8)
+# define PRESCALER ADC_PRESCALER_8
+#else
+# error "G_freq_ADC must be a G_freq_PCLK2 / (2|4|6|8)"
+#endif
+
 
 /*
 * Types
@@ -98,23 +146,24 @@ static adc_t adc_read_channel(uint32_t channel);
 void adc_init(void) {
 	clock_init(ADCx_CLOCKEN);
 
+	// Set the sample time registers
+	// If the sample time might be shorter than the minimum temperature sample
+	// time and the temperature might be read, it's sample time should be set
+	// separately.
+	ADCx->SMPR1 = SAMPLE_TIME_REG & SMPR1_MASK;
+	ADCx->SMPR2 = SAMPLE_TIME_REG & SMPR2_MASK;
+
+	MODIFY_BITS(ADC_PRESCALER_REG, ADC_PRESCALER_Msk, PRESCALER);
+
+#if USE_STM32F1_ADC
 	MODIFY_BITS(ADCx->CR2, ADC_CR2_CONT|ADC_CR2_EXTSEL|ADC_CR2_EXTTRIG,
 		(0b0   << ADC_CR2_CONT_Pos  ) | // Keep at 0 for single conversion mode
 		(0b111 << ADC_CR2_EXTSEL_Pos) | // Enable software start
 		(0b1   << ADC_CR2_EXTTRIG_Pos)| // Enable the trigger
 		0);
 
-	// Set the sample time registers
-	// If the sample time might bit shorter than the minimum temperature sample
-	// time and the temperature might be read, it's sample time should be set
-	// separately.
-	ADCx->SMPR1 = SAMPLE_TIME_REG & 0x00FFFFFF; // Only 24 bits used
-	ADCx->SMPR2 = SAMPLE_TIME_REG & 0x3FFFFFFF; // Only 30 bits used
-
-	// When ADON is set the first time, wake from power-down mode
-	SET_BIT(ADCx->CR2, ADC_CR2_ADON);
-
 	// Calibrate the ADC
+	SET_BIT(ADCx->CR2, ADC_CR2_ADON);
 	SET_BIT(ADCx->CR2, ADC_CR2_RSTCAL);
 	while (BIT_IS_SET(ADCx->CR2, ADC_CR2_RSTCAL)) {
 		// Nothing to do here
@@ -124,8 +173,13 @@ void adc_init(void) {
 		// Nothing to do here
 	}
 
-	CLEAR_BIT(ADCx->CR2, ADC_CR2_ADON);
-	clock_disable(ADCx_CLOCKEN);
+#else // ! STM32F1
+	MODIFY_BITS(ADCx->CR2, ADC_CR2_CONT,
+		(0b0 << ADC_CR2_CONT_Pos  ) | // Keep at 0 for single conversion mode
+		0);
+#endif // ! STM32F1
+
+	adc_off();
 
 	return;
 }
@@ -148,18 +202,16 @@ void adc_on(void) {
 }
 void adc_off(void) {
 	CLEAR_BIT(ADCx->CR2, ADC_CR2_ADON);
-
 	clock_disable(ADCx_CLOCKEN);
 
 	return;
 }
+static uint8_t pin_to_channel(pin_t pin) {
+	uint8_t pinno;
 
-adc_t adc_read_pin(pin_t pin) {
-	uint32_t channel;
-	pin_t pinno;
-
-	channel = 0; // Shut the compiler up
-
+	// This is cheating, but we know that channels 0-7 are the first 8 pins
+	// on port A and 8 and 9 are the first 2 on port B so we can just do this
+	// to get from pin to channel
 	pinno = GPIO_GET_PINNO(pin);
 	switch (PINID(pin)) {
 	case PINID_A0:
@@ -170,34 +222,43 @@ adc_t adc_read_pin(pin_t pin) {
 	case PINID_A5:
 	case PINID_A6:
 	case PINID_A7:
-		channel = pinno;
+		//return pinno;
 		break;
 	case PINID_B0:
 	case PINID_B1:
-		channel = pinno + 8;
+		//return (pinno + 8);
+		pinno += + 8;
 		break;
 	default:
-		return 0;
+		LOGGER("Attempted ADC read on invalid pin 0x%02X", (uint )pin);
+		pinno = 0xFF;
 		break;
 	}
 
-	return adc_read_channel(channel);
+	return pinno;
+}
+adc_t adc_read_pin(pin_t pin) {
+	return adc_read_channel(pin_to_channel(pin));
 }
 static adc_t adc_read_channel(uint32_t channel) {
 	adcm_t adc;
 
 	// Five bits of channel selection
-	assert(channel <= 0b11111);
+	if (channel > 0b11111) {
+		return 0;
+	}
 
 	// Select the ADC channel to convert
 	MODIFY_BITS(ADCx->SQR3, 0b11111 << ADC_SQR3_SQ1_Pos,
 		(channel << ADC_SQR3_SQ1_Pos)
 		);
 
+#if USE_STM32F1_ADC
 	// Conversion can begin when ADON is set the second time after ADC power up
 	// If any bit other than ADON is changed when ADON is set, no conversion is
 	// triggered.
 	SET_BIT(ADCx->CR2, ADC_CR2_ADON);
+#endif
 
 	adc = 0;
 	for (uiter_t i = 0; i < ADC_SAMPLE_COUNT; ++i) {
@@ -216,9 +277,12 @@ int16_t adc_read_vref_mV(void) {
 	adc_t adc;
 	uint16_t vref;
 
-#if ADCx_IS_ADC1
 	// Enable internal VREF and temperature sensors
+#if USE_STM32F1_ADC
 	SET_BIT(ADCx->CR2, ADC_CR2_TSVREFE);
+#else
+	SET_BIT(ADCx_COMMON->CCR, ADC_CCR_TSVREFE);
+#endif
 
 	adc = adc_read_channel(VREF_CHANNEL);
 	// Calculate the ADC Vref by comparing it to the internal Vref
@@ -228,56 +292,41 @@ int16_t adc_read_vref_mV(void) {
 	// vref = (1200mV * max) / adc
 	vref = (INTERNAL_VREF_mV * ADC_MAX) / (uint32_t )adc;
 
+	// Disable internal VREF and temperature sensors
+#if USE_STM32F1_ADC
 	CLEAR_BIT(ADCx->CR2, ADC_CR2_TSVREFE);
-
-#else // !ADCx_IS_ADC1
-	vref = REGULATED_VOLTAGE_mV;
-#endif // ADCx_IS_ADC1
+#else
+	CLEAR_BIT(ADCx_COMMON->CCR, ADC_CCR_TSVREFE);
+#endif
 
 	return vref;
 }
 
 adc_t adc_read_ac_amplitude(pin_t pin, uint32_t period_ms) {
-	uint32_t channel = 0;
-	pin_t pinno;
+	uint8_t channel;
 	adc_t adc, adc_min, adc_max;
 	adcm_t adcm_min, adcm_max;
 	utime_t timeout;
 
-	pinno = GPIO_GET_PINNO(pin);
-	switch (PINID(pin)) {
-	case PINID_A0:
-	case PINID_A1:
-	case PINID_A2:
-	case PINID_A3:
-	case PINID_A4:
-	case PINID_A5:
-	case PINID_A6:
-	case PINID_A7:
-		channel = pinno;
-		break;
-	case PINID_B0:
-	case PINID_B1:
-		channel = pinno + 8;
-		break;
-	default:
+	channel = pin_to_channel(pin);
+	// Five bits of channel selection
+	if (channel > 0b11111) {
 		return 0;
-		break;
 	}
 
-	// Use continuous conversion mode
-	MODIFY_BITS(ADCx->CR2, ADC_CR2_CONT,
-		(0b1   << ADC_CR2_CONT_Pos  )
-		);
 	// Select the ADC channel to convert
 	MODIFY_BITS(ADCx->SQR3, 0b11111 << ADC_SQR3_SQ1_Pos,
 		(channel << ADC_SQR3_SQ1_Pos)
 		);
+	// Use continuous conversion mode
+	SET_BIT(ADCx->CR2, ADC_CR2_CONT);
 
+#if USE_STM32F1_ADC
 	// Conversion can begin when ADON is set the second time after ADC power up
 	// If any bit other than ADON is changed when ADON is set, no conversion is
 	// triggered.
 	SET_BIT(ADCx->CR2, ADC_CR2_ADON);
+#endif
 
 	adcm_max = 0;
 	adcm_min = 0;
@@ -304,9 +353,7 @@ adc_t adc_read_ac_amplitude(pin_t pin, uint32_t period_ms) {
 	}
 
 	// Switch back to single conversion mode
-	MODIFY_BITS(ADCx->CR2, ADC_CR2_CONT,
-		(0b0   << ADC_CR2_CONT_Pos  )
-		);
+	CLEAR_BIT(ADCx->CR2, ADC_CR2_CONT);
 	// Wait for final conversion to finish
 	while (!BIT_IS_SET(ADCx->SR, ADC_SR_EOC)) {
 		// Nothing to do here
