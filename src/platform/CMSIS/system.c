@@ -42,6 +42,43 @@
 /*
 * Static values
 */
+#if defined STM32F1
+# define EXTI_PREG AFIO
+# define EXTI_PREG_CLOCKEN RCC_PERIPH_AFIO
+# define FLASH_ACR_PRFTEN_Pos FLASH_ACR_PRFTBE_Pos
+# define FLASH_ACR_PRFTEN     FLASH_ACR_PRFTBE
+#else
+# define EXTI_PREG SYSCFG
+# define EXTI_PREG_CLOCKEN RCC_PERIPH_SYSCFG
+# define RCC_BDCR_RTCSEL_NOCLOCK 0
+# define RCC_BDCR_RTCSEL_LSE (0b01 << RCC_BDCR_RTCSEL_Pos)
+# define RCC_BDCR_RTCSEL_LSI (0b10 << RCC_BDCR_RTCSEL_Pos)
+# define RCC_BDCR_RTCSEL_HSE (0b11 << RCC_BDCR_RTCSEL_Pos)
+#endif
+
+// For STM32F1 use a flash latency of 0 for speeds <= 24MHz, 1 for
+// 24-48MHz, and 2 for anything higher.
+//
+// For other STM32s, assuming 3.3V Vcc, the number of wait states varies
+// by line but on the conservative end would be 0 for <= 25MHz and +1 for
+// each additional 25MHz above that, or more commonly 0 for <= 30MHz and
+// +1 for each additional 30MHz above that up to a line-dependendent maximum.
+//
+#if defined(STM32F1)
+# define FLASH_WS_MAX 2
+# define FLASH_WS_STEP 24000000
+#elif defined(STM32F413xx) || defined(STM32F423xx)
+# define FLASH_WS_MAX 6
+# define FLASH_WS_STEP 25000000
+#elif defined(STM32F401xC) || defined(STM32F401xE)
+# define FLASH_WS_MAX 5
+# define FLASH_WS_STEP 30000000
+#elif defined(STM32F4)
+# define FLASH_WS_MAX 6
+# define FLASH_WS_STEP 30000000
+#else
+# error "Unsupported STM32 architecture"
+#endif
 
 
 /*
@@ -57,6 +94,7 @@
 // more convenient
 static bool button_wakeup = true;
 #endif
+static uint8_t bd_write_enabled = 0;
 
 
 /*
@@ -104,37 +142,12 @@ void Button_IRQHandler(void) {
 * Functions
 */
 void platform_init(void) {
-	uint32_t remaps;
-
 	clocks_init();
 
 	// The AFIO clock is needed to fix a few problems, remap the inputs, and
 	// to set up the button interrupt below, so enable it here and disable at
 	// the end of setup when it's no longer needed
-	clock_init(RCC_PERIPH_AFIO);
-	remaps = 0;
-	// Remap CAN to PD[01] (per the errata sheet) so it doesn't interfere with
-	// USART1 (even though we don't use RTS...)
-	remaps |= AFIO_MAPR_CAN_REMAP_REMAP3;
-#if SPI1_DO_REMAP
-	remaps |= AFIO_MAPR_SPI1_REMAP;
-#endif
-#if UART1_DO_REMAP
-	remaps |= AFIO_MAPR_USART1_REMAP;
-#endif
-#if I2C1_DO_REMAP
-	remaps |= AFIO_MAPR_I2C1_REMAP;
-#endif
-	// Unlike everything else, JTAG is enabled on reset and needs to be explicitly
-	// disabled
-	// Unlike everything else, reading the JTAG part of AFIO_MAPR will always
-	// return '0' (fully-enabled) so it needs to be set everytime.
-	// NOJNTRST would have full JTAG and SWD but no JNTRST
-	// JTAGDISABLE disables JTAG while leaving SWD
-	// DISABLE would disable everything
-	remaps     |= AFIO_MAPR_SWJ_CFG_JTAGDISABLE;
-	MODIFY_BITS(AFIO->MAPR, AFIO_MAPR_SWJ_CFG|AFIO_MAPR_USART1_REMAP|AFIO_MAPR_SPI1_REMAP|AFIO_MAPR_CAN_REMAP,
-		remaps);
+	clock_init(EXTI_PREG_CLOCKEN);
 
 	gpio_init();
 	// Violoate our separation of concerns in order to provide early user
@@ -168,36 +181,39 @@ void platform_init(void) {
 
 	// Set interrupt priority grouping
 	// Use 4 bits for group priority and 0 bits for subpriority
-	// See 4.4.5 of the Cortex M3 programming manual for how to determine the
-	// value passed, it looks to be '3 + number of bits for subpriority'.
+	// See 4.4.5 (SCB_AIRCR register) of the Cortex M3 programming manual for
+	// how to determine the value passed, it looks to be '3 + number of bits
+	// for subpriority'. Cortex M4 is the same.
 	NVIC_SetPriorityGrouping(0b011 + 0);
 
 #if BUTTON_PIN
 	uint32_t pmask, pinno;
 
 	// Make sure the correct port is connected to the EXTI line
-#if (BUTTON_PIN & GPIO_PORT_MASK) == GPIO_PORTA
+#if GPIO_GET_PORTNO(BUTTON_PIN) == GPIO_PORTA
 	pmask = 0b0000;
-#else
+#elif GPIO_GET_PORTNO(BUTTON_PIN) == GPIO_PORTB
 	pmask = 0b0001;
+#else
+# error "Unsupported BUTTON_PIN port"
 #endif
 	pinno = GPIO_GET_PINNO(BUTTON_PIN);
 #if GPIO_GET_PINNO(BUTTON_PIN) <= 3
 	pinno = pinno*4;
 	pmask <<= (pinno);
-	MODIFY_BITS(AFIO->EXTICR[0], 0b1111 << pinno, pmask);
+	MODIFY_BITS(EXTI_PREG->EXTICR[0], 0b1111 << pinno, pmask);
 #elif GPIO_GET_PINNO(BUTTON_PIN) <= 7
 	pinno = (pinno-4)*4;
 	pmask <<= (pinno);
-	MODIFY_BITS(AFIO->EXTICR[1], 0b1111 << pinno, pmask);
+	MODIFY_BITS(EXTI_PREG->EXTICR[1], 0b1111 << pinno, pmask);
 #elif GPIO_GET_PINNO(BUTTON_PIN) <= 11
 	pinno = (pinno-8)*4;
 	pmask <<= (pinno);
-	MODIFY_BITS(AFIO->EXTICR[2], 0b1111 << pinno, pmask);
+	MODIFY_BITS(EXTI_PREG->EXTICR[2], 0b1111 << pinno, pmask);
 #elif GPIO_GET_PINNO(BUTTON_PIN) <= 15
 	pinno = (pinno-12)*4;
 	pmask <<= (pinno);
-	MODIFY_BITS(AFIO->EXTICR[3], 0b1111 << pinno, pmask);
+	MODIFY_BITS(EXTI_PREG->EXTICR[3], 0b1111 << pinno, pmask);
 #else
 # error "Unhandled BUTTON_PIN"
 #endif // GPIO_GET_PINNO(BUTTON_PIN)
@@ -210,8 +226,7 @@ void platform_init(void) {
 	NVIC_EnableIRQ(BUTTON_IRQn);
 #endif // BUTTON_PIN
 
-	// Only need the clock for AFIO->EXTICR[x] and AFIO->MAPR access
-	clock_disable(RCC_PERIPH_AFIO);
+	clock_disable(EXTI_PREG_CLOCKEN);
 
 	return;
 }
@@ -233,7 +248,7 @@ void sysflash(void) {
 	}
 }
 static void clocks_init(void) {
-	uint32_t reg;
+	uint32_t reg, latency;
 
 	// Don't use clock source protection
 	CLEAR_BIT(RCC->CR, RCC_CR_CSSON);
@@ -273,78 +288,69 @@ static void clocks_init(void) {
 
 	reg = 0;
 #if G_freq_HCLK == G_freq_OSC
-	// Nothing to do here
+	reg |= HCLK_PRESCALER_1;
 #elif G_freq_HCLK == (G_freq_OSC / 2)
-	reg |= 0b1000 << RCC_CFGR_HPRE_Pos;
+	reg |= HCLK_PRESCALER_2;
 #elif G_freq_HCLK == (G_freq_OSC / 4)
-	reg |= 0b1001 << RCC_CFGR_HPRE_Pos;
+	reg |= HCLK_PRESCALER_4;
 #elif G_freq_HCLK == (G_freq_OSC / 8)
-	reg |= 0b1010 << RCC_CFGR_HPRE_Pos;
+	reg |= HCLK_PRESCALER_8;
 #elif G_freq_HCLK == (G_freq_OSC / 16)
-	reg |= 0b1011 << RCC_CFGR_HPRE_Pos;
+	reg |= HCLK_PRESCALER_16;
 #elif G_freq_HCLK == (G_freq_OSC / 64)
-	reg |= 0b1100 << RCC_CFGR_HPRE_Pos;
+	reg |= HCLK_PRESCALER_64;
 #elif G_freq_HCLK == (G_freq_OSC / 128)
-	reg |= 0b1101 << RCC_CFGR_HPRE_Pos;
+	reg |= HCLK_PRESCALER_128;
 #elif G_freq_HCLK == (G_freq_OSC / 256)
-	reg |= 0b1110 << RCC_CFGR_HPRE_Pos;
+	reg |= HCLK_PRESCALER_256;
 #elif G_freq_HCLK == (G_freq_OSC / 512)
-	reg |= 0b1111 << RCC_CFGR_HPRE_Pos;
+	reg |= HCLK_PRESCALER_512;
 #else
 # error "G_freq_HCLK must be a G_freq_OSC / (1|2|4|8|16|64|128|256|512)"
 #endif
 
 #if G_freq_PCLK1 == G_freq_HCLK
-	// Nothing to do here
+	reg |= PCLK1_PRESCALER_1;
 #elif G_freq_PCLK1 == (G_freq_HCLK / 2)
-	reg |= 0b100 << RCC_CFGR_PPRE1_Pos;
+	reg |= PCLK1_PRESCALER_2;
 #elif G_freq_PCLK1 == (G_freq_HCLK / 4)
-	reg |= 0b101 << RCC_CFGR_PPRE1_Pos;
+	reg |= PCLK1_PRESCALER_4;
 #elif G_freq_PCLK1 == (G_freq_HCLK / 8)
-	reg |= 0b110 << RCC_CFGR_PPRE1_Pos;
+	reg |= PCLK1_PRESCALER_8;
 #elif G_freq_PCLK1 == (G_freq_HCLK / 16)
-	reg |= 0b111 << RCC_CFGR_PPRE1_Pos;
+	reg |= PCLK1_PRESCALER_16;
 #else
 # error "G_freq_PCLK1 must be a G_freq_HCLK / (1|2|4|8|16)"
 #endif
 
 #if G_freq_PCLK2 == G_freq_HCLK
-	// Nothing to do here
+	reg |= PCLK2_PRESCALER_1;
 #elif G_freq_PCLK2 == (G_freq_HCLK / 2)
-	reg |= 0b100 << RCC_CFGR_PPRE2_Pos;
+	reg |= PCLK2_PRESCALER_2;
 #elif G_freq_PCLK2 == (G_freq_HCLK / 4)
-	reg |= 0b101 << RCC_CFGR_PPRE2_Pos;
+	reg |= PCLK2_PRESCALER_4;
 #elif G_freq_PCLK2 == (G_freq_HCLK / 8)
-	reg |= 0b110 << RCC_CFGR_PPRE2_Pos;
+	reg |= PCLK2_PRESCALER_8;
 #elif G_freq_PCLK2 == (G_freq_HCLK / 16)
-	reg |= 0b111 << RCC_CFGR_PPRE2_Pos;
+	reg |= PCLK2_PRESCALER_16;
 #else
 # error "G_freq_PCLK2 must be a G_freq_HCLK / (1|2|4|8|16)"
 #endif
 
-#if   G_freq_ADC == (G_freq_PCLK2 / 2)
-	// Nothing to do here
-#elif G_freq_ADC == (G_freq_PCLK2 / 4)
-	reg |= 0b01 << RCC_CFGR_ADCPRE_Pos;
-#elif G_freq_ADC == (G_freq_PCLK2 / 6)
-	reg |= 0b10 << RCC_CFGR_ADCPRE_Pos;
-#elif G_freq_ADC == (G_freq_PCLK2 / 8)
-	reg |= 0b11 << RCC_CFGR_ADCPRE_Pos;
-#else
-# error "G_freq_ADC must be a G_freq_PCLK2 / (2|4|6|8)"
-#endif
-
-	MODIFY_BITS(RCC->CFGR, RCC_CFGR_HPRE|RCC_CFGR_PPRE1|RCC_CFGR_PPRE2|RCC_CFGR_ADCPRE,
+	MODIFY_BITS(RCC->CFGR, RCC_CFGR_HPRE|RCC_CFGR_PPRE1|RCC_CFGR_PPRE2,
 		reg
 		);
 
 	// Set flash latency and prefetch buffer
-	// According to the reference manual, you should use a flash latency of 0
-	// for speeds <= 24MHz, 1 for 24-48MHz, and 2 for anything higher.
-	// The prefetch buffer must be on when using a scaler other than 1 for HCLK
-	MODIFY_BITS(FLASH->ACR, FLASH_ACR_PRFTBE|FLASH_ACR_LATENCY,
-		(0b1   << FLASH_ACR_PRFTBE_Pos  ) | // Enable the prefetch buffer
-		(0b000 << FLASH_ACR_LATENCY_Pos ) | // Use a latency of 0
+	//
+	// The prefetch buffer must be on when using a scaler other than 1 for AHB
+	//
+	// The latency is 3 bits on the STM32F1 and 4 bits on the other lines
+	latency = G_freq_HCLK / FLASH_WS_STEP;
+	latency = (latency > FLASH_WS_MAX) ? FLASH_WS_MAX : latency;
+	MODIFY_BITS(FLASH->ACR, FLASH_ACR_PRFTEN|FLASH_ACR_LATENCY,
+		(0b1     << FLASH_ACR_PRFTEN_Pos  ) | // Enable the prefetch buffer
+		(latency << FLASH_ACR_LATENCY_Pos ) |
 		0);
 
 	// We don't use the LSI for anything
@@ -354,7 +360,9 @@ static void clocks_init(void) {
 	// clock and the backup domain interface clock; keep it on afterwards
 	// because RTC access requires them too
 	clock_enable(RCC_PERIPH_PWR);
+#if RCC_PERIPH_BKP
 	clock_enable(RCC_PERIPH_BKP);
+#endif
 
 	BD_write_enable();
 	SET_BIT(RCC->BDCR, RCC_BDCR_LSEON);
@@ -424,21 +432,21 @@ void hibernate_s(utime_t s, uint8_t flags) {
 }
 OPTIMIZE_FUNCTION \
 static void light_sleep_ms(utime_t ms, uint8_t flags) {
-	uint16_t period;
+	uint32_t period;
 
 	// The systick interrupt will wake us from sleep if left enabled
-	CLEAR_BIT(SysTick->CTRL, SysTick_CTRL_TICKINT_Msk|SysTick_CTRL_ENABLE_Msk);
+	suspend_systick();
 
 	// Don't use deep sleep mode
 	CLEAR_BIT(SCB->SCR, SCB_SCR_SLEEPDEEP_Msk);
 
 	while (ms > 0) {
-		if (ms < (0xFFFF/TIM_MS_TICKS)) {
+		if (ms < SLEEP_TIM_MAX_MS) {
 			period = ms;
 			ms = 0;
 		} else {
-			period = (0xFFFF/TIM_MS_TICKS);
-			ms -= (0xFFFF/TIM_MS_TICKS);
+			period = SLEEP_TIM_MAX_MS;
+			ms -= SLEEP_TIM_MAX_MS;
 		}
 
 		set_sleep_alarm(period);
@@ -459,22 +467,20 @@ static void light_sleep_ms(utime_t ms, uint8_t flags) {
 	}
 
 	// Resume systick
-	SET_BIT(SysTick->CTRL, SysTick_CTRL_TICKINT_Msk|SysTick_CTRL_ENABLE_Msk);
+	resume_systick();
 
 	return;
 }
 OPTIMIZE_FUNCTION \
 static void deep_sleep_s(utime_t s, uint8_t flags) {
-	if (s == 0) {
-		return;
-	}
+	utime_t period;
 
 	// UART can't do anything during deep sleep and there's a pulldown when it's
 	// on, so turn it off until wakeup
 	uart_off();
 
 	// The systick interrupt will wake us from sleep if left enabled
-	CLEAR_BIT(SysTick->CTRL, SysTick_CTRL_TICKINT_Msk|SysTick_CTRL_ENABLE_Msk);
+	suspend_systick();
 
 	// Use deep sleep mode
 	SET_BIT(SCB->SCR, SCB_SCR_SLEEPDEEP_Msk);
@@ -484,24 +490,35 @@ static void deep_sleep_s(utime_t s, uint8_t flags) {
 		(0b1 << PWR_CR_LPDS_Pos) | // Use the low-power voltage regulator
 		0);
 
-	set_RTC_alarm(s);
-	while (BIT_IS_SET(EXTI->IMR, RTC_ALARM_EXTI_LINE)) {
-		// Wait for an interrupt
-		// The stop mode entry procedure will be ignored and program execution
-		// continues if any of the EXTI interrupt pending flags, peripheral
-		// interrupt pending flags, or RTC alarm flag are set.
-		__WFI();
-
-		// If desired keep sleeping until the wakeup alarm triggers
-		if (BIT_IS_SET(flags, CFG_ALLOW_INTERRUPTS)) {
-			break;
-		} else if (BIT_IS_SET(EXTI->IMR, RTC_ALARM_EXTI_LINE)) {
-			// Let the user know we can't do anything right now
-			sysflash();
-			sysflash();
+	while (s > 0) {
+		if (s < HIBERNATE_MAX_S) {
+			period = s;
+			s = 0;
+		} else {
+			period = HIBERNATE_MAX_S;
+			s -= HIBERNATE_MAX_S;
 		}
+
+		set_RTC_alarm(period);
+		while (BIT_IS_SET(EXTI->IMR, RTC_ALARM_EXTI_LINE)) {
+			// Wait for an interrupt
+			// The stop mode entry procedure will be ignored and program execution
+			// continues if any of the EXTI interrupt pending flags, peripheral
+			// interrupt pending flags, or RTC alarm flag are set.
+			__WFI();
+
+			// If desired keep sleeping until the wakeup alarm triggers
+			if (BIT_IS_SET(flags, CFG_ALLOW_INTERRUPTS)) {
+				s = 0;
+				break;
+			} else if (BIT_IS_SET(EXTI->IMR, RTC_ALARM_EXTI_LINE)) {
+				// Let the user know we can't do anything right now
+				sysflash();
+				sysflash();
+			}
+		}
+		stop_RTC_alarm();
 	}
-	stop_RTC_alarm();
 
 	// The SYSCLK is always HSI on wakeup
 #if USE_INTERNAL_CLOCK
@@ -526,7 +543,7 @@ static void deep_sleep_s(utime_t s, uint8_t flags) {
 #endif // USE_INTERNAL_CLOCK
 
 	// Resume systick
-	SET_BIT(SysTick->CTRL, SysTick_CTRL_TICKINT_Msk|SysTick_CTRL_ENABLE_Msk);
+	resume_systick();
 
 	// Clear wakeup flag by writing 1 to CWUF
 	SET_BIT(PWR->CR, PWR_CR_CWUF);
@@ -542,7 +559,11 @@ void clock_enable(rcc_periph_t periph_clock) {
 
 	switch (SELECT_BITS(periph_clock, RCC_BUS_MASK)) {
 	case RCC_BUS_AHB1:
+#if defined(STM32F1)
 		reg = &RCC->AHBENR;
+#else
+		reg = &RCC->AHB1ENR;
+#endif
 		break;
 	case RCC_BUS_APB1:
 		reg = &RCC->APB1ENR;
@@ -568,11 +589,15 @@ void clock_enable(rcc_periph_t periph_clock) {
 }
 void clock_disable(rcc_periph_t periph_clock) {
 	uint32_t mask;
-	__IO uint32_t *reg, tmpreg;
+	__IO uint32_t *reg;
 
 	switch (SELECT_BITS(periph_clock, RCC_BUS_MASK)) {
 	case RCC_BUS_AHB1:
+#if defined(STM32F1)
 		reg = &RCC->AHBENR;
+#else
+		reg = &RCC->AHB1ENR;
+#endif
 		break;
 	case RCC_BUS_APB1:
 		reg = &RCC->APB1ENR;
@@ -599,9 +624,8 @@ void clock_init(rcc_periph_t periph_clock) {
 	clock_enable(periph_clock);
 
 	switch (SELECT_BITS(periph_clock, RCC_BUS_MASK)) {
-	// The STM32F1 series doesn't have a reset register for the AHB, so use
-	// a value present when it exists to test for it
-#if RCC_AHB1RSTR_GPIOARST
+	// The STM32F1 series doesn't have a reset register for the AHB
+#if ! defined(STM32F1)
 	case RCC_BUS_AHB1:
 		reg = &RCC->AHB1RSTR;
 		break;
@@ -630,65 +654,34 @@ void clock_init(rcc_periph_t periph_clock) {
 }
 
 void BD_write_enable(void) {
-	SET_BIT(PWR->CR, PWR_CR_DBP);
-	while (!BIT_IS_SET(PWR->CR, PWR_CR_DBP)) {
-		// Nothing to do here
+	if (bd_write_enabled == 0) {
+		SET_BIT(PWR->CR, PWR_CR_DBP);
+		while (!BIT_IS_SET(PWR->CR, PWR_CR_DBP)) {
+			// Nothing to do here
+		}
 	}
+	++bd_write_enabled;
 
 	return;
 }
 void BD_write_disable(void) {
-	// Per the reference manual, backup domain write protection must remain
-	// disabled if using HSE/128 as the RTC clock
-	if (SELECT_BITS(RCC->BDCR, RCC_BDCR_RTCSEL) != RCC_BDCR_RTCSEL_HSE) {
-		CLEAR_BIT(PWR->CR, PWR_CR_DBP);
-		while (BIT_IS_SET(PWR->CR, PWR_CR_DBP)) {
-			// Nothing to do here
+	if (bd_write_enabled != 0) {
+		--bd_write_enabled;
+	}
+	if (bd_write_enabled == 0) {
+		// Per the reference manual, backup domain write protection must remain
+		// disabled if using HSE/128 as the RTC clock
+		if (SELECT_BITS(RCC->BDCR, RCC_BDCR_RTCSEL) != RCC_BDCR_RTCSEL_HSE) {
+			CLEAR_BIT(PWR->CR, PWR_CR_DBP);
+			while (BIT_IS_SET(PWR->CR, PWR_CR_DBP)) {
+				// Nothing to do here
+			}
 		}
 	}
 
 	return;
 }
-err_t RTC_cfg_enable(utime_t timeout) {
-	timeout = SET_TIMEOUT(timeout);
 
-	BD_write_enable();
-
-	while (!BIT_IS_SET(RTC->CRL, RTC_CRL_RTOFF)) {
-		if (TIMES_UP(timeout)) {
-			return ETIMEOUT;
-		}
-	}
-
-	SET_BIT(RTC->CRL, RTC_CRL_CNF);
-	while (!BIT_IS_SET(RTC->CRL, RTC_CRL_CNF)) {
-		if (TIMES_UP(timeout)) {
-			return ETIMEOUT;
-		}
-	}
-
-	return EOK;
-}
-err_t RTC_cfg_disable(utime_t timeout) {
-	timeout = SET_TIMEOUT(timeout);
-
-	CLEAR_BIT(RTC->CRL, RTC_CRL_CNF);
-	while (BIT_IS_SET(RTC->CRL, RTC_CRL_CNF)) {
-		if (TIMES_UP(timeout)) {
-			return ETIMEOUT;
-		}
-	}
-
-	while (!BIT_IS_SET(RTC->CRL, RTC_CRL_RTOFF)) {
-		if (TIMES_UP(timeout)) {
-			return ETIMEOUT;
-		}
-	}
-
-	BD_write_disable();
-
-	return EOK;
-}
 
 #ifdef __cplusplus
  }

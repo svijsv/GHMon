@@ -36,8 +36,40 @@
 */
 #include "ulib/types.h"
 
-// CMSIS header file
-#include <stm32f103xb.h>
+// CMSIS header files
+// Both ulib/bits.h and stm32fXxx.h define the SET_BIT() and CLEAR_BIT()
+// macros; they're identical so use whichever one we can get to not cause the
+// compiler to complain about a redefinition
+#undef SET_BIT
+#undef CLEAR_BIT
+#if defined(STM32F1)
+# include <stm32f1xx.h>
+# define CMSIS_VERSION __STM32F1_CMSIS_VERSION
+# define CMSIS_NAME "STM32F1"
+# define USE_STM32F1_ADC    1
+# define USE_STM32F1_GPIO   1
+# define USE_STM32F1_RTC    1
+
+#elif defined(STM32F4xx)
+# include <stm32f4xx.h>
+# define CMSIS_VERSION __STM32F4xx_CMSIS_VERSION
+# define CMSIS_NAME "STM32F4xx"
+
+// There's a typo in stm32f4xx.h that breaks compilation when using the
+// version number
+# undef __STM32F4xx_CMSIS_VERSION
+# define __STM32F4xx_CMSIS_VERSION ((__STM32F4xx_CMSIS_VERSION_MAIN << 24)\
+                                   |(__STM32F4xx_CMSIS_VERSION_SUB1 << 16)\
+                                   |(__STM32F4xx_CMSIS_VERSION_SUB2 << 8 )\
+                                   |(__STM32F4xx_CMSIS_VERSION_RC))
+
+#else
+# error "Unsupported architecture"
+#endif
+// There are macros with the same name as these but different functions in
+// use
+#undef READ_REG
+#undef WRITE_REG
 
 
 /*
@@ -53,30 +85,52 @@ typedef struct {
 /*
 * Static values
 */
-// 20480 (0x5000) bytes of RAM, starting at address 0x200000000
-#define RAM_PRESENT 0x5000
-#define RAM_BASE    0x20000000
+#if ! RAM_PRESENT
+// 20480 (0x5000) bytes of RAM
+# define RAM_PRESENT 0x5000
+#endif
+#define RAM_BASE SRAM_BASE
 
+//
 // Oscillator frequencies
-// The reference manual gives a range of 30KHz-60KHz for the LSI
-#define G_freq_LSI 40000
-#define G_freq_HSI 8000000
-#define G_freq_HSE 8000000
+#if defined(STM32F1)
+// The reference manual gives a range of 30KHz-60KHz for the LSI on the F1
+# define G_freq_LSI 40000
+# define G_freq_HSI 8000000
+# if ! HSE_FREQUENCY
+#  define HSE_FREQUENCY 8000000
+# endif
+#else // !STM32F1
+# define G_freq_LSI 32768
+# define G_freq_HSI 16000000
+# if ! HSE_FREQUENCY
+#  define HSE_FREQUENCY 25000000
+# endif
+#endif // !STM32F1
+#define G_freq_HSE HSE_FREQUENCY
 #define G_freq_LSE 32768
+//
 // Clock frequencies
 #define G_freq_HCLK  4000000
-#define G_freq_PCLK1 2000000
-#define G_freq_PCLK2 4000000
+//#define G_freq_HCLK (HSE_FREQUENCY/4)
+#define G_freq_PCLK1 (G_freq_HCLK/2)
+#define G_freq_PCLK2 (G_freq_HCLK/1)
 // On the STM32F1, the ADC input clock must not exceed 14MHz
-#define G_freq_ADC   1000000
+#define G_freq_ADC   (G_freq_PCLK2/2)
 
 // 12-bit ADC maximum value
 #define ADC_MAX 0x0FFF
 // Voltage of the internal reference in mV
+#if ! INTERNAL_VREF_mV
+# if defined(STM32F1)
 // Per the STM32F1 datasheet the internal Vref can be between 1.16V and 1.24V,
 // with 1.20V being typical.
-#ifndef INTERNAL_VREF_mV
-# define INTERNAL_VREF_mV 1200
+#  define INTERNAL_VREF_mV 1200
+# else
+// Per the STM32F4 datasheet the internal Vref can be between 1.18V and 1.24V,
+// with 1.21V being typical
+#  define INTERNAL_VREF_mV 1210
+# endif
 #endif
 
 //
@@ -101,9 +155,8 @@ typedef struct {
 #define PINID_A10 (GPIO_PORTA_MASK|0x0A)
 #define PINID_A11 (GPIO_PORTA_MASK|0x0B)
 #define PINID_A12 (GPIO_PORTA_MASK|0x0C)
-// PINID_A13 and PINID_A14 are used for SWDIO and SWCLK
-//#define PINID_A13 (GPIO_PORTA_MASK|0x0D)
-//#define PINID_A14 (GPIO_PORTA_MASK|0x0E)
+#define PINID_A13 (GPIO_PORTA_MASK|0x0D)
+#define PINID_A14 (GPIO_PORTA_MASK|0x0E)
 #define PINID_A15 (GPIO_PORTA_MASK|0x0F)
 //
 // Port B
@@ -126,34 +179,13 @@ typedef struct {
 #define PINID_B13 (GPIO_PORTB_MASK|0x0D)
 #define PINID_B14 (GPIO_PORTB_MASK|0x0E)
 #define PINID_B15 (GPIO_PORTB_MASK|0x0F)
-//
-// Alternate function pins
-// Listings of mappings can be found in section 3 (Pinout and pin description)
-// of the datasheet and in section 9.3.7 (Timer alternate function remapping)
-// of the reference manual
-// This isn't all the mappings
-// Timer 1
-#define PINID_TIM1_CH1 PINID_A8
-#define PINID_TIM1_CH2 PINID_A9
-#define PINID_TIM1_CH3 PINID_A10
-#define PINID_TIM1_CH4 PINID_A11
-// Timer 2
-#define PINID_TIM2_CH1 PINID_A0
-#define PINID_TIM2_CH2 PINID_A1
-#define PINID_TIM2_CH3 PINID_A2
-#define PINID_TIM2_CH4 PINID_A3
-// Timer 3
-#define PINID_TIM3_CH1 PINID_A6
-#define PINID_TIM3_CH2 PINID_A7
-#define PINID_TIM3_CH3 PINID_B0
-#define PINID_TIM3_CH4 PINID_B1
-// Timer 4
-#define PINID_TIM4_CH1 PINID_B6
-#define PINID_TIM4_CH2 PINID_B7
-#define PINID_TIM4_CH3 PINID_B8
-#define PINID_TIM4_CH4 PINID_B9
+// Alternate function pin mappings
+#include "platform_AF.h"
 //
 // Bluepill pin mappings
+// Should be accurate for pretty much all other boards too, though there are
+// some that use a more Arduino-like scheme or have additional pins
+// Not all pins will be broken out on all boards
 #define PIN_A0  PINID_A0
 #define PIN_A1  PINID_A1
 #define PIN_A2  PINID_A2
@@ -167,8 +199,11 @@ typedef struct {
 #define PIN_A10 PINID_A10
 #define PIN_A11 PINID_A11
 #define PIN_A12 PINID_A12
-//#define PIN_SWDIO PINID_A13
-//#define PIN_SWCLK PINID_A14
+// PINID_A13 and PINID_A14 are used for SWDIO and SWCLK when DEBUG is enabled
+#if ! DEBUG
+# define PIN_A13 PINID_A13
+# define PIN_A14 PINID_A14
+#endif
 #define PIN_A15 PINID_A15
 
 #define PIN_B0  PINID_B0
@@ -208,21 +243,29 @@ extern volatile utime_t G_sys_msticks;
 // Quick pin access, for when you know what you want:
 #define IS_GPIO_INPUT_HIGH(pin)  (BIT_IS_SET(GPIO_GET_PORT(pin)->IDR, GPIO_GET_PINMASK(pin)))
 #define SET_GPIO_OUTPUT_HIGH(pin) (GPIO_GET_PORT(pin)->BSRR = GPIO_GET_PINMASK(pin))
-#define SET_GPIO_OUTPUT_LOW(pin)  (GPIO_GET_PORT(pin)->BRR  = GPIO_GET_PINMASK(pin))
+#if USE_STM32F1_GPIO
+# define SET_GPIO_OUTPUT_LOW(pin)  (GPIO_GET_PORT(pin)->BRR = GPIO_GET_PINMASK(pin))
+#else
+# define SET_GPIO_OUTPUT_LOW(pin)  (GPIO_GET_PORT(pin)->BSRR = (1UL << (GPIO_GET_PINNO(pin) + GPIO_BSRR_BR0_Pos)))
+#endif
 
 // Use the micro-second counter
-#define USCOUNTER_TIM TIM3
-# define USCOUNTER_START() \
+#if defined(TIM9)
+# define USCOUNTER_TIM TIM9
+#else
+# define USCOUNTER_TIM TIM3
+#endif
+#define USCOUNTER_START() \
 	do { \
 		SET_BIT(USCOUNTER_TIM->EGR, TIM_EGR_UG); /* Generate an update event to reset the counter */ \
 		SET_BIT(USCOUNTER_TIM->CR1, TIM_CR1_CEN); /* Enable the timer */ \
 	} while (0);
-# define USCOUNTER_STOP(counter) \
+#define USCOUNTER_STOP(counter) \
 	do { \
 		(counter) = USCOUNTER_TIM->CNT; \
 		CLEAR_BIT(USCOUNTER_TIM->CR1, TIM_CR1_CEN); /* Disable the timer */ \
 	} while (0);
-//# define USCOUNTER_GET() (USCOUNTER_TIM->CNT)
+//#define USCOUNTER_GET() (USCOUNTER_TIM->CNT)
 
 #endif // _PLATFORM_CMSIS_H
 #ifdef __cplusplus
