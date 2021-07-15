@@ -20,6 +20,14 @@
 // gpio.c
 // Manage the GPIO peripheral
 // NOTES:
+//    Per DM00315319, pins use less power in analog input mode than in any
+//    other (especially compared to floating input) so that's the default
+//    mode
+//
+//    The STM32F401 manual says reset for port A MODER is 0x0C00 0000 but
+//    the other manuals I've checked all give it as 0xA800 0000 which
+//    makes more sense since that would make the JTAG pins AF mode rather
+//    than leaving 2 of them as GP and one as analog
 //
 
 #ifdef __cplusplus
@@ -37,12 +45,8 @@
 /*
 * Static values
 */
-// MODE bits for setting pin direction in GPIOx_CR[LH]
-#define OUTPUT_SLOW   0b10 // Slow speed,   2MHZ
-#define OUTPUT_MEDIUM 0b01 // Medium speed, 10MHZ
-#define OUTPUT_HIGH   0b11 // High speed,   50MHZ
+// OUTPUT_SLOW is defined in the platform-specific GPIO files
 #define OUTPUT OUTPUT_SLOW
-#define INPUT  0x00
 
 
 /*
@@ -56,9 +60,15 @@
 
 
 /*
+* Macros
+*/
+
+
+/*
 * Local function prototypes
 */
-static bool is_output(pin_t pin);
+static void port_reset(GPIO_TypeDef *port);
+static void gpio_platform_init(void);
 
 
 /*
@@ -69,23 +79,35 @@ static bool is_output(pin_t pin);
 /*
 * Functions
 */
-void gpio_init(void) {
-	// Enable GPIO port clocks
-	// Only enable GPIO ports A and B since none of the rest are broken out
-	clock_init(RCC_PERIPH_GPIOA|RCC_PERIPH_GPIOB);
+#define INCLUDED_BY_GPIO_C 1
+#if USE_STM32F1_GPIO
+# include "gpio_STM32F1.c"
+#else
+# include "gpio_STM32Fx.c"
+#endif
 
-	// Set all pins to analog mode, which should be the lowest-power-drawing
-	// mode
-	// Analog mode corresponds to MODE == 0b00 and CNF == 0b00
-	// Set the output low first just in case
-	// Port A
-	GPIOA->ODR = 0;
-	GPIOA->CRL = 0;
-	GPIOA->CRH = 0;
-	// Port B
-	GPIOB->ODR = 0;
-	GPIOB->CRL = 0;
-	GPIOB->CRH = 0;
+void gpio_init(void) {
+	rcc_periph_t ports;
+
+	ports = RCC_PERIPH_GPIOA|RCC_PERIPH_GPIOB;
+#if defined(GPIOC)
+	ports |= RCC_PERIPH_GPIOC;
+#endif
+#if defined(GPIOH)
+	ports |= RCC_PERIPH_GPIOH;
+#endif
+	clock_init(ports);
+
+	port_reset(GPIOA);
+	port_reset(GPIOB);
+#if defined(GPIOC)
+	port_reset(GPIOC);
+#endif
+#if defined(GPIOH)
+	port_reset(GPIOH);
+#endif
+
+	gpio_platform_init();
 
 	return;
 }
@@ -104,7 +126,7 @@ void gpio_set_state(pin_t pin, gpio_state_t new_state) {
 		port->BSRR = pinmask;
 		break;
 	case GPIO_LOW:
-		port->BRR = pinmask;
+		port->BSRR = pinmask << GPIO_BSRR_BR0_Pos;
 		break;
 	case GPIO_FLOAT:
 		break;
@@ -114,19 +136,17 @@ void gpio_set_state(pin_t pin, gpio_state_t new_state) {
 }
 void gpio_toggle_state(pin_t pin) {
 	GPIO_TypeDef* port;
-	uint32_t pinmask, dr;
+	uint32_t pinmask;
 
 	assert(pin != 0);
 
 	port = GPIO_GET_PORT(pin);
 	pinmask = GPIO_GET_PINMASK(pin);
-	dr = (is_output(pin)) ? port->ODR : port->IDR;
 
-	port->BSRR = ((pinmask & dr) == 0) ? pinmask : pinmask << 16;
+	port->BSRR = ((pinmask & port->ODR) == 0) ? pinmask : pinmask << GPIO_BSRR_BR0_Pos;
 
 	return;
 }
-
 gpio_state_t gpio_get_state(pin_t pin) {
 	GPIO_TypeDef* port;
 	uint32_t pinmask;
@@ -138,7 +158,6 @@ gpio_state_t gpio_get_state(pin_t pin) {
 
 	return (BIT_IS_SET(port->IDR, pinmask)) ? GPIO_HIGH : GPIO_LOW;
 }
-
 void gpio_quickread_prepare(volatile gpio_quick_t *qpin, pin_t pin) {
 	assert(qpin != NULL);
 	assert(pin != 0);
@@ -148,164 +167,6 @@ void gpio_quickread_prepare(volatile gpio_quick_t *qpin, pin_t pin) {
 
 	return;
 }
-
-void gpio_set_mode(pin_t pin, gpio_mode_t mode, gpio_state_t istate) {
-	uint32_t mask;
-	GPIO_TypeDef* port;
-	uint32_t pinmask, pinno, mpinno;
-
-	assert(pin != 0);
-
-	port = GPIO_GET_PORT(pin);
-	pinmask = GPIO_GET_PINMASK(pin);
-	pinno = GPIO_GET_PINNO(pin);
-
-	// Determine the CNF and MODE bits for the pin
-	switch (mode) {
-	case GPIO_MODE_RESET:
-		mask = 0x04; // Reference-defined reset state
-		break;
-	case GPIO_MODE_PP:
-		mask = 0b0000|OUTPUT;
-		break;
-	case GPIO_MODE_PP_AF:
-		mask = 0b1000|OUTPUT;
-		break;
-	case GPIO_MODE_OD:
-		mask = 0b0100|OUTPUT;
-		break;
-	case GPIO_MODE_OD_AF:
-		mask = 0b1100|OUTPUT;
-		break;
-	case GPIO_MODE_IN:
-		switch (istate) {
-		case GPIO_HIGH:
-		case GPIO_LOW:
-			mask = 0b1000|INPUT;
-			break;
-		default:
-			mask = 0b0100|INPUT;
-			break;
-		}
-		break;
-	case GPIO_MODE_AIN:
-	case GPIO_MODE_HiZ:
-	default:
-		mask = 0b0000|INPUT;
-		break;
-	}
-
-	// I don't know why they designed it this way...would have made more sense
-	// to use one register for modes and the other for configuration
-	if (pinno < 8) {
-		mpinno = pinno * 4;
-		MODIFY_BITS(port->CRL, (0b1111 << mpinno),
-			(mask << mpinno)
-			);
-	} else {
-		mpinno = (pinno - 8) * 4;
-		MODIFY_BITS(port->CRH, (0b1111 << mpinno),
-			(mask << mpinno)
-			);
-	}
-
-	// For normal outputs, set the initial pin state
-	// For inputs with a bias, set the pull direction
-	// For analog and floating inputs this does nothing
-	// Ignore AF outputs, let the controlling peripherals handle them
-	switch (mode) {
-	case GPIO_MODE_RESET:
-	case GPIO_MODE_AIN:
-	case GPIO_MODE_HiZ:
-		port->BRR = pinmask;
-		break;
-	case GPIO_MODE_PP_AF:
-	case GPIO_MODE_OD_AF:
-		break;
-	default:
-		switch (istate) {
-		case GPIO_HIGH:
-			port->BSRR = pinmask;
-			break;
-		case GPIO_LOW:
-			port->BRR = pinmask;
-			break;
-		default:
-			break;
-		}
-		break;
-	}
-
-	return;
-}
-gpio_mode_t gpio_get_mode(pin_t pin) {
-	uint32_t mask;
-	GPIO_TypeDef* port;
-	uint32_t pinno, mpinno;
-
-	assert(pin != 0);
-
-	port = GPIO_GET_PORT(pin);
-	pinno = GPIO_GET_PINNO(pin);
-
-	if (pinno < 8) {
-		mpinno = pinno * 4;
-		mask = GATHER_BITS(port->CRL, 0b1111, mpinno);
-	} else {
-		mpinno = (pinno - 8) * 4;
-		mask = GATHER_BITS(port->CRH, 0b1111, mpinno);
-	}
-
-	switch (mask) {
-	case (0b0000|OUTPUT):
-		return GPIO_MODE_PP;
-		break;
-	case (0b1000|OUTPUT):
-		return GPIO_MODE_PP_AF;
-		break;
-	case (0b0100|OUTPUT):
-		return GPIO_MODE_OD;
-		break;
-	case (0b1100|OUTPUT):
-		return GPIO_MODE_OD_AF;
-		break;
-	case (0b1000|INPUT):
-		return GPIO_MODE_IN;
-		break;
-	case (0b0100|INPUT):
-		return GPIO_MODE_IN;
-		break;
-	case (0b0000|INPUT):
-		return GPIO_MODE_AIN;
-		break;
-	}
-
-	// Shouldn't actually reach this point, all the possibilities are handled
-	// except other output speeds, which aren't used anywhere
-	return GPIO_MODE_HiZ;
-}
-
-static bool is_output(pin_t pin) {
-	uint32_t selected;
-	GPIO_TypeDef* port;
-	uint32_t pinno, mpinno;
-
-	assert(pin != 0);
-
-	port = GPIO_GET_PORT(pin);
-	pinno = GPIO_GET_PINNO(pin);
-
-	if (pinno < 8) {
-		mpinno = pinno * 4;
-		selected = SELECT_BITS(port->CRL, 0x03 << mpinno);
-	} else {
-		mpinno = (pinno - 8) * 4;
-		selected = SELECT_BITS(port->CRH, 0x03 << mpinno);
-	}
-
-	return (selected != 0);
-}
-
 
 #ifdef __cplusplus
  }

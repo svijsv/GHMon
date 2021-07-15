@@ -46,6 +46,7 @@
 //
 // Most associated types are defined in interface.h
 //
+typedef uint8_t gpio_af_t;
 
 
 /*
@@ -63,6 +64,9 @@ void gpio_init(void);
 // GPIO_MODE_RESET is returned as GPIO_MODE_IN
 // GPIO_MODE_HiZ is returned as GPIO_MODE_AIN
 //gpio_mode_t gpio_get_mode(pin_t pin);
+
+// Set the alternate function associated with a pin
+void gpio_set_AF(pin_t pin, gpio_af_t af);
 
 
 /*
