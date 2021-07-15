@@ -20,10 +20,7 @@
 // time.c
 // Manage the time-keeping peripherals
 // NOTES:
-//    The timer numbers are defined in time.h
-//
-//    Only timers 1-4 are set up because those are the ones present on the
-//    STM32F103C8
+//    The timers are defined in time.h
 //
 
 #ifdef __cplusplus
@@ -36,6 +33,8 @@
 */
 #include "time.h"
 #include "system.h"
+#include "gpio.h"
+
 
 /*
 * Static values
@@ -43,6 +42,35 @@
 // Divide the number of cycles per ms by this in a dumb delay to account for
 // overhead
 #define DUMB_DELAY_DIV 7
+
+// If any prescaler other than 1 is used on a timer's bus clock, the timer's
+// frequency is doubled
+#if G_freq_PCLK1 == G_freq_HCLK
+# define TIM_APB1_MAX_FREQUENCY G_freq_PCLK1
+#else
+# define TIM_APB1_MAX_FREQUENCY (G_freq_PCLK1 * 2)
+#endif
+#if G_freq_PCLK2 == G_freq_HCLK
+# define TIM_APB2_MAX_FREQUENCY G_freq_PCLK2
+#else
+# define TIM_APB2_MAX_FREQUENCY (G_freq_PCLK2 * 2)
+#endif
+
+// A PWM signal period is the total time it takes for the counter to go from
+// 0 to PWM_DUTY_CYCLE_SCALE-1, therefore the frequency of the timer's counter
+// is the signal frequency times PWM_DUTY_CYCLE_SCALE and the maximum supported
+// frequency is the base clock divided by PWM_DUTY_CYCLE_SCALE
+#define PWM_APB1_FREQUENCY (PWM_MAX_FREQUENCY * PWM_DUTY_CYCLE_SCALE)
+#if PWM_APB1_FREQUENCY > (TIM_APB1_MAX_FREQUENCY / PWM_DUTY_CYCLE_SCALE)
+# undef  PWM_APB1_FREQUENCY
+# define PWM_APB1_FREQUENCY (TIM_APB1_MAX_FREQUENCY / PWM_DUTY_CYCLE_SCALE)
+#endif
+#define PWM_APB2_FREQUENCY (PWM_MAX_FREQUENCY * PWM_DUTY_CYCLE_SCALE)
+#if PWM_APB2_FREQUENCY > (TIM_APB2_MAX_FREQUENCY / PWM_DUTY_CYCLE_SCALE)
+# undef  PWM_APB2_FREQUENCY
+# define PWM_APB2_FREQUENCY (TIM_APB2_MAX_FREQUENCY / PWM_DUTY_CYCLE_SCALE)
+#endif
+
 
 /*
 * Types
@@ -53,7 +81,7 @@
 * Variables
 */
 // System tick count, milliseconds
-volatile utime_t G_sys_msticks;
+volatile utime_t G_sys_msticks = 0;
 
 
 /*
@@ -61,6 +89,7 @@ volatile utime_t G_sys_msticks;
 */
 static uint16_t calculate_TIM_prescaler(rcc_periph_t tim, uint32_t hz);
 static void systick_init(void);
+// Defined in time_RTC_*.h
 static void RTC_init(void);
 static void timers_init(void);
 
@@ -71,23 +100,6 @@ static void timers_init(void);
 OPTIMIZE_FUNCTION \
 void SysTick_Handler(void) {
 	++G_sys_msticks;
-	return;
-}
-OPTIMIZE_FUNCTION \
-void RTC_Alarm_IRQHandler(void) {
-	NVIC_DisableIRQ(RTC_Alarm_IRQn);
-	NVIC_ClearPendingIRQ(RTC_Alarm_IRQn);
-
-	CLEAR_BIT(RTC->CRL,
-		RTC_CRL_ALRF  | // Clear the alarm interrupt flag
-		0);
-
-	// Clear the EXTI line interrupt flag
-	// This is set to 1 to clear
-	SET_BIT(EXTI->PR, RTC_ALARM_EXTI_LINE);
-	// Disable the alarm EXTI interrupt
-	CLEAR_BIT(EXTI->IMR, RTC_ALARM_EXTI_LINE);
-
 	return;
 }
 OPTIMIZE_FUNCTION \
@@ -116,7 +128,7 @@ void time_init(void) {
 	return;
 }
 //
-// Set up systick timer
+// Manage the systick timer
 static void systick_init(void) {
 	uint32_t period;
 
@@ -140,100 +152,29 @@ static void systick_init(void) {
 
 	return;
 }
-//
-// Set up RTC
-// The RTC clock is configured in the backup domain so the power interface
-// clock and the backup domain interface clock need to be enabled before this
-// is called.
-// TODO: Load date from backup registers? AN2821 may shed light on that.
-// TODO: Reset BDRST to allow changing RTC settings if they differ from current
-static void RTC_init(void) {
-	BD_write_enable();
-	MODIFY_BITS(RCC->BDCR, RCC_BDCR_RTCSEL|RCC_BDCR_RTCEN,
-		RCC_BDCR_RTCSEL_LSE |
-		RCC_BDCR_RTCEN      | // Enable the RTC
-		0);
-	BD_write_disable();
-
-	// Wait until the RTC registries are synchronized with the RTC core
-	CLEAR_BIT(RTC->CRL, RTC_CRL_RSF);
-	while (!BIT_IS_SET(RTC->CRL, RTC_CRL_RSF)) {
-		// Nothing to do here
-	}
-
-	RTC_cfg_enable(1000);
-	// Set the prescaler
-	WRITE_SPLITREG(G_freq_LSE-1, RTC->PRLH, RTC->PRLL);
-	RTC_cfg_disable(1000);
-
-	NVIC_SetPriority(RTC_Alarm_IRQn, RTC_ALARM_IRQp);
-
+void suspend_systick(void) {
+	CLEAR_BIT(SysTick->CTRL, SysTick_CTRL_TICKINT_Msk|SysTick_CTRL_ENABLE_Msk);
 	return;
 }
-utime_t get_RTC_seconds(void) {
-	uint32_t rtcs;
-
-	READ_SPLITREG(rtcs, RTC->CNTH, RTC->CNTL);
-
-	return rtcs;
-}
-err_t set_RTC_seconds(utime_t s) {
-	err_t res;
-
-	if ((res = RTC_cfg_enable(1000)) == EOK) {
-		WRITE_SPLITREG(s, RTC->CNTH, RTC->CNTL);
-		res = RTC_cfg_disable(1000);
-	}
-
-	return res;
-}
-
-void set_RTC_alarm(utime_t time) {
-	assert(time > 0);
-	time = get_RTC_seconds() + time;
-
-	RTC_cfg_enable(100);
-	WRITE_SPLITREG(time, RTC->ALRH, RTC->ALRL);
-
-	CLEAR_BIT(RTC->CRL, RTC_CRL_ALRF); // Clear the alarm interrupt flag
-	RTC_cfg_disable(100);
-
-	// Clear the EXTI line interrupt flag
-	// This is set to 1 to clear
-	SET_BIT(EXTI->PR, RTC_ALARM_EXTI_LINE);
-	// Enable the alarm EXTI rising-edge trigger
-	// This is mandatory to wake from stop mode
-	SET_BIT(EXTI->RTSR, RTC_ALARM_EXTI_LINE);
-	// Enable the alarm EXTI interrupt
-	SET_BIT(EXTI->IMR, RTC_ALARM_EXTI_LINE);
-
-	NVIC_ClearPendingIRQ(RTC_Alarm_IRQn);
-	NVIC_EnableIRQ(RTC_Alarm_IRQn);
-
-	return;
-}
-void stop_RTC_alarm(void) {
-	NVIC_DisableIRQ(RTC_Alarm_IRQn);
-	NVIC_ClearPendingIRQ(RTC_Alarm_IRQn);
-
-	// Clear the EXTI line interrupt flag
-	// This is set to 1 to clear
-	SET_BIT(EXTI->PR, RTC_ALARM_EXTI_LINE);
-	// Disable the alarm EXTI rising-edge trigger
-	CLEAR_BIT(EXTI->RTSR, RTC_ALARM_EXTI_LINE);
-	// Disable the alarm EXTI interrupt
-	CLEAR_BIT(EXTI->IMR, RTC_ALARM_EXTI_LINE);
-
-	// Clear the alarm interrupt flag
-	CLEAR_BIT(RTC->CRL, RTC_CRL_ALRF);
-
+void resume_systick(void) {
+	SET_BIT(SysTick->CTRL, SysTick_CTRL_TICKINT_Msk|SysTick_CTRL_ENABLE_Msk);
 	return;
 }
 //
-// Configure the remaining timers
+// Manage the RTC
+// This is handled in other files to avoid cluttering this one because the
+// RTC differs so much between STM32 lines
+#define INCLUDED_BY_TIME_C 1
+#if USE_STM32F1_RTC
+# include "time_RTC_STM32F1.c"
+#else
+# include "time_RTC_STM32Fx.c"
+#endif
+//
+// Manage the standard timers
 #define CONFIGURE_PWM_TIMER(TIMx) do { \
 	(TIMx)->CR1 = cr1; \
-	(TIMx)->ARR = 100; \
+	(TIMx)->ARR = (PWM_DUTY_CYCLE_SCALE - 1); \
 	(TIMx)->CCMR1 = ccmr; \
 	(TIMx)->CCMR2 = ccmr; \
 	/* Generate an update event to load the shadow registers */ \
@@ -258,18 +199,30 @@ static void timers_init(void) {
 #ifdef TIM4
 	apb1_enr |= RCC_PERIPH_TIM4;
 #endif
-	clock_init(apb1_enr);
 
 #ifdef TIM1
 	apb2_enr |= RCC_PERIPH_TIM1;
 #endif
+
+#if SELECT_BITS(SLEEP_ALARM_CLOCKEN, RCC_BUS_MASK) == RCC_BUS_APB1
+	apb1_enr |= SLEEP_ALARM_CLOCKEN;
+#else
+	apb2_enr |= SLEEP_ALARM_CLOCKEN;
+#endif
+#if SELECT_BITS(USCOUNTER_CLOCKEN, RCC_BUS_MASK) == RCC_BUS_APB1
+	apb1_enr |= USCOUNTER_CLOCKEN;
+#else
+	apb2_enr |= USCOUNTER_CLOCKEN;
+#endif
+
+	clock_init(apb1_enr);
 	clock_init(apb2_enr);
 
 	//
 	// PWM timers
 	//
-	psc_apb1 = calculate_TIM_prescaler(RCC_BUS_APB1, PWM_MAX_FREQUENCY*PWM_DUTY_CYCLE_SCALE);
-	psc_apb2 = calculate_TIM_prescaler(RCC_BUS_APB2, PWM_MAX_FREQUENCY*PWM_DUTY_CYCLE_SCALE);
+	psc_apb1 = calculate_TIM_prescaler(RCC_BUS_APB1, PWM_APB1_FREQUENCY);
+	psc_apb2 = calculate_TIM_prescaler(RCC_BUS_APB2, PWM_APB2_FREQUENCY);
 	// Auto-reload register buffer is suggested by the reference manual for
 	// reliability in PWM mode
 	cr1 = TIM_CR1_ARPE;
@@ -311,7 +264,7 @@ static void timers_init(void) {
 		(0b0 << TIM_CR1_DIR_Pos  ) | // 0 to use as an upcounter
 		(0b1 << TIM_CR1_OPM_Pos  ) | // 1 to automatically disable on update events
 		0);
-	SLEEP_ALARM_TIM->PSC = calculate_TIM_prescaler(SLEEP_ALARM_CLOCKEN, 1000*TIM_MS_TICKS);
+	SLEEP_ALARM_TIM->PSC = calculate_TIM_prescaler(SLEEP_ALARM_CLOCKEN, 1000*SLEEP_TIM_MS_TICKS);
 	NVIC_SetPriority(SLEEP_ALARM_IRQn, SLEEP_ALARM_IRQp);
 
 	//
@@ -331,7 +284,8 @@ static void timers_init(void) {
 
 	return;
 }
-// hz is the target Hz, e.g. 1000 for 1ms timing
+// hz is the target rate of counter increase, e.g. 1000 to go up 1 each
+// millisecond (or 1000 a second)
 // Clocks:
 // Timers 2-7 and 12-14
 //   PCLK1*1 if PCLK1 prescaler is 1
@@ -347,40 +301,35 @@ static uint16_t calculate_TIM_prescaler(rcc_periph_t tim, uint32_t hz) {
 
 	switch (SELECT_BITS(tim, RCC_BUS_MASK)) {
 	case RCC_BUS_APB1:
-		assert(((G_freq_PCLK1/hz) <= (0xFFFF/2)) || (SELECT_BITS(RCC->CFGR, RCC_CFGR_PPRE1) == 0));
 		pclk = G_freq_PCLK1;
-		prescaler = (SELECT_BITS(RCC->CFGR, RCC_CFGR_PPRE1_2) == 0) ? 1 : 2;
+		prescaler = (G_freq_PCLK1 == G_freq_HCLK) ? 1 : 2;
 		break;
 	case RCC_BUS_APB2:
-		assert(((G_freq_PCLK2/hz) <= (0xFFFF/2)) || (SELECT_BITS(RCC->CFGR, RCC_CFGR_PPRE2) == 0));
 		pclk = G_freq_PCLK2;
-		prescaler = (SELECT_BITS(RCC->CFGR, RCC_CFGR_PPRE2_2) == 0) ? 1 : 2;
+		prescaler = (G_freq_PCLK2 == G_freq_HCLK) ? 1 : 2;
 		break;
 	default:
 		// Shouldn't reach this point
 		assert(false);
 		return 0;
 	}
+	assert(pclk > hz);
+	assert((pclk/hz) <= (0xFFFF/prescaler));
 
 	prescaler *= pclk / hz;
-	assert(prescaler != 0);
 	// A prescaler of 0 divides by 1 so we need to adjust.
-	if (prescaler > 0) {
-		--prescaler;
-	}
+	--prescaler;
 
 	return prescaler;
 }
-void set_sleep_alarm(uint16_t ms) {
+void set_sleep_alarm(uint32_t ms) {
 	assert(ms != 0);
-#if TIM_MS_TICKS > 1
-	assert((0xFFFF/TIM_MS_TICKS) >= ms);
-#endif // TIM_MS_TICKS > 1
+	assert(ms <= SLEEP_TIM_MAX_MS);
 
 	clock_enable(SLEEP_ALARM_CLOCKEN);
 
 	// Set the reload value and generate an update event to load it
-	SLEEP_ALARM_TIM->ARR = ms * TIM_MS_TICKS;
+	SLEEP_ALARM_TIM->ARR = ms * SLEEP_TIM_MS_TICKS;
 	SET_BIT(SLEEP_ALARM_TIM->EGR, TIM_EGR_UG);
 
 	SLEEP_ALARM_TIM->SR = 0x0000;                 // Clear all event flags
@@ -397,8 +346,9 @@ void stop_sleep_alarm(void) {
 
 	//CLEAR_BIT(SLEEP_ALARM_TIM->SR, TIM_SR_UIF);
 	SLEEP_ALARM_TIM->SR = 0;
-	// Configured to disable itself
-	//CLEAR_BIT(SLEEP_ALARM_TIM->CR1, TIM_CR1_CEN);
+	// Configured to disable itself, but this may be called before the alarm
+	// goes off
+	CLEAR_BIT(SLEEP_ALARM_TIM->CR1, TIM_CR1_CEN);
 
 	clock_disable(SLEEP_ALARM_CLOCKEN);
 
@@ -458,7 +408,11 @@ void dumb_delay_cycles(uint32_t cycles) {
 // PWM management
 void pwm_on(pin_t pin, uint16_t duty_cycle) {
 	uint8_t channel;
+	gpio_af_t af = 0;
+	rcc_periph_t TIMxEN;
 	TIM_TypeDef *TIMx;
+
+	duty_cycle -= 1;
 
 	channel = 4;
 	switch (PINID(pin)) {
@@ -473,8 +427,9 @@ void pwm_on(pin_t pin, uint16_t duty_cycle) {
 		--channel;
 		// fall through
 	case PINID_TIM1_CH4:
-		clock_enable(RCC_PERIPH_TIM1);
 		TIMx = TIM1;
+		TIMxEN = RCC_PERIPH_TIM1;
+		af = AF_TIM1;
 		break;
 #endif
 #if USE_TIMER2_PWM
@@ -488,8 +443,9 @@ void pwm_on(pin_t pin, uint16_t duty_cycle) {
 		--channel;
 		// fall through
 	case PINID_TIM2_CH4:
-		clock_enable(RCC_PERIPH_TIM2);
 		TIMx = TIM2;
+		TIMxEN = RCC_PERIPH_TIM2;
+		af = AF_TIM2;
 		break;
 #endif
 #if USE_TIMER3_PWM
@@ -503,8 +459,9 @@ void pwm_on(pin_t pin, uint16_t duty_cycle) {
 		--channel;
 		// fall through
 	case PINID_TIM3_CH4:
-		clock_enable(RCC_PERIPH_TIM3);
 		TIMx = TIM3;
+		TIMxEN = RCC_PERIPH_TIM3;
+		af = AF_TIM3;
 		break;
 #endif
 #if USE_TIMER4_PWM
@@ -518,8 +475,9 @@ void pwm_on(pin_t pin, uint16_t duty_cycle) {
 		--channel;
 		// fall through
 	case PINID_TIM4_CH4:
-		clock_enable(RCC_PERIPH_TIM4);
 		TIMx = TIM4;
+		TIMxEN = RCC_PERIPH_TIM4;
+		af = AF_TIM4;
 		break;
 #endif
 
@@ -529,6 +487,7 @@ void pwm_on(pin_t pin, uint16_t duty_cycle) {
 		break;
 	}
 
+	clock_enable(TIMxEN);
 	switch (channel) {
 	case 1:
 		TIMx->CCR1 = duty_cycle;
@@ -550,7 +509,9 @@ void pwm_on(pin_t pin, uint16_t duty_cycle) {
 	SET_BIT(TIMx->CR1, TIM_CR1_CEN);
 
 	// Enable output by setting the pin to AF PP mode
-	// See section 9.1.11 of the reference manual
+	// See section 9.1.11 (GPIO configurations for device peripherals) of the
+	// STM32F1 reference manual
+	gpio_set_AF(pin, af);
 	gpio_set_mode(pin, GPIO_MODE_PP_AF, GPIO_FLOAT);
 
 END:
@@ -574,7 +535,6 @@ void pwm_off(pin_t pin) {
 		--channel;
 		// fall through
 	case PINID_TIM1_CH4:
-		clock_enable(RCC_PERIPH_TIM1);
 		TIMx = TIM1;
 		TIMxEN = RCC_PERIPH_TIM1;
 		break;
@@ -590,7 +550,6 @@ void pwm_off(pin_t pin) {
 		--channel;
 		// fall through
 	case PINID_TIM2_CH4:
-		clock_enable(RCC_PERIPH_TIM2);
 		TIMx = TIM2;
 		TIMxEN = RCC_PERIPH_TIM2;
 		break;
@@ -606,7 +565,6 @@ void pwm_off(pin_t pin) {
 		--channel;
 		// fall through
 	case PINID_TIM3_CH4:
-		clock_enable(RCC_PERIPH_TIM3);
 		TIMx = TIM3;
 		TIMxEN = RCC_PERIPH_TIM3;
 		break;
@@ -622,7 +580,6 @@ void pwm_off(pin_t pin) {
 		--channel;
 		// fall through
 	case PINID_TIM4_CH4:
-		clock_enable(RCC_PERIPH_TIM4);
 		TIMx = TIM4;
 		TIMxEN = RCC_PERIPH_TIM4;
 		break;
