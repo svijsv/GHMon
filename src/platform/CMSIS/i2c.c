@@ -32,6 +32,7 @@
 */
 #include "i2c.h"
 #include "system.h"
+#include "gpio.h"
 
 
 #if USE_I2C
@@ -72,6 +73,9 @@ void i2c_init(void) {
 	// Start the clock and reset the peripheral
 	clock_init(I2Cx_CLOCKEN);
 
+	gpio_set_AF(I2C_SCL_PIN,  I2Cx_AF);
+	gpio_set_AF(I2C_SDA_PIN,  I2Cx_AF);
+
 	//
 	// Set the frequency (in MHz) of the RCC bus the I2C peripheral is on so
 	// that clock timing can be generated accurately
@@ -94,28 +98,6 @@ void i2c_init(void) {
 		(tmp << I2C_CCR_CCR_Pos) | // Set prescaler
 		0
 		);
-	/*
-	// Dead code left here in case it's useful:
-	//
-	// There's 10^9 ns per second and our target rate is for half a cycle
-	//    F*1000 cycles = 10^9 ns
-	//    F*1 cycles = 10^6 ns
-	//    1 cycle = 10^6 ns / F
-	//    1/2 cycle = (10^6 ns / F)/2 = (10^6) / (F*2)
-	i2c_ns = (1000000 / (I2C_FREQUENCY*2));
-	//    F*10^6 cycles = 10^9 ns
-	//    F*1 cycles = 10^3 ns
-	//    1 cycle = 10^3 ns / F
-	//pclk_ns = 1000/(G_freq_PCLK1/1000000);
-	pclk_ns = 1000000000/(G_freq_PCLK1);
-	//
-	// From the reference manual:
-	//    Tlow = CCR * Tpclk1
-	//    Thigh = CCR * Tpclk1
-	// so:
-	//    Tlow/Tpclk1 = CCR
-	ccr = i2c_ns / pclk_ns;
-	*/
 	//
 	// Configure the I2C maximum rise time
 	// The reference manual gives the formula (1000ns/Tpclk)+1, which becomes
@@ -129,25 +111,35 @@ void i2c_init(void) {
 
 	return;
 }
+static void pins_on(void) {
+	// Peripheral pin modes specified in the STM32F1 reference manual section
+	// 9.1.11
+	// I can't find specifications for the other devices, I'm assuming they
+	// just need to be AF
+	gpio_set_mode(I2C_SCL_PIN, GPIO_MODE_OD_AF, GPIO_FLOAT);
+	gpio_set_mode(I2C_SDA_PIN, GPIO_MODE_OD_AF, GPIO_FLOAT);
 
+	return;
+}
+static void pins_off(void) {
+	gpio_set_mode(I2C_SCL_PIN, GPIO_MODE_HiZ, GPIO_FLOAT);
+	gpio_set_mode(I2C_SDA_PIN, GPIO_MODE_HiZ, GPIO_FLOAT);
+
+	return;
+}
 void i2c_on(void) {
 	// Enable the peripheral before switching the pin GPIO mode to prevent the
 	// pins from briefly pulling low
 	clock_enable(I2Cx_CLOCKEN);
 	SET_BIT(I2Cx->CR1, I2C_CR1_PE);
-
-	// Reference manual section 9.1.11 lists pin configuration for peripherals.
-	gpio_set_mode(I2C_SCL_PIN, GPIO_MODE_OD_AF, GPIO_FLOAT);
-	gpio_set_mode(I2C_SDA_PIN, GPIO_MODE_OD_AF, GPIO_FLOAT);
+	pins_on();
 
 	return;
 }
 void i2c_off(void) {
 	// Switch the pin GPIO mode before disabling the peripheral to prevent the
 	// pins from briefly pulling low
-	gpio_set_mode(I2C_SCL_PIN, GPIO_MODE_HiZ, GPIO_FLOAT);
-	gpio_set_mode(I2C_SDA_PIN, GPIO_MODE_HiZ, GPIO_FLOAT);
-
+	pins_off();
 	CLEAR_BIT(I2Cx->CR1, I2C_CR1_PE);
 	clock_disable(I2Cx_CLOCKEN);
 

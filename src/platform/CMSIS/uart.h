@@ -43,39 +43,61 @@
 //
 // Handle UARTx
 // USART1 remapped
-#if (PINID(UART_TX_PIN) == PINID_B6) && (PINID(UART_RX_PIN) == PINID_B7)
+#if (PINID(UART_TX_PIN) == PIN_UART1_REMAP_TX) && (PINID(UART_RX_PIN) == PIN_UART1_REMAP_RX)
 # define UART1_DO_REMAP 1
+#endif
+
+#if USE_STM32F1_GPIO
+# define IS_UART1_TX ((PINID(UART_TX_PIN) == PIN_UART1_TX) || UART1_DO_REMAP)
+# define IS_UART1_RX ((PINID(UART_RX_PIN) == PIN_UART1_RX) || UART1_DO_REMAP)
+#else
+# define IS_UART1_TX ((PINID(UART_TX_PIN) == PIN_UART1_TX) || (PINID(UART_TX_PIN) == PIN_UART1_REMAP_TX))
+# define IS_UART1_RX ((PINID(UART_RX_PIN) == PIN_UART1_RX) || (PINID(UART_RX_PIN) == PIN_UART1_REMAP_RX))
 #endif
 // USART2 and USART3 can be remapped, but the remapped pins aren't accessible
 // on the bluepill
+#define IS_UART2_TX ((PINID(UART_TX_PIN) == PIN_UART2_TX))
+#define IS_UART2_RX ((PINID(UART_RX_PIN) == PIN_UART2_RX))
+#define IS_UART3_TX ((PINID(UART_TX_PIN) == PIN_UART3_TX))
+#define IS_UART3_RX ((PINID(UART_RX_PIN) == PIN_UART3_RX))
 
 // USART1
-#if ((PINID(UART_TX_PIN) == PINID_A9) && (PINID(UART_RX_PIN) == PINID_A10)) || UART1_DO_REMAP
+#if IS_UART1_TX && IS_UART1_RX
 # define UARTx USART1
 # define UARTx_IRQn       USART1_IRQn
 # define UARTx_IRQHandler USART1_IRQHandler
 # define UARTx_CLOCKEN    RCC_PERIPH_UART1
-# define UARTx_BUSFREQ    G_freq_PCLK2
+# define UARTx_AF         AF_UART1
 
 // USART2
-#elif (PINID(UART_TX_PIN) == PINID_A2) && (PINID(UART_RX_PIN) == PINID_A3)
+#elif IS_UART2_TX && IS_UART2_RX
 # define UARTx USART2
 # define UARTx_IRQn       USART2_IRQn
 # define UARTx_IRQHandler USART2_IRQHandler
 # define UARTx_CLOCKEN    RCC_PERIPH_UART2
-# define UARTx_BUSFREQ    G_freq_PCLK1
+# define UARTx_AF         AF_UART2
 
 // USART3
-#elif (PINID(UART_TX_PIN) == PINID_B10) && (PINID(UART_RX_PIN) == PINID_B11)
+#elif IS_UART3_TX && IS_UART3_RX
 # define UARTx USART3
 # define UARTx_IRQn       USART3_IRQn
 # define UARTx_IRQHandler USART3_IRQHandler
 # define UARTx_CLOCKEN    RCC_PERIPH_UART3
-# define UARTx_BUSFREQ    G_freq_PCLK1
+# define UARTx_AF         AF_UART3
 
 #else
 # error "Can't determine UART peripheral"
 #endif // UARTx
+
+#if (UARTx_CLOCKEN & RCC_BUS_MASK) == RCC_BUS_APB1
+# define UARTx_BUSFREQ G_freq_PCLK1
+#elif (UARTx_CLOCKEN & RCC_BUS_MASK) == RCC_BUS_APB2
+# define UARTx_BUSFREQ G_freq_PCLK2
+#elif (UARTx_CLOCKEN & RCC_BUS_MASK) == RCC_BUS_AHB1
+# define UARTx_BUSFREQ G_freq_HCLK
+#else
+# error "Can't determine UART bus clock"
+#endif
 
 
 /*
@@ -91,7 +113,7 @@
 /*
 * Function prototypes (defined in uart.c)
 */
-// Initialize the UART interface at the chosen baud rate
+// Initialize the UART interface
 // The interface is always configured as 8 data bits with 1 stop bit and no
 // parity bit with a baud rate of UART_BAUDRATE.
 err_t uart_init(void);

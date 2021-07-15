@@ -32,6 +32,7 @@
 */
 #include "uart.h"
 #include "system.h"
+#include "gpio.h"
 
 
 #if USE_SERIAL
@@ -80,12 +81,14 @@ void UARTx_IRQHandler(void) {
 err_t uart_init(void) {
 	clock_init(UARTx_CLOCKEN);
 
+	gpio_set_AF(UART_TX_PIN, UARTx_AF);
+	gpio_set_AF(UART_RX_PIN, UARTx_AF);
+
 	MODIFY_BITS(UARTx->CR1, USART_CR1_M|USART_CR1_PCE|USART_CR1_PS|USART_CR1_RXNEIE|USART_CR1_UE|USART_CR1_TE|USART_CR1_RE,
 		(0b0 << USART_CR1_M_Pos     ) | // 0 for 8 data bits
 		(0b0 << USART_CR1_PCE_Pos   ) | // 0 to disable parity
 		(0b0 << USART_CR1_PS_Pos    ) | // 0 for even parity, 1 for odd parity
 		(0b1 << USART_CR1_RXNEIE_Pos) | // RXNE interrupt enable
-		(0b1 << USART_CR1_UE_Pos    ) | // Enable UART
 		(0b1 << USART_CR1_TE_Pos    ) | // Enable transmission
 		(0b1 << USART_CR1_RE_Pos    ) | // Enable reception
 		0);
@@ -95,35 +98,41 @@ err_t uart_init(void) {
 
 	UARTx->BRR = calculate_baud_div(UART_BAUDRATE);
 
-	// Peripheral pin modes specified in reference manual section 9.1.11
-	gpio_set_mode(UART_TX_PIN, GPIO_MODE_PP_AF, GPIO_LOW);
-	gpio_set_mode(UART_RX_PIN, GPIO_MODE_IN,    GPIO_FLOAT);
-
 	NVIC_SetPriority(UARTx_IRQn, UARTx_IRQp);
 
 	// Don't turn UART off after initializing; that's only done for hibernation
-	// to put the pins in HiZ mode.
-	// clock_disable(UARTx_CLOCKEN);
+	// when it can't be used anyway
+	//uart_off();
+	uart_on();
 
 	return EOK;
 }
+static void pins_on(void) {
+	// Peripheral pin modes specified in the STM32F1 reference manual section
+	// 9.1.11
+	// I can't find specifications for the other devices, I'm assuming they
+	// just need to be AF
+	gpio_set_mode(UART_TX_PIN, GPIO_MODE_PP_AF, GPIO_FLOAT);
+	gpio_set_mode(UART_RX_PIN, GPIO_MODE_IN_AF, GPIO_FLOAT);
+
+	return;
+}
+static void pins_off(void) {
+	gpio_set_mode(UART_TX_PIN, GPIO_MODE_HiZ, GPIO_FLOAT);
+	gpio_set_mode(UART_RX_PIN, GPIO_MODE_HiZ, GPIO_FLOAT);
+
+	return;
+}
 void uart_on(void) {
 	clock_enable(UARTx_CLOCKEN);
-
-	// Peripheral pin modes specified in reference manual section 9.1.11
-	gpio_set_mode(UART_TX_PIN, GPIO_MODE_PP_AF, GPIO_LOW);
-	gpio_set_mode(UART_RX_PIN, GPIO_MODE_IN,    GPIO_FLOAT);
-
+	pins_on();
 	SET_BIT(UARTx->CR1, USART_CR1_UE);
 
 	return;
 }
 void uart_off(void) {
 	CLEAR_BIT(UARTx->CR1, USART_CR1_UE);
-
-	gpio_set_mode(UART_TX_PIN, GPIO_MODE_HiZ, GPIO_FLOAT);
-	gpio_set_mode(UART_RX_PIN, GPIO_MODE_HiZ, GPIO_FLOAT);
-
+	pins_off();
 	clock_disable(UARTx_CLOCKEN);
 
 	return;
@@ -175,7 +184,7 @@ END:
 }
 
 static uint16_t calculate_baud_div(uint32_t baud) {
-	// From section 27.3.4 of the reference manual:
+	// From section 27.3.4 of the STM32F1 reference manual:
 	//   baud = pclk/(16*div)
 	// Therefore:
 	//   (16*div) = pclk/baud

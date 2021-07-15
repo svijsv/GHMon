@@ -20,6 +20,9 @@
 // spi.c
 // Manage the SPI peripheral
 // NOTES:
+//    According to the STM32F4 errata sheet, the last bit received in master
+//    mode can be corrupted if the GPIO clock is set too slow for the APB bus
+//    clock. Bus speeds below 28MHz would seem to be unaffected by this.
 //
 
 #ifdef __cplusplus
@@ -32,6 +35,7 @@
 */
 #include "spi.h"
 #include "system.h"
+#include "gpio.h"
 
 
 #if USE_SPI
@@ -39,6 +43,14 @@
 /*
 * Static values
 */
+#define DIV_256 (0b111 << SPI_CR1_BR_Pos)
+#define DIV_128 (0b110 << SPI_CR1_BR_Pos)
+#define DIV_64  (0b101 << SPI_CR1_BR_Pos)
+#define DIV_32  (0b100 << SPI_CR1_BR_Pos)
+#define DIV_16  (0b011 << SPI_CR1_BR_Pos)
+#define DIV_8   (0b010 << SPI_CR1_BR_Pos)
+#define DIV_4   (0b001 << SPI_CR1_BR_Pos)
+#define DIV_2   (0b000 << SPI_CR1_BR_Pos)
 
 
 /*
@@ -71,6 +83,10 @@ void spi_init(void) {
 	// Start the clock and reset the peripheral
 	clock_init(SPIx_CLOCKEN);
 
+	gpio_set_AF(SPI_SCK_PIN,  SPIx_AF);
+	gpio_set_AF(SPI_MISO_PIN, SPIx_AF);
+	gpio_set_AF(SPI_MOSI_PIN, SPIx_AF);
+
 	// Set SPI parameters
 	// Per http:// elm-chan.org/docs/mmc/mmc_e.html, this needs to correspond
 	// to SPI mode 0 for use with SD cards but mode 3 sometimes works too.
@@ -94,41 +110,55 @@ void spi_init(void) {
 static uint32_t calculate_prescaler(uint32_t goal) {
 	uint32_t scaler;
 
-	// Prescaler values taken from the reference manual
-	scaler = 0; // Clock/2
 	if ((SPIx_BUSFREQ / 256) >= goal) {
-		scaler = 0b111; // Clock/256
+		scaler = DIV_256;
 	} else
 	if ((SPIx_BUSFREQ / 128) >= goal) {
-		scaler = 0b110; // Clock/128
+		scaler = DIV_128;
 	} else
 	if ((SPIx_BUSFREQ / 64) >= goal) {
-		scaler = 0b101; // Clock/64
+		scaler = DIV_64;
 	} else
 	if ((SPIx_BUSFREQ / 32) >= goal) {
-		scaler = 0b100; // Clock/32
+		scaler = DIV_32;
 	} else
 	if ((SPIx_BUSFREQ / 16) >= goal) {
-		scaler = 0b011; // Clock/16
+		scaler = DIV_16;
 	} else
 	if ((SPIx_BUSFREQ / 8) >= goal) {
-		scaler = 0b010; // Clock/8
+		scaler = DIV_8;
 	} else
 	if ((SPIx_BUSFREQ / 4) >= goal) {
-		scaler = 0b001; // Clock/4
+		scaler = DIV_4;
+	} else {
+		scaler = DIV_2;
 	}
 
-	return (scaler << SPI_CR1_BR_Pos);
+	return scaler;
 }
+static void pins_on(void) {
+	// Peripheral pin modes specified in the STM32F1 reference manual section
+	// 9.1.11
+	// I can't find specifications for the other devices, I'm assuming they
+	// just need to be AF
+	gpio_set_mode(SPI_SCK_PIN,  GPIO_MODE_PP_AF, GPIO_FLOAT);
+	gpio_set_mode(SPI_MOSI_PIN, GPIO_MODE_PP_AF, GPIO_FLOAT);
+	gpio_set_mode(SPI_MISO_PIN, GPIO_MODE_IN_AF, GPIO_FLOAT);
 
+	return;
+}
+static void pins_off(void) {
+	gpio_set_mode(SPI_SCK_PIN,  GPIO_MODE_HiZ, GPIO_FLOAT);
+	gpio_set_mode(SPI_MOSI_PIN, GPIO_MODE_HiZ, GPIO_FLOAT);
+	gpio_set_mode(SPI_MISO_PIN, GPIO_MODE_HiZ, GPIO_FLOAT);
+
+	return;
+}
 void spi_on(void) {
 	clock_enable(SPIx_CLOCKEN);
 	SET_BIT(SPIx->CR1, SPI_CR1_SPE);
 
-	// Reference manual section 9.1.11 lists pin configuration for peripherals.
-	gpio_set_mode(SPI_SCK_PIN,  GPIO_MODE_PP_AF, GPIO_LOW);
-	gpio_set_mode(SPI_MOSI_PIN, GPIO_MODE_PP_AF, GPIO_LOW);
-	gpio_set_mode(SPI_MISO_PIN, GPIO_MODE_IN,    GPIO_HIGH);
+	pins_on();
 
 	return;
 }
@@ -155,9 +185,7 @@ void spi_off(void) {
 		}
 	}
 
-	gpio_set_mode(SPI_SCK_PIN,  GPIO_MODE_HiZ, GPIO_FLOAT);
-	gpio_set_mode(SPI_MOSI_PIN, GPIO_MODE_HiZ, GPIO_FLOAT);
-	gpio_set_mode(SPI_MISO_PIN, GPIO_MODE_HiZ, GPIO_FLOAT);
+	pins_off();
 
 	CLEAR_BIT(SPIx->CR1, SPI_CR1_SPE);
 	clock_disable(SPIx_CLOCKEN);

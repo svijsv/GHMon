@@ -45,26 +45,56 @@
 #if USE_I2C
 //
 // I2C1 remapped
-#if (PINID(I2C_SCL_PIN) == PINID_B8) && (PINID(I2C_SDA_PIN) == PINID_B9)
+#if (PINID(I2C_SCL_PIN) == PIN_I2C1_REMAP_SCL) && (PINID(I2C_SDA_PIN) == PIN_I2C1_REMAP_SDA)
 # define I2C1_DO_REMAP 1
 #endif
+
+#if USE_STM32F1_GPIO
+# define IS_I2C1_SDA ((PINID(I2C_SDA_PIN) == PIN_I2C1_SDA) || I2C1_DO_REMAP)
+# define IS_I2C1_SCL ((PINID(I2C_SCL_PIN) == PIN_I2C1_SCL) || I2C1_DO_REMAP)
+# define IS_I2C2_SDA ((PINID(I2C_SDA_PIN) == PIN_I2C2_SDA))
+#else
+# define IS_I2C1_SDA ((PINID(I2C_SDA_PIN) == PIN_I2C1_SDA) || (PINID(I2C_SDA_PIN) == PIN_I2C1_REMAP_SDA))
+# define IS_I2C1_SCL ((PINID(I2C_SCL_PIN) == PIN_I2C1_SCL) || (PINID(I2C_SCL_PIN) == PIN_I2C1_REMAP_SCL))
+# define IS_I2C2_SDA ((PINID(I2C_SDA_PIN) == PIN_I2C2_SDA) || (PINID(I2C_SDA_PIN) == PIN_I2C2_REMAP_SDA))
+#endif
+#define IS_I2C2_SCL ((PINID(I2C_SCL_PIN) == PIN_I2C2_SCL))
+#define IS_I2C3_SDA ((PINID(I2C_SDA_PIN) == PIN_I2C3_SDA))
+#define IS_I2C3_SCL ((PINID(I2C_SCL_PIN) == PIN_I2C3_SCL))
+
 //
 // I2C1
-#if ((PINID(I2C_SCL_PIN) == PINID_B6) && (PINID(I2C_SDA_PIN) == PINID_B7)) || I2C1_DO_REMAP
+#if IS_I2C1_SDA && IS_I2C1_SCL
 # define I2Cx I2C1
 # define I2Cx_CLOCKEN  RCC_PERIPH_I2C1
-# define I2Cx_BUSFREQ  G_freq_PCLK1
+# define I2Cx_AF       AF_I2C1
 //
 // I2C2
-#elif (PINID(I2C_SCL_PIN) == PINID_B10) && (PINID(I2C_SDA_PIN) == PINID_B11)
+#elif IS_I2C2_SDA && IS_I2C2_SCL
 # define I2Cx I2C2
 # define I2Cx_CLOCKEN  RCC_PERIPH_I2C2
-# define I2Cx_BUSFREQ  G_freq_PCLK1
+# define I2Cx_AF       AF_I2C2
+//
+// I2C3
+#elif IS_I2C3_SDA && IS_I2C3_SCL
+# define I2Cx I2C3
+# define I2Cx_CLOCKEN  RCC_PERIPH_I2C3
+# define I2Cx_AF       AF_I2C3
 
 #else
 # error "Can't determine I2C peripheral"
 #endif // I2Cx
 #endif // USE_I2C
+
+#if (I2Cx_CLOCKEN & RCC_BUS_MASK) == RCC_BUS_APB1
+# define I2Cx_BUSFREQ G_freq_PCLK1
+#elif (I2Cx_CLOCKEN & RCC_BUS_MASK) == RCC_BUS_APB2
+# define I2Cx_BUSFREQ G_freq_PCLK2
+#elif (I2Cx_CLOCKEN & RCC_BUS_MASK) == RCC_BUS_AHB1
+# define I2Cx_BUSFREQ G_freq_HCLK
+#else
+# error "Can't determine I2C bus clock"
+#endif
 
 
 /*
