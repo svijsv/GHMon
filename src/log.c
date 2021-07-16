@@ -473,11 +473,16 @@ static bool buffer_is_full(void) {
 }
 static void buffer_line(utime_t now) {
 	log_buffer_t *line;
+	uint lineno;
 
 	assert(log_buffer.tail <  LOGFILE_BUFFER_COUNT);
 	assert(log_buffer.size <= LOGFILE_BUFFER_COUNT);
 
-	LOGGER("Buffering log line %u of %u", (uint )(log_buffer.size+1), (uint )LOGFILE_BUFFER_COUNT);
+	lineno = log_buffer.size+1;
+	if (lineno > LOGFILE_BUFFER_COUNT) {
+		lineno = LOGFILE_BUFFER_COUNT;
+	}
+	LOGGER("Buffering log line %u of %u", (uint )lineno, (uint )LOGFILE_BUFFER_COUNT);
 
 	line = &log_buffer.lines[log_buffer.tail];
 	line->uptime      = now;
