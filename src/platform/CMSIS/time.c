@@ -264,20 +264,14 @@ static void timers_init(void) {
 		(0b0 << TIM_CR1_DIR_Pos  ) | // 0 to use as an upcounter
 		(0b1 << TIM_CR1_OPM_Pos  ) | // 1 to automatically disable on update events
 		0);
-	SLEEP_ALARM_TIM->PSC = calculate_TIM_prescaler(SLEEP_ALARM_CLOCKEN, 1000*SLEEP_TIM_MS_TICKS);
+	G_sleep_alarm_psc = calculate_TIM_prescaler(SLEEP_ALARM_CLOCKEN, 1000*SLEEP_TIM_MS_TICKS);
+	SLEEP_ALARM_TIM->PSC = G_sleep_alarm_psc;
 	NVIC_SetPriority(SLEEP_ALARM_IRQn, SLEEP_ALARM_IRQp);
 
 	//
 	// USCOUNTER timer
 	//
-	MODIFY_BITS(USCOUNTER_TIM->CR1, TIM_CR1_ARPE|TIM_CR1_CMS|TIM_CR1_DIR|TIM_CR1_OPM,
-		(0b0  << TIM_CR1_ARPE_Pos) | // 0 to disable reload register buffer
-		(0b00 << TIM_CR1_CMS_Pos ) | // 0 to disable bidirectional counting
-		(0b0 << TIM_CR1_DIR_Pos  ) | // 0 to use as an upcounter
-		(0b1 << TIM_CR1_OPM_Pos  ) | // 1 to automatically disable on update events
-		0);
-	USCOUNTER_TIM->PSC = calculate_TIM_prescaler(USCOUNTER_CLOCKEN, 1000000);
-	USCOUNTER_TIM->ARR = 0xFFFF;
+	G_uscounter_psc = calculate_TIM_prescaler(USCOUNTER_CLOCKEN, 1000000);
 
 	clock_disable(apb1_enr);
 	clock_disable(apb2_enr);
@@ -344,7 +338,9 @@ void stop_sleep_alarm(void) {
 	NVIC_DisableIRQ(SLEEP_ALARM_IRQn);
 	NVIC_ClearPendingIRQ(SLEEP_ALARM_IRQn);
 
-	//CLEAR_BIT(SLEEP_ALARM_TIM->SR, TIM_SR_UIF);
+	// Disable update interrupts
+	CLEAR_BIT(SLEEP_ALARM_TIM->DIER, TIM_DIER_UIE);
+	// Clear all event flags
 	SLEEP_ALARM_TIM->SR = 0;
 	// Configured to disable itself, but this may be called before the alarm
 	// goes off

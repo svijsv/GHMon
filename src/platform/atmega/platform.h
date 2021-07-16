@@ -49,7 +49,6 @@ typedef struct {
 } gpio_quick_t;
 #define GPIO_QUICK_T_IS_DEFINED 1
 
-
 /*
 * Static values
 */

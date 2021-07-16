@@ -262,13 +262,30 @@ extern volatile utime_t G_sys_msticks;
 #endif
 
 // Use the micro-second counter
-#if defined(TIM9)
-# define USCOUNTER_TIM TIM9
+uint16_t G_uscounter_psc;
+uint16_t G_sleep_alarm_psc;
+// Because time.h is local to the CMSIS backend the timers need to be defined
+// here
+// This definition must be kept in sync with the corresponding definitions in
+// time.h
+#if defined(TIM5)
+# define SLEEP_ALARM_TIM TIM5
 #else
-# define USCOUNTER_TIM TIM3
+# define SLEEP_ALARM_TIM TIM2
 #endif
+// Timers 2 and 5 have 16 bit counters on the STM32F1s and 32 bit counters
+// on the other lines
+#if defined(STM32F1)
+# define SLEEP_TIM_MAX_CNT 0xFFFF
+#else
+# define SLEEP_TIM_MAX_CNT 0xFFFFFFFF
+#endif
+#define USCOUNTER_TIM         SLEEP_ALARM_TIM
+#define USCOUNTER_TIM_MAX_CNT SLEEP_TIM_MAX_CNT
 #define USCOUNTER_START() \
 	do { \
+		USCOUNTER_TIM->PSC = G_uscounter_psc; \
+		USCOUNTER_TIM->ARR = USCOUNTER_TIM_MAX_CNT; \
 		SET_BIT(USCOUNTER_TIM->EGR, TIM_EGR_UG); /* Generate an update event to reset the counter */ \
 		SET_BIT(USCOUNTER_TIM->CR1, TIM_CR1_CEN); /* Enable the timer */ \
 	} while (0);
@@ -276,6 +293,7 @@ extern volatile utime_t G_sys_msticks;
 	do { \
 		(counter) = USCOUNTER_TIM->CNT; \
 		CLEAR_BIT(USCOUNTER_TIM->CR1, TIM_CR1_CEN); /* Disable the timer */ \
+		USCOUNTER_TIM->PSC = G_sleep_alarm_psc; \
 	} while (0);
 //#define USCOUNTER_GET() (USCOUNTER_TIM->CNT)
 

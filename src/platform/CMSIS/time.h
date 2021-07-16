@@ -23,8 +23,8 @@
 //   Prototypes for most of the related functions are in interface.h
 //
 //   PWM is supported only for timers 1-4 and only on the default pins for
-//   the STM32F1 lines. Timers 2 and 3 may be used for other tasks and the
-//   others may be absent depending on platform.
+//   the STM32F1 lines. Timer 2 may be used for other tasks and the others
+//   may be absent depending on platform.
 //
 
 #ifdef __cplusplus
@@ -57,16 +57,15 @@
 // Other STM32 MCUs may have more or less than these
 //
 // Sleep alarm timer
-// If this changes, uncomment the code for timer 2 PWM and comment out the
-// PWM code for the new timer in time.c
+// SLEEP_ALARM_TIM is defined in platform.h
 #if defined(TIM5)
-# define SLEEP_ALARM_TIM       TIM5
+//# define SLEEP_ALARM_TIM       TIM5
 # define SLEEP_ALARM_CLOCKEN   RCC_PERIPH_TIM5
 # define SLEEP_ALARM_IRQn      TIM5_IRQn
 # define SleepAlarm_IRQHandler TIM5_IRQHandler
 # define USE_TIMER2_PWM 1
 #else
-# define SLEEP_ALARM_TIM       TIM2
+//# define SLEEP_ALARM_TIM       TIM2
 # define SLEEP_ALARM_CLOCKEN   RCC_PERIPH_TIM2
 # define SLEEP_ALARM_IRQn      TIM2_IRQn
 # define SleepAlarm_IRQHandler TIM2_IRQHandler
@@ -92,23 +91,22 @@
 #endif
 // Timers 2 and 5 have 16 bit counters on the STM32F1s and 32 bit counters
 // in other lines
+// This is defined in platform.h
+/*
 #if defined(STM32F1)
-# define SLEEP_TIM_MAX_MS (0xFFFF / SLEEP_TIM_MS_TICKS)
+# define SLEEP_TIM_MAX_CNT 0xFFFF
 #else
-# define SLEEP_TIM_MAX_MS (0xFFFFFFFF / SLEEP_TIM_MS_TICKS)
+# define SLEEP_TIM_MAX_CNT 0xFFFFFFFF
 #endif
+*/
+#define SLEEP_TIM_MAX_MS (SLEEP_TIM_MAX_CNT / SLEEP_TIM_MS_TICKS)
+
 //
 // Micro-second counter timer
 // USCOUNTER_TIM is #defined in platform.h for convenience
-#if defined(TIM9)
-//# define USCOUNTER_TIM TIM9
-# define USCOUNTER_CLOCKEN RCC_PERIPH_TIM9
-# define USE_TIMER3_PWM 1
-#else
-//# define USCOUNTER_TIM TIM3
-# define USCOUNTER_CLOCKEN RCC_PERIPH_TIM3
-# define USE_TIMER3_PWM 0
-#endif
+//#define USCOUNTER_TIM   SLEEP_ALARM_TIM
+#define USCOUNTER_CLOCKEN SLEEP_ALARM_CLOCKEN
+
 //
 // Timers used for PWM output
 // The timers used for the sleep alarm and the microsecond counter can't be
@@ -134,12 +132,12 @@
 #endif
 /*
 #ifdef TIM2
-# define USE_TIMER2_PWM 0
-#endif
-#ifdef TIM3
-# define USE_TIMER3_PWM 0
+# define USE_TIMER2_PWM 1
 #endif
 */
+#ifdef TIM3
+# define USE_TIMER3_PWM 1
+#endif
 #ifdef TIM4
 # define USE_TIMER4_PWM 1
 #endif
