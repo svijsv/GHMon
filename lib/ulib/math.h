@@ -116,6 +116,9 @@ FIXEDP_ITYPE log10_fixedp(FIXEDP_ITYPE x);
 // Absolute value of an integer, naive-but-simple approach
 #define ABS(x) (((x) > 0) ? (x) : -(x))
 
+// Round a division instead of truncating
+#define DIV_ROUNDED(n, d) ((n + (d/2)) / d)
+
 // Quick power-of-2 division for unsigned ints
 #define SHIFT_DIV_2(x)    ((x) >>  1)
 #define SHIFT_DIV_4(x)    ((x) >>  2)
