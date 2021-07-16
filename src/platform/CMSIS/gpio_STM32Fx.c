@@ -162,7 +162,7 @@ void gpio_set_AF(pin_t pin, gpio_af_t af) {
 void gpio_set_mode(pin_t pin, gpio_mode_t mode, gpio_state_t istate) {
 	GPIO_TypeDef* port;
 	uint8_t pinno, pos2;
-	uint32_t pinmask, mask2;
+	uint32_t pinmask, mask2, bsrr = 0;
 	uint32_t cfg, otype = 0, pull;
 
 	assert(pin != 0);
@@ -183,11 +183,11 @@ void gpio_set_mode(pin_t pin, gpio_mode_t mode, gpio_state_t istate) {
 		pull = NO_PULL;
 		switch (istate) {
 		case GPIO_HIGH:
-			port->BSRR = pinmask;
+			bsrr = pinmask;
 			break;
 		case GPIO_FLOAT: // Shut the compiler up
 		case GPIO_LOW:
-			port->BSRR = pinmask << GPIO_BSRR_BR0_Pos;
+			bsrr = pinmask << GPIO_BSRR_BR0_Pos;
 			break;
 		}
 		break;
@@ -206,7 +206,6 @@ void gpio_set_mode(pin_t pin, gpio_mode_t mode, gpio_state_t istate) {
 			pull = NO_PULL;
 			break;
 		}
-		pull = pull;
 		break;
 	case GPIO_MODE_RESET:
 	case GPIO_MODE_AIN:
@@ -244,6 +243,7 @@ void gpio_set_mode(pin_t pin, gpio_mode_t mode, gpio_state_t istate) {
 		cfg = MODE_ANALOG;
 		break;
 	}
+	port->BSRR = bsrr;
 	pull = pull << pos2;
 	MODIFY_BITS(port->PUPDR, mask2, pull);
 	otype = otype << pinno;

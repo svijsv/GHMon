@@ -218,7 +218,7 @@ void check_sensors() {
 #endif // USE_I2C_SENSORS
 
 	for (uiter_t i = 0; i < SENSOR_COUNT; ++i) {
-		s = &G_sensors[i];
+		//s = &G_sensors[i];
 		type = SENSORS[i].type;
 
 		if (sensor_dispatch[type].update != NULL) {
