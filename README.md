@@ -1,7 +1,7 @@
 ## Introduction
 GHMon is a configurable low-power firmware for autonomous small-scale
-greenhouse control and data logging. At present it supports STM32F103-based
-Bluepill and ATMega328-based Arduino devices with wired resistance- and
+greenhouse control and data logging. At present it supports STM32F103-,
+STM32F4-, and ATMega328-based devices with wired resistance- and
 voltage-based sensors, DHT11 temperature/humidity sensors, and BMP280/BME280
 temperature/air pressure/humidity sensors.
 
