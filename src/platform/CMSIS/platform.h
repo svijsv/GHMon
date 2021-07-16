@@ -80,6 +80,18 @@ typedef struct {
 	uint32_t mask;
 } gpio_quick_t;
 #define GPIO_QUICK_T_IS_DEFINED 1
+typedef enum {
+	GPIO_MODE_RESET = 0, // Reset state of the pin
+	GPIO_MODE_PP,    // Push-pull output
+	GPIO_MODE_PP_AF, // Alternate-function push-pull output
+	GPIO_MODE_OD,    // Open-drain output
+	GPIO_MODE_OD_AF, // Alternate-function open-drain output
+	GPIO_MODE_IN,    // Input
+	GPIO_MODE_IN_AF, // Alternate-function input
+	GPIO_MODE_AIN,   // Analog input
+	GPIO_MODE_HiZ    // High-impedence mode
+} gpio_mode_t;
+#define GPIO_MODE_T_IS_DEFINED 1
 
 
 /*

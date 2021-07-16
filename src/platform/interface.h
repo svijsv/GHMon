@@ -138,19 +138,19 @@ typedef enum {
 	GPIO_HIGH = 1,
 	GPIO_FLOAT
 } gpio_state_t;
+#if ! GPIO_MODE_T_IS_DEFINED
 // Define the operation mode of a GPIO pin
 // Some modes may be absent or aliased to other modes depending on platform
+// Platforms that define their own gpio_mode_t must include these values
 typedef enum {
 	GPIO_MODE_RESET = 0, // Reset state of the pin
 	GPIO_MODE_PP,    // Push-pull output
-	GPIO_MODE_PP_AF, // Alternate-function push-pull output
 	GPIO_MODE_OD,    // Open-drain output
-	GPIO_MODE_OD_AF, // Alternate-function open-drain output
 	GPIO_MODE_IN,    // Input
-	GPIO_MODE_IN_AF, // Alternate-function input
 	GPIO_MODE_AIN,   // Analog input
 	GPIO_MODE_HiZ    // High-impedence mode
 } gpio_mode_t;
+#endif
 #if ! PIN_T_IS_DEFINED
 // An identifier for MCU pins
 // Using an int is simpler than a struct because I don't need to define
