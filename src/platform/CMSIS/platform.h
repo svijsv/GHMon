@@ -38,8 +38,9 @@
 
 // CMSIS header files
 // Both ulib/bits.h and stm32fXxx.h define the SET_BIT() and CLEAR_BIT()
-// macros; they're identical so use whichever one we can get to not cause the
-// compiler to complain about a redefinition
+// macros
+#pragma push_macro("SET_BIT")
+#pragma push_macro("CLEAR_BIT")
 #undef SET_BIT
 #undef CLEAR_BIT
 #if defined(STM32F1)
@@ -66,6 +67,8 @@
 #else
 # error "Unsupported architecture"
 #endif
+#pragma pop_macro("SET_BIT")
+#pragma pop_macro("CLEAR_BIT")
 // There are macros with the same name as these but different functions in
 // use
 #undef READ_REG
