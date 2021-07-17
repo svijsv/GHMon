@@ -38,6 +38,8 @@
 //       * Add it to sensor_devcfg_t if required
 //       * Add it to sensor_devcache_t if required
 //       * Add USE_x_SENSORS to config/templates/config.h
+//       * Add a (commented-out) example to the template configuration
+//
 
 
 #ifdef __cplusplus
@@ -78,7 +80,9 @@ uint16_t sensor_read_ADC(uiter_t si);
 //
 // Sensor type names
 //
-// Devices with multiple internal sensors need one type per sensor
+// Devices with multiple internal sensors need one type per sensor, and each
+// type should use a separate #define so that it's easy to see here what the
+// options are
 //
 // There's no way to (even hackily) auto-increment macros which is what I
 // would need to avoid having to add each sensor to an enum manually, so

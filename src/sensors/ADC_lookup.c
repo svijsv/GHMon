@@ -45,7 +45,7 @@ void sensor_init_adc_lookup(uiter_t si) {
 
 	// This wouldn't actually cause any internal problems, but it indicates
 	// the structure was never set
-	if (BIT_IS_SET(cflags, SENS_FLAG_OHMS) && (dev_cfg->calibration == 0)) {
+	if (BIT_IS_SET(cflags, SENS_FLAG_OHMS) && (dev_cfg->series_R_ohms == 0)) {
 		SETUP_ERR(si, "Series resistance of 0 not allowed");
 	}
 	// Make sure we have exactly one of SENS_FLAG_{OHMS,VOLTS} set
@@ -107,7 +107,7 @@ void sensor_update_adc_lookup(uiter_t si, uint16_t adc) {
 			s->status = (lut[0] < lut[size-1]) ? SENSOR_LOW : SENSOR_HIGH;
 			return;
 		}
-		input = ADC_TO_R(adc, dev_cfg->calibration);
+		input = ADC_TO_R(adc, dev_cfg->series_R_ohms);
 	}
 
 	if (input < min) {

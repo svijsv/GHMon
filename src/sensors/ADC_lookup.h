@@ -62,7 +62,7 @@ typedef struct {
 	// For voltage sensors, ignored
 	// For resistance sensors, the value of the other resistor in the sensor's
 	// voltage divider
-	uint32_t calibration;
+	uint32_t series_R_ohms;
 	// The index of the lookup table in LOOKUP_TABLES[]
 	uint8_t lutno;
 } sensor_opt_lookup_t;

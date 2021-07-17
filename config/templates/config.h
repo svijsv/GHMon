@@ -126,7 +126,7 @@
 //
 // If a power pin has a bias, the pin is always in push-pull mode and it's
 // output is set to the bias value when OFF and the reverse when ON; the
-// default is high-impedence mode when OFF and output HIGH when ON
+// default is high-impedence mode when OFF and push-pull HIGH when ON
 //
 // If any device on the SPI or I2C buses are power-switched then ALL devices
 // on that same bus (as well as the SDA and SCL pullups in the case of I2C)
@@ -157,7 +157,9 @@
 //
 // Some pins (like A12) may have external pullups or pulldowns
 //
-// Pins A8-A11 and B6-B9 support PWM
+// On the STM32F103 pins A6-A11, B0, B1, and B6-B9 support PWM
+// On most other STM32s those pins plus A0-A3 support PWM, but on some there
+// may be fewer supported pins
 #if USE_STM32
 //
 // Sensor inputs
@@ -256,7 +258,8 @@
 //
 // SPI pins; hardware-specified
 // The hardware SS pin should be used as a slave-select pin because if it's
-// ever set low as an input it will force the MCU into SPI slave mode
+// ever set low as an input while SPI is enabled it will force the MCU into
+// SPI slave mode
 #define SPI_SS_PIN    PIN_10
 #define SPI_CS_SD_PIN SPI_SS_PIN
 #define SPI_SCK_PIN   PIN_13

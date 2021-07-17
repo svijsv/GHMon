@@ -8,6 +8,8 @@ are contained in each file.
 
 
 ## Sensors
+Any used sensor type must be enabled in `config.h`.
+
 There are example sensor configurations in `config/templates/sensors.c` and
 detailed documentation of the structures used to configure the sensors can be
 found in `src/sensors.h` and the headers in `src/sensors/`. Configuration
@@ -19,7 +21,7 @@ as well as DHT11 and BME280 and BMP280 sensors.
 
 Resistance and voltage sensors are read through the internal ADC. They, along
 with generic digital sensors like the DHT11, can be power-switched using
-`SENSOR_POWER_PINS` defined in `config.h`; any, all, or none can be connected
+`SENSOR_POWER_PINS` defined in `config.h`: any, all, or none can be connected
 to the pin(s).
 
 SPI sensors (at present only the BM[EP]280) must either *all* be switched with
@@ -36,7 +38,9 @@ it when the pullups are high.
 The address of an I2C sensor is set using the 'pin' field of the configuration
 struct.
 
-Any used sensor type must be enabled in `config.h`.
+For sensors where measurement units are determined internally (such as the
+DHT11), the default units are degrees Celsius for temperature, % for humidity,
+millibars for air pressure, ohms for resistance, and millivolts for voltage.
 
 
 ## Look-up tables
@@ -61,6 +65,8 @@ There are settings related to look-up tables in both `config.h` and `advanced.h`
 
 
 ## Controllers
+Controllers are used to control external devices by turning GPIO pins on and off.
+
 There are example controller configurations in `config/templates/controllers.c`
 and detailed documentation of the structures used to configure the controllers
 can be found in `src/controllers.h`. Configuration consists of filling the
