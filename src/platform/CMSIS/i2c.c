@@ -37,6 +37,11 @@
 
 #if USE_I2C
 
+#if (I2Cx_BUSFREQ/(I2C_FREQUENCY*2)) > (I2C_CCR_CCR >> I2C_CCR_CCR_Pos)
+# error "I2C frequency is too low for the system clock"
+#endif
+
+
 /*
 * Static values
 */

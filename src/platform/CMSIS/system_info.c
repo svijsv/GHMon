@@ -87,6 +87,7 @@ extern char _ebss;
 */
 void print_platform_info(printf_putc_t printf_putc) {
 	int bss_size, data_size, stack_size;
+	uint hclk_psc = 0;
 
 	// Due to a bug in the hardware, the ID and revision are always 0 on the
 	// STM32F1
@@ -103,35 +104,44 @@ void print_platform_info(printf_putc_t printf_putc) {
 		);
 
 	{
-		uint32_t hclk = 0, pclk1 = 0, pclk2 = 0, adcclk = 0;
+		uint hclk = 0, pclk1 = 0, pclk2 = 0, adcclk = 0;
 
 		switch (SELECT_BITS(RCC->CFGR, HCLK_PRESCALER_Msk)) {
 		case HCLK_PRESCALER_1:
 			hclk = G_freq_OSC;
+			hclk_psc = 1;
 			break;
 		case HCLK_PRESCALER_2:
 			hclk = G_freq_OSC / 2;
+			hclk_psc = 2;
 			break;
 		case HCLK_PRESCALER_4:
 			hclk = G_freq_OSC / 4;
+			hclk_psc = 4;
 			break;
 		case HCLK_PRESCALER_8:
 			hclk = G_freq_OSC / 8;
+			hclk_psc = 8;
 			break;
 		case HCLK_PRESCALER_16:
 			hclk = G_freq_OSC / 16;
+			hclk_psc = 16;
 			break;
 		case HCLK_PRESCALER_64:
 			hclk = G_freq_OSC / 64;
+			hclk_psc = 64;
 			break;
 		case HCLK_PRESCALER_128:
 			hclk = G_freq_OSC / 128;
+			hclk_psc = 128;
 			break;
 		case HCLK_PRESCALER_256:
 			hclk = G_freq_OSC / 256;
+			hclk_psc = 256;
 			break;
 		case HCLK_PRESCALER_512:
 			hclk = G_freq_OSC / 512;
+			hclk_psc = 512;
 			break;
 		}
 		switch (SELECT_BITS(RCC->CFGR, PCLK1_PRESCALER_Msk)) {
@@ -194,7 +204,6 @@ void print_platform_info(printf_putc_t printf_putc) {
 		);
 	}
 
-/*
 	vvprintf(printf_putc, "Should be:\r\nHCLK: %uHz, PCLK1: %uHz, PCLK2: %uHz, ADC: %uHz\r\n",
 		(uint )G_freq_HCLK,
 		(uint )G_freq_PCLK1,
@@ -205,11 +214,12 @@ void print_platform_info(printf_putc_t printf_putc) {
 		(uint )0
 #endif
 	);
-*/
+
 	{
 		uint32_t src = GATHER_BITS(RCC->CFGR, 0b11, RCC_CFGR_SWS_Pos);
-		vvprintf(printf_putc, "SysCLK: %s, CSS: %s, HSE: %s, HSI: %s, PLL: %s, LSE: %s, LSI: %s\r\n",
+		vvprintf(printf_putc, "SysCLK: %s/%u, CSS: %s, HSE: %s, HSI: %s, PLL: %s, LSE: %s, LSI: %s\r\n",
 			(src == 0b00) ? "HSI" : (src == 0b01) ? "HSE" : "PLL",
+			(uint )hclk_psc,
 			(BIT_IS_SET(RCC->CR,   RCC_CR_CSSON  )) ? ON : OFF,
 			(BIT_IS_SET(RCC->CR,   RCC_CR_HSEON  )) ? ON : OFF,
 			(BIT_IS_SET(RCC->CR,   RCC_CR_HSION  )) ? ON : OFF,
@@ -224,7 +234,7 @@ void print_platform_info(printf_putc_t printf_putc) {
 		(uint )GATHER_BITS(RCC->CR, 0b11111, RCC_CR_HSITRIM_Pos)
 	);
 
-#if defined(STM32F1)
+#if USE_STM32F1_PLL
 	vvprintf(printf_putc, "PLL Src: %s, Mult: %u\r\n",
 		(BIT_IS_SET(RCC->CFGR, RCC_CFGR_PLLSRC)) ?
 			(BIT_IS_SET(RCC->CFGR, RCC_CFGR_PLLXTPRE)) ? "HSE/2" : "HSE"
@@ -232,26 +242,6 @@ void print_platform_info(printf_putc_t printf_putc) {
 		// TODO: This is wrong if the multiplier is 0b1111
 		(uint )(GATHER_BITS(RCC->CFGR, 0xF, RCC_CFGR_PLLMULL_Pos) + 2)
 	);
-	{
-		uint32_t src, div;
-
-		src = GATHER_BITS(RCC->BDCR, 0b11, RCC_BDCR_RTCSEL_Pos);
-		READ_SPLITREG(div, RTC->PRLH, RTC->PRLL);
-		vvprintf(printf_putc, "RTC Src: %s, Div: %u\r\n",
-			(src == 0b00) ? "None" :
-			(src == 0b01) ? "LSE"  :
-			(src == 0b10) ? "LSI"  :
-			"HSE/128",
-			(uint )(div+1) // The divider is offset by one
-		);
-	}
-
-	vvprintf(printf_putc, "Flash Latency: %u, Prefetch: %s, Half-cycle access: %s\r\n",
-		(uint )GATHER_BITS(FLASH->ACR, 0b111, FLASH_ACR_LATENCY_Pos),
-		GATHER_BITS(FLASH->ACR, 0b1, FLASH_ACR_PRFTBE_Pos) ? ON : OFF,
-		GATHER_BITS(FLASH->ACR, 0b1, FLASH_ACR_HLFCYA_Pos) ? ON : OFF
-	);
-
 #else
 	vvprintf(printf_putc, "PLL Src: %s, DivM: %u, MulN: %u, DivP: %u \r\n",
 		(BIT_IS_SET(RCC->PLLCFGR, RCC_PLLCFGR_PLLSRC)) ? "HSE" : "HSI",
@@ -259,7 +249,23 @@ void print_platform_info(printf_putc_t printf_putc) {
 		(uint )( GATHER_BITS(RCC->PLLCFGR, 0x1FF, RCC_PLLCFGR_PLLN_Pos)),
 		(uint )((GATHER_BITS(RCC->PLLCFGR, 0x3,   RCC_PLLCFGR_PLLP_Pos) + 1) * 2)
 	);
+#endif
 
+#if USE_STM32F1_RTC
+	{
+		uint32_t src, div;
+
+		src = GATHER_BITS(RCC->BDCR, 0b11, RCC_BDCR_RTCSEL_Pos);
+		READ_SPLITREG(div, RTC->PRLH, RTC->PRLL);
+		vvprintf(printf_putc, "RTC Src: %s/%u\r\n",
+			(src == 0b00) ? "None" :
+			(src == 0b01) ? "LSE"  :
+			(src == 0b10) ? "LSI"  :
+			"(HSE/128)",
+			(uint )(div+1) // The divider is offset by one
+		);
+	}
+#else
 	{
 		uint32_t src;
 
@@ -273,10 +279,18 @@ void print_platform_info(printf_putc_t printf_putc) {
 			(uint )GATHER_BITS(RTC->PRER, 0x7FFF, RTC_PRER_PREDIV_S_Pos)
 		);
 	}
+#endif
 
-	vvprintf(printf_putc, "Flash Latency: %u, Prefetch: %s\r\n",
+#if defined(STM32F1)
+	vvprintf(printf_putc, "Flash Latency: %u, Prefetch: %s, Half-cycle access: %s\r\n",
 		(uint )GATHER_BITS(FLASH->ACR, 0b111, FLASH_ACR_LATENCY_Pos),
-		GATHER_BITS(FLASH->ACR, 0b1, FLASH_ACR_PRFTEN_Pos) ? ON : OFF
+		BIT_IS_SET(FLASH->ACR, FLASH_ACR_PRFTBE) ? ON : OFF,
+		BIT_IS_SET(FLASH->ACR, FLASH_ACR_HLFCYA) ? ON : OFF
+	);
+#else
+	vvprintf(printf_putc, "Flash Latency: %u, Prefetch: %s\r\n",
+		(uint )GATHER_BITS(FLASH->ACR, 0b1111, FLASH_ACR_LATENCY_Pos),
+		BIT_IS_SET(FLASH->ACR, FLASH_ACR_PRFTEN) ? ON : OFF
 	);
 #endif
 
@@ -288,7 +302,6 @@ void print_platform_info(printf_putc_t printf_putc) {
 
 	return;
 }
-
 
 #ifdef __cplusplus
  }

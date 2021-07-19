@@ -75,35 +75,6 @@
 # error "Can't determine user button"
 #endif // User button
 
-//
-// Clock prescalers
-//
-// HCLK is system oscillator divided by this
-#define HCLK_PRESCALER_Msk (0b1111 << RCC_CFGR_HPRE_Pos)
-#define HCLK_PRESCALER_1   (0b0000 << RCC_CFGR_HPRE_Pos)
-#define HCLK_PRESCALER_2   (0b1000 << RCC_CFGR_HPRE_Pos)
-#define HCLK_PRESCALER_4   (0b1001 << RCC_CFGR_HPRE_Pos)
-#define HCLK_PRESCALER_8   (0b1010 << RCC_CFGR_HPRE_Pos)
-#define HCLK_PRESCALER_16  (0b1011 << RCC_CFGR_HPRE_Pos)
-#define HCLK_PRESCALER_64  (0b1100 << RCC_CFGR_HPRE_Pos)
-#define HCLK_PRESCALER_128 (0b1101 << RCC_CFGR_HPRE_Pos)
-#define HCLK_PRESCALER_256 (0b1110 << RCC_CFGR_HPRE_Pos)
-#define HCLK_PRESCALER_512 (0b1111 << RCC_CFGR_HPRE_Pos)
-// PCLK1 is HCLK divided by this
-#define PCLK1_PRESCALER_Msk (0b111 << RCC_CFGR_PPRE1_Pos)
-#define PCLK1_PRESCALER_1   (0b000 << RCC_CFGR_PPRE1_Pos)
-#define PCLK1_PRESCALER_2   (0b100 << RCC_CFGR_PPRE1_Pos)
-#define PCLK1_PRESCALER_4   (0b101 << RCC_CFGR_PPRE1_Pos)
-#define PCLK1_PRESCALER_8   (0b110 << RCC_CFGR_PPRE1_Pos)
-#define PCLK1_PRESCALER_16  (0b111 << RCC_CFGR_PPRE1_Pos)
-// PCLK2 is HCLK divided by this
-#define PCLK2_PRESCALER_Msk (0b111 << RCC_CFGR_PPRE2_Pos)
-#define PCLK2_PRESCALER_1   (0b000 << RCC_CFGR_PPRE2_Pos)
-#define PCLK2_PRESCALER_2   (0b100 << RCC_CFGR_PPRE2_Pos)
-#define PCLK2_PRESCALER_4   (0b101 << RCC_CFGR_PPRE2_Pos)
-#define PCLK2_PRESCALER_8   (0b110 << RCC_CFGR_PPRE2_Pos)
-#define PCLK2_PRESCALER_16  (0b111 << RCC_CFGR_PPRE2_Pos)
-
 
 /*
 * Types
@@ -113,6 +84,7 @@
 /*
 * Variable declarations (defined in system.c)
 */
+extern const uint32_t G_freq_OSC;
 
 
 /*

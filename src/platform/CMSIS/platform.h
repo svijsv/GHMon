@@ -50,6 +50,7 @@
 # define USE_STM32F1_ADC    1
 # define USE_STM32F1_GPIO   1
 # define USE_STM32F1_RTC    1
+# define USE_STM32F1_PLL    1
 
 #elif defined(STM32F4xx)
 # include <stm32f4xx.h>
@@ -126,12 +127,41 @@ typedef enum {
 #define G_freq_LSE 32768
 //
 // Clock frequencies
-#define G_freq_HCLK  4000000
-//#define G_freq_HCLK (HSE_FREQUENCY/4)
-#define G_freq_PCLK1 (G_freq_HCLK/2)
-#define G_freq_PCLK2 (G_freq_HCLK/1)
-// On the STM32F1, the ADC input clock must not exceed 14MHz
-#define G_freq_ADC   (G_freq_PCLK2/2)
+#if F_CPU
+# define G_freq_HCLK F_CPU
+#else
+# define G_freq_HCLK  4000000
+#endif
+// The maximum frequency of APB1 is generally 1/2 the maximum frequency of
+// the system clock
+#if F_PCLK1
+# define G_freq_PCLK1 F_PLCK1
+#else
+# define G_freq_PCLK1 (G_freq_HCLK/2)
+#endif
+// The maximum frequency of APB2 is generally the same as the maximum
+// frequency of the system clock
+#if F_PCLK2
+# define G_freq_PCLK2 F_PCLK2
+#else
+# define G_freq_PCLK2 (G_freq_HCLK/1)
+#endif
+// Per the reference manual, on the STM32F1 the ADC input clock must not
+// exceed 14MHz
+// I haven't really checked for other devices
+#if F_ADC
+# define G_freq_ADC F_ADC
+#else
+# if (G_freq_PCLK2/2) <= 14000000
+#  define G_freq_ADC (G_freq_PCLK2/2)
+# elif (G_freq_PCLK2/4) <= 14000000
+#  define G_freq_ADC (G_freq_PCLK2/4)
+# elif (G_freq_PCLK2/6) <= 14000000
+#  define G_freq_ADC (G_freq_PCLK2/6)
+# else
+#  define G_freq_ADC (G_freq_PCLK2/8)
+# endif
+#endif
 
 // 12-bit ADC maximum value
 #define ADC_MAX 0x0FFF

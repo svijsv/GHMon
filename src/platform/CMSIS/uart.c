@@ -37,6 +37,11 @@
 
 #if USE_SERIAL
 
+#if (UARTx_BUSFREQ/UART_BAUDRATE) > (0xFFFF)
+# error "UART frequency is too low for the system clock"
+#endif
+
+
 /*
 * Static values
 */

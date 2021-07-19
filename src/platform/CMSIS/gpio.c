@@ -40,13 +40,29 @@
 */
 #include "gpio.h"
 #include "system.h"
+#include "spi.h"
 
 
 /*
 * Static values
 */
-// OUTPUT_SLOW is defined in the platform-specific GPIO files
-#define OUTPUT OUTPUT_SLOW
+// According to the STM32F4 errata sheet, the last bit received in SPI master
+// mode can be corrupted if the GPIO clock is set too slow for the APB bus
+// clock. Bus speeds below 28MHz would seem to be unaffected by this.
+// OUTPUT_x is defined in the platform-specific GPIO files
+#if USE_SPI
+# if SPIx_BUSFREQ <= 28000000
+#  define OUTPUT OUTPUT_SLOW
+# elif SPIx_BUSFREQ <= (28000000 * 2)
+#  define OUTPUT OUTPUT_MEDIUM
+# elif SPIx_BUSFREQ <= (28000000 * 3)
+#  define OUTPUT OUTPUT_FAST
+# else
+#  define OUTPUT OUTPUT_VERY_FAST
+# endif
+#else
+# define OUTPUT OUTPUT_SLOW
+#endif
 
 
 /*
