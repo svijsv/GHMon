@@ -614,7 +614,7 @@ static void timer1_pwm_on(pin_t pin, uint8_t off_at) {
 void pwm_on(pin_t pin, uint16_t duty_cycle) {
 	uint8_t off_at;
 
-	assert(duty_cycle <= 100);
+	assert(duty_cycle <= PWM_DUTY_CYCLE_SCALE);
 
 	off_at = (duty_cycle * 0xFF) / PWM_DUTY_CYCLE_SCALE;
 
