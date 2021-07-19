@@ -138,10 +138,10 @@ typedef enum {
 	GPIO_HIGH = 1,
 	GPIO_FLOAT
 } gpio_state_t;
-#if ! GPIO_MODE_T_IS_DEFINED
 // Define the operation mode of a GPIO pin
 // Some modes may be absent or aliased to other modes depending on platform
 // Platforms that define their own gpio_mode_t must include these values
+#if ! GPIO_MODE_T_IS_DEFINED
 typedef enum {
 	GPIO_MODE_RESET = 0, // Reset state of the pin
 	GPIO_MODE_PP,    // Push-pull output
@@ -151,20 +151,20 @@ typedef enum {
 	GPIO_MODE_HiZ    // High-impedence mode
 } gpio_mode_t;
 #endif
-#if ! PIN_T_IS_DEFINED
 // An identifier for MCU pins
 // Using an int is simpler than a struct because I don't need to define
 // structures to use pins, can check them with the preprocessor, and individual
 // backends have more flexibility choosing how to make use of the bits.
 // '0' is reserved for unassigned pins.
+#if ! PIN_T_IS_DEFINED
 typedef uint8_t pin_t;
 #endif
 #if ! GPIO_QUICK_T_IS_DEFINED
 typedef pin_t gpio_quick_t;
 #endif
 
-#if ! ADC_T_IS_DEFINED
 // Type used to hold the value returned by an ADC
+#if ! ADC_T_IS_DEFINED
 typedef uint16_t adc_t;
 // Type used to perform mathematical functions with ADC readings which may
 // overflow adc_t such as multiplication or those which may involve negative
