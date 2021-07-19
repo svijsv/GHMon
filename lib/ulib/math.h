@@ -117,7 +117,9 @@ FIXEDP_ITYPE log10_fixedp(FIXEDP_ITYPE x);
 #define ABS(x) (((x) > 0) ? (x) : -(x))
 
 // Round a division instead of truncating
-#define DIV_ROUNDED(n, d) ((n + (d/2)) / d)
+#define DIV_ROUNDED(n, d) (((n) + ((d)/2)) / (d))
+// Test for truncation in a division
+#define DIV_IS_TRUNCATED(n, d) ((((n) / (d)) * (d)) != (n))
 
 // Quick power-of-2 division for unsigned ints
 #define SHIFT_DIV_2(x)    ((x) >>  1)
