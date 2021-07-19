@@ -408,6 +408,8 @@ void pwm_on(pin_t pin, uint16_t duty_cycle) {
 	rcc_periph_t TIMxEN;
 	TIM_TypeDef *TIMx;
 
+	assert(duty_cycle <= PWM_DUTY_CYCLE_SCALE);
+
 	duty_cycle -= 1;
 
 	channel = 4;
