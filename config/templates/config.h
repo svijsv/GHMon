@@ -121,6 +121,9 @@
 // Pin configuration
 // Platform-specific
 //
+// 'Power pin' refers to any of the power pins listed below for sensors, SPI,
+// or I2C as well as any control pin listed in the definition of a controller
+//
 // If a power pin isn't defined or is 0, it's assumed anything it would
 // normally control is always powered on
 //
@@ -128,16 +131,16 @@
 // output is set to the bias value when OFF and the reverse when ON; the
 // default is high-impedence mode when OFF and push-pull HIGH when ON
 //
+// A duty cycle can be specified for any power pin which supports PWM. By
+// default it's a percentage (e.g. '50' means on 50% of the time) but this
+// can be adjusted along with the frequency in advanced.h. A duty cycle of 0
+// is taken as a duty cycle of 100%.
+//
 // If any device on the SPI or I2C buses are power-switched then ALL devices
 // on that same bus (as well as the SDA and SCL pullups in the case of I2C)
 // must also be switched to prevent damage that might be caused by applying
 // voltage to the IO pins of an unpowered device or current leaking through
 // the IO pins
-//
-// A duty cycle can be specified for any power pin which supports PWM. By
-// default it's a percentage (e.g. '50' means on 50% of the time) but this
-// can be adjusted along with the frequency in advanced.h. A duty cycle of 0
-// is taken as a duty cycle of 100%.
 //
 // Power pins for SPI and I2C can't be the same as any other power pin.
 //
@@ -181,14 +184,14 @@
 // Power pins
 // Power for sensors not on the SPI or I2C buses
 // Use a comma-separated list for multiple pins
-#define SENSOR_POWER_PINS PIN_B11
+#define SENSOR_POWER_PINS PIN_B11, (PIN_B10|BIAS_HIGH)
 // Power for SPI devices
 //#define SPI_POWER_PIN (PIN_B5 | BIAS_LOW)
 // Power for I2C devices
 //#define I2C_POWER_PIN (PIN_A11)
 // PWM mappings
 // Comma-separated pin/duty cycle pairs
-//#define PWM_PINS { PIN_B11, 50 }
+//#define PWM_PINS { SENSOR_FAN_PIN, 50 }, { PIN_B11, 100 }
 //
 // UART pins; hardware-specified
 // PIN_A9-PIN_A10: UART1
@@ -243,14 +246,14 @@
 // Power pins
 // Power for sensors not on the SPI or I2C buses
 // Use a comma-separated list for multiple pins
-#define SENSOR_POWER_PINS PIN_6
+#define SENSOR_POWER_PINS PIN_6, (PIN_9|BIAS_HIGH)
 // Power for SPI devices
 //#define SPI_POWER_PIN   PIN_7
 // Power for I2C devices
 //#define I2C_POWER_PIN   PIN_8
 // PWM mappings
 // Comma-separated pin/duty cycle pairs
-//#define PWM_PINS { PIN_6, 50 }
+//#define PWM_PINS { PIN_6, 100 }, { SENSOR_FAN_PIN, 50 }
 //
 // UART pins; hardware-specified
 #define UART_TX_PIN PIN_TX

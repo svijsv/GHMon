@@ -42,6 +42,10 @@
 // Maximum frequency for PWM output
 #define PWM_MAX_FREQUENCY 250
 // PWM duty cycle is defined as a number between 0 and PWM_DUTY_CYCLE_SCALE
+// The effect of increasing the scale is hardware-dependent and may reduce the
+// maximum possible frequency (as with STM32s) or have a limited effect on
+// the actual resolution of a duty-cycle setting (as with ATMegas, which
+// always convert to a scale of 0-255 internally)
 #define PWM_DUTY_CYCLE_SCALE 100
 
 // Maximum length of sensor and controller names

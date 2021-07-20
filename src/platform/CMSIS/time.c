@@ -36,6 +36,12 @@
 #include "gpio.h"
 
 
+#if DEBUG
+# pragma message "SLEEP_TIM_MS_TICKS is " XTRINGIZE(SLEEP_TIM_MS_TICKS)
+# pragma message "SLEEP_TIM_MAX_MS is " XTRINGIZE(SLEEP_TIM_MAX_MS)
+#endif
+
+
 /*
 * Static values
 */
