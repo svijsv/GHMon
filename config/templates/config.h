@@ -95,7 +95,7 @@
 // Names are 8.3 format (8 characters for the name + 3 for an extension), but
 // can include directories.
 // The path is relative to the SD card root and parent directories must exist.
-// This name is modified at fixed positions (the 7th and 8th characters in) if
+// This name is modified at the 5th and 6th places before the end if
 // LINES_PER_FILE is > 0.
 #define LOGFILE_NAME_PATTERN "STATUSXX.LOG"
 

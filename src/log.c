@@ -547,18 +547,24 @@ static bool file_exists(const char *path) {
 #if LINES_PER_FILE > 0
 static void new_name(void) {
 	uiter_t i;
+	static cstrlen_t mod_p = 0;
+
+	if (mod_p == 0) {
+		// This gets us two positions before the file extension
+		mod_p = cstring_len(logfile_name) - 6;
+	}
 
 	for (i = 0; i <= 99; ++i) {
-		logfile_name[6] = '0' + (i/10);
-		logfile_name[7] = '0' + (i%10);
+		logfile_name[mod_p  ] = '0' + (i/10);
+		logfile_name[mod_p+1] = '0' + (i%10);
 		if (!file_exists(logfile_name)) {
 			return;
 		}
 	}
 	// Default to XX if we've created too many files already.
 	if (i > 99) {
-		logfile_name[6] = 'X';
-		logfile_name[7] = 'X';
+		logfile_name[mod_p] = 'X';
+		logfile_name[mod_p+1] = 'X';
 	}
 
 	return;
