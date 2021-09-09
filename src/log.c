@@ -155,7 +155,8 @@ static FRESULT print_header(void);
 static char* format_uptime(utime_t uptime);
 static char* format_warnings(uint8_t warnings);
 
-#define LPRINTF(fmt, ...) lprintf(F1(fmt), ## __VA_ARGS__)
+// LOGGER() uses F1() and is called from lprintf_putc()
+#define LPRINTF(fmt, ...) lprintf(F2(fmt), ## __VA_ARGS__)
 
 /*
 * Interrupt handlers
