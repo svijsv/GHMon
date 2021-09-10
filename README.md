@@ -75,6 +75,8 @@ Otherwise, check to make sure that:
 * `SENSOR_COUNT` and `CONTROLLER_COUNT` match the number of sensors and
 controllers defined in `sensors.c` and `controllers.c`
 * The correct `devcfg` field has been set for each chosen sensor type
+* There's enough free RAM for runtime usage; 256 bytes may work but 384 bytes
+or more is better especially when logging is used.
 
 If using an SD card for logging and it isn't being recognized, [this](https://www.sdcard.org/downloads/formatter/)
 (ideally) or the internal formatter (with `USE_FDISK` set in `config.h`) may
