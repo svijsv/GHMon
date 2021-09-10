@@ -104,7 +104,8 @@
 // writes, the only time our buffer matters is if the total size of a write
 // is multiple sectors (which it may well be, especially with larger log line
 // buffers)
-#if USE_LOGGING
+#if USE_LOGGING && ! SD_PRINT_BUFFER_SIZE
+# undef SD_PRINT_BUFFER_SIZE
 # if USE_SMALL_CODE < 1
 // This is a crude method of determining the needed buffer size based on
 // maximum possible usage - 17 characters for uptime, 9 for warnings, 4 for
@@ -127,7 +128,20 @@
 #  else
 #   define SD_PRINT_BUF_RESERVE_CTRL 0
 #  endif
-#  define SD_PRINT_BUF_RESERVE (SERIAL_BUFFER_SIZE + TERMINAL_BUFFER_SIZE + (12 * LOGFILE_BUFFER_COUNT) + 1024 + (SENSOR_COUNT * 16) + SD_PRINT_BUF_RESERVE_CTRL + 256)
+// This includes both G_sensors[] and the memory used by the sensor fields
+// in log_buffer_t
+#  define SD_PRINT_BUF_RESERVE_SENS   ((SENSOR_COUNT * 12) + (4 * LOGFILE_BUFFER_COUNT))
+#  define SD_PRINT_BUF_RESERVE_IO     (SERIAL_BUFFER_SIZE + TERMINAL_BUFFER_SIZE)
+#  define SD_PRINT_BUF_RESERVE_LOG    (8 * LOGFILE_BUFFER_COUNT)
+#  define SD_PRINT_BUF_RESERVE_FATFS   1024
+// ATMegas have separate name spaces for flash and RAM and the work-around
+// requires a little RAM itself
+#  if _HAVE_FLASH_NAMESPACE
+#   define SD_PRINT_BUF_RESERVE_GENERAL (256 + (_FLASH_TMP_SIZE * 3))
+#  else
+#   define SD_PRINT_BUF_RESERVE_GENERAL  256
+#  endif
+#  define SD_PRINT_BUF_RESERVE (SD_PRINT_BUF_RESERVE_CTRL + SD_PRINT_BUF_RESERVE_SENS + SD_PRINT_BUF_RESERVE_IO + SD_PRINT_BUF_RESERVE_LOG + SD_PRINT_BUF_RESERVE_FATFS + SD_PRINT_BUF_RESERVE_GENERAL)
 #  if SD_PRINT_BUF_TOTAL < (RAM_PRESENT - SD_PRINT_BUF_RESERVE)
 #   define SD_PRINT_BUFFER_SIZE SD_PRINT_BUF_TOTAL
 // No point in a local buffer if it's got to be smaller than the library's

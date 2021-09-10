@@ -97,6 +97,14 @@
 // Number of samples to take and then average for every ADC reading
 #define ADC_SAMPLE_COUNT 1
 
+// The number of bytes used for the SD card write buffer
+// If 0, an attempt is made to calculate this automatically; this should only
+// really be set if there are RAM shortage issues and the auto-detection code
+// isn't doing what it should.
+// FatFS has it's own 512-byte buffer so when the size of all the data to be
+// written is <= 512 bytes this just serves to minimize the number of write
+// calls that need to be made to the FatFS library.
+#define SD_PRINT_BUFFER_SIZE 0
 
 //
 // Hardware configuration
