@@ -68,6 +68,7 @@
 * Static values
 */
 #define _FLASH __flash
+#define _HAVE_FLASH_NAMESPACE 1
 
 // The size of the static array used to return strings from FROM_STR()
 #if ! _FLASH_TMP_SIZE
@@ -133,6 +134,7 @@ char* FROM_FSTR_TO_BUF(_FLASH_STR_T *fs, char *buf);
 * Static values
 */
 #define _FLASH
+#define _HAVE_FLASH_NAMESPACE 0
 
 /*
 * Types
