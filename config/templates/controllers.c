@@ -16,7 +16,7 @@ _FLASH const controller_static_t CONTROLLERS[CONTROLLER_COUNT] = {
 /*
 * 0: Fan control */ {
 	.name = "FAN_CTL", // Logging name, max size 7 characters by default
-	.control_pins = { CONTROL_FAN_PIN }, // FAN_CONTROL_PIN is defined in config.h
+	.control_pins = { CONTROL_FAN_PIN }, // CONTROL_FAN_PIN is defined in config.h
 
 	.run_timeout_seconds = 0,  // Once triggered, run continuously until the
 	                           // temperature is low enough
@@ -79,7 +79,7 @@ _FLASH const controller_static_t CONTROLLERS[CONTROLLER_COUNT] = {
 			.below = 30, // Turn on below 30C (86F)
 		},
 		// More than one input can be attached to controllers by changing
-		// CONTROLLER_SENS_COUNT in config/advanced.h
+		// CONTROLLER_INPUTS_COUNT in config/advanced.h
 		{
 			.si = WATER,
 			.above = SENS_THRESHOLD_IGNORE,

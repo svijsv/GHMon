@@ -67,8 +67,8 @@ controller_t G_controllers[CONTROLLER_COUNT];
 /*
 * Local function prototypes
 */
-void power_on_control_pins(_FLASH const controller_static_t *cfg);
-void power_off_control_pins(_FLASH const controller_static_t *cfg);
+static void power_on_control_pins(_FLASH const controller_static_t *cfg);
+static void power_off_control_pins(_FLASH const controller_static_t *cfg);
 #if USE_SMALL_CONTROLLERS < 2
 static gpio_state_t read_stop(_FLASH const controller_static_t *cfg);
 #endif
@@ -78,7 +78,7 @@ static void update_runtime(controller_t *c);
 /*
  * Macros
 */
-#define CHECK_ENGAGED(c) (BIT_IS_SET((c)->iflags, CTRL_FLAG_ENGAGED))
+#define IS_ENGAGED(c) (BIT_IS_SET((c)->iflags, CTRL_FLAG_ENGAGED))
 #define SET_ENGAGED(c)   (SET_BIT(   (c)->iflags, CTRL_FLAG_ENGAGED))
 #define UNSET_ENGAGED(c) (CLEAR_BIT( (c)->iflags, CTRL_FLAG_ENGAGED))
 
@@ -118,8 +118,8 @@ void controllers_init(void) {
 			ERROR_STATE("Unset name in CONTROLLERS[]; is CONTROLLER_COUNT correct?");
 		}
 
-#if CONTROLLER_SENS_COUNT > 0
-		for (uiter_t j = 0; j < CONTROLLER_SENS_COUNT; ++j) {
+#if CONTROLLER_INPUTS_COUNT > 0
+		for (uiter_t j = 0; j < CONTROLLER_INPUTS_COUNT; ++j) {
 			if (cfg->inputs[j].si >= SENSOR_COUNT) {
 				NOTIFY("Controller %u input %u index >= SENSOR_COUNT", (uint )i, (uint )j);
 				ERROR_STATE("Controller input index >= SENSOR_COUNT");
@@ -137,14 +137,14 @@ void controllers_init(void) {
 }
 
 void check_controller(controller_t *c) {
-	_FLASH const controller_sens_t *s;
+	_FLASH const controller_in_t *s;
 	_FLASH const controller_static_t *cfg;
 	status_t status;
 	bool do_engage, is_engaged;
 
 	cfg = &CONTROLLERS[GET_CONTROLLER_I(c)];
 	if (BIT_IS_SET(G_warnings, WARN_BATTERY_LOW|WARN_VCC_LOW) && !BIT_IS_SET(cfg->cflags, CTRL_FLAG_IGNORE_POWER)) {
-		is_engaged = CHECK_ENGAGED(c);
+		is_engaged = IS_ENGAGED(c);
 		if (is_engaged) {
 			DISENGAGE(c, cfg, "battery or Vcc low");
 #if USE_SMALL_CONTROLLERS < 1
@@ -168,7 +168,7 @@ void check_controller(controller_t *c) {
 	CLEAR_BIT(c->iflags, CTRL_FLAG_INVALIDATE);
 
 	do_engage = true;
-#if CONTROLLER_SENS_COUNT > 0
+#if CONTROLLER_INPUTS_COUNT > 0
 	if (BIT_IS_SET(c->iflags, CTRL_FLAG_USES_SENSORS)) {
 		bool any_met = false, any_unmet = false;
 		bool high = false, low = false, inside = false;
@@ -177,7 +177,7 @@ void check_controller(controller_t *c) {
 		// and trust in the cooldown timer to keep us from doing so too often
 		check_sensors();
 
-		for (uiter_t i = 0; i < CONTROLLER_SENS_COUNT; ++i) {
+		for (uiter_t i = 0; i < CONTROLLER_INPUTS_COUNT; ++i) {
 			s = &cfg->inputs[i];
 			if (s->si < 0) {
 				continue;
@@ -205,8 +205,8 @@ void check_controller(controller_t *c) {
 			do_engage = false;
 		}
 	}
-#endif // CONTROLLER_SENS_COUNT > 0
-	is_engaged = CHECK_ENGAGED(c);
+#endif // CONTROLLER_INPUTS_COUNT > 0
+	is_engaged = IS_ENGAGED(c);
 
 	if ((do_engage) && (BIT_IS_SET(cfg->cflags, CTRL_FLAG_WARN_WHEN_ON))) {
 		SET_BIT(c->iflags, CTRL_FLAG_WARNING);
@@ -452,8 +452,8 @@ static void update_runtime(controller_t *c) {
 	return;
 }
 
-void power_on_control_pins(_FLASH const controller_static_t *cfg) {
-	for (uiter_t i = 0; i < CONTROLLER_CTRL_PIN_COUNT; ++i) {
+static void power_on_control_pins(_FLASH const controller_static_t *cfg) {
+	for (uiter_t i = 0; i < CONTROLLER_OUTPUTS_COUNT; ++i) {
 		if (cfg->control_pins[i] != 0) {
 			power_on_output(cfg->control_pins[i]);
 		}
@@ -461,8 +461,8 @@ void power_on_control_pins(_FLASH const controller_static_t *cfg) {
 
 	return;
 }
-void power_off_control_pins(_FLASH const controller_static_t *cfg) {
-	for (uiter_t i = 0; i < CONTROLLER_CTRL_PIN_COUNT; ++i) {
+static void power_off_control_pins(_FLASH const controller_static_t *cfg) {
+	for (uiter_t i = 0; i < CONTROLLER_OUTPUTS_COUNT; ++i) {
 		bool still_needed = false;
 
 		if (cfg->control_pins[i] != 0) {
@@ -471,7 +471,7 @@ void power_off_control_pins(_FLASH const controller_static_t *cfg) {
 					continue;
 				}
 
-				for (uiter_t pi = 0; pi < CONTROLLER_CTRL_PIN_COUNT; ++pi) {
+				for (uiter_t pi = 0; pi < CONTROLLER_OUTPUTS_COUNT; ++pi) {
 					if (PINID(cfg->control_pins[i]) == PINID(CONTROLLERS[ci].control_pins[pi])) {
 						still_needed = true;
 						break;

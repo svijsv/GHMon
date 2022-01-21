@@ -103,7 +103,7 @@ typedef struct {
 	// Can't be > 127.
 	// Set to -1 to disable.
 	int8_t si;
-} controller_sens_t;
+} controller_in_t;
 //
 // Description of the user-configured portion of a controller struct
 typedef struct {
@@ -111,12 +111,12 @@ typedef struct {
 	// The size of name[] includes a trailing NUL byte.
 	char name[DEVICE_NAME_LEN+1];
 
-#if CONTROLLER_SENS_COUNT > 0
+#if CONTROLLER_INPUTS_COUNT > 0
 	// The sensor(s) used to determine whether the controller is activated.
-	controller_sens_t inputs[CONTROLLER_SENS_COUNT];
+	controller_in_t inputs[CONTROLLER_INPUTS_COUNT];
 #endif
 
-// schedule only makes sense with individual controller wakeup times, which
+// Scheduling only makes sense with individual controller wakeup times, which
 // are absent when USE_SMALL_CONTROLLERS >= 1
 #if USE_SMALL_CONTROLLERS < 1
 	// When to check the whether the controller should be engaged
@@ -141,11 +141,11 @@ typedef struct {
 	// bias state normally, then reversed when conditions are met.
 	// If not biased, these pins are normally in high-impedence mode and set
 	// to push-pull high when conditions are met.
-	pin_t control_pins[CONTROLLER_CTRL_PIN_COUNT];
+	pin_t control_pins[CONTROLLER_OUTPUTS_COUNT];
 #if USE_SMALL_CONTROLLERS < 2
 	// MCU pin used tell the controller that the device should stop running
 	// This pin should be high when the controller should halt; the internal
-	// pullup or pulldown can be used by biasing it.
+	// pullup or pulldown can be used if present by biasing it.
 	// Ignored if unset.
 	pin_t stop_pin;
 #endif // USE_SMALL_CONTROLLERS < 2

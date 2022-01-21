@@ -72,7 +72,7 @@ and detailed documentation of the structures used to configure the controllers
 can be found in `src/controllers.h`. Configuration consists of filling the
 `CONTROLLERS[]` array with descriptions of the individual devices and how they're
 tied to the sensors. If a controller needs to be tied to more than one sensor
-then `CONTROLLER_SENS_COUNT` can be set to the desired number in `advanced.h`
+then `CONTROLLER_INPUTS_COUNT` can be set to the desired number in `advanced.h`
 and any unused inputs can have their sensor index set to `-1`.
 
 A controller with no configured sensors will run every time it's scheduled to

@@ -75,10 +75,10 @@
 #define CONTROLLER_STOP_CHECK_SECONDS 5
 // The number of sensors associated with each controller
 // If <= 0, all controllers are triggered at their respective scheduled times.
-#define CONTROLLER_SENS_COUNT 1
+#define CONTROLLER_INPUTS_COUNT 1
 // The number of control pins associated with each controller
 // Must be >=1.
-#define CONTROLLER_CTRL_PIN_COUNT 1
+#define CONTROLLER_OUTPUTS_COUNT 1
 
 // Use the less-accurate but lower-power internal oscillator for the system
 // clock where supported instead of the external crystal

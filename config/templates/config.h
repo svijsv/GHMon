@@ -133,8 +133,7 @@
 //
 // A duty cycle can be specified for any power pin which supports PWM. By
 // default it's a percentage (e.g. '50' means on 50% of the time) but this
-// can be adjusted along with the frequency in advanced.h. A duty cycle of 0
-// is taken as a duty cycle of 100%.
+// can be adjusted along with the frequency in advanced.h.
 //
 // If any device on the SPI or I2C buses are power-switched then ALL devices
 // on that same bus (as well as the SDA and SCL pullups in the case of I2C)
