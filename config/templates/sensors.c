@@ -5,10 +5,10 @@
 // Rv is resistance from the supply to the test point, Rg is test point to
 // ground.
 #define CALC_VDIV_SCALE(Rv, Rg) ((((uint64_t )100) * ((uint64_t )Rv + (uint64_t )Rg)) / (uint64_t )Rg)
-// Calculate a multiplier
-#define MULTIPLY_BY(mul) ((mul) * (100))
-// Calculate a divider
-#define DIVIDE_BY(div) ((100) / (div))
+// Calculate a multiplier for a percentage-based field
+#define MULTIPLY_BY(mul) ((mul) * (100.0f))
+// Calculate a divider for a percentage-based field
+#define DIVIDE_BY(div) ((100.0f) / (div))
 //
 // Convert Celsius temperature to Fahrenheit by setting .scale_percent to
 // C_TO_F_SCALE and .adjust to C_TO_F_ADJUST
@@ -17,7 +17,16 @@
 // The adjustment is applied before the scaling, so it needs to be converted
 // to Celsius by dividing by 1.8
 #define C_TO_F_ADJUST (DIV_ROUNDED(32.0f, 1.8f))
-
+//
+// Convert Kelvin temperature to Fahrenheit by setting .scale_percent to
+// K_TO_F_SCALE and .adjust to K_TO_F_ADJUST
+#define K_TO_F_SCALE (C_TO_F_SCALE)
+#define K_TO_F_ADJUST (-273.15f + (32.0f / 1.8f))
+//
+// Convert Kelvin temperature to Celsius by setting .scale_percent to
+// K_TO_C_SCALE and .adjust to K_TO_C_ADJUST
+#define K_TO_C_SCALE (0)
+#define K_TO_C_ADJUST (-273.15f)
 
 /*
 *
