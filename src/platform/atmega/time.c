@@ -564,6 +564,47 @@ void uscounter_off(void) {
 }
 //
 // Set up a PWM timer
+static void timer0_pwm_set(pin_t pin, uint8_t off_at) {
+	if (PINID(pin) == PINID_OC0A) {
+		OCR0A = off_at;
+	} else {
+		OCR0B = off_at;
+	}
+
+	return;
+}
+static void timer1_pwm_set(pin_t pin, uint8_t off_at) {
+	if (PINID(pin) == PINID_OC1A) {
+		OCR1A = off_at;
+	} else {
+		OCR1B = off_at;
+	}
+
+	return;
+}
+void pwm_set(pin_t pin, uint16_t duty_cycle) {
+	uint8_t off_at;
+
+	assert(duty_cycle <= PWM_DUTY_CYCLE_SCALE);
+
+	off_at = ((uint32_t )duty_cycle * 0xFF) / PWM_DUTY_CYCLE_SCALE;
+
+	switch (PINID(pin)) {
+	case PINID_OC0A:
+	case PINID_OC0B:
+		timer0_pwm_set(pin, off_at);
+		break;
+	case PINID_OC1A:
+	case PINID_OC1B:
+		timer1_pwm_set(pin, off_at);
+		break;
+	default:
+		LOGGER("Attempted PWM with incapable pin 0x%02X", (uint )pin);
+		break;
+	}
+
+	return;
+}
 static void timer0_pwm_on(pin_t pin, uint8_t off_at) {
 	power_timer0_enable();
 	// Don't disable the counter in case the other output is already in
@@ -616,7 +657,7 @@ void pwm_on(pin_t pin, uint16_t duty_cycle) {
 
 	assert(duty_cycle <= PWM_DUTY_CYCLE_SCALE);
 
-	off_at = (duty_cycle * 0xFF) / PWM_DUTY_CYCLE_SCALE;
+	off_at = ((uint32_t )duty_cycle * 0xFF) / PWM_DUTY_CYCLE_SCALE;
 
 	switch (PINID(pin)) {
 	case PINID_OC0A:
