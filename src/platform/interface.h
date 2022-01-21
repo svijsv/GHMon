@@ -313,6 +313,8 @@ void dumb_delay_cycles(uint32_t cycles);
 // be switched back when it's disabled, the frontend needs to handle that
 void pwm_on(pin_t pin, uint16_t duty_cycle);
 void pwm_off(pin_t pin);
+// Adjust an already-enabled PWM output
+void pwm_set(pin_t pin, uint16_t duty_cycle);
 
 #if USE_ADC
 //

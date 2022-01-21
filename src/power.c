@@ -301,8 +301,27 @@ void power_off_I2C(void) {
 }
 #endif // USE_I2C
 
+void power_on_PWM_output(pin_t pin, uint16_t duty_cycle) {
+	assert(pin != 0);
+
+	if (duty_cycle > PWM_DUTY_CYCLE_SCALE) {
+		duty_cycle = PWM_DUTY_CYCLE_SCALE;
+	}
+
+	switch (GPIO_GET_BIAS(pin)) {
+	case BIAS_HIGH:
+		pwm_on(pin, PWM_DUTY_CYCLE_SCALE - duty_cycle);
+		break;
+	default:
+		pwm_on(pin, duty_cycle);
+		break;
+	}
+
+	return;
+}
 void power_on_output(pin_t pin) {
 	uint16_t duty_cycle = 0;
+	bool use_PWM = false;
 
 	assert(pin != 0);
 
@@ -310,12 +329,15 @@ void power_on_output(pin_t pin) {
 	for (uiter_t i = 0; i < PWM_PIN_COUNT; ++i) {
 		if (PINID(pin) == PINID(pwm_pins[i].pin)) {
 			duty_cycle = pwm_pins[i].duty_cycle;
+			use_PWM = true;
 			break;
 		}
 	}
 #endif
 
-	if ((duty_cycle == 0) || (duty_cycle == PWM_DUTY_CYCLE_SCALE)) {
+	if (use_PWM) {
+		power_on_PWM_output(pin, duty_cycle);
+	} else {
 		switch (GPIO_GET_BIAS(pin)) {
 		case BIAS_HIGH:
 			gpio_set_mode(pin, GPIO_MODE_PP, GPIO_LOW);
@@ -324,33 +346,19 @@ void power_on_output(pin_t pin) {
 			gpio_set_mode(pin, GPIO_MODE_PP, GPIO_HIGH);
 			break;
 		}
-	} else {
-		pwm_on(pin, duty_cycle);
 	}
 
 	return;
 }
-void power_off_output(pin_t pin) {
-	uint16_t duty_cycle = 0;
-
+void power_off_PWM_output(pin_t pin) {
 	assert(pin != 0);
-
-#ifdef PWM_PINS
-	for (uiter_t i = 0; i < PWM_PIN_COUNT; ++i) {
-		if (PINID(pin) == PINID(pwm_pins[i].pin)) {
-			duty_cycle = pwm_pins[i].duty_cycle;
-			break;
-		}
-	}
-#endif
 
 	// Any output connection that can tolerate PWM should be able to tolerate
 	// a briefly floating pin but there's no way to know how the backend will
 	// tolerate a pin being set before PWM is off so disable PWM then set the
 	// pin mode
-	if ((duty_cycle != 0) && (duty_cycle != PWM_DUTY_CYCLE_SCALE)) {
-		pwm_off(pin);
-	}
+	pwm_off(pin);
+
 	switch (GPIO_GET_BIAS(pin)) {
 	case BIAS_HIGH:
 		gpio_set_mode(pin, GPIO_MODE_PP, GPIO_HIGH);
@@ -361,6 +369,38 @@ void power_off_output(pin_t pin) {
 	default:
 		gpio_set_mode(pin, GPIO_MODE_HiZ, GPIO_FLOAT);
 		break;
+	}
+
+	return;
+}
+void power_off_output(pin_t pin) {
+	bool use_PWM = false;
+
+	assert(pin != 0);
+
+#ifdef PWM_PINS
+	for (uiter_t i = 0; i < PWM_PIN_COUNT; ++i) {
+		if (PINID(pin) == PINID(pwm_pins[i].pin)) {
+			use_PWM = true;
+			break;
+		}
+	}
+#endif
+
+	if (use_PWM) {
+		power_off_PWM_output(pin);
+	} else {
+		switch (GPIO_GET_BIAS(pin)) {
+		case BIAS_HIGH:
+			gpio_set_mode(pin, GPIO_MODE_PP, GPIO_HIGH);
+			break;
+		case BIAS_LOW:
+			gpio_set_mode(pin, GPIO_MODE_PP, GPIO_LOW);
+			break;
+		default:
+			gpio_set_mode(pin, GPIO_MODE_HiZ, GPIO_FLOAT);
+			break;
+		}
 	}
 
 	return;
