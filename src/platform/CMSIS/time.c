@@ -180,7 +180,11 @@ void resume_systick(void) {
 // Manage the standard timers
 #define CONFIGURE_PWM_TIMER(TIMx) do { \
 	(TIMx)->CR1 = cr1; \
-	(TIMx)->ARR = (PWM_DUTY_CYCLE_SCALE - 1); \
+	if (PWM_DUTY_CYCLE_SCALE <= 0xFFFF) { \
+		(TIMx)->ARR = (PWM_DUTY_CYCLE_SCALE - 1); \
+	} else { \
+		(TIMx)->ARR = 0xFFFF; \
+	} \
 	(TIMx)->CCMR1 = ccmr; \
 	(TIMx)->CCMR2 = ccmr; \
 	/* Generate an update event to load the shadow registers */ \
@@ -408,27 +412,28 @@ void dumb_delay_cycles(uint32_t cycles) {
 }
 //
 // PWM management
-void pwm_on(pin_t pin, uint16_t duty_cycle) {
-	uint8_t channel;
-	gpio_af_t af = 0;
+#if PWM_DUTY_CYCLE_SCALE <= 0xFFFF
+# define SET_PWM_CH(ccr, duty) do { (ccr) = (duty); } while (0)
+#else
+# define SET_PWM_CH(ccr, duty) do { (ccr) = ((uint64_t )(duty) * 0xFFFF) / PWM_DUTY_CYCLE_SCALE; } while (0)
+#endif
+static TIM_TypeDef* find_pwm_tim(pin_t pin, uint8_t *channel, gpio_af_t *altpin, rcc_periph_t *periph) {
+	uint8_t ch;
+	gpio_af_t af;
 	rcc_periph_t TIMxEN;
 	TIM_TypeDef *TIMx;
 
-	assert(duty_cycle <= PWM_DUTY_CYCLE_SCALE);
-
-	duty_cycle -= 1;
-
-	channel = 4;
+	ch = 4;
 	switch (PINID(pin)) {
 #if USE_TIMER1_PWM
 	case PINID_TIM1_CH1:
-		--channel;
+		--ch;
 		// fall through
 	case PINID_TIM1_CH2:
-		--channel;
+		--ch;
 		// fall through
 	case PINID_TIM1_CH3:
-		--channel;
+		--ch;
 		// fall through
 	case PINID_TIM1_CH4:
 		TIMx = TIM1;
@@ -438,13 +443,13 @@ void pwm_on(pin_t pin, uint16_t duty_cycle) {
 #endif
 #if USE_TIMER2_PWM
 	case PINID_TIM2_CH1:
-		--channel;
+		--ch;
 		// fall through
 	case PINID_TIM2_CH2:
-		--channel;
+		--ch;
 		// fall through
 	case PINID_TIM2_CH3:
-		--channel;
+		--ch;
 		// fall through
 	case PINID_TIM2_CH4:
 		TIMx = TIM2;
@@ -454,13 +459,13 @@ void pwm_on(pin_t pin, uint16_t duty_cycle) {
 #endif
 #if USE_TIMER3_PWM
 	case PINID_TIM3_CH1:
-		--channel;
+		--ch;
 		// fall through
 	case PINID_TIM3_CH2:
-		--channel;
+		--ch;
 		// fall through
 	case PINID_TIM3_CH3:
-		--channel;
+		--ch;
 		// fall through
 	case PINID_TIM3_CH4:
 		TIMx = TIM3;
@@ -470,13 +475,13 @@ void pwm_on(pin_t pin, uint16_t duty_cycle) {
 #endif
 #if USE_TIMER4_PWM
 	case PINID_TIM4_CH1:
-		--channel;
+		--ch;
 		// fall through
 	case PINID_TIM4_CH2:
-		--channel;
+		--ch;
 		// fall through
 	case PINID_TIM4_CH3:
-		--channel;
+		--ch;
 		// fall through
 	case PINID_TIM4_CH4:
 		TIMx = TIM4;
@@ -487,26 +492,82 @@ void pwm_on(pin_t pin, uint16_t duty_cycle) {
 
 	default:
 		LOGGER("Attempted PWM with incapable pin 0x%02X", (uint )pin);
-		goto END;
+		return NULL;
 		break;
+	}
+
+	if (channel != NULL) {
+		*channel = ch;
+	}
+	if (altpin != NULL) {
+		*altpin = af;
+	}
+	if (periph != NULL) {
+		*periph = TIMxEN;
+	}
+	return TIMx;
+}
+void pwm_set(pin_t pin, uint16_t duty_cycle) {
+	uint8_t channel = 0;
+	TIM_TypeDef *TIMx;
+
+	assert(duty_cycle <= PWM_DUTY_CYCLE_SCALE);
+
+	duty_cycle -= 1;
+
+	TIMx = find_pwm_tim(pin, &channel, NULL, NULL);
+	if (TIMx == NULL) {
+		return;
+	}
+
+	switch (channel) {
+	case 1:
+		SET_PWM_CH(TIMx->CCR1, duty_cycle);
+		break;
+	case 2:
+		SET_PWM_CH(TIMx->CCR2, duty_cycle);
+		break;
+	case 3:
+		SET_PWM_CH(TIMx->CCR3, duty_cycle);
+		break;
+	case 4:
+		SET_PWM_CH(TIMx->CCR4, duty_cycle);
+		break;
+	}
+
+	return;
+}
+void pwm_on(pin_t pin, uint16_t duty_cycle) {
+	uint8_t channel = 0;
+	gpio_af_t af = 0;
+	rcc_periph_t TIMxEN = 0;
+	TIM_TypeDef *TIMx;
+
+	assert(duty_cycle <= PWM_DUTY_CYCLE_SCALE);
+
+	duty_cycle -= 1;
+
+	TIMx = find_pwm_tim(pin, &channel, &af, &TIMxEN);
+	if (TIMx == NULL) {
+		return;
 	}
 
 	clock_enable(TIMxEN);
 	switch (channel) {
 	case 1:
-		TIMx->CCR1 = duty_cycle;
+		SET_PWM_CH(TIMx->CCR1, duty_cycle);
 		SET_BIT(TIMx->CCER, TIM_CCER_CC1E);
 		break;
 	case 2:
-		TIMx->CCR2 = duty_cycle;
+		SET_PWM_CH(TIMx->CCR2, duty_cycle);
 		SET_BIT(TIMx->CCER, TIM_CCER_CC2E);
 		break;
 	case 3:
-		TIMx->CCR3 = duty_cycle;
+		SET_PWM_CH(TIMx->CCR3, duty_cycle);
 		SET_BIT(TIMx->CCER, TIM_CCER_CC3E);
 		break;
 	case 4:
-		TIMx->CCR4 = duty_cycle;
+		SET_PWM_CH(TIMx->CCR4, duty_cycle);
 		SET_BIT(TIMx->CCER, TIM_CCER_CC4E);
 		break;
 	}
@@ -518,7 +579,6 @@ void pwm_on(pin_t pin, uint16_t duty_cycle) {
 	gpio_set_AF(pin, af);
 	gpio_set_mode(pin, GPIO_MODE_PP_AF, GPIO_FLOAT);
 
-END:
 	return;
 }
 void pwm_off(pin_t pin) {
@@ -526,73 +586,9 @@ void pwm_off(pin_t pin) {
 	rcc_periph_t TIMxEN;
 	TIM_TypeDef *TIMx;
 
-	channel = 4;
-	switch (PINID(pin)) {
-#if USE_TIMER1_PWM
-	case PINID_TIM1_CH1:
-		--channel;
-		// fall through
-	case PINID_TIM1_CH2:
-		--channel;
-		// fall through
-	case PINID_TIM1_CH3:
-		--channel;
-		// fall through
-	case PINID_TIM1_CH4:
-		TIMx = TIM1;
-		TIMxEN = RCC_PERIPH_TIM1;
-		break;
-#endif
-#if USE_TIMER2_PWM
-	case PINID_TIM2_CH1:
-		--channel;
-		// fall through
-	case PINID_TIM2_CH2:
-		--channel;
-		// fall through
-	case PINID_TIM2_CH3:
-		--channel;
-		// fall through
-	case PINID_TIM2_CH4:
-		TIMx = TIM2;
-		TIMxEN = RCC_PERIPH_TIM2;
-		break;
-#endif
-#if USE_TIMER3_PWM
-	case PINID_TIM3_CH1:
-		--channel;
-		// fall through
-	case PINID_TIM3_CH2:
-		--channel;
-		// fall through
-	case PINID_TIM3_CH3:
-		--channel;
-		// fall through
-	case PINID_TIM3_CH4:
-		TIMx = TIM3;
-		TIMxEN = RCC_PERIPH_TIM3;
-		break;
-#endif
-#if USE_TIMER4_PWM
-	case PINID_TIM4_CH1:
-		--channel;
-		// fall through
-	case PINID_TIM4_CH2:
-		--channel;
-		// fall through
-	case PINID_TIM4_CH3:
-		--channel;
-		// fall through
-	case PINID_TIM4_CH4:
-		TIMx = TIM4;
-		TIMxEN = RCC_PERIPH_TIM4;
-		break;
-#endif
-
-	default:
-		LOGGER("Attempted PWM with incapable pin 0x%02X", (uint )pin);
-		goto END;
-		break;
+	TIMx = find_pwm_tim(pin, &channel, NULL, &TIMxEN);
+	if (TIMx == NULL) {
+		return;
 	}
 
 	switch (channel) {
@@ -616,7 +612,6 @@ void pwm_off(pin_t pin) {
 		clock_disable(TIMxEN);
 	}
 
-END:
 	return;
 }
 
