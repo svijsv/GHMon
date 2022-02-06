@@ -25,8 +25,8 @@ _FLASH const controller_static_t CONTROLLERS[CONTROLLER_COUNT] = {
 	// Base decision to run on this sensor
 	.inputs = {
 		{
-			.si = TEMP_TID, // Use this index in SENSORS[], TEMP_TID is defined
-			                // in config/sensors.c
+			.si = TEMP_TID_IDX, // Use this index in SENSORS[], TEMP_TID_IDX is
+			                    // defined in config/sensors.c
 			.above = 30, // Turn on above 30C (86F)
 			.below = SENS_THRESHOLD_IGNORE, // Don't turn on below anything
 		}
@@ -47,7 +47,7 @@ _FLASH const controller_static_t CONTROLLERS[CONTROLLER_COUNT] = {
 
 	.inputs = {
 		{
-			.si = WATER,
+			.si = WATER_IDX,
 			.above = 50000, // Trigger when sensor resistance is > 50KR
 			.below = SENS_THRESHOLD_IGNORE,
 		}
@@ -72,7 +72,7 @@ _FLASH const controller_static_t CONTROLLERS[CONTROLLER_COUNT] = {
 
 	.inputs = {
 		{
-			.si = TEMP_TID,
+			.si = TEMP_TID_IDX,
 			// If above < below, the values are taken as a window to operate
 			// inside of.
 			.above = 10, // Turn on above 10C (50F)
@@ -81,7 +81,7 @@ _FLASH const controller_static_t CONTROLLERS[CONTROLLER_COUNT] = {
 		// More than one input can be attached to controllers by changing
 		// CONTROLLER_INPUTS_COUNT in config/advanced.h
 		{
-			.si = WATER,
+			.si = WATER_IDX,
 			.above = SENS_THRESHOLD_IGNORE,
 			.below = 50000,
 		},

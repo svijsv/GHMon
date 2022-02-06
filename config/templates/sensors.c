@@ -91,7 +91,7 @@ _FLASH const sensor_static_t SENSORS[SENSOR_COUNT] = {
 	},
 	.adjust = -273, // Convert from Kelvin to Celsius
 },
-#define TEMP_TID 0
+#define TEMP_TID_IDX 0
 
 /*
 * 1: Outdoor temperature */ {
@@ -107,7 +107,7 @@ _FLASH const sensor_static_t SENSORS[SENSOR_COUNT] = {
 	},
 	.adjust = -273,
 },
-#define TEMP_TOD 1
+#define TEMP_TOD_IDX 1
 
 /*
 * 2: Soil moisture */ {
@@ -120,7 +120,7 @@ _FLASH const sensor_static_t SENSORS[SENSOR_COUNT] = {
 		.ohm.series_R_ohms = 47000,  // Series resistor (Vcc -> Rs -> MCU_pin -> sensor -> Gnd)
 	},
 },
-#define WATER 2
+#define WATER_IDX 2
 
 /*
 * 3: Supply voltage */ {
@@ -138,7 +138,7 @@ _FLASH const sensor_static_t SENSORS[SENSOR_COUNT] = {
 	                      // See also the macros MULTIPLY_BY(), DIVIDE_BY(),
 	                      // CALC_VDIV_SCALE() defined at the top of this file.
 },
-#define BATTERY 3
+#define BATTERY_IDX 3
 
 };
 

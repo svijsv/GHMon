@@ -150,8 +150,8 @@
 //
 //
 // STM32F103
-// Sensors like thermistors need to be on a pin that supports ADC; that means
-// A0-A7 or B0-B1
+// Resistance and voltage sensors need to be on a pin that supports ADC; that
+// means A0-A7 or B0-B1
 //
 // Pins A15, B3, and B4 are JTAG and will be pulled up or down when flashing
 // and during power on, and so shouldn't be used to power anything that doesn't
@@ -190,7 +190,7 @@
 //#define I2C_POWER_PIN (PIN_A11)
 // PWM mappings
 // Comma-separated pin/duty cycle pairs
-//#define PWM_PINS { SENSOR_FAN_PIN, 50 }, { PIN_B11, 100 }
+//#define PWM_PINS { CONTROL_FAN_PIN, 50 }, { PIN_B11, 100 }
 //
 // UART pins; hardware-specified
 // PIN_A9-PIN_A10: UART1
@@ -216,8 +216,8 @@
 //
 // The button needs to be on pin 2 or pin 3
 //
-// Sensors like thermistors need to be on a pin that supports ADC; that means
-// A0-A5 as well as A6 and A7 when present
+// Resistance and voltage sensors need to be on a pin that supports ADC; that
+// means A0-A5 as well as A6 and A7 when present
 //
 // Pins A6 and A7 don't have digital buffers and can only be used for analog
 // input
@@ -225,7 +225,8 @@
 // There are internal pullups but no internal pulldowns
 //
 // Pins 9 and 10 support PWM. Pins 5 and 6 also support PWM if no DHT11
-// sensors are used.
+// sensors are used because the timer that controls them is used to measure
+// the signal time.
 #if USE_AVR
 //
 // Sensor inputs
@@ -252,7 +253,7 @@
 //#define I2C_POWER_PIN   PIN_8
 // PWM mappings
 // Comma-separated pin/duty cycle pairs
-//#define PWM_PINS { PIN_6, 100 }, { SENSOR_FAN_PIN, 50 }
+//#define PWM_PINS { PIN_6, 100 }, { CONTROL_FAN_PIN, 50 }
 //
 // UART pins; hardware-specified
 #define UART_TX_PIN PIN_TX
