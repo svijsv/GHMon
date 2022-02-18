@@ -102,7 +102,7 @@
 #ifndef GPIO_BIAS_OFFSET
 # define GPIO_BIAS_OFFSET 6
 #endif
-// BIAS_LOW and BIAS_HIGH don't use the *_MASK nomenclature because they're
+// BIAS_LOW and BIAS_HIGH don't use the *_MASK/*NO nomenclature because they're
 // intended to be used in configuration, where keeping track of mask/number
 // is a hassle
 #ifndef BIAS_LOW
@@ -110,6 +110,18 @@
 #endif
 #ifndef BIAS_HIGH
 # define BIAS_HIGH (0b10 << GPIO_BIAS_OFFSET)
+#endif
+// HiZ when off push when on, the default
+#ifndef BIAS_TRIHI
+# define BIAS_TRIHI (0b00 << GPIO_BIAS_OFFSET)
+#endif
+// HiZ when off pull when on
+// Treated the same as TRIHI for inputs and PWM outputs
+#ifndef BIAS_TRILO
+# define BIAS_TRILO (0b11 << GPIO_BIAS_OFFSET)
+#endif
+#ifndef BIAS_DEFAULT
+# define BIAS_DEFAULT BIAS_TRIHI
 #endif
 
 // Maximum value returned by the ADC

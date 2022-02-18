@@ -127,9 +127,15 @@
 // If a power pin isn't defined or is 0, it's assumed anything it would
 // normally control is always powered on
 //
-// If a power pin has a bias, the pin is always in push-pull mode and it's
-// output is set to the bias value when OFF and the reverse when ON; the
-// default is high-impedence mode when OFF and push-pull HIGH when ON
+// Input pins can be biased with the internal pullup/pulldown (if present) by
+// |-ing with BIAS_HIGH or BIAS_LOW.
+//
+// Non-PWM output pins can be |-ed with BIAS_LOW (pull when off, push when on),
+// BIAS_HIGH (push when off, pull when on), BIAS_TRILO (HiZ when off, pull
+// when on), or BIAS_TRIHI (HiZ when off, push when on). The default is
+// BIAS_TRIHI. PWM outputs work the same as non-PWM outputs when off but
+// when on they alternate between push and HiZ and BIAS_HIGH will reverse
+// the on/off cycle.
 //
 // A duty cycle can be specified for any power pin which supports PWM. By
 // default it's a percentage (e.g. '50' means on 50% of the time) but this

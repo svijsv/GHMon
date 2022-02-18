@@ -312,6 +312,9 @@ void power_on_PWM_output(pin_t pin, uint16_t duty_cycle) {
 	case BIAS_HIGH:
 		pwm_on(pin, PWM_DUTY_CYCLE_SCALE - duty_cycle);
 		break;
+	case BIAS_LOW:
+	case BIAS_TRIHI:
+	case BIAS_TRILO:
 	default:
 		pwm_on(pin, duty_cycle);
 		break;
@@ -340,8 +343,11 @@ void power_on_output(pin_t pin) {
 	} else {
 		switch (GPIO_GET_BIAS(pin)) {
 		case BIAS_HIGH:
+		case BIAS_TRILO:
 			gpio_set_mode(pin, GPIO_MODE_PP, GPIO_LOW);
 			break;
+		case BIAS_LOW:
+		case BIAS_TRIHI:
 		default:
 			gpio_set_mode(pin, GPIO_MODE_PP, GPIO_HIGH);
 			break;
@@ -366,6 +372,8 @@ void power_off_PWM_output(pin_t pin) {
 	case BIAS_LOW:
 		gpio_set_mode(pin, GPIO_MODE_PP, GPIO_LOW);
 		break;
+	case BIAS_TRILO:
+	case BIAS_TRIHI:
 	default:
 		gpio_set_mode(pin, GPIO_MODE_HiZ, GPIO_FLOAT);
 		break;
@@ -397,6 +405,8 @@ void power_off_output(pin_t pin) {
 		case BIAS_LOW:
 			gpio_set_mode(pin, GPIO_MODE_PP, GPIO_LOW);
 			break;
+		case BIAS_TRILO:
+		case BIAS_TRIHI:
 		default:
 			gpio_set_mode(pin, GPIO_MODE_HiZ, GPIO_FLOAT);
 			break;
@@ -416,6 +426,8 @@ void power_on_input(pin_t pin) {
 	case BIAS_LOW:
 		gpio_set_mode(pin, GPIO_MODE_IN, GPIO_LOW);
 		break;
+	case BIAS_TRIHI:
+	case BIAS_TRILO:
 	default:
 		gpio_set_mode(pin, GPIO_MODE_IN, GPIO_FLOAT);
 		break;
