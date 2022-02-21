@@ -46,6 +46,15 @@
 #define HOURS   (3600U)
 #define DAYS    (86400U)
 #define YEARS   (31536000U)
+#define SECONDS_PER_MINUTE (60U)
+#define SECONDS_PER_HOUR   (SECONDS_PER_MINUTE * 60U)
+#define SECONDS_PER_DAY    (SECONDS_PER_HOUR   * 24U)
+#define SECONDS_PER_YEAR   (SECONDS_PER_DAY    * 365U)
+
+// Minutes in a given time period
+#define MINUTES_PER_HOUR (60U)
+#define MINUTES_PER_DAY  (MINUTES_PER_HOUR * 24U)
+#define MINUTES_PER_YEAR (MINUTES_PER_DAY  * 365U)
 
 // Year 0 of the internal calendar
 #define YEAR_0 2010
