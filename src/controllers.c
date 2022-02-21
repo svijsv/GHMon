@@ -125,6 +125,8 @@ void controllers_init(void) {
 				ERROR_STATE("Controller input index >= SENSOR_COUNT");
 			} else if (cfg->inputs[j].si >= 0) {
 				SET_BIT(G_controllers[i].iflags, CTRL_FLAG_USES_SENSORS);
+			} else if (cfg->inputs[j].si == CTRL_INPUT_TIME_OF_DAY) {
+				SET_BIT(G_controllers[i].iflags, CTRL_FLAG_USES_TIME);
 			}
 		}
 #endif
@@ -169,20 +171,30 @@ void check_controller(controller_t *c) {
 
 	do_engage = true;
 #if CONTROLLER_INPUTS_COUNT > 0
-	if (BIT_IS_SET(c->iflags, CTRL_FLAG_USES_SENSORS)) {
+	if (BIT_IS_SET(c->iflags, CTRL_FLAG_USES_SENSORS) || BIT_IS_SET(c->iflags, CTRL_FLAG_USES_TIME)) {
 		bool any_met = false, any_unmet = false;
 		bool high = false, low = false, inside = false;
+		utime_t now = 0, tod = 0;
 
 		// It simplifies things greatly to always check all the sensors here
 		// and trust in the cooldown timer to keep us from doing so too often
-		check_sensors();
+		if (BIT_IS_SET(c->iflags, CTRL_FLAG_USES_SENSORS)) {
+			check_sensors();
+		}
+		if (BIT_IS_SET(c->iflags, CTRL_FLAG_USES_TIME)) {
+			now = NOW() / SECONDS_PER_MINUTE;
+			tod = (now % (MINUTES_PER_DAY));
+		}
 
 		for (uiter_t i = 0; i < CONTROLLER_INPUTS_COUNT; ++i) {
 			s = &cfg->inputs[i];
-			if (s->si < 0) {
+			if (s->si >= 0) {
+				status = G_sensors[s->si].status;
+			} else if (s->si == CTRL_INPUT_TIME_OF_DAY) {
+				status = tod;
+			} else {
 				continue;
 			}
-			status = G_sensors[s->si].status;
 
 			high = (s->above == SENS_THRESHOLD_IGNORE) ? false : (status > s->above);
 			low  = (s->below == SENS_THRESHOLD_IGNORE) ? false : (status < s->below);

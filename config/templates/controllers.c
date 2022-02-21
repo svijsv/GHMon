@@ -85,6 +85,12 @@ _FLASH const controller_static_t CONTROLLERS[CONTROLLER_COUNT] = {
 			.above = SENS_THRESHOLD_IGNORE,
 			.below = 50000,
 		},
+		// We don't want the alarm to get tired, so give it an 8-hour work day
+		{
+			.si = CTRL_INPUT_TIME_OF_DAY,
+			.above = CLOCK_TIME(9, 0),
+			.below = CLOCK_TIME(17, 0),
+		},
 	},
 },
 */

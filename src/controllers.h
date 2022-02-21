@@ -82,7 +82,14 @@
 #define CTRL_FLAG_INVALIDATE  0x40
 // Set if a warning was issued by the controller
 #define CTRL_FLAG_WARNING     0x80
+// Set if the controller uses the time as an input
+#define CTRL_FLAG_USES_TIME   0x01
 
+//
+// Special controller inputs
+//
+#define CTRL_INPUT_NONE        -1
+#define CTRL_INPUT_TIME_OF_DAY -2
 
 /*
 * Types
@@ -101,7 +108,9 @@ typedef struct {
 
 	// The index of the sensor in G_sensors[] (defined in config.c)
 	// Can't be > 127.
-	// Set to -1 to disable.
+	// Set to CTRL_INPUT_NONE to disable.
+	// Set to CTRL_INPUT_TIME_OF_DAY to use the time of day in minutes after
+	// 00:00:00.
 	int8_t si;
 } controller_in_t;
 //
