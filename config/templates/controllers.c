@@ -2,7 +2,7 @@
 * Macros to aid in controller configuration
 */
 // Set a schedule using a more natural notation than bare minutes
-#define CLOCK_TIME(hours, minutes) (((hours) * 60) + (minutes))
+#define CLOCK_TIME(hours, minutes) (((hours) * (uint16_t )60) + (minutes))
 
 /*
 *
