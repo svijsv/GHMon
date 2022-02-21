@@ -23,15 +23,14 @@
 // CTRL_PRESS x 0  : Take any actions with a check period of 0
 // CTRL_PRESS x 1  : Sync log data to file
 // CTRL_PRESS x 2  : Check device controllers
-// CTRL_PRESS x 3  : Set time of day to 12:00:00
+// CTRL_PRESS x 3  : Set time of day to 00:00:00 + RESET_TIME_OFFSET_MINUTES
 // CTRL_PRESS x >=4: Cancel
 #define CTRL_PRESS (2000)
 
-// When the button is held long enough the time is normally set to 12:00:00;
-// with this that time can be offset by the given number of minutes. Negative
-// offsets are allowed. The 12 + RESET_TIME_OFFSET_MINUTES/60 must be >=0 and
-// <=23.
-#define RESET_TIME_OFFSET_MINUTES 0
+// When the button is held long enough the time is normally set to 00:00:00;
+// with this that time can be offset by the given number of minutes. The
+// value must be >= 0 and < 24*60
+#define RESET_TIME_OFFSET_MINUTES (12 * 60) // 12:00:00
 
 // The UART communication parameters
 #define UART_BAUDRATE 9600
