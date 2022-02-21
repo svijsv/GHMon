@@ -27,6 +27,12 @@
 // CTRL_PRESS x >=4: Cancel
 #define CTRL_PRESS (2000)
 
+// When the button is held long enough the time is normally set to 12:00:00;
+// with this that time can be offset by the given number of minutes. Negative
+// offsets are allowed. The 12 + RESET_TIME_OFFSET_MINUTES/60 must be >=0 and
+// <=23.
+#define RESET_TIME_OFFSET_MINUTES 0
+
 // The UART communication parameters
 #define UART_BAUDRATE 9600
 

@@ -201,8 +201,8 @@ int main(void) {
 					break;
 				case 3: {
 					led_flash(4, DELAY_LONG);
-					LOGGER("Setting system time to 12:00:00");
-					set_time(12, 0, 0);
+					LOGGER("Setting system time to 12:00:00 + %d minutes", (int )RESET_TIME_OFFSET_MINUTES);
+					set_time(12+(RESET_TIME_OFFSET_MINUTES/60), (RESET_TIME_OFFSET_MINUTES%60), 0);
 					next_wakeup = set_alarms(true);
 					break;
 				}
