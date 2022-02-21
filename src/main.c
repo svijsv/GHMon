@@ -200,9 +200,13 @@ int main(void) {
 					force_controllers = true;
 					break;
 				case 3: {
+					static const uint use_time = (12 * 60) + RESET_TIME_OFFSET_MINUTES;
+					uint use_h = use_time / 60;
+					uint use_m = use_time % 60;
+
 					led_flash(4, DELAY_LONG);
-					LOGGER("Setting system time to 12:00:00 + %d minutes", (int )RESET_TIME_OFFSET_MINUTES);
-					set_time(12+(RESET_TIME_OFFSET_MINUTES/60), (RESET_TIME_OFFSET_MINUTES%60), 0);
+					LOGGER("Setting system time to %u:%02u:00", (uint )set_h, (uint )set_m);
+					set_time(use_h, use_m, 0);
 					next_wakeup = set_alarms(true);
 					break;
 				}
