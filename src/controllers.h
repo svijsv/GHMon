@@ -131,7 +131,7 @@ typedef struct {
 	// the stop pin goes high.
 	// If 0, the pins are kept high until a future controller check stops them
 	// or the stop pin goes high.
-	uint8_t run_timeout_seconds;
+	uint16_t run_timeout_seconds;
 
 	// Control flags
 	uint8_t cflags;
