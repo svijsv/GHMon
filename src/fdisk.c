@@ -78,7 +78,7 @@ err_t format_SD(void) {
 
 	LOGGER("Formatting SD card");
 
-	power_on_SD();
+	power_on_SPI();
 
 	res = f_mkfs("", &opt, buf, FF_MAX_SS);
 	switch (res) {
@@ -112,7 +112,7 @@ err_t format_SD(void) {
 		NOTIFY("SD formatting error %d (fatfs error %d)", (int )err, (int )res);
 	}
 
-	power_off_SD();
+	power_off_SPI();
 
 	return err;
 }
