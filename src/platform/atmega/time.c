@@ -62,10 +62,8 @@
 */
 #define WDT_WAKEUP    0
 #define WDT_CALIBRATE 1
-// Using more cycles for calibration *should* reduce the overall error
-// Since wdt_calibration is only 8 bits and needs to store the number of ms
-// elapsed in this period, this shouldn't be more than WDTO_120MS to be on
-// the safe side
+// Using more cycles for calibration *should* reduce the overall error at
+// the expense of more power used
 #define WDT_CALIBRATE_CYCLES WDTO_60MS
 // This is the number of times the WDT can be called before recalibration;
 // right now it's only used in set_wakeup_alarm() and should fit in a uint16_t
@@ -73,6 +71,10 @@
 // each sleep is different; 1000 works out to ~2 hours if every sleep is 8s
 // and nothing else much happens
 #define WDT_CALIBRATE_INTERVAL 200
+// Only use sleep periods longer than this in the count to WDT_CALIBRATE_INTERVAL
+// This should be longer than the expected duration of the calibration cycle,
+// possibly as much as 3 times longer on older device with voltage below 5V
+#define WDT_CALIBRATE_MINIMUM_MS 500
 
 #define TIM01_PRESCALER_1    0b001
 #define TIM01_PRESCALER_8    0b010
@@ -127,7 +129,7 @@ static utime_t RTC_prev_msticks = 0;
 static utime_t RTC_millis = 0;
 
 volatile uint8_t wdt_state;
-volatile uint8_t wdt_calibration;
+volatile uint16_t wdt_calibration;
 
 /*
 * Local function prototypes
@@ -403,14 +405,17 @@ static void calibrate_WDT(void) {
 		// Nothing to do here
 	} while (wdt_state != WDT_WAKEUP);
 
+	READ_VOLATILE(post_calib, G_sys_msticks);
 	// Because we don't know either the initial state of the systick timer
 	// or where exactly it is now, we're going to end up overcounting on
 	// one end and undercounting on the other; but because we could see
 	// tick increments during this read and have to deal ISR overhead, we're
 	// mostly going to overcount so subtract 1ms to (hopefully) keep things a
 	// little closer to reality
-	READ_VOLATILE(post_calib, G_sys_msticks);
-	wdt_calibration = (uint8_t )(post_calib - pre_calib) - 1;
+	// EDIT: The clock was running fast by one minute per hour, which
+	// corresponds to the correction being one millisecond slow during the 60ms
+	// calibration period, so let's not subtract 1 here after all...
+	wdt_calibration = (uint16_t )(post_calib - pre_calib);
 
 	RESTORE_INTERRUPTS(sreg);
 
@@ -420,8 +425,8 @@ static void calibrate_WDT(void) {
 // For convenience sake, set_wakeup_alarm() helps keep track of RTC_ticks
 uint16_t set_wakeup_alarm(uint16_t ms) {
 	static uint16_t calib_counter = WDT_CALIBRATE_INTERVAL;
-	uint16_t period_ms;
-	uint8_t shifts, adjust_ms = 0;
+	uint16_t period_ms, adjust_ms = 0;
+	uint8_t shifts;
 
 	if (ms == 0) {
 		return 0;
@@ -430,7 +435,7 @@ uint16_t set_wakeup_alarm(uint16_t ms) {
 	wakeup_alarm_is_set = false;
 
 	// Don't count for recalibration if we're not waiting long
-	if (ms > 500) {
+	if (ms >= WDT_CALIBRATE_MINIMUM_MS) {
 		--calib_counter;
 
 		if (calib_counter == 0) {
@@ -473,8 +478,12 @@ uint16_t set_wakeup_alarm(uint16_t ms) {
 		ENABLE_WDT_ISR();
 		RESTORE_INTERRUPTS(sreg);
 
-		// When sleep is interrupted (specifically by a button press), this will
-		// result in the system time being ahead of real time
+		// When sleep is interrupted (specifically by a button press), there's
+		// no way to know how long we actually slept. Hopefully the average over
+		// many such incidents is 1/2 the total sleep time.
+		if (BIT_IS_SET(G_IRQs, BUTTON_IRQf)) {
+			period_ms /= 2;
+		}
 		add_RTC_millis(period_ms);
 	}
 
