@@ -85,7 +85,12 @@ static void button_IRQHandler(void) {
 
 	G_button_pressed = 1;
 	// First timeout is shorter to account for time taken to wake up
-	timeout = SET_TIMEOUT((CTRL_PRESS*3)/4);
+	timeout = SET_TIMEOUT(CTRL_PRESS-50);
+
+#if BUTTON_DEBOUNCE_MS
+	delay_ms(BUTTON_DEBOUNCE_MS);
+#endif // BUTTON_DEBOUNCE_MS
+
 	// Use a delay of 10ms to limit the influence of delay_ms() overhead
 	do {
 		if (TIMES_UP(timeout)) {

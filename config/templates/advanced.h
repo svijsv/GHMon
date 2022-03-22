@@ -27,6 +27,10 @@
 // CTRL_PRESS x >=4: Cancel
 #define CTRL_PRESS (2000)
 
+// Delay this many milliseconds after the first button press is registered
+// to avoid reading an early release due to switch bounce
+#define BUTTON_DEBOUNCE_MS 30
+
 // When the button is held long enough the time is normally set to 00:00:00;
 // with this that time can be offset by the given number of minutes. The
 // value must be >= 0 and < 24*60
