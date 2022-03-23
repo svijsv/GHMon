@@ -267,6 +267,8 @@ const uint32_t G_freq_OSC = FREQ_OSC_HZ;
 static void light_sleep_ms(utime_t ms, uint8_t flags);
 static void deep_sleep_s(utime_t s, uint8_t flags);
 static void clocks_init(void);
+static void enable_button_ISR(void);
+static void disable_button_ISR(void);
 
 static inline __attribute__((always_inline)) \
 void sysflash(void);
@@ -277,11 +279,10 @@ void sysflash(void);
 #if BUTTON_PIN
 OPTIMIZE_FUNCTION \
 void Button_IRQHandler(void) {
-	// The button shouldn't disable itself; there's no time when it shouldn't
-	// at least let the user know the system is still running.
-	// NVIC_DisableIRQ(BUTTON_IRQn);
-
-	SET_BIT(G_IRQs, BUTTON_IRQf);
+	NVIC_DisableIRQ(BUTTON_IRQn);
+	// The EXTI pending bit is cleared by writing 1
+	SET_BIT(EXTI->PR, GPIO_GET_PINMASK(BUTTON_PIN));
+	NVIC_ClearPendingIRQ(BUTTON_IRQn);
 
 	// Let the user know we got the interrupt even if we're not going to do
 	// anything for a while
@@ -290,13 +291,11 @@ void Button_IRQHandler(void) {
 	// led_flash(1, DELAY_ACK);
 	sysflash();
 
-	// The EXTI pending bit is cleared by writing 1
-	SET_BIT(EXTI->PR, GPIO_GET_PINMASK(BUTTON_PIN));
-	NVIC_ClearPendingIRQ(BUTTON_IRQn);
-
 #if USE_TERMINAL
 	button_wakeup = true;
 #endif
+
+	SET_BIT(G_IRQs, BUTTON_IRQf);
 
 	return;
 }
@@ -382,17 +381,35 @@ void platform_init(void) {
 # error "Unhandled BUTTON_PIN"
 #endif // GPIO_GET_PINNO(BUTTON_PIN)
 
-	// Configure the EXTI interrupt on the rising edge for the wakeup button
-	gpio_set_mode(BUTTON_PIN, GPIO_MODE_IN, GPIO_BIAS_TO_STATE(BUTTON_PIN));
+	power_on_input(BUTTON_PIN);
+	// Configure the EXTI interrupt for the wakeup button
 	SET_BIT(EXTI->IMR,  GPIO_GET_PINMASK(BUTTON_PIN));
+# if (GPIO_GET_BIAS(BUTTON_PIN) == BIAS_HIGH)
+	// Falling edge
+	SET_BIT(EXTI->FTSR, GPIO_GET_PINMASK(BUTTON_PIN));
+# else
+	// Rising edge
 	SET_BIT(EXTI->RTSR, GPIO_GET_PINMASK(BUTTON_PIN));
+# endif
 	NVIC_SetPriority(BUTTON_IRQn, BUTTON_IRQp);
-	NVIC_EnableIRQ(BUTTON_IRQn);
+	disable_button_ISR();
 #endif // BUTTON_PIN
 
 	clock_disable(EXTI_PREG_CLOCKEN);
 
 	return;
+}
+static void enable_button_ISR(void) {
+#if BUTTON_PIN
+	NVIC_ClearPendingIRQ(BUTTON_IRQn);
+	NVIC_EnableIRQ(BUTTON_IRQn);
+#endif
+}
+static void disable_button_ISR(void) {
+#if BUTTON_PIN
+	NVIC_DisableIRQ(BUTTON_IRQn);
+	NVIC_ClearPendingIRQ(BUTTON_IRQn);
+#endif
 }
 static inline __attribute__((always_inline)) \
 void sysflash(void) {
@@ -613,6 +630,9 @@ void hibernate_s(utime_t s, uint8_t flags) {
 		NVIC_EnableIRQ(UARTx_IRQn);
 	}
 #endif // USE_SERIAL
+	if (BIT_IS_SET(flags, CFG_ALLOW_INTERRUPTS)) {
+		enable_button_ISR();
+	}
 
 	// UART interrupts can't wake us up from deep sleep so sleep lightly for a
 	// few seconds before entering deep sleep in order to detect them
@@ -644,6 +664,9 @@ void hibernate_s(utime_t s, uint8_t flags) {
 		LOGGER("Hibernation ending with G_IRQs at 0x%02X", (uint )G_IRQs);
 	}
 
+	if (BIT_IS_SET(flags, CFG_ALLOW_INTERRUPTS)) {
+		disable_button_ISR();
+	}
 #if USE_SERIAL
 	NVIC_DisableIRQ(UARTx_IRQn);
 	NVIC_ClearPendingIRQ(UARTx_IRQn);
