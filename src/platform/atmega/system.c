@@ -63,12 +63,16 @@
 #if BUTTON_PIN
 # if PINID(BUTTON_PIN) == PINID_D2
 #  define BUTTON_ISR INT0_vect
+#  define BUTTON_EIMSK 0b01
 # elif PINID(BUTTON_PIN) == PINID_D3
 #  define BUTTON_ISR INT1_vect
+#  define BUTTON_EIMSK 0b10
 # else
 #  error "Usupported BUTTON_PIN; use PIN_2 or PIN_3"
 # endif
 #endif // BUTTON_PIN
+
+
 
 // CFG_* flags 0xF0 reserved for local use
 #define CFG_DEEPSLEEP 0x10
@@ -92,6 +96,8 @@ static volatile bool button_wakeup = true;
 */
 static inline __attribute__((always_inline)) \
 void sysflash(void);
+static void enable_button_ISR(void);
+static void disable_button_ISR(void);
 
 /*
 * Interrupt handlers
@@ -198,18 +204,34 @@ void platform_init(void) {
 #endif
 
 #if BUTTON_PIN
-# if PINID(BUTTON_PIN) == PINID_D2
-	SET_BIT(EICRA, 0b0011); // Trigger INT0 on rising edge
-	SET_BIT(EIMSK, 0b01);   // Enable INT0
-# elif  PINID(BUTTON_PIN) == PINID_D3
-	SET_BIT(EICRA, 0b1100); // Trigger INT1 on rising edge
-	SET_BIT(EIMSK, 0b10);   // Enable INT1
+# if (GPIO_GET_BIAS(BUTTON_PIN) == BIAS_HIGH)
+   // Trigger on falling edge
+#  define BUTTON_TRIGGER 0b0001
 # else
-#  error "Usupported BUTTON_PIN; use PIN_PD2 (Arduino pin 2) or PIN_PD3 (Arduino pin 3)"
+   // Trigger on rising edge
+#  define BUTTON_TRIGGER 0b0011
 # endif
-#endif
+# if PINID(BUTTON_PIN) == PINID_D2
+	SET_BIT(EICRA, BUTTON_TRIGGER); // Trigger INT0
+# else
+	SET_BIT(EICRA, BUTTON_TRIGGER << 2); // Trigger INT1
+# endif
+	disable_button_ISR();
+	power_on_input(BUTTON_PIN);
+# undef BUTTON_TRIGGER
+#endif // BUTTON_PIN
 
 	return;
+}
+static void enable_button_ISR(void) {
+#if BUTTON_PIN
+	SET_BIT(EIMSK, BUTTON_EIMSK);
+#endif
+}
+static void disable_button_ISR(void) {
+#if BUTTON_PIN
+	CLEAR_BIT(EIMSK, BUTTON_EIMSK);
+#endif
 }
 static inline __attribute__((always_inline)) \
 void sysflash(void) {
@@ -250,6 +272,9 @@ static void _sleep_ms(utime_t ms, uint8_t flags) {
 
 	is_deep_sleep = (SELECT_BITS(SMCR, _BV(SM2)|_BV(SM1)|_BV(SM0)) == _BV(SM1));
 
+	if (BIT_IS_SET(flags, CFG_ALLOW_INTERRUPTS)) {
+		enable_button_ISR();
+	}
 	while (ms != 0) {
 		// Every deep sleep includes an additional time period during which
 		// the oscillator is starting up that needs to be taken into account
@@ -301,6 +326,9 @@ static void _sleep_ms(utime_t ms, uint8_t flags) {
 		sei();
 		enable_systick();
 		stop_wakeup_alarm();
+	}
+	if (BIT_IS_SET(flags, CFG_ALLOW_INTERRUPTS)) {
+		disable_button_ISR();
 	}
 
 	return;
