@@ -66,12 +66,15 @@ void power_off_I2C(void);
 
 // Power a specific pin on and off
 // power_{on,off}_output() will handle PWM for any pin specified by PWM_PINS
+// These are now declared in interface.h
+/*
 void power_on_PWM_output(pin_t pin, uint16_t duty_cycle);
 void power_off_PWM_output(pin_t pin);
 void power_on_output(pin_t pin);
 void power_off_output(pin_t pin);
 void power_on_input(pin_t pin);
 void power_off_input(pin_t pin);
+*/
 
 
 /*
