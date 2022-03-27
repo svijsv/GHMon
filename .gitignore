@@ -1,6 +1,8 @@
 .pio
 platformio-device-monitor-*
 *.sch-bak
+*-backups
+_autosave-*
 
 /todo
 /temp
