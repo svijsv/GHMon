@@ -419,7 +419,7 @@ static void calibrate_WDT(void) {
 	// tick increments during this read and have to deal ISR overhead, we're
 	// mostly going to overcount so subtract 1ms to (hopefully) keep things a
 	// little closer to reality
-	// EDIT: The clock was running fast by one minute per hour, which
+	// EDIT: The clock was running slow by one minute per hour, which
 	// corresponds to the correction being one millisecond slow during the 60ms
 	// calibration period, so let's not subtract 1 here after all...
 	wdt_calibration = (uint16_t )(post_calib - pre_calib);
