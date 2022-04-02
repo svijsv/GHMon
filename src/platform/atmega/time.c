@@ -81,7 +81,7 @@
 // find a way to detect the right one at run-time, but the most
 // likely value for a given board seems to be ~16K cycles
 // See also: https://www.avrfreaks.net/comment/3020151#comment-3020151
-#define WAKEUP_MS (16000/(G_freq_CORECLK/1000))
+#define WAKEUP_MS (16000/(G_freq_OSC/1000))
 
 #define TIM01_PRESCALER_1    0b001
 #define TIM01_PRESCALER_8    0b010
