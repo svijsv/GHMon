@@ -76,6 +76,13 @@
 // possibly as much as 3 times longer on older device with voltage below 5V
 #define WDT_CALIBRATE_MINIMUM_MS 500
 
+// Section 9 of the reference manual includes startup time tables
+// for the various oscillators; they vary... quite a bit and I can't
+// find a way to detect the right one at run-time, but the most
+// likely value for a given board seems to be ~16K cycles
+// See also: https://www.avrfreaks.net/comment/3020151#comment-3020151
+#define WAKEUP_MS (16000/(G_freq_CORECLK/1000))
+
 #define TIM01_PRESCALER_1    0b001
 #define TIM01_PRESCALER_8    0b010
 #define TIM01_PRESCALER_64   0b011
@@ -422,11 +429,18 @@ static void calibrate_WDT(void) {
 	return;
 }
 //
-// For convenience sake, set_wakeup_alarm() helps keep track of RTC_ticks
+// For convenience sake, set_wakeup_alarm() helps keep track of RTC_ticks and
+// calibrates the watchdog timer so A) it may use up some of the time it says
+// would be slept and B) it may leave the RTC in a wrong state until the sleep
+// has occurred.
+// This may return a time greater than 'ms'.
+// If this returns >0 without setting wakeup_alarm_is_set, that means the
+// whole sleep period was already used up.
 uint16_t set_wakeup_alarm(uint16_t ms) {
 	static uint16_t calib_counter = WDT_CALIBRATE_INTERVAL;
-	uint16_t period_ms, adjust_ms = 0;
+	uint16_t period_ms = 0, adjust_ms = 0;
 	uint8_t shifts;
+	bool is_deep_sleep;
 
 	if (ms == 0) {
 		return 0;
@@ -446,10 +460,18 @@ uint16_t set_wakeup_alarm(uint16_t ms) {
 			if (ms > adjust_ms) {
 				ms -= adjust_ms;
 			} else {
-				// Returning a period without having set wakeup_alarm_is_set should
-				// cause the caller to skip a loop
-				return ms;
+				goto END;
 			}
+		}
+	}
+	// Every deep sleep includes an additional time period during which the
+	// oscillator is starting up that needs to be taken into account
+	is_deep_sleep = (SELECT_BITS(SMCR, _BV(SM2)|_BV(SM1)|_BV(SM0)) == _BV(SM1));
+	if (is_deep_sleep) {
+		if (ms > WAKEUP_MS) {
+			ms -= WAKEUP_MS;
+		} else {
+			goto END;
 		}
 	}
 
@@ -466,6 +488,9 @@ uint16_t set_wakeup_alarm(uint16_t ms) {
 	if (shifts > WDTO_8S) {
 		period_ms = 0;
 	}
+	if (is_deep_sleep) {
+		period_ms += WAKEUP_MS;
+	}
 
 	if (period_ms != 0) {
 		uint8_t sreg;
@@ -478,15 +503,10 @@ uint16_t set_wakeup_alarm(uint16_t ms) {
 		ENABLE_WDT_ISR();
 		RESTORE_INTERRUPTS(sreg);
 
-		// When sleep is interrupted (specifically by a button press), there's
-		// no way to know how long we actually slept. Hopefully the average over
-		// many such incidents is 1/2 the total sleep time.
-		if (BIT_IS_SET(G_IRQs, BUTTON_IRQf)) {
-			period_ms /= 2;
-		}
 		add_RTC_millis(period_ms);
 	}
 
+END:
 	return period_ms + adjust_ms;
 }
 void stop_wakeup_alarm(void) {
