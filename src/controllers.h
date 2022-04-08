@@ -167,14 +167,14 @@ typedef struct {
 	utime_t next_check;
 	// Time when current engagement started
 	utime_t run_start;
-	// Number retries that have been made for this controller
-	uint8_t try_count;
 
 	// Number of times a device has been engaged
-	// Rolls over after 255 times
-	uint8_t run_count;
+	uint16_t run_count;
 	// Total number of minutes controller has run
 	uint16_t run_time_minutes;
+
+	// Number retries that have been made for this controller
+	uint8_t try_count;
 #endif // USE_SMALL_CONTROLLERS < 1
 
 	// Internal flags

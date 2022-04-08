@@ -85,7 +85,7 @@ typedef struct {
 #if USE_CONTROLLERS
 #if USE_SMALL_CONTROLLERS < 1
 	uint16_t run_time[CONTROLLER_COUNT];
-	uint8_t  run_count[CONTROLLER_COUNT];
+	uint16_t run_count[CONTROLLER_COUNT];
 	uint8_t  controller_iflags[CONTROLLER_COUNT];
 #endif // USE_SMALL_CONTROLLERS < 1
 #endif // USE_CONTROLLERS
