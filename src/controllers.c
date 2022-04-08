@@ -36,6 +36,7 @@
 #include "power.h"
 #include "serial.h"
 
+#include "ulib/math.h"
 
 // Need to check this *after* the headers are included
 #if USE_CONTROLLERS
