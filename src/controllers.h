@@ -173,9 +173,8 @@ typedef struct {
 	// Number of times a device has been engaged
 	// Rolls over after 255 times
 	uint8_t run_count;
-	// Total number of seconds controller has run
-	// Rolls over after ~18 hours
-	uint16_t run_time_seconds;
+	// Total number of minutes controller has run
+	uint16_t run_time_minutes;
 #endif // USE_SMALL_CONTROLLERS < 1
 
 	// Internal flags

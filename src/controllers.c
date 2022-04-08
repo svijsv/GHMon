@@ -450,7 +450,7 @@ static void update_runtime(controller_t *c) {
 			LOGGER("Traveled %u seconds into the future, not updating %s run time", (uint )(now - *last), FROM_FSTR(cfg->name));
 		} else {
 			LOGGER("%s has been running %us", FROM_FSTR(cfg->name), (uint )(now - *last));
-			c->run_time_seconds += now - *last;
+			c->run_time_minutes += DIV_ROUNDED((now - *last), 60);
 		}
 	} else {
 		LOGGER("Traveled %u seconds into the past, not updating %s run time", (uint )(*last - now), FROM_FSTR(cfg->name));

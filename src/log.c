@@ -340,7 +340,7 @@ void log_status(bool force_write) {
 			} else {
 				prefix = prefix_std;
 			}
-			LPRINTF("%s%u\t%u", prefix, (uint )G_controllers[i].run_count, (uint )G_controllers[i].run_time_seconds);
+			LPRINTF("%s%u\t%u", prefix, (uint )G_controllers[i].run_count, (uint )G_controllers[i].run_time_minutes);
 		}
 #endif // USE_SMALL_CONTROLLERS < 1
 #endif // USE_CONTROLLERS
@@ -497,7 +497,7 @@ static void buffer_line(utime_t now) {
 #if USE_CONTROLLERS
 #if USE_SMALL_CONTROLLERS < 1
 	for (uiter_t i = 0; i < CONTROLLER_COUNT; ++i) {
-		line->run_time[i] = G_controllers[i].run_time_seconds;
+		line->run_time[i] = G_controllers[i].run_time_minutes;
 		line->run_count[i] = G_controllers[i].run_count;
 		line->controller_iflags[i] = G_controllers[i].iflags;
 	}
@@ -713,7 +713,7 @@ static FRESULT print_header(void) {
 
 	for (uiter_t i = 0; i < CONTROLLER_COUNT; ++i) {
 		FROM_FSTR_TO_BUF(CONTROLLERS[i].name, name);
-		LPRINTF("\t[!]%s_count\t%s_time", name, name);
+		LPRINTF("\t[!]%s_count\t%s_minutes", name, name);
 	}
 #endif // USE_SMALL_CONTROLLERS < 1
 #endif // USE_CONTROLLERS
