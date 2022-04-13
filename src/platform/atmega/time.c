@@ -422,6 +422,8 @@ static void calibrate_WDT(void) {
 	// EDIT: The clock was running slow by one minute per hour, which
 	// corresponds to the correction being one millisecond slow during the 60ms
 	// calibration period, so let's not subtract 1 here after all...
+	// EDIT: Removing the subtraction only reduced the error from 24min a day
+	// to 9min a day, which is still enough to matter.
 	wdt_calibration = (uint16_t )(post_calib - pre_calib);
 
 	RESTORE_INTERRUPTS(sreg);
@@ -488,9 +490,6 @@ uint16_t set_wakeup_alarm(uint16_t ms) {
 	if (shifts > WDTO_8S) {
 		period_ms = 0;
 	}
-	if (is_deep_sleep) {
-		period_ms += WAKEUP_MS;
-	}
 
 	if (period_ms != 0) {
 		uint8_t sreg;
@@ -503,6 +502,9 @@ uint16_t set_wakeup_alarm(uint16_t ms) {
 		ENABLE_WDT_ISR();
 		RESTORE_INTERRUPTS(sreg);
 
+		if (is_deep_sleep) {
+			period_ms += WAKEUP_MS;
+		}
 		add_RTC_millis(period_ms);
 	}
 

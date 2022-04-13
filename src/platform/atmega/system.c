@@ -278,11 +278,11 @@ static void _sleep_ms(utime_t ms, uint8_t flags) {
 			break;
 		}
 
-		// The systick is disabled during sleep so that the interrupts don't
-		// wake us up
-		disable_systick();
-		cli();
 		while (wakeup_alarm_is_set) {
+			// The systick is disabled during sleep so that the interrupts don't
+			// wake us up
+			disable_systick();
+			cli();
 			sleep_enable();
 			sleep_bod_disable();
 			sei();
@@ -300,11 +300,7 @@ static void _sleep_ms(utime_t ms, uint8_t flags) {
 					sysflash();
 				}
 			}
-			disable_systick();
-			cli();
 		}
-		sei();
-		enable_systick();
 		stop_wakeup_alarm();
 	}
 	if (BIT_IS_SET(flags, CFG_ALLOW_INTERRUPTS)) {
