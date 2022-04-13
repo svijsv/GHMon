@@ -71,8 +71,9 @@ void stop_wakeup_alarm(void);
 void enable_systick(void);
 void disable_systick(void);
 
-// Add time to the internal fake RTC
+// Add/subtract time to the internal fake RTC
 void add_RTC_millis(uint16_t ms);
+void subtract_RTC_millis(uint16_t ms);
 
 
 /*

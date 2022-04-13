@@ -133,7 +133,7 @@ static utime_t RTC_prev_msticks = 0;
 // one from RTC_prev_msticks but the time spent sleeping is so much greater
 // than the time spent awake that doing so would roll the counter over rather
 // quickly, so a separate counter is needed for that
-static utime_t RTC_millis = 0;
+static int32_t RTC_millis = 0;
 
 volatile uint8_t wdt_state;
 volatile uint16_t wdt_calibration;
@@ -529,9 +529,15 @@ utime_t get_RTC_seconds(void) {
 
 	// This should happen close enough to every second that repeated subtraction
 	// will be faster than division
-	while (RTC_millis > 1000) {
+	while (RTC_millis >= 1000) {
 		++RTC_ticks;
 		RTC_millis -= 1000;
+	}
+	while (RTC_millis <= -1000) {
+		if (RTC_ticks != 0) {
+			--RTC_ticks;
+		}
+		RTC_millis += 1000;
 	}
 
 	return RTC_ticks;
@@ -545,6 +551,11 @@ err_t set_RTC_seconds(utime_t s) {
 }
 void add_RTC_millis(uint16_t ms) {
 	RTC_millis += ms;
+
+	return;
+}
+void subtract_RTC_millis(uint16_t ms) {
+	RTC_millis -= ms;
 
 	return;
 }

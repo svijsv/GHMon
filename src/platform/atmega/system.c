@@ -292,6 +292,11 @@ static void _sleep_ms(utime_t ms, uint8_t flags) {
 
 			// If desired keep sleeping until the wakeup alarm triggers
 			if (wakeup_alarm_is_set) {
+				// There's no way to directly track sleep time so if an interrupt
+				// wakes us we need to make a best guess as to how much time we
+				// lost. Sometimes the sleep period returned by set_wakeup_alarm()
+				// will be longer than the actual period but that should be rare.
+				subtract_RTC_millis(period/2);
 				if (BIT_IS_SET(flags, CFG_ALLOW_INTERRUPTS)) {
 					ms = 0;
 					break;
