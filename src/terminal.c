@@ -425,7 +425,7 @@ static void terminalcmd_delay_S(char *line_in) {
 	PRINTF("Delaying %u seconds...", (uint )n);
 	n += NOW();
 	//delay_ms(n * 1000);
-	while (NOW() != n) {
+	while (NOW() < n) {
 		delay_ms(50);
 	}
 	PRINTF("done.\r\n");
