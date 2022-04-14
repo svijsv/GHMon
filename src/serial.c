@@ -164,7 +164,7 @@ void logger(const char *fmt, ...) {
 
 	va_start(arp, fmt);
 	// Prefix message with system up time
-	vvprintf(serial_putc, "%04u:  ", (uint )NOW());
+	vvprintf(serial_putc, "%04lu:  ", (long unsigned int )NOW());
 	vaprintf(serial_putc, fmt, arp);
 	// Append message with a newline
 	serial_putc('\r'); serial_putc('\n');
