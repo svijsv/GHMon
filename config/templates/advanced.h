@@ -35,6 +35,16 @@
 // with this that time can be offset by the given number of minutes. The
 // value must be >= 0 and < 24*60
 #define RESET_TIME_OFFSET_MINUTES (12 * 60) // 12:00:00
+// Every RTC_CORRECTION_PERIOD_MINUTES the RTC is adjusted by
+// RTC_CORRECTION_SECONDS to account for any known clock drift. Disabled if
+// either is 0.
+#define RTC_CORRECTION_PERIOD_MINUTES 60
+#define RTC_CORRECTION_SECONDS 0
+// Every RTC_FINE_CORRECTION_PERIOD_MINUTES the RTC is adjusted by
+// RTC_FINE_CORRECTION_SECONDS to account for any known clock drift. Disabled
+// if either is 0. This is to provide for a second, finer-grained adjustment.
+#define RTC_FINE_CORRECTION_PERIOD_MINUTES (60*24)
+#define RTC_FINE_CORRECTION_SECONDS 0
 
 // The UART communication parameters
 #define UART_BAUDRATE 9600

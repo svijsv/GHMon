@@ -42,9 +42,24 @@
 
 #include "ulib/cstrings.h"
 
+#if RTC_CORRECTION_PERIOD_MINUTES < 0
+# error "RTC_CORRECTION_PERIOD_MINUTES must be >= 0"
+#endif
+#if RTC_FINE_CORRECTION_PERIOD_MINUTES < 0
+# error "RTC_FINE_CORRECTION_PERIOD_MINUTES must be >= 0"
+#endif
+
 /*
 * Static values
 */
+#define RTC_CORRECTION_PERIOD_SECONDS ((RTC_CORRECTION_PERIOD_MINUTES)*SECONDS_PER_MINUTE)
+#if RTC_CORRECTION_PERIOD_SECONDS && RTC_CORRECTION_SECONDS && (USE_SMALL_CODE < 2)
+# define DO_CLOCK_DESCEW 1
+#endif
+#define RTC_FINE_CORRECTION_PERIOD_SECONDS ((RTC_FINE_CORRECTION_PERIOD_MINUTES)*SECONDS_PER_MINUTE)
+#if RTC_FINE_CORRECTION_PERIOD_SECONDS && RTC_FINE_CORRECTION_SECONDS && (USE_SMALL_CODE < 2)
+# define DO_FINE_CLOCK_DESCEW 1
+#endif
 
 
 /*
@@ -61,6 +76,12 @@ volatile uint8_t  G_button_pressed = 0;
 
 static utime_t log_alarm = 0;
 static utime_t status_alarm = 0;
+#if DO_CLOCK_DESCEW
+static utime_t descew_alarm = 0;
+#endif
+#if DO_FINE_CLOCK_DESCEW
+static utime_t fine_descew_alarm = 0;
+#endif
 #if USE_SMALL_CONTROLLERS >= 1
 static utime_t controller_alarm = 0;
 #endif // USE_SMALL_CONTROLLERS >= 1
@@ -72,6 +93,7 @@ static utime_t controller_alarm = 0;
 // Calculate all the wakeup alarms and return the time of the next alarm
 static uint32_t set_alarms(bool force);
 static void check_warnings(void);
+static void descew_clock(int16_t correction);
 
 
 /*
@@ -222,6 +244,19 @@ int main(void) {
 			G_button_pressed = 0;
 		}
 
+#if DO_CLOCK_DESCEW
+		if ((descew_alarm > 0) && (NOW() >= descew_alarm)) {
+			descew_alarm = 0;
+			descew_clock(RTC_CORRECTION_SECONDS);
+		}
+#endif
+#if DO_FINE_CLOCK_DESCEW
+		if ((fine_descew_alarm > 0) && (NOW() >= fine_descew_alarm)) {
+			fine_descew_alarm = 0;
+			descew_clock(RTC_FINE_CORRECTION_SECONDS);
+		}
+#endif
+
 		// Checking the status only updates warning blinks
 		if (do_status || ((status_alarm > 0) && (NOW() >= status_alarm))) {
 			LOGGER("Checking sensor status");
@@ -298,6 +333,27 @@ static uint32_t set_alarms(bool force) {
 		tmp = STATUS_CHECK_MINUTES * MINUTES;
 		status_alarm = SNAP_TO_FACTOR(now + tmp, tmp);
 	}
+#if DO_CLOCK_DESCEW
+	if ((descew_alarm == 0) || force) {
+		tmp = RTC_CORRECTION_PERIOD_SECONDS;
+		descew_alarm = SNAP_TO_FACTOR(now + tmp, tmp);
+		// Without this check, a negative correction will be applied repeatedly.
+		if ((RTC_CORRECTION_SECONDS < 0) && (descew_alarm <= (now + -(RTC_CORRECTION_SECONDS)))) {
+			descew_alarm += RTC_CORRECTION_PERIOD_SECONDS;
+		}
+	}
+#endif
+#if DO_FINE_CLOCK_DESCEW
+	if ((fine_descew_alarm == 0) || force) {
+		tmp = RTC_FINE_CORRECTION_PERIOD_SECONDS;
+		fine_descew_alarm = SNAP_TO_FACTOR(now + tmp, tmp);
+		// Without this check, a negative correction will be applied repeatedly.
+		if ((RTC_FINE_CORRECTION_SECONDS < 0) && (fine_descew_alarm <= (now + -(RTC_FINE_CORRECTION_SECONDS)))) {
+			fine_descew_alarm += RTC_FINE_CORRECTION_PERIOD_SECONDS;
+		}
+	}
+#endif
+
 #if USE_CONTROLLERS
 #if USE_SMALL_CONTROLLERS >= 1
 	if ((CONTROLLER_CHECK_MINUTES > 0) && ((controller_alarm == 0) || force)) {
@@ -387,6 +443,16 @@ static uint32_t set_alarms(bool force) {
 	if ((status_alarm != 0) && (next > status_alarm)) {
 		next = status_alarm;
 	}
+#if DO_CLOCK_DESCEW
+	if ((descew_alarm != 0) && (next > descew_alarm)) {
+		next = descew_alarm;
+	}
+#endif
+#if DO_FINE_CLOCK_DESCEW
+	if ((fine_descew_alarm != 0) && (next > fine_descew_alarm)) {
+		next = fine_descew_alarm;
+	}
+#endif
 #if USE_CONTROLLERS
 #if USE_SMALL_CONTROLLERS >= 1
 	if ((controller_alarm != 0) && (next > controller_alarm)) {
@@ -404,6 +470,21 @@ static uint32_t set_alarms(bool force) {
 #endif // USE_CONTROLLERS
 
 	return next;
+}
+
+static void descew_clock(int16_t correction) {
+#if DO_CLOCK_DESCEW || DO_FINE_CLOCK_DESCEW
+	err_t res = EOK;
+	utime_t now;
+
+	now = get_RTC_seconds() + correction;
+	if ((res = set_RTC_seconds(now)) != EOK) {
+		LOGGER("Error %u while adjusting clock scew", (uint )res);
+	}
+	LOGGER("Clock adjusted %d seconds", (int )correction);
+
+#endif // DO_CLOCK_DESCEW || DO_FINE_CLOCK_DESCEW
+	return;
 }
 
 void led_on(void) {
