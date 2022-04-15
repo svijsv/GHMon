@@ -86,6 +86,12 @@ const char* cstring_eat_whitespace(const char *s);
 // Repeating delimiters are treated as a single one.
 const char* cstring_next_token(const char *cs, char delim);
 
+// Copy up to 'n' bytes from 'src' to 'dest'.
+// If USE_CLIB_STRING isn't set, this differs from strncpy() in that if the
+// length of 'src' is less than 'n' the extra space is not overwritten with
+// 0.
+char* cstring_strncpy(char *dest, const char *src, cstrlen_t n);
+
 /*
 * Macros
 */

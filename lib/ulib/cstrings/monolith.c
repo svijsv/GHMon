@@ -8,4 +8,5 @@
 # include "cstring_len.c"
 # include "cstring_ncmp.c"
 # include "cstring_next_token.c"
+# include "cstring_strncpy.c"
 #endif // USE_MONOLITHIC_ULIB
