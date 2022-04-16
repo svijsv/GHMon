@@ -63,14 +63,16 @@
 #define WDT_WAKEUP    0
 #define WDT_CALIBRATE 1
 // Using more cycles for calibration *should* reduce the overall error at
-// the expense of more power used
-#define WDT_CALIBRATE_CYCLES WDTO_60MS
+// the expense of (very slightly) more power used due to the missing sleep
+// period. The WDTO_* constants are defined in avr/include/avr/wdt.h in the
+// toolchain directory.
+#define WDT_CALIBRATE_CYCLES WDTO_120MS
 // This is the number of times the WDT can be called before recalibration;
 // right now it's only used in set_wakeup_alarm() and should fit in a uint16_t
 // It's hard to associate this with a period of time because the duration of
 // each sleep is different; 1000 works out to ~2 hours if every sleep is 8s
 // and nothing else much happens
-#define WDT_CALIBRATE_INTERVAL 200
+#define WDT_CALIBRATE_INTERVAL 150 // ~20 minutes
 // Only use sleep periods longer than this in the count to WDT_CALIBRATE_INTERVAL
 // This should be longer than the expected duration of the calibration cycle,
 // possibly as much as 3 times longer on older device with voltage below 5V
