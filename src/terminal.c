@@ -65,7 +65,7 @@ static _FLASH const char TERMINAL_PROMPT[] =
 
 static _FLASH const char TERMINAL_HELP[] =
 #if USE_AVR
-"Commands: set_time info status controllers synclog led_{on,off,toggle} delay fdisk test help"
+"Commands: set_time info status controllers synclog led_{on,off,toggle} delay fdisk show_log test help exit"
 #else // !USE_AVR
 "Accepted commands:\r\n"
 "   set_time YY.MM.DD hh:mm:ss - Set system time, clock is 24-hour\r\n"
@@ -84,6 +84,9 @@ static _FLASH const char TERMINAL_HELP[] =
 #if USE_FDISK
 "   fdisk                      - Format the SD card\r\n"
 #endif // USE_FDISK
+#if LOGGER_REPLAY_BUFFER_SIZE > 0
+"   show_log                   - Replay system log output\r\n"
+#endif
 "   test                       - Stub command for testing new functionality\r\n"
 "   help                       - Display this help\r\n"
 "   exit                       - Exit the command terminal\r\n"
@@ -114,6 +117,9 @@ static void terminalcmd_test(char *line_in);
 #if USE_LOGGING
 static void terminalcmd_sync_log(void);
 #endif // USE_LOGGING
+#if LOGGER_REPLAY_BUFFER_SIZE > 0
+static void terminalcmd_show_log(void);
+#endif
 #if USE_CONTROLLERS
 static void terminalcmd_run_controllers(void);
 #endif // USE_CONTROLLERS
@@ -176,6 +182,11 @@ void terminal(void) {
 		} else if (cstring_cmp(line_in, "synclog") == 0) {
 			terminalcmd_sync_log();
 #endif // USE_LOGGING
+
+#if LOGGER_REPLAY_BUFFER_SIZE > 0
+		} else if (cstring_cmp(line_in, "show_log") == 0) {
+			terminalcmd_show_log();
+#endif
 
 		} else if (cstring_ncmp(line_in, "help", 4) == 0) {
 			PUTS_NOF(FROM_FSTR(TERMINAL_HELP), 0);
@@ -313,6 +324,13 @@ static void terminalcmd_sync_log(void) {
 	log_status(true);
 }
 #endif // USE_LOGGING
+#if LOGGER_REPLAY_BUFFER_SIZE > 0
+static void terminalcmd_show_log(void) {
+	logger_replay();
+
+	return;
+}
+#endif
 // Format: 'set_time YY.MM.DD hh:mm:ss'
 static void terminalcmd_set_time(char *line_in) {
 	int year, month, day, hour, minute, second;

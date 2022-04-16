@@ -86,6 +86,11 @@
 #else
 # define SERIAL_BUFFER_SIZE 0
 #endif
+// Right now the only place the replay is used is the terminal
+#if LOGGER_REPLAY_BUFFER_SIZE && ! USE_TERMINAL
+# undef  LOGGER_REPLAY_BUFFER_SIZE
+# define LOGGER_REPLAY_BUFFER_SIZE 0
+#endif
 //
 // Serial input
 #if USE_TERMINAL

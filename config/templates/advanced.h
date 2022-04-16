@@ -49,6 +49,10 @@
 // The UART communication parameters
 #define UART_BAUDRATE 9600
 
+// If >0, keep a ring buffer of logger() output for later replay for debugging
+// purposes.
+#define LOGGER_REPLAY_BUFFER_SIZE 0
+
 // SPI communication parameters
 // Target speed of the SPI bus; it will generally be somewhat higher due to
 // hardware limitations

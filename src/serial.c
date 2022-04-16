@@ -42,6 +42,7 @@
 
 #if DEBUG
 # pragma message "SERIAL_BUFFER_SIZE: " XTRINGIZE(SERIAL_BUFFER_SIZE)
+# pragma message "LOGGER_REPLAY_BUFFER_SIZE: " XTRINGIZE(LOGGER_REPLAY_BUFFER_SIZE)
 #endif
 
 /*
@@ -55,6 +56,15 @@
 /*
 * Types
 */
+#if LOGGER_REPLAY_BUFFER_SIZE > 0
+typedef struct {
+	char output[LOGGER_REPLAY_BUFFER_SIZE];
+	// 'tail' is the index of the next byte to be written.
+	uint16_t tail;
+	// 'size' is the number of bytes that contain valid data.
+	uint16_t size;
+} logger_replay_buffer_t;
+#endif
 
 
 /*
@@ -67,6 +77,9 @@ static uint8_t printf_buffer[SERIAL_BUFFER_SIZE];
 static uint8_t printf_buffer_size = 0;
 #endif // SERIAL_BUFFER_SIZE > 0
 
+#if LOGGER_REPLAY_BUFFER_SIZE > 0
+logger_replay_buffer_t logger_replay_buffer = { { 0 }, 0, 0 };
+#endif
 /*
 * Local function prototypes
 */
@@ -140,7 +153,6 @@ void serial_print(const char *msg, txsize_t len) {
 
 	return;
 }
-
 void serial_printf(const char *fmt, ...) {
 	va_list arp;
 
@@ -153,6 +165,47 @@ void serial_printf(const char *fmt, ...) {
 
 	return;
 }
+
+#if LOGGER_REPLAY_BUFFER_SIZE > 0
+static void logger_putc(int c) {
+	serial_putc(c);
+
+	logger_replay_buffer.output[logger_replay_buffer.tail] = c;
+	logger_replay_buffer.tail = (logger_replay_buffer.tail + 1) % LOGGER_REPLAY_BUFFER_SIZE;
+	if (logger_replay_buffer.size != LOGGER_REPLAY_BUFFER_SIZE) {
+		++logger_replay_buffer.size;
+	}
+
+	return;
+}
+void logger_replay(void) {
+	txsize_t len;
+	uint8_t *msg;
+
+	flush_printf_buffer();
+	len = logger_replay_buffer.size-logger_replay_buffer.tail;
+	if (len > 0) {
+		msg = (uint8_t *)&logger_replay_buffer.output[logger_replay_buffer.tail];
+		uart_transmit_block(msg, len, SERIAL_TIMEOUT_MS);
+	}
+	if (logger_replay_buffer.tail > 0) {
+		len = logger_replay_buffer.tail;
+		msg = (uint8_t *)logger_replay_buffer.output;
+		uart_transmit_block(msg, len, SERIAL_TIMEOUT_MS);
+	}
+
+	return;
+}
+#else // !LOGGER_REPLAY_BUFFER_SIZE > 0
+static void logger_putc(int c) {
+	serial_putc(c);
+
+	return;
+}
+void logger_replay(void) {
+	return;
+}
+#endif // LOGGER_REPLAY_BUFFER_SIZE > 0
 void logger(const char *fmt, ...) {
 	va_list arp;
 
@@ -164,10 +217,10 @@ void logger(const char *fmt, ...) {
 
 	va_start(arp, fmt);
 	// Prefix message with system up time
-	vvprintf(serial_putc, "%04lu:  ", (long unsigned int )NOW());
-	vaprintf(serial_putc, fmt, arp);
+	vvprintf(logger_putc, "%04lu:  ", (long unsigned int )NOW());
+	vaprintf(logger_putc, fmt, arp);
 	// Append message with a newline
-	serial_putc('\r'); serial_putc('\n');
+	logger_putc('\r'); logger_putc('\n');
 	flush_printf_buffer();
 	va_end(arp);
 

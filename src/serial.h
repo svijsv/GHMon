@@ -58,7 +58,6 @@
 // True if serial output has be initialized
 extern bool G_serial_is_up;
 
-
 /*
 * Function prototypes (defined in serial.c)
 */
@@ -68,6 +67,8 @@ void serial_init(void);
 // Print information about the running system to the serial line
 void print_system_info(void);
 
+// Send stored logger() messages to the serial output.
+void logger_replay(void);
 
 /*
 * Macros
