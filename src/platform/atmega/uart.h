@@ -35,7 +35,7 @@
 #include "common.h"
 
 
-#if USE_SERIAL
+#if USE_UART
 
 /*
 * Static values
@@ -69,7 +69,7 @@ void uart_listen_off(void);
 */
 
 
-#endif // USE_SERIAL
+#endif // USE_UART
 
 #endif // _PLATFORM_ATMEGA_UART_H
 #ifdef __cplusplus

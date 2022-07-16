@@ -35,7 +35,7 @@
 #include "gpio.h"
 
 
-#if USE_SERIAL
+#if USE_UART
 
 #if (UARTx_BUSFREQ/UART_BAUDRATE) > (0xFFFF)
 # error "UART frequency is too low for the system clock"
@@ -202,7 +202,7 @@ static uint16_t calculate_baud_div(uint32_t baud) {
 }
 
 
-#endif // USE_SERIAL
+#endif // USE_UART
 #ifdef __cplusplus
  }
 #endif

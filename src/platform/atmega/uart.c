@@ -38,7 +38,7 @@
 #include <avr/power.h>
 
 
-#if USE_SERIAL
+#if USE_UART
 
 #if (PINID(UART_RX_PIN) != PINID_D0) || (PINID(UART_TX_PIN) != PINID_D1)
 # error "Incorrect pin(s) set for UART"
@@ -175,7 +175,7 @@ END:
 }
 
 
-#endif // USE_SERIAL
+#endif // USE_UART
 #ifdef __cplusplus
  }
 #endif

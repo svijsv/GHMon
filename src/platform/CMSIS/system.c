@@ -322,7 +322,7 @@ void platform_init(void) {
 	time_init();
 	led_flash(1, DELAY_SHORT);
 
-#if USE_SERIAL
+#if USE_UART
 	uart_init();
 	led_flash(1, DELAY_SHORT);
 #endif

@@ -35,7 +35,7 @@
 #include "common.h"
 
 
-#if USE_SERIAL
+#if USE_UART
 
 /*
 * Static values
@@ -124,7 +124,7 @@ err_t uart_init(void);
 */
 
 
-#endif // USE_SERIAL
+#endif // USE_UART
 
 #endif // _PLATFORM_CMSIS_UART_H
 #ifdef __cplusplus

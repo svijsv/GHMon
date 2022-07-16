@@ -45,6 +45,10 @@
 # define USE_SERIAL 1
 #endif
 
+#if USE_SERIAL
+# define USE_UART 1
+#endif
+
 #if USE_LOGGING || USE_FDISK
 # define USE_SD  1
 #endif
@@ -88,6 +92,7 @@
 #endif
 // Right now the only place the replay is used is the terminal
 #if LOGGER_REPLAY_BUFFER_SIZE && ! USE_TERMINAL
+# warning "Setting LOGGER_REPLAY_BUFFER_SIZE to 0 because USE_TERMINAL was unset"
 # undef  LOGGER_REPLAY_BUFFER_SIZE
 # define LOGGER_REPLAY_BUFFER_SIZE 0
 #endif

@@ -247,7 +247,7 @@ gpio_state_t gpio_get_state(pin_t pin);
 // qpin can be passed to GPIO_QUICK_READ() after being set up here
 void gpio_quickread_prepare(volatile gpio_quick_t *qpin, pin_t pin);
 
-#if USE_SERIAL
+#if USE_UART
 //
 // UART interface
 // Turn the UART peripheral on or off

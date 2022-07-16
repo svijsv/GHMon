@@ -176,7 +176,7 @@ void platform_init(void) {
 	time_init();
 	sysflash();
 
-#if USE_SERIAL
+#if USE_UART
 	uart_init();
 	sysflash();
 #endif
