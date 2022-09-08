@@ -62,7 +62,7 @@
 #define SYSTICK_IRQp     1
 #define BUTTON_IRQp      2
 #define RTC_ALARM_IRQp   3
-#define UARTx_IRQp       4
+#define UART_COMM_IRQp   4
 #define SLEEP_ALARM_IRQp 5
 
 // Peripheral control mappings

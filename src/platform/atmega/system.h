@@ -55,6 +55,11 @@
 /*
 * Variable declarations
 */
+#if USE_UART_COMM
+extern const uart_port_t* comm_port;
+#else
+# define comm_port NULL
+#endif
 
 
 /*

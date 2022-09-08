@@ -39,13 +39,13 @@
 # define USE_TERMINAL 1
 #endif
 
-#if USE_TERMINAL && !USE_SERIAL
-# warning "Setting USE_SERIAL because USE_TERMINAL was set"
-# undef USE_SERIAL
-# define USE_SERIAL 1
+#if USE_TERMINAL && !USE_UART_COMM
+# warning "Setting USE_UART_COMM because USE_TERMINAL was set"
+# undef USE_UART_COMM
+# define USE_UART_COMM 1
 #endif
 
-#if USE_SERIAL
+#if USE_UART_COMM
 # define USE_UART 1
 #endif
 
@@ -80,15 +80,15 @@
 //
 // Calculate IO buffer sizes
 //
-// Serial output
-#if USE_SERIAL
+// UART comm output
+#if USE_UART_COMM
 # if USE_SMALL_CODE < 1
-#  define SERIAL_BUFFER_SIZE 64
+#  define UART_COMM_BUFFER_SIZE 64
 # else
-#  define SERIAL_BUFFER_SIZE 0
+#  define UART_COMM_BUFFER_SIZE 0
 # endif
 #else
-# define SERIAL_BUFFER_SIZE 0
+# define UART_COMM_BUFFER_SIZE 0
 #endif
 // Right now the only place the replay is used is the terminal
 #if LOGGER_REPLAY_BUFFER_SIZE && ! USE_TERMINAL
@@ -141,7 +141,7 @@
 // This includes both G_sensors[] and the memory used by the sensor fields
 // in log_buffer_t
 #  define SD_PRINT_BUF_RESERVE_SENS   ((SENSOR_COUNT * 12) + (4 * LOGFILE_BUFFER_COUNT))
-#  define SD_PRINT_BUF_RESERVE_IO     (SERIAL_BUFFER_SIZE + TERMINAL_BUFFER_SIZE)
+#  define SD_PRINT_BUF_RESERVE_IO     (UART_COMM_BUFFER_SIZE + TERMINAL_BUFFER_SIZE)
 #  define SD_PRINT_BUF_RESERVE_LOG    (8 * LOGFILE_BUFFER_COUNT)
 #  define SD_PRINT_BUF_RESERVE_FATFS   1024
 // ATMegas have separate name spaces for flash and RAM and the work-around

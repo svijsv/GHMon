@@ -45,6 +45,12 @@
 /*
 * Types
 */
+struct uart_port_t {
+	uint16_t ubrr;
+	pin_t rx_pin;
+	pin_t tx_pin;
+	uint8_t uart_portno;
+};
 
 
 /*
@@ -55,18 +61,14 @@
 /*
 * Function prototypes
 */
-// Initialize the UART interface at the chosen baud rate
-// The interface is always configured as 8 data bits with 1 stop bit and no
-// parity bit with a baud rate of UART_BAUDRATE.
-void uart_init(void);
-
 // Turn the UART receive interrupt on and off
-void uart_listen_on(void);
-void uart_listen_off(void);
+void uart_listen_on(const uart_port_t *p);
+void uart_listen_off(const uart_port_t *p);
 
 /*
 * Macros
 */
+#define IS_UART0(rx_pin, tx_pin) ((PINID(rx_pin) == PINID_RX0) || (PINID(tx_pin) != PINID_TX0))
 
 
 #endif // USE_UART

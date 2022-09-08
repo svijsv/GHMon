@@ -372,10 +372,10 @@ void uscounter_off(void) {
 void delay_ms(utime_t ms) {
 	utime_t timer;
 
-#if DEBUG && USE_SERIAL
+#if DEBUG && USE_UART_COMM
 	uint32_t systick_mask = SysTick_CTRL_TICKINT_Msk|SysTick_CTRL_ENABLE_Msk;
 	if (SELECT_BITS(SysTick->CTRL, systick_mask) != systick_mask) {
-		uart_on();
+		uart_on(comm_port);
 		LOGGER("Someone is using delay_ms() without systick...");
 		dumb_delay_ms(ms);
 		return;

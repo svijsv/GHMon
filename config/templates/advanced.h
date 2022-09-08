@@ -46,8 +46,8 @@
 #define RTC_FINE_CORRECTION_PERIOD_MINUTES (60*24)
 #define RTC_FINE_CORRECTION_SECONDS 0
 
-// The UART communication parameters
-#define UART_BAUDRATE 9600
+// The UART serial communication parameters
+#define UART_COMM_BAUDRATE 9600
 
 // If >0, keep a ring buffer of logger() output for later replay for debugging
 // purposes.

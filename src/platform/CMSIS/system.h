@@ -85,6 +85,11 @@
 * Variable declarations (defined in system.c)
 */
 extern const uint32_t G_freq_OSC;
+#if USE_UART_COMM
+extern const uart_port_t* comm_port;
+#else
+# define comm_port NULL
+#endif
 
 
 /*
@@ -95,6 +100,8 @@ extern const uint32_t G_freq_OSC;
 void clock_init(rcc_periph_t periph_clock);
 void clock_enable(rcc_periph_t periph_clock);
 void clock_disable(rcc_periph_t periph_clock);
+// Check if a peripheral clock is enabled.
+bool clock_is_enabled(rcc_periph_t periph_clock);
 
 // Enable/Disable writes to backup-domain registers
 void BD_write_enable(void);

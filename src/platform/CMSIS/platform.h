@@ -84,6 +84,7 @@ typedef struct {
 	uint32_t mask;
 } gpio_quick_t;
 #define GPIO_QUICK_T_IS_DEFINED 1
+
 typedef enum {
 	GPIO_MODE_RESET = 0, // Reset state of the pin
 	GPIO_MODE_PP,    // Push-pull output

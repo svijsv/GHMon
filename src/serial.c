@@ -38,10 +38,10 @@
 #include "fatfs/ff.h"
 
 
-#if USE_SERIAL
+#if USE_UART_COMM
 
 #if DEBUG
-# pragma message "SERIAL_BUFFER_SIZE: " XTRINGIZE(SERIAL_BUFFER_SIZE)
+# pragma message "UART_COMM_BUFFER_SIZE: " XTRINGIZE(UART_COMM_BUFFER_SIZE)
 # pragma message "LOGGER_REPLAY_BUFFER_SIZE: " XTRINGIZE(LOGGER_REPLAY_BUFFER_SIZE)
 #endif
 
@@ -50,7 +50,7 @@
 */
 // Timeout in ms for serial communications; this is the timeout for a whole
 // message
-#define SERIAL_TIMEOUT_MS 10000 // 10s
+#define UART_COMM_TIMEOUT_MS 10000 // 10s
 
 
 /*
@@ -72,10 +72,10 @@ typedef struct {
 */
 bool G_serial_is_up = false;
 
-#if SERIAL_BUFFER_SIZE > 0
-static uint8_t printf_buffer[SERIAL_BUFFER_SIZE];
+#if UART_COMM_BUFFER_SIZE > 0
+static uint8_t printf_buffer[UART_COMM_BUFFER_SIZE];
 static uint8_t printf_buffer_size = 0;
-#endif // SERIAL_BUFFER_SIZE > 0
+#endif // UART_COMM_BUFFER_SIZE > 0
 
 #if LOGGER_REPLAY_BUFFER_SIZE > 0
 logger_replay_buffer_t logger_replay_buffer = { { 0 }, 0, 0 };
@@ -109,35 +109,35 @@ void serial_init(void) {
 }
 
 static void flush_printf_buffer(void) {
-#if SERIAL_BUFFER_SIZE > 0
+#if UART_COMM_BUFFER_SIZE > 0
 	if (printf_buffer_size > 0) {
-		uart_transmit_block(printf_buffer, printf_buffer_size, SERIAL_TIMEOUT_MS);
+		uart_transmit_block(NULL, printf_buffer, printf_buffer_size, UART_COMM_TIMEOUT_MS);
 		printf_buffer_size = 0;
 	}
-#endif // SERIAL_BUFFER_SIZE > 0
+#endif // UART_COMM_BUFFER_SIZE > 0
 
 	return;
 }
-#if SERIAL_BUFFER_SIZE > 0
+#if UART_COMM_BUFFER_SIZE > 0
 static void serial_putc(int c) {
-	assert(printf_buffer_size < SERIAL_BUFFER_SIZE);
+	assert(printf_buffer_size < UART_COMM_BUFFER_SIZE);
 
 	printf_buffer[printf_buffer_size] = c;
 	++printf_buffer_size;
-	if (printf_buffer_size == SERIAL_BUFFER_SIZE) {
+	if (printf_buffer_size == UART_COMM_BUFFER_SIZE) {
 		flush_printf_buffer();
 	}
 
 	return;
 }
-#else // !SERIAL_BUFFER_SIZE > 0
+#else // !UART_COMM_BUFFER_SIZE > 0
 static void serial_putc(int c) {
 	uint8_t c8 = c;
-	uart_transmit_block(&c8, 1, SERIAL_TIMEOUT_MS);
+	uart_transmit_block(NULL, &c8, 1, UART_COMM_TIMEOUT_MS);
 
 	return;
 }
-#endif // SERIAL_BUFFER_SIZE > 0
+#endif // UART_COMM_BUFFER_SIZE > 0
 void serial_print(const char *msg, txsize_t len) {
 	assert(msg != NULL);
 
@@ -149,7 +149,7 @@ void serial_print(const char *msg, txsize_t len) {
 	}
 
 	flush_printf_buffer();
-	uart_transmit_block((uint8_t *)msg, len, SERIAL_TIMEOUT_MS);
+	uart_transmit_block(NULL, (uint8_t *)msg, len, UART_COMM_TIMEOUT_MS);
 
 	return;
 }
@@ -186,12 +186,12 @@ void logger_replay(void) {
 	len = logger_replay_buffer.size-logger_replay_buffer.tail;
 	if (len > 0) {
 		msg = (uint8_t *)&logger_replay_buffer.output[logger_replay_buffer.tail];
-		uart_transmit_block(msg, len, SERIAL_TIMEOUT_MS);
+		uart_transmit_block(NULL, msg, len, UART_COMM_TIMEOUT_MS);
 	}
 	if (logger_replay_buffer.tail > 0) {
 		len = logger_replay_buffer.tail;
 		msg = (uint8_t *)logger_replay_buffer.output;
-		uart_transmit_block(msg, len, SERIAL_TIMEOUT_MS);
+		uart_transmit_block(NULL, msg, len, UART_COMM_TIMEOUT_MS);
 	}
 
 	return;
@@ -258,7 +258,7 @@ void print_system_info(void) {
 	return;
 }
 
-#endif // USE_SERIAL
+#endif // USE_UART_COMM
 
 #ifdef __cplusplus
  }

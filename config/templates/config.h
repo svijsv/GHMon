@@ -19,7 +19,7 @@
 // If 2, also use smaller structures for data in ROM
 #define USE_SMALL_BUILD 0
 // Enable serial output
-#define USE_SERIAL 0
+#define USE_UART_COMM 0
 // Enable the interactive serial terminal
 #define USE_TERMINAL 0
 // Enable SD card formatting from the serial terminal
@@ -198,10 +198,10 @@
 // Comma-separated pin/duty cycle pairs
 //#define PWM_PINS { CONTROL_FAN_PIN, 50 }, { PIN_B11, 100 }
 //
-// UART pins; hardware-specified
+// UART serial communication pins; hardware-specified
 // PIN_A9-PIN_A10: UART1
-#define UART_TX_PIN PIN_A9
-#define UART_RX_PIN PIN_A10
+#define UART_COMM_TX_PIN PIN_A9
+#define UART_COMM_RX_PIN PIN_A10
 //
 // SPI pins; hardware-specified
 // PIN_B12-PIN_B15: SPI2
@@ -261,9 +261,9 @@
 // Comma-separated pin/duty cycle pairs
 //#define PWM_PINS { PIN_6, 100 }, { CONTROL_FAN_PIN, 50 }
 //
-// UART pins; hardware-specified
-#define UART_TX_PIN PIN_TX
-#define UART_RX_PIN PIN_RX
+// UART serial communication pins; hardware-specified
+#define UART_COMM_TX_PIN PIN_TX
+#define UART_COMM_RX_PIN PIN_RX
 //
 // SPI pins; hardware-specified
 // The hardware SS pin should be used as a slave-select pin because if it's

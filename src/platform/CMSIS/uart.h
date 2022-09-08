@@ -40,69 +40,79 @@
 /*
 * Static values
 */
-//
-// Handle UARTx
-// USART1 remapped
-#if (PINID(UART_TX_PIN) == PIN_UART1_REMAP_TX) && (PINID(UART_RX_PIN) == PIN_UART1_REMAP_RX)
-# define UART1_DO_REMAP 1
-#endif
-
+// Helper macros for below
 #if USE_STM32F1_GPIO
-# define IS_UART1_TX ((PINID(UART_TX_PIN) == PIN_UART1_TX) || UART1_DO_REMAP)
-# define IS_UART1_RX ((PINID(UART_RX_PIN) == PIN_UART1_RX) || UART1_DO_REMAP)
-#else
-# define IS_UART1_TX ((PINID(UART_TX_PIN) == PIN_UART1_TX) || (PINID(UART_TX_PIN) == PIN_UART1_REMAP_TX))
-# define IS_UART1_RX ((PINID(UART_RX_PIN) == PIN_UART1_RX) || (PINID(UART_RX_PIN) == PIN_UART1_REMAP_RX))
-#endif
+// STM32F1 requires that pins either all be remapped or all left alone.
+# define IS_UART1(rx_pin, tx_pin) (((PINID(rx_pin) == PIN_UART1_RX)       && (PINID(tx_pin) == PIN_UART1_TX)) || \
+                                  ((PINID(rx_pin) == PIN_UART1_REMAP_RX) && (PINID(tx_pin) == PIN_UART1_REMAP_TX)))
+#else // ! STM32F1_GPIO
+// Non-F1 STM32s allow mixing remapped and default pins
+# define IS_UART1(rx_pin, tx_pin) (((PINID(rx_pin) == PIN_UART1_RX) || (PINID(rx_pin) == PIN_UART1_REMAP_RX)) && \
+                                  ((PINID(tx_pin) == PIN_UART1_TX) || (PINID(tx_pin) == PIN_UART1_REMAP_TX)))
+#endif // ! STM32F1_GPIO
+
 // USART2 and USART3 can be remapped, but the remapped pins aren't accessible
 // on the bluepill
-#define IS_UART2_TX ((PINID(UART_TX_PIN) == PIN_UART2_TX))
-#define IS_UART2_RX ((PINID(UART_RX_PIN) == PIN_UART2_RX))
-#define IS_UART3_TX ((PINID(UART_TX_PIN) == PIN_UART3_TX))
-#define IS_UART3_RX ((PINID(UART_RX_PIN) == PIN_UART3_RX))
+#if defined(USART2)
+# define IS_UART2(rx_pin, tx_pin) ((PINID(rx_pin) == PIN_UART2_RX) && (PINID(tx_pin) == PIN_UART2_TX))
+#else
+# define IS_UART2(rx_pin, tx_pin) (false)
+#endif
+#if defined(USART3)
+# define IS_UART3(rx_pin, tx_pin) ((PINID(rx_pin) == PIN_UART3_RX) && (PINID(tx_pin) == PIN_UART3_TX))
+#else
+# define IS_UART3(rx_pin, tx_pin) (false)
+#endif
 
+//
+// Determine UART peripheral used for serial communication.
 // USART1
-#if IS_UART1_TX && IS_UART1_RX
-# define UARTx USART1
-# define UARTx_IRQn       USART1_IRQn
-# define UARTx_IRQHandler USART1_IRQHandler
-# define UARTx_CLOCKEN    RCC_PERIPH_UART1
-# define UARTx_AF         AF_UART1
+#if USE_UART_COMM
+# if IS_UART1(UART_COMM_RX_PIN, UART_COMM_TX_PIN)
+#  define UART_COMM_IRQn       USART1_IRQn
+#  define UART_COMM_IRQHandler USART1_IRQHandler
+#  define UART_COMM_CLOCKEN    RCC_PERIPH_UART1
 
 // USART2
-#elif IS_UART2_TX && IS_UART2_RX
-# define UARTx USART2
-# define UARTx_IRQn       USART2_IRQn
-# define UARTx_IRQHandler USART2_IRQHandler
-# define UARTx_CLOCKEN    RCC_PERIPH_UART2
-# define UARTx_AF         AF_UART2
+# elif IS_UART2(UART_COMM_RX_PIN, UART_COMM_TX_PIN)
+#  define UART_COMM_IRQn       USART2_IRQn
+#  define UART_COMM_IRQHandler USART2_IRQHandler
+#  define UART_COMM_CLOCKEN    RCC_PERIPH_UART2
 
 // USART3
-#elif IS_UART3_TX && IS_UART3_RX
-# define UARTx USART3
-# define UARTx_IRQn       USART3_IRQn
-# define UARTx_IRQHandler USART3_IRQHandler
-# define UARTx_CLOCKEN    RCC_PERIPH_UART3
-# define UARTx_AF         AF_UART3
+# elif IS_UART3(UART_COMM_RX_PIN, UART_COMM_TX_PIN)
+#  define UART_COMM_IRQn       USART3_IRQn
+#  define UART_COMM_IRQHandler USART3_IRQHandler
+#  define UART_COMM_CLOCKEN    RCC_PERIPH_UART3
 
-#else
-# error "Can't determine UART peripheral"
-#endif // UARTx
+# else
+#  error "Can't determine comm UART peripheral"
+# endif // IS_UARTx()
 
-#if (UARTx_CLOCKEN & RCC_BUS_MASK) == RCC_BUS_APB1
-# define UARTx_BUSFREQ G_freq_PCLK1
-#elif (UARTx_CLOCKEN & RCC_BUS_MASK) == RCC_BUS_APB2
-# define UARTx_BUSFREQ G_freq_PCLK2
-#elif (UARTx_CLOCKEN & RCC_BUS_MASK) == RCC_BUS_AHB1
-# define UARTx_BUSFREQ G_freq_HCLK
-#else
-# error "Can't determine UART bus clock"
-#endif
+// This isn't used for anything anymore but it's good to get the warning
+// during compilation instead failing at runtime
+# if (UART_COMM_CLOCKEN & RCC_BUS_MASK) == RCC_BUS_APB1
+#  define UART_COMM_BUSFREQ G_freq_PCLK1
+# elif (UART_COMM_CLOCKEN & RCC_BUS_MASK) == RCC_BUS_APB2
+#  define UART_COMM_BUSFREQ G_freq_PCLK2
+# elif (UART_COMM_CLOCKEN & RCC_BUS_MASK) == RCC_BUS_AHB1
+#  define UART_COMM_BUSFREQ G_freq_HCLK
+# else
+#  error "Can't determine comm UART bus clock"
+# endif
+#endif // USE_UART_COMM
 
 
 /*
 * Types
 */
+struct uart_port_t {
+	volatile __IO USART_TypeDef *uart;
+	// Need to know the pins and clock when turning the peripheral on or off.
+	rcc_periph_t clocken;
+	pin_t rx_pin;
+	pin_t tx_pin;
+};
 
 
 /*
@@ -113,10 +123,6 @@
 /*
 * Function prototypes (defined in uart.c)
 */
-// Initialize the UART interface
-// The interface is always configured as 8 data bits with 1 stop bit and no
-// parity bit with a baud rate of UART_BAUDRATE.
-err_t uart_init(void);
 
 
 /*

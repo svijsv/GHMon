@@ -79,6 +79,9 @@
 /*
 * Variables
 */
+#if USE_UART_COMM
+const uart_port_t* comm_port = NULL;
+#endif
 #if USE_TERMINAL
 static volatile bool button_wakeup = true;
 #endif
@@ -176,8 +179,15 @@ void platform_init(void) {
 	time_init();
 	sysflash();
 
-#if USE_UART
-	uart_init();
+#if USE_UART_COMM
+	const uart_port_conf_t uart_conf = {
+		.rx_pin = UART_COMM_RX_PIN,
+		.tx_pin = UART_COMM_TX_PIN,
+		.baud_rate = UART_COMM_BAUDRATE,
+	};
+
+	comm_port = uart_init_port(&uart_conf);
+	uart_on(comm_port);
 	sysflash();
 #endif
 
@@ -336,10 +346,10 @@ void hibernate_s(utime_t s, uint8_t flags) {
 		s -= w;
 
 		NOTIFY("Waiting %u seconds for UART input", (uint )w);
-		uart_listen_on();
+		uart_listen_on(comm_port);
 		set_sleep_mode(SLEEP_MODE_IDLE);
 		_sleep_ms(w*1000, flags);
-		uart_listen_off();
+		uart_listen_off(comm_port);
 	} else
 #endif // USE_TERMINAL
 	if (s < MIN_DEEP_SLEEP_SECONDS) {

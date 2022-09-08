@@ -56,6 +56,18 @@
 #define MODE_INF   (0b0100|INPUT)
 #define MODE_AN    (0b0000|INPUT)
 
+// Unlike everything else, JTAG is enabled on reset and needs to be explicitly
+// disabled
+// Unlike everything else, reading the JTAG part of AFIO_MAPR will always
+// return '0' (fully-enabled) so it needs to be set everytime.
+// NOJNTRST would have full JTAG and SWD but no JNTRST
+// JTAGDISABLE disables JTAG while leaving SWD
+// DISABLE would disable everything
+#if DEBUG
+# define JTAG_STATE AFIO_MAPR_SWJ_CFG_JTAGDISABLE
+#else
+# define JTAG_STATE AFIO_MAPR_SWJ_CFG_DISABLE
+#endif
 
 /*
 * Types
@@ -98,25 +110,11 @@ static void gpio_platform_init(void) {
 #if SPI1_DO_REMAP
 	remaps |= AFIO_MAPR_SPI1_REMAP;
 #endif
-#if UART1_DO_REMAP
-	remaps |= AFIO_MAPR_USART1_REMAP;
-#endif
 #if I2C1_DO_REMAP
 	remaps |= AFIO_MAPR_I2C1_REMAP;
 #endif
-	// Unlike everything else, JTAG is enabled on reset and needs to be explicitly
-	// disabled
-	// Unlike everything else, reading the JTAG part of AFIO_MAPR will always
-	// return '0' (fully-enabled) so it needs to be set everytime.
-	// NOJNTRST would have full JTAG and SWD but no JNTRST
-	// JTAGDISABLE disables JTAG while leaving SWD
-	// DISABLE would disable everything
-#if DEBUG
-	remaps |= AFIO_MAPR_SWJ_CFG_JTAGDISABLE;
-#else
-	remaps |= AFIO_MAPR_SWJ_CFG_DISABLE;
-#endif
-	MODIFY_BITS(AFIO->MAPR, AFIO_MAPR_SWJ_CFG|AFIO_MAPR_USART1_REMAP|AFIO_MAPR_SPI1_REMAP|AFIO_MAPR_I2C1_REMAP|AFIO_MAPR_CAN_REMAP,
+	remaps |= JTAG_STATE;
+	MODIFY_BITS(AFIO->MAPR, AFIO_MAPR_SWJ_CFG|AFIO_MAPR_SPI1_REMAP|AFIO_MAPR_I2C1_REMAP|AFIO_MAPR_CAN_REMAP,
 		remaps);
 
 	return;
@@ -152,6 +150,25 @@ void gpio_set_AF(pin_t pin, gpio_af_t af) {
 	assert(pin != 0);
 
 	UNUSED(af);
+
+	return;
+}
+void gpio_remap_uart1(void) {
+	bool redisable_clock;
+
+	redisable_clock = !clock_is_enabled(RCC_PERIPH_AFIO);
+	if (redisable_clock) {
+		clock_enable(RCC_PERIPH_AFIO);
+	}
+
+	// Have to update the SWJ config every time AFIO->MAPR is called or
+	// else it will be reset to 0 due to a hardware bug.
+	MODIFY_BITS(AFIO->MAPR, AFIO_MAPR_SWJ_CFG|AFIO_MAPR_USART1_REMAP,
+		JTAG_STATE | AFIO_MAPR_USART1_REMAP);
+
+	if (redisable_clock) {
+		clock_disable(RCC_PERIPH_AFIO);
+	}
 
 	return;
 }

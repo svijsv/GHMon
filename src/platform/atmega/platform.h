@@ -149,8 +149,8 @@ typedef struct {
 //
 // Alternate function pins
 // Communication
-#define PINID_RXD  PINID_D0
-#define PINID_TXD  PINID_D1
+#define PINID_RX0  PINID_D0
+#define PINID_TX0  PINID_D1
 #define PINID_MISO PINID_B4
 #define PINID_MOSI PINID_B3
 #define PINID_SCK  PINID_B5

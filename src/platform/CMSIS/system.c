@@ -251,6 +251,9 @@
 /*
 * Variables
 */
+#if USE_UART_COMM
+const uart_port_t* comm_port = NULL;
+#endif
 #if USE_TERMINAL
 // Treat the first sleep as user-initiated to make entering the terminal
 // more convenient
@@ -322,8 +325,16 @@ void platform_init(void) {
 	time_init();
 	led_flash(1, DELAY_SHORT);
 
-#if USE_UART
-	uart_init();
+#if USE_UART_COMM
+	const uart_port_conf_t uart_conf = {
+		.rx_pin = UART_COMM_RX_PIN,
+		.tx_pin = UART_COMM_TX_PIN,
+		.baud_rate = UART_COMM_BAUDRATE,
+	};
+
+	comm_port = uart_init_port(&uart_conf);
+	NVIC_SetPriority(UART_COMM_IRQn, UART_COMM_IRQp);
+	uart_on(comm_port);
 	led_flash(1, DELAY_SHORT);
 #endif
 
@@ -624,12 +635,12 @@ void hibernate_s(utime_t s, uint8_t flags) {
 		return;
 	}
 
-#if USE_SERIAL
+#if USE_UART_COMM
 	if (BIT_IS_SET(flags, CFG_ALLOW_INTERRUPTS)) {
-		NVIC_ClearPendingIRQ(UARTx_IRQn);
-		NVIC_EnableIRQ(UARTx_IRQn);
+		NVIC_ClearPendingIRQ(UART_COMM_IRQn);
+		NVIC_EnableIRQ(UART_COMM_IRQn);
 	}
-#endif // USE_SERIAL
+#endif // USE_UART_COMM
 	if (BIT_IS_SET(flags, CFG_ALLOW_INTERRUPTS)) {
 		enable_button_ISR();
 	}
@@ -667,10 +678,10 @@ void hibernate_s(utime_t s, uint8_t flags) {
 	if (BIT_IS_SET(flags, CFG_ALLOW_INTERRUPTS)) {
 		disable_button_ISR();
 	}
-#if USE_SERIAL
-	NVIC_DisableIRQ(UARTx_IRQn);
-	NVIC_ClearPendingIRQ(UARTx_IRQn);
-#endif // USE_SERIAL
+#if USE_UART_COMM
+	NVIC_DisableIRQ(UART_COMM_IRQn);
+	NVIC_ClearPendingIRQ(UART_COMM_IRQn);
+#endif // USE_UART_COMM
 
 	return;
 }
@@ -721,7 +732,7 @@ static void deep_sleep_s(utime_t s, uint8_t flags) {
 
 	// UART can't do anything during deep sleep and there's a pulldown when it's
 	// on, so turn it off until wakeup
-	uart_off();
+	uart_off(comm_port);
 
 	// The systick interrupt will wake us from sleep if left enabled
 	suspend_systick();
@@ -773,11 +784,37 @@ static void deep_sleep_s(utime_t s, uint8_t flags) {
 	// Clear wakeup flag by writing 1 to CWUF
 	SET_BIT(PWR->CR, PWR_CR_CWUF);
 
-	uart_on();
+	uart_on(comm_port);
 
 	return;
 }
 
+bool clock_is_enabled(rcc_periph_t periph_clock) {
+	uint32_t mask;
+	uint32_t reg;
+
+	switch (SELECT_BITS(periph_clock, RCC_BUS_MASK)) {
+	case RCC_BUS_AHB1:
+#if defined(STM32F1)
+		reg = RCC->AHBENR;
+#else
+		reg = RCC->AHB1ENR;
+#endif
+		break;
+	case RCC_BUS_APB1:
+		reg = RCC->APB1ENR;
+		break;
+	case RCC_BUS_APB2:
+		reg = RCC->APB2ENR;
+		break;
+	default:
+		return false;
+	}
+
+	mask = MASK_BITS(periph_clock, RCC_BUS_MASK);
+
+	return BITS_ARE_SET(reg, mask);
+}
 void clock_enable(rcc_periph_t periph_clock) {
 	uint32_t mask;
 	__IO uint32_t *reg, tmpreg;

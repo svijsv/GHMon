@@ -68,6 +68,11 @@ void gpio_init(void);
 // Set the alternate function associated with a pin
 void gpio_set_AF(pin_t pin, gpio_af_t af);
 
+#if USE_STM32F1_GPIO
+// Remap the UART1 pins:
+void gpio_remap_uart1(void);
+#endif
+
 
 /*
 * Macros

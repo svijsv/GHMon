@@ -68,7 +68,7 @@
 //
 // IRQ received flags
 #define BUTTON_IRQf 0x01
-#define UART_IRQf   0x02
+#define UART_COMM_IRQf   0x02
 
 //
 // Configuration flags
@@ -184,10 +184,22 @@ typedef uint16_t adc_t;
 typedef int32_t adcm_t;
 #endif
 
+// The type used to track bytes passed during data transmissions
 #if ! TXSIZE_T_IS_DEFINED
 typedef uint16_t txsize_t;
 #endif
 
+// The structure used to specify UART port configuration
+typedef struct {
+	uint32_t baud_rate;
+	pin_t rx_pin;
+	pin_t tx_pin;
+} uart_port_conf_t;
+// The type used to distinguish between different UART uses/ports
+#if ! UART_PORT_T_IS_DEFINED
+struct uart_port_t;
+typedef struct uart_port_t uart_port_t;
+#endif
 
 /*
 * Variable declarations
@@ -250,16 +262,21 @@ void gpio_quickread_prepare(volatile gpio_quick_t *qpin, pin_t pin);
 #if USE_UART
 //
 // UART interface
-// Turn the UART peripheral on or off
-void uart_on(void);
-void uart_off(void);
-// Receive a block of data
-err_t uart_receive_block(uint8_t *buffer, txsize_t size, utime_t timeout);
-// Transmit a block of data
-err_t uart_transmit_block(const uint8_t *buffer, txsize_t size, utime_t timeout);
+// Initialize a UART peripheral
+// The interface is always configured as 8 data bits with 1 stop bit and no
+// parity bit.
+const uart_port_t* uart_init_port(const uart_port_conf_t *conf);
+// Turn a UART peripheral on or off. If 'port' is 'NULL', use the serial
+// communication port.
+void uart_on(const uart_port_t *port);
+void uart_off(const uart_port_t *port);
+// Receive a block of data. If 'port' is 'NULL', use the serial communication port.
+err_t uart_receive_block(const uart_port_t *port, uint8_t *buffer, txsize_t size, utime_t timeout);
+// Transmit a block of data. If 'port' is 'NULL', use the serial communication port.
+err_t uart_transmit_block(const uart_port_t *port, const uint8_t *buffer, txsize_t size, utime_t timeout);
 #else
-# define uart_on()  ((void )0)
-# define uart_off() ((void )0)
+# define uart_on(...)  ((void )0)
+# define uart_off(...) ((void )0)
 # define uart_receive_block(...)  ((void )0)
 # define uart_transmit_block(...) ((void )0)
 #endif
@@ -358,7 +375,7 @@ adc_t adc_read_ac_amplitude(pin_t pin, uint32_t period_ms);
 //
 // Frontend-provided
 //
-#if USE_SERIAL
+#if USE_UART_COMM
 // Print a debug message
 void logger(const char *fmt, ...)
 	__attribute__ ((format(printf, 1, 2)));
@@ -401,7 +418,7 @@ void power_off_input(pin_t pin);
 /*
 * Macros
 */
-#if (DEBUG || USE_SMALL_CODE < 2) && USE_SERIAL
+#if (DEBUG || USE_SMALL_CODE < 2) && USE_UART_COMM
 # define ERROR_STATE(msg)     error_state(F1(__FILE__), __LINE__, __func__, F(msg))
 # define ERROR_STATE_NOF(msg) error_state(F1(__FILE__), __LINE__, __func__, msg)
 #else
@@ -409,14 +426,14 @@ void power_off_input(pin_t pin);
 # define ERROR_STATE_NOF(msg) error_state_crude()
 #endif
 
-#if DEBUG && USE_SERIAL
+#if DEBUG && USE_UART_COMM
 # define LOGGER(fmt, ...)      logger(F1(fmt), ## __VA_ARGS__)
 # define LOGGER_NOF(fmt, ...)  logger(fmt, ## __VA_ARGS__)
 #else
 # define LOGGER(...)      ((void )0U)
 # define LOGGER_NOF(...)  ((void )0U)
 #endif
-#if USE_SERIAL
+#if USE_UART_COMM
 # define NOTIFY(fmt, ...)      logger(F1(fmt), ## __VA_ARGS__)
 # define NOTIFY_NOF(fmt, ...)  logger(fmt, ## __VA_ARGS__)
 #else
@@ -424,7 +441,7 @@ void power_off_input(pin_t pin);
 # define NOTIFY_NOF(...)  ((void )0U)
 #endif
 
-#if USE_SERIAL
+#if USE_UART_COMM
 # define PRINTF(fmt, ...)     serial_printf(F1(fmt), ## __VA_ARGS__)
 # define PRINTF_NOF(fmt, ...) serial_printf(fmt, ## __VA_ARGS__)
 # define PUTS(msg, len)       serial_print(F1(msg), len)

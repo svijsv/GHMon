@@ -222,7 +222,7 @@ static txsize_t terminal_gets(char *line_in, txsize_t size) {
 		if (!started_line) {
 			PUTS_NOF(FROM_FSTR(TERMINAL_PROMPT), 0);
 		}
-		if (uart_receive_block(&c, 1, (uint32_t )TERMINAL_TIMEOUT_SECONDS*1000) == ETIMEOUT) {
+		if (uart_receive_block(NULL, &c, 1, (uint32_t )TERMINAL_TIMEOUT_SECONDS*1000) == ETIMEOUT) {
 			PUTS("Timed out waiting for input\r\n", 0);
 			line_in[0] = 0;
 			return 0;
@@ -274,7 +274,7 @@ static txsize_t terminal_gets(char *line_in, txsize_t size) {
 			newlines = 0;
 			timeout = SET_TIMEOUT(10);
 			// Eat any remaining input
-			while (!TIMES_UP(timeout) && (uart_receive_block(&c, 1, 5) != ETIMEOUT)) {
+			while (!TIMES_UP(timeout) && (uart_receive_block(NULL, &c, 1, 5) != ETIMEOUT)) {
 				switch (c) {
 				case '\n':
 				case '\r':

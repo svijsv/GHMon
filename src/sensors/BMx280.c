@@ -238,11 +238,9 @@ END:
 	}
 
 	calculate_bmx280(&status, &raw, do_humidity);
-#if USE_SERIAL
 	if ((status.temp | status.press | status.hum) == 0) {
-		LOGGER("BMx280 sensor at 0x%02X: all readings were invalid", (uint )addr);
+		NOTIFY("BMx280 sensor at 0x%02X: all readings were invalid", (uint )addr);
 	}
-#endif
 
 	if (use_spi) {
 #if USE_BMx280_SPI_SENSORS

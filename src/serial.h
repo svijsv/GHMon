@@ -36,7 +36,7 @@
 #include "config.h"
 #include "common.h"
 
-#if USE_SERIAL
+#if USE_UART_COMM
 
 /*
 * Static values
@@ -44,7 +44,7 @@
 // Size of the output buffer
 // Set to 0 to disable.
 // This is set in config_unify.h
-//#define SERIAL_BUFFER_SIZE 64
+//#define UART_COMM_BUFFER_SIZE 64
 
 
 /*
@@ -75,7 +75,7 @@ void logger_replay(void);
 */
 
 
-#endif // USE_SERIAL
+#endif // USE_UART_COMM
 
 #endif // _SERIAL_H
 #ifdef __cplusplus

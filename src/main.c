@@ -144,7 +144,7 @@ int main(void) {
 	power_init();
 	//led_flash(1, DELAY_SHORT);
 
-#if USE_SERIAL
+#if USE_UART_COMM
 	serial_init();
 	led_flash(1, DELAY_SHORT);
 #endif
@@ -174,9 +174,9 @@ int main(void) {
 			CLEAR_BIT(G_IRQs, BUTTON_IRQf);
 			button_IRQHandler();
 		}
-		if (BIT_IS_SET(G_IRQs, UART_IRQf)) {
+		if (BIT_IS_SET(G_IRQs, UART_COMM_IRQf)) {
 			utime_t entry_time;
-			CLEAR_BIT(G_IRQs, UART_IRQf);
+			CLEAR_BIT(G_IRQs, UART_COMM_IRQf);
 
 			entry_time = NOW();
 			terminal();
@@ -266,7 +266,7 @@ int main(void) {
 			check_controller_warnings();
 			check_warnings();
 
-#if DEBUG && USE_SERIAL
+#if DEBUG
 			PRINTF("   VCC: %d\r\n\n   I  Name  Status\r\n",
 				(int )G_vcc_voltage);
 			for (uiter_t i = 0; i < SENSOR_COUNT; ++i) {
@@ -551,7 +551,7 @@ void error_state_crude(void) {
 	}
 	return;
 }
-#if USE_SERIAL
+#if USE_UART_COMM
 void error_state(const char *file_path, uint32_t lineno, const char *func_name, const char *msg) {
 	const char *basename;
 	utime_t msg_timeout;
@@ -578,7 +578,7 @@ void error_state(const char *file_path, uint32_t lineno, const char *func_name, 
 	}
 	return;
 }
-#else // !USE_SERIAL
+#else // !USE_UART_COMM
 void error_state(const char *file_path, uint32_t lineno, const char *func_name, const char *msg) {
 	UNUSED(file_path);
 	UNUSED(lineno);
@@ -587,7 +587,7 @@ void error_state(const char *file_path, uint32_t lineno, const char *func_name, 
 	error_state_crude();
 	return;
 }
-#endif // USE_SERIAL
+#endif // USE_UART_COMM
 
 void _assert_failed(const char *file_path, uint32_t lineno, const char *func_name, const char *expr) {
 	error_state(file_path, lineno, func_name, expr);
