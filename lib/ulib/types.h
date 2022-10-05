@@ -72,8 +72,9 @@ typedef enum {
 	EDISK,
 } err_t;
 
-// Type (optionally) used for bitfields
-typedef uint32_t flag_t;
+// Types (optionally) used for bitfields
+typedef uint32_t bitop_t;
+typedef bitop_t  flag_t;
 
 // A smaller, unsigned time-tracking type for embedded systems
 typedef uint32_t utime_t;

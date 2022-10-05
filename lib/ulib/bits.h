@@ -79,42 +79,78 @@ int msb32_idx(uint32_t n);
 #ifndef SET_BIT
 # define SET_BIT(field, bits) ((field) |= (bits))
 #endif
+static inline bitop_t set_bit(bitop_t field, bitop_t bits) {
+	return SET_BIT(field, bits);
+}
 // Unset one or more bits in a field
 #ifndef CLEAR_BIT
 # define CLEAR_BIT(field, bits) ((field) &= ~(bits))
 #endif
+static inline bitop_t clear_bit(bitop_t field, bitop_t bits) {
+	return CLEAR_BIT(field, bits);
+}
 // Toggle one or more bits in a field
 #define TOGGLE_BIT(field, bits) ((field) ^= (bits))
+static inline bitop_t toggle_bit(bitop_t field, bitop_t bits) {
+	return TOGGLE_BIT(field, bits);
+}
 // Set or clear bits in a field limited by a mask
 //#define MODIFY_BITS(field, mask, bits) ((field) = (((field) & ~(mask)) | (bits)))
 #define MODIFY_BITS(field, mask, bits) ((field) = (((field) & ~(mask)) | ((bits) & (mask))))
+static inline bitop_t modify_bits(bitop_t field, bitop_t mask, bitop_t bits) {
+	return MODIFY_BITS(field, mask, bits);
+}
 
 // Select every set bit in field that's also set in mask
 #define SELECT_BITS(field, mask) ((field) & (mask))
+static inline bitop_t select_bits(bitop_t field, bitop_t mask) {
+	return SELECT_BITS(field, mask);
+}
 // Select every set bit in field except those set in mask
 #define MASK_BITS(field, mask)   ((field) & ~(mask))
+static inline bitop_t mask_bits(bitop_t field, bitop_t mask) {
+	return MASK_BITS(field, mask);
+}
 // Select every bit in a mask at some offset and then shift those bits to the
 // LSB end
 // offset is expanded twice for convenience
 #define GATHER_BITS(field, mask, offset) (SELECT_BITS((field), ((mask) << (offset))) >> (offset))
+static inline bitop_t gather_bits(bitop_t field, bitop_t mask, bitop_t offset) {
+	return GATHER_BITS(field, mask, offset);
+}
 
 // Check if any bit set in mask is set in field
 //#define BIT_IS_SET(field, mask)    ((field) & (mask))
 #define BIT_IS_SET(field, mask)    (((field) & (mask)) != 0)
+static inline bitop_t bit_is_set(bitop_t field, bitop_t bits) {
+	return BIT_IS_SET(field, bits);
+}
 // Check if every bit set in mask is set in field
 // mask is expanded twice for convenience
 #define BITS_ARE_SET(field, mask) (((field) & (mask)) == (mask))
+static inline bitop_t bits_are_set(bitop_t field, bitop_t mask) {
+	return BITS_ARE_SET(field, mask);
+}
 
 // Turn an integer into a bit mask
 #define AS_BIT(n) (1U << (n))
+static inline bitop_t as_bit(bitop_t n) {
+	return ((bitop_t )1U << n);
+}
 #ifndef _BV
 # define _BV(n) (1U << (n))
 #endif
 
 // Find the lowest set bit in a field
 #define LOWEST_BIT(field) ((field) & -(field))
+static inline bitop_t lowest_bit(bitop_t field) {
+	return LOWEST_BIT(field);
+}
 // Shift right so lowest set bit ends up at bit 0
 #define SHIFT_LOWEST_BIT(field) ((field) / ((field) & -(field)))
+static inline bitop_t shift_lowest_bit(bitop_t field) {
+	return SHIFT_LOWEST_BIT(field);
+}
 
 // Find the number of leading zeroes in a 32-bit integer
 #define CLZ32(x) (((x) == 0) ? 32 : clz32((uint32_t )x))
