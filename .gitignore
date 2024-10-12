@@ -4,8 +4,21 @@ platformio-device-monitor-*
 *-backups
 _autosave-*
 
+compile_commands.json
+.cache
+.ctagsd
+.vscode
+.codelite
+workspace.*
+*.workspace
+*.bak*
+.*.bak*
+*.log
+
 /todo
+/todo.*
 /temp
+/notes
 
 /config/config.h
 /config/advanced.h
