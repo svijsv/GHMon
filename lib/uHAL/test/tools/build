@@ -1,0 +1,8 @@
+#!/bin/sh
+
+if [ -z "${1}" ] || [ "X${1}" = "X--help" ] || [ "X${1}" = "X-h" ]; then
+	echo "Usage: ${0} <env>"
+	exit 1
+fi
+
+rm -rf .pio && pio run -e "${1}" -j 1 && pio run -e "${1}" -t compiledb

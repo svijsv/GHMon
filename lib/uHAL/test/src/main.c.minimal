@@ -1,0 +1,49 @@
+// SPDX-License-Identifier: GPL-3.0-only
+/***********************************************************************
+*                                                                      *
+*                                                                      *
+* Copyright 2021 svijsv                                                *
+* This program is free software: you can redistribute it and/or modify *
+* it under the terms of the GNU General Public License as published by *
+* the Free Software Foundation, version 3.                             *
+*                                                                      *
+* This program is distributed in the hope that it will be useful, but  *
+* WITHOUT ANY WARRANTY; without even the implied warranty of           *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU    *
+* General Public License for more details.                             *
+*                                                                      *
+* You should have received a copy of the GNU General Public License    *
+* along with this program.  If not, see <http:// www.gnu.org/licenses/>.*
+*                                                                      *
+*                                                                      *
+***********************************************************************/
+// main.c
+// Main program logic
+// NOTES:
+//    This file is useful for determining the smallest binary we can produce.
+//
+#include "uHAL/include/interface.h"
+#include "ulib/include/debug.h"
+
+#ifndef HAVE_AVR_XMEGA3
+# define HAVE_AVR_XMEGA3 0
+#endif
+#ifndef HAVE_STM32
+# define HAVE_STM32 0
+#endif
+
+#if HAVE_STM32
+# define ISR(_isr_) void _isr_(void)
+#endif
+
+int main(void) {
+/*
+	platform_init();
+
+	while (true) {
+		// Nothing to do here
+	}
+*/
+
+	return 0;
+}

@@ -1,0 +1,27 @@
+#!/bin/sh
+
+USAGE="${0} <stm32|avr> <build_name> <tool> [tool_arguments]"
+
+if [ "${1}" = "stm32" ]; then
+	ROOT="${HOME}/.platformio/packages/toolchain-gccarmnoneeabi"
+	PREFIX="arm-none-eabi"
+elif [ "${1}" = "avr" ]; then
+	ROOT="${HOME}/.platformio/packages/toolchain-atmelavr"
+	PREFIX="avr"
+else
+	echo "${USAGE}" >&2
+	exit 1
+fi
+shift 1
+
+BUILD_NAME="${1}"; shift 1
+TOOL="${1}"; shift 1
+if [ -z "${TOOL}" ] || [ -z "${BUILD_NAME}" ]; then
+	echo "${USAGE}" >&2
+	exit 1
+fi
+
+LD_LIBRARY_PATH="${ROOT}/lib"; export LD_LIBRARY_PATH
+ELF=".pio/build/${BUILD_NAME}/firmware.elf"
+
+"${ROOT}/bin/${PREFIX}-${TOOL}" "${@}" "${ELF}"

@@ -1,0 +1,16 @@
+.pio
+platformio-device-monitor-*
+compile_commands.json
+.cache
+.ctagsd
+.vscode
+.codelite
+workspace.*
+*.workspace
+*.bak*
+.*.bak*
+*.log
+/todo
+/todo.*
+/temp
+/notes
