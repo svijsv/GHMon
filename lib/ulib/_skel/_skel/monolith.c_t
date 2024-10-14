@@ -1,4 +1,0 @@
-#if USE_MONOLITHIC_ULIB
-# undef USE_MONOLITHIC_ULIB
-# include "func.c"
-#endif // USE_MONOLITHIC_ULIB
