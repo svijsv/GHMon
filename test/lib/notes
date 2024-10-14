@@ -1,0 +1,2 @@
+xprintf is modified to export xvfprintf() and to not use C string.h functions
+unless USE_CLIB_STRING is set.

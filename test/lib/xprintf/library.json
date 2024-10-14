@@ -1,0 +1,7 @@
+{
+	"name": "xprintf",
+	"description": "elm-chan's xfprintf implementation",
+	"build": {
+		"flags": "-DUSE_CLIB_STRING=1"
+	}
+}

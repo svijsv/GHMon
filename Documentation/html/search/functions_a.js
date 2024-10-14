@@ -1,0 +1,22 @@
+var searchData=
+[
+  ['pinctrl_5finit_0',['pinctrl_init',['../gpio_8h.html#a4d3a62ffb95c196feb734390547be6e4',1,'gpio.h']]],
+  ['pinctrl_5finit2_5finput_1',['pinctrl_init2_input',['../gpio_8h.html#a30e0ecf537479a79aa6d932d884c5064',1,'gpio.h']]],
+  ['pinctrl_5finit2_5foutput_2',['pinctrl_init2_output',['../gpio_8h.html#a08c3a80c8562f0aafcef9e02cfe4d72f',1,'gpio.h']]],
+  ['pinctrl_5fis_5fon_3',['pinctrl_is_on',['../gpio_8h.html#ac7494b7af071dd5724339d06b85c83a4',1,'gpio.h']]],
+  ['pinctrl_5foff_4',['pinctrl_off',['../gpio_8h.html#aa47f2356d89ec8ddc642cfb85ee57095',1,'gpio.h']]],
+  ['pinctrl_5fon_5',['pinctrl_on',['../gpio_8h.html#af928c52b6b782003d489678ddebf0650',1,'gpio.h']]],
+  ['pinctrl_5fresume_6',['pinctrl_resume',['../gpio_8h.html#ac148cdd840db1c61b419cb2863b896b0',1,'gpio.h']]],
+  ['pinctrl_5fsuspend_7',['pinctrl_suspend',['../gpio_8h.html#a260e7b925f47f181c67845a34d485d81',1,'gpio.h']]],
+  ['pinctrl_5ftoggle_8',['pinctrl_toggle',['../gpio_8h.html#ae7f69ad0b1b0355976e8edf850dd21c2',1,'gpio.h']]],
+  ['platform_5finit_9',['platform_init',['../system_8h.html#a760229807662fde444020422a81e937c',1,'system.h']]],
+  ['platform_5freset_10',['platform_reset',['../system_8h.html#afea180ee48367b63170d1eeb5fd468e6',1,'system.h']]],
+  ['post_5fhibernate_5fhook_11',['post_hibernate_hook',['../system_8h.html#ab988c6f5c9011193b631c24881d2779b',1,'system.h']]],
+  ['pre_5fhibernate_5fhook_12',['pre_hibernate_hook',['../system_8h.html#a7d450314aa9b0322c26d75111b6baa7d',1,'system.h']]],
+  ['pre_5freset_5fhook_13',['pre_reset_hook',['../system_8h.html#a8e66724ac8b7e9912f10e6501751c9c1',1,'system.h']]],
+  ['print_5fplatform_5finfo_14',['print_platform_info',['../serial_8h.html#ac4678cabca1c22b6100c5feb41694cca',1,'serial.h']]],
+  ['print_5fsystem_5finfo_15',['print_system_info',['../serial_8h.html#a37f44bf45880153c07ddf47a4dcaf135',1,'serial.h']]],
+  ['pwm_5foff_16',['pwm_off',['../pwm_8h.html#ac41cda2f936c9e43937cee89cc85758b',1,'pwm.h']]],
+  ['pwm_5fon_17',['pwm_on',['../pwm_8h.html#ac109b96db7b9e6b96cbcd31e22d7cacf',1,'pwm.h']]],
+  ['pwm_5fset_18',['pwm_set',['../pwm_8h.html#af12145da7f24b3e37a94d1bde077a2ba',1,'pwm.h']]]
+];
