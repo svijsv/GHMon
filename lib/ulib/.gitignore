@@ -1,0 +1,10 @@
+out
+todo
+temp
+test
+ulibconfig.h
+compile_commands.json
+*.gz
+*.xz
+*.lz
+workspace.*

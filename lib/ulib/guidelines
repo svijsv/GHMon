@@ -1,0 +1,48 @@
+These guidelines don't necessarily describe the current code, they change over
+time.
+
+
+C99 ONLY - document any deviations and the reason.
+	Exceptions:
+		files.c requires _POSIX_C_SOURCE>=200809L for the *_at() functions.
+		files.c requires _X_OPEN_SOURCE>=500 when for copying special files.
+		msg.c require _POXIX_C_SOURCE>=200809L for vdprintf(), dprintf(), and strdup().
+Every function with arguments should have an ASSERT() section followed immediately by a DO_SAFETY_CHECKS section.
+	Exceptions:
+		Anything that just passes it's arguments on without using them.
+Anything that uses malloc should have a non-malloc version if feasable.
+Use inline funcs instead of macros whenever possible.
+Constants should include the U/UL/ULL/L/LL size specifier, especially in bit operation macros.
+	This includes anything in hex notation.
+All unmodified pointer arguments should have 'const' qualifier.
+All non-const pointer arguments should have 'restrict' qualifer if:
+	There's more than one of the same type (including a const pointer)
+	AND the references really won't ever be the same - comparisons for instance may be.
+Parameters that are used to return values should be prefixed with 'ret_'.
+	Dont use the passed value until the very end, use a temp var before then.
+Header includes should be listed alphabetically to catch duplicates.
+Header includes are grouped by local -> ulib -> global in that order
+Assign on declaration only with static r-values.
+Strict aliasing good.
+	https://blog.regehr.org/archives/1307
+		Dont cast structs to other structs even if theyre internally the same.
+			OK if casted struct contains castee as first element.
+		Dont 'chunk' byte streams into words to speed them up.
+		(u)int8_t may not be considered character types for aliasing rules, but probably are.
+		Using unions as casts works, but technically is also undefined behavior.
+Names include units.
+	e.g. 'FOO_SEC' or 'BAR_MS' instead of 'BAZ_TIME'
+Dont typedef function pointers.
+	Having to look them up is more annoying than having to see them in the declarations/definitions.
+Use macros to handle common assertions.
+Notes on using a module go in the header, notes for modifying it go in the body.
+Use initialization structs rather than simple arguments if there's going to be more than one.
+	Including for *_new() functions.
+Check config option sanity at the top of the module .c file.
+Macro arguments should be prefixed with _ to avoid name clashes.
+Any static constants should be declared with 'FMEM_STORAGE'
+	and any in-line strings (including in macros) with 'F()' or 'F[1-4]()'
+Types intended for use with bitwise operators (such as flags) shouldn't be enums.
+	Because enums are signed integers in C and there's no portable way to change that.
+Use POINTER_IS_VALID() for assertions and saftey checks but nothing else.
+Check the return value of every invocation of malloc() and realloc().
