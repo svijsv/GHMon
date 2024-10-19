@@ -21,65 +21,42 @@
 // Header common to all components in the frontend
 // NOTES:
 //
-
-#ifdef __cplusplus
- extern "C" {
-#endif
 #ifndef _COMMON_H
 #define _COMMON_H
 
-/*
-* Includes
-*/
-#include "ulib/assert.h"
-#include "ulib/types.h"
-#include "ulib/bits.h"
-#include "ulib/util.h"
-#include "ulib/fmem.h"
+// The main configuration is pulled in (indirectly) by interface.h.
+#include "uHAL/include/interface.h"
 
-#include "platform/interface.h"
-#include "platform.h"
-#include "config.h"
+#include "ulib/include/debug.h"
+#include "ulib/include/types.h"
+#include "ulib/include/bits.h"
+#include "ulib/include/util.h"
+#include "ulib/include/fmem.h"
 
 
-/*
-* Static values
-*/
 //
 // Warning flags
 // If the order changes or an addition is made, modify format_warnings() and
 // print_header() in log.c to match.
-#define WARN_BATTERY_LOW 0x01
-#define WARN_VCC_LOW     0x02
-#define WARN_SENSOR      0x04
-#define WARN_CONTROLLER  0x08
-#define WARN_SD_SKIPPED  0x10
-#define WARN_SD_FAILED   0x20
+typedef enum {
+	WARN_BATTERY_LOW = 0x01U,
+	WARN_VCC_LOW     = 0x02U,
+	WARN_SENSOR      = 0x04U,
+	WARN_CONTROLLER  = 0x08U,
+	WARN_SD_SKIPPED  = 0x10U,
+	WARN_SD_FAILED   = 0x20U,
+} ghmon_warning_flags_t;
+//
+// Used to track warnings in effect
+extern uint_fast8_t ghmon_warnings;
 
-
-/*
-* Types
-*/
-
-
-/*
-* Variable declarations (defined in main.c)
-*/
-// Warnings in effect
-extern volatile uint8_t G_warnings;
-
-
-/*
-* Function prototypes (defined in main.c)
-*/
-
-
-/*
-* Macros
-*/
+//
+// Control the status LED
+void led_on(void);
+void led_off(void);
+void led_toggle(void);
+void led_flash(uint8_t count, uint16_t ms);
+void issue_warning(void);
 
 
 #endif // _COMMON_H
-#ifdef __cplusplus
- }
-#endif
