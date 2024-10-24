@@ -1,0 +1,14 @@
+{
+	"name": "ulib",
+	"description": "Library of basic functions",
+	"repository": {
+		"type": "git",
+		"url": "",
+		"branch": "master"
+	},
+	"build": {
+		"srcDir": "./src",
+		"includeDir": "./include",
+		"flags": "-I../.. -I."
+	}
+}
