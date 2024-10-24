@@ -2,7 +2,7 @@
 /***********************************************************************
 *                                                                      *
 *                                                                      *
-* Copyright 2021 svijsv                                                *
+* Copyright 2021, 2024 svijsv                                          *
 * This program is free software: you can redistribute it and/or modify *
 * it under the terms of the GNU General Public License as published by *
 * the Free Software Foundation, version 3.                             *

@@ -6,11 +6,19 @@
 
 //
 // These are sub-features of USE_SMALL_BUILD
-#define USE_SMALL_SENSORS     USE_SMALL_BUILD
-#define USE_SMALL_CONTROLLERS USE_SMALL_BUILD
 #define USE_SMALL_CODE        USE_SMALL_BUILD
 #define SKIP_SAFETY_CHECKS    USE_SMALL_BUILD
 #define SKIP_LIB_SAFETY_CHECKS SKIP_SAFETY_CHECKS
+
+//
+// These are sub-features of USE_SMALL_CONTROLLERS
+// The configuration and status structs will change depending on these values
+#define USE_CONTROLLER_SCHEDULE (!USE_SMALL_CONTROLLERS)
+#define USE_CONTROLLER_INIT     1
+#define USE_CONTROLLER_NAME     (!USE_SMALL_CONTROLLERS)
+#define USE_CONTROLLER_DATA     (!USE_SMALL_CONTROLLERS)
+#define USE_CONTROLLER_STATUS   (!USE_SMALL_CONTROLLERS)
+#define USE_CONTROLLER_NEXTTIME (!USE_SMALL_CONTROLLERS)
 
 //
 // Delays during status LED display
@@ -76,35 +84,17 @@
 // setting it to 8 would use 12 bytes).
 #define DEVICE_NAME_LEN 7
 //
-// Number of bits used for the signed integer holding sensor statuses
-// Normally defaults to 16, but certain sensors may override that.
-#define STATUS_BITS 0
+// The signed type used to store sensor statuses, this may need to be larger
+// for certain sensor types
+#define SENSOR_STATUS_T int16_t
 //
-// The type used for elements in lookup tables
-#define LUT_T int16_t
+// The default minimum period between reads of a single sensor, used to prevent
+// sensitive sensors from being continuously powered on and off
+#define SENSOR_DEFAULT_COOLDOWN_SECONDS 0
 
 //
-// A controller with the CTRL_FLAG_RETRY flag set will check it's sensors'
-// status at most this many additional times before stopping and issuing a
-// warning
-#define CONTROLLER_RETRY_MAX 2
-//
-// Wait this many seconds between attempts when CTRL_FLAG_RETRY is set
-#define CONTROLLER_RETRY_DELAY_SECONDS 30
-//
-// Wait this many seconds between checking the controller 'stop' pin when it's
-// set
-// If set to 0, poll the stop pin continuously; nothing else will happen until
-// either the stop pin goes high or the controller times out.
-#define CONTROLLER_STOP_CHECK_SECONDS 5
-//
-// The number of sensors associated with each controller
-// If <= 0, all controllers are triggered at their respective scheduled times.
-#define CONTROLLER_INPUTS_COUNT 1
-//
-// The number of control pins associated with each controller
-// Must be >=1.
-#define CONTROLLER_OUTPUTS_COUNT 1
+// The type used to hold controller status values
+#define CONTROLLER_STATUS_T int
 
 //
 // The number of bytes used for the SD card write buffer

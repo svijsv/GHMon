@@ -23,6 +23,7 @@
 //
 
 #include "common.h"
+#include "controllers.h"
 
 #if RTC_CORRECTION_PERIOD_MINUTES < 0
 # error "RTC_CORRECTION_PERIOD_MINUTES must be >= 0"
@@ -82,27 +83,23 @@ int main(void) {
 #if USE_UART_TERMINAL
 	uart_listen_on(UART_COMM_PORT);
 #endif
+	init_default_controllers();
 
 	while (true) {
-		utime_t now_sec = NOW();
-		utime_t now_min = now_sec / SECONDS_PER_MINUTE;
+		utime_t now = NOW();
 
 #if USE_CTRL_BUTTON
 		input_pin_listen_on(&ctrl_button_listen_handle);
 #endif
-		if ((next_wakeup > now_min) && (ghmon_IRQs == 0)) {
-			next_wakeup = (next_wakeup * SECONDS_PER_MINUTE);
-			next_wakeup = SNAP_TO_FACTOR(next_wakeup, 60);
-			next_wakeup -= now_sec;
-
-			hibernate_s(next_wakeup, HIBERNATE_DEEP, uHAL_CFG_ALLOW_INTERRUPTS);
+		if ((next_wakeup > now) && (ghmon_IRQs == 0)) {
+			hibernate_s(next_wakeup - now, HIBERNATE_DEEP, uHAL_CFG_ALLOW_INTERRUPTS);
 			// Clear the status *after* hibernation so that we wake instantly if we
 			// recieved an interrupt while something besides sleep was happening
 			uHAL_CLEAR_STATUS(uHAL_FLAG_IRQ);
 		} else {
 			// This message would have saved me many hours tracking down a bug in
 			// set_alarms(); don't remove without a good reason.
-			LOGGER("Skipping hibernate_s()");
+			LOGGER("Skipping hibernation");
 		}
 #if USE_CTRL_BUTTON
 		if (BIT_IS_SET(ghmon_IRQs, BUTTON_IRQ_FLAG)) {
@@ -118,10 +115,9 @@ int main(void) {
 			entry_time = NOW();
 			terminal();
 
-			now_sec = NOW();
-			now_min = now_sec / SECONDS_PER_MINUTE;
+			now = NOW();
 			// Reset the alarms if there's reason to believe the time was changed
-			if ((now_sec < entry_time) || ((now_sec - entry_time) > (SECONDS_PER_HOUR / 4U))) {
+			if ((now < entry_time) || ((now - entry_time) > (SECONDS_PER_HOUR / 4U))) {
 				next_wakeup = set_alarms(true);
 			}
 		}
@@ -144,20 +140,18 @@ int main(void) {
 
 		case 1:
 			led_flash(1, STATUS_LED_ACK_DELAY_MS);
-			if (USE_CONTROLLERS && CONTROLLER_CHECK_MINUTES == 0) {
+			if (CONTROLLER_CHECK_MINUTES == 0) {
 				do_controllers = true;
-				LOGGER("Checking controllers");
+				LOGGER("Running controllers");
 			}
 			if (USE_LOGGING && LOG_APPEND_MINUTES == 0) {
 				do_log = true;
 				LOGGER("Appending to log");
 			}
-			if (USE_SENSORS) {
-				LOGGER("Forcing sensor status check");
 /*
-				invalidate_sensors();
+			LOGGER("Forcing sensor status check");
+			invalidate_sensors();
 */
-			}
 			LOGGER("Updating status");
 			do_status = true;
 			break;
@@ -175,13 +169,9 @@ int main(void) {
 
 		case 3:
 			led_flash(3, STATUS_LED_LONG_DELAY_MS);
-			if (USE_CONTROLLERS) {
-				LOGGER("Forcing controller checks");
-				do_controllers = true;
-				force_controllers = true;
-			} else {
-				LOGGER("No action taken, controllers disabled");
-			}
+			LOGGER("Forcing controller run");
+			do_controllers = true;
+			force_controllers = true;
 			break;
 
 		case 4: {
@@ -203,36 +193,30 @@ int main(void) {
 		ctrl_button_pressed = 0;
 #endif // USE_CTRL_BUTTON
 
-		now_sec = NOW();
-		now_min = now_sec / SECONDS_PER_MINUTE;
-		if (DO_CLOCK_DESCEW && (descew_alarm > 0) && (now_min >= descew_alarm)) {
+		now = NOW();
+		if (DO_CLOCK_DESCEW && (descew_alarm > 0) && (now >= descew_alarm)) {
 			descew_alarm = 0;
 			descew_clock(RTC_CORRECTION_SECONDS);
-			now_sec = NOW();
-			now_min = now_sec / SECONDS_PER_MINUTE;
+			now = NOW();
 		}
-		if (DO_FINE_CLOCK_DESCEW && (fine_descew_alarm > 0) && (now_min >= fine_descew_alarm)) {
+		if (DO_FINE_CLOCK_DESCEW && (fine_descew_alarm > 0) && (now >= fine_descew_alarm)) {
 			fine_descew_alarm = 0;
 			descew_clock(RTC_FINE_CORRECTION_SECONDS);
-			now_sec = NOW();
-			now_min = now_sec / SECONDS_PER_MINUTE;
+			now = NOW();
 		}
 
 		// Checking the status only updates warning blinks
-		if (do_status || ((status_alarm > 0) && (now_min >= status_alarm))) {
+		if (do_status || ((status_alarm > 0) && (now >= status_alarm))) {
 			status_alarm = 0;
 /*
 			if (USE_SENSORS) {
 				LOGGER("Checking sensor status");
 				check_sensors();
-				now_sec = NOW();
-				now_min = now_sec / SECONDS_PER_MINUTE;
+				now = NOW();
 				check_sensor_warnings();
 			}
-			if (USE_CONTROLLERS) {
-				check_controller_warnings();
-			}
 */
+			check_default_controller_warnings();
 			check_warnings();
 
 /*
@@ -245,37 +229,14 @@ int main(void) {
 */
 		}
 
-		if (USE_LOGGING && (do_log || ((log_alarm > 0) && (now_min >= log_alarm)))) {
+		if (USE_LOGGING && (do_log || ((log_alarm > 0) && (now >= log_alarm)))) {
 			log_alarm = 0;
 /*
 			log_status(force_sync);
 */
 		}
 
-/*
-		if (USE_CONTROLLERS) {
-			controller_t *c;
-			utime_t alarm;
-			bool invalidated;
-
-			invalidated = false;
-			for (uiter_t i = 0; i < CONTROLLER_COUNT; ++i) {
-				c = &G_controllers[i];
-				alarm = c->next_check;
-				now_sec = NOW();
-				now_min = now_sec / SECONDS_PER_MINUTE;
-
-				if (force_controllers || ((alarm > 0) && (now_min >= alarm)) || (do_controllers && (alarm == 0))) {
-					if (!invalidated && BITS_ARE_SET(c->iflags, CTRL_FLAG_INVALIDATE|CTRL_FLAG_USES_SENSORS)) {
-						invalidated = true;
-						invalidate_sensors();
-					}
-					c->next_check = 0;
-					check_controller(c);
-				}
-			}
-		}
-*/
+		run_default_controllers(do_controllers, force_controllers);
 		next_wakeup = set_alarms(false);
 	}
 
@@ -285,121 +246,50 @@ int main(void) {
 }
 
 static utime_t set_alarms(bool force) {
-	utime_t now_min, now_sec, next;
+	utime_t now, next, test;
 	char *reason = "Unknown";
 
 	// Zeroing out alarms when they're executed and only setting them if they've
 	// been zeroed allows us to catch missed alarms, such as when a controller
 	// ran longer than the wait period would have been
-	now_sec = NOW();
-	now_min = now_sec / SECONDS_PER_MINUTE;
+	now = NOW();
 	if (USE_LOGGING && (LOG_APPEND_MINUTES > 0) && ((log_alarm == 0) || force)) {
-		next = now_min + LOG_APPEND_MINUTES;
-		log_alarm = SNAP_TO_FACTOR(next, LOG_APPEND_MINUTES);
+		const utime_t tmp = (LOG_APPEND_MINUTES * SECONDS_PER_MINUTE);
+		next = now + tmp;
+		log_alarm = SNAP_TO_FACTOR(next, tmp);
 	}
 	if ((STATUS_CHECK_MINUTES > 0) && ((status_alarm == 0) || force)) {
-		next = now_min + STATUS_CHECK_MINUTES;
-		status_alarm = SNAP_TO_FACTOR(next, STATUS_CHECK_MINUTES);
+		const utime_t tmp = (STATUS_CHECK_MINUTES * SECONDS_PER_MINUTE);
+		next = now + tmp;
+		status_alarm = SNAP_TO_FACTOR(next, tmp);
 	}
 
 	if (DO_CLOCK_DESCEW && ((descew_alarm == 0) || force)) {
-		next = now_min + RTC_CORRECTION_PERIOD_MINUTES;
-		descew_alarm = SNAP_TO_FACTOR(next, RTC_CORRECTION_PERIOD_MINUTES);
+		const utime_t tmp = (RTC_CORRECTION_PERIOD_MINUTES * SECONDS_PER_MINUTE);
+		next = now + tmp;
+		descew_alarm = SNAP_TO_FACTOR(next, tmp);
+		//
 		// Without this check, a negative correction may be applied repeatedly.
-		if ((RTC_CORRECTION_SECONDS < 0) && (descew_alarm <= ((now_sec + -RTC_CORRECTION_SECONDS) / SECONDS_PER_MINUTE))) {
-			descew_alarm += RTC_CORRECTION_PERIOD_MINUTES;
+		if ((RTC_CORRECTION_SECONDS < 0) && (descew_alarm <= (now + -RTC_CORRECTION_SECONDS))) {
+			descew_alarm += RTC_CORRECTION_PERIOD_MINUTES * SECONDS_PER_MINUTE;
 		}
 	}
 	if (DO_FINE_CLOCK_DESCEW && ((fine_descew_alarm == 0) || force)) {
-		next = now_min + RTC_FINE_CORRECTION_PERIOD_MINUTES;
-		fine_descew_alarm = SNAP_TO_FACTOR(next, RTC_FINE_CORRECTION_PERIOD_MINUTES);
+		const utime_t tmp = (RTC_FINE_CORRECTION_PERIOD_MINUTES * SECONDS_PER_MINUTE);
+		next = now + tmp;
+		fine_descew_alarm = SNAP_TO_FACTOR(next, tmp);
+		//
 		// Without this check, a negative correction may be applied repeatedly.
-		if ((RTC_CORRECTION_SECONDS < 0) && (descew_alarm <= ((now_sec + -RTC_FINE_CORRECTION_SECONDS) / SECONDS_PER_MINUTE))) {
-			fine_descew_alarm += RTC_FINE_CORRECTION_PERIOD_MINUTES;
+		if ((RTC_FINE_CORRECTION_SECONDS < 0) && (fine_descew_alarm <= (now + -RTC_FINE_CORRECTION_SECONDS))) {
+			fine_descew_alarm += RTC_FINE_CORRECTION_PERIOD_MINUTES * SECONDS_PER_MINUTE;
 		}
 	}
-
-/*
-	if (USE_CONTROLLERS) {
-		controller_t *c;
-		FMEM_STORAGE const controller_static_t *cfg;
-		utime_t alarm;
-
-		for (uiter_t i = 0; i < CONTROLLER_COUNT; ++i) {
-			c = &G_controllers[i];
-			cfg = &CONTROLLERS[i];
-			alarm = c->next_check;
-
-			if ((alarm != 0) && (!force)) {
-				continue;
-			}
-
-			//
-			// Default polling frequency
-			if (cfg->schedule_minutes == 0) {
-				if (CONTROLLER_CHECK_MINUTES > 0) {
-					next = now_min + CONTROLLER_CHECK_MINUTES;
-					c->next_check = SNAP_TO_FACTOR(next, CONTROLLER_CHECK_MINUTES);
-				//
-				// If the alarm is set but there's no default scheduled time, that
-				// means it was set somewhere other than here and if we've made it to
-				// this point then we're in a forced update so check on the next round
-				} else if (alarm != 0) {
-					c->next_check = now_min;
-				}
-			//
-			// Controller-specific polling frequency
-			} else {
-				//
-				// Time of day
-				if (BIT_IS_SET(cfg->cflags, CTRL_FLAG_USE_TIME_OF_DAY)) {
-					utime_t sm;
-
-					sm = cfg->schedule_minutes;
-					next = SNAP_TO_FACTOR(now_min, MINUTES_PER_DAY) + sm;
-					//
-					// If the alarm is set but not for the normal time, that means it
-					// was set somewhere other than here and if we've made it to this
-					// point then we're in a forced update so check on the next round
-					if ((alarm != 0) && ((alarm % MINUTES_PER_DAY) != sm)) {
-						c->next_check = now_min;
-					//
-					// If the scheduled time would be earlier than now and we're outside
-					// the clock scew window, wait until tomorrow
-					} else if ((next + CONTROLLER_SCHEDULE_SCEW_WINDOW_MINUTES) < now_min) {
-						c->next_check = next + MINUTES_PER_DAY;
-
-					} else {
-						c->next_check = next;
-					}
-				//
-				// Periodic
-				} else {
-					utime_t sm;
-
-					sm = cfg->schedule_minutes;
-					next = now_min + sm;
-					next = SNAP_TO_FACTOR(next, sm);
-
-					// If the alarm is set but not for the normal time, that means it
-					// was set somewhere other than here and if we've made it to this
-					// point then we're in a forced update so check on the next round
-					if ((alarm != 0) && (next != alarm)) {
-						c->next_check = now_min;
-
-					} else {
-						c->next_check = next;
-					}
-				}
-			}
-		}
-	}
-*/
+	calculate_default_controller_alarms(force);
 
 	// Check for the next alarm in a separate loop so that I don't have to keep
 	// track of what has or hasn't been set and when
 	// 12 hours should be more than long enough a default sleep period
-	next = now_min + (12U * MINUTES_PER_HOUR);
+	next = now + (12U * SECONDS_PER_HOUR);
 	if ((log_alarm != 0) && (next > log_alarm)) {
 		next = log_alarm;
 		reason = "Write log";
@@ -416,20 +306,13 @@ static utime_t set_alarms(bool force) {
 		next = fine_descew_alarm;
 		reason = "Descew clock (fine)";
 	}
-/*
-	if (USE_CONTROLLERS) {
-		for (uiter_t i = 0; i < CONTROLLER_COUNT; ++i) {
-			controller_t *c = &G_controllers[i];
-
-			if ((c->next_check != 0) && (next > c->next_check)) {
-				next = c->next_check;
-				reason = "Run controller";
-			}
-		}
+	test = find_next_default_controller_alarm();
+	if (test > 0 && test < next) {
+		next = test;
+		reason = "Run controllers";
 	}
-*/
 
-	LOGGER("Next alarm %u minutes for: %s", (uint )(next - now_min), reason);
+	LOGGER("Next alarm in %u seconds: %s", (uint )(next - now), reason);
 	return next;
 }
 
@@ -497,11 +380,11 @@ static void check_warnings(void) {
 		sleep_ms(STATUS_LED_LONG_DELAY_MS);
 		led_flash(1, STATUS_LED_ERR_DELAY_MS);
 	} else {
-		if (USE_SENSORS && (ghmon_warnings & warn_sensor)) {
+		if (ghmon_warnings & warn_sensor) {
 			sleep_ms(STATUS_LED_LONG_DELAY_MS);
 			led_flash(2, STATUS_LED_ERR_DELAY_MS);
 		}
-		if (USE_CONTROLLERS && (ghmon_warnings & warn_controller)) {
+		if (ghmon_warnings & warn_controller) {
 			sleep_ms(STATUS_LED_LONG_DELAY_MS);
 			led_flash(3, STATUS_LED_ERR_DELAY_MS);
 		}

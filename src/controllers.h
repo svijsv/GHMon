@@ -2,7 +2,7 @@
 /***********************************************************************
 *                                                                      *
 *                                                                      *
-* Copyright 2021 svijsv                                                *
+* Copyright 2021, 2024 svijsv                                          *
 * This program is free software: you can redistribute it and/or modify *
 * it under the terms of the GNU General Public License as published by *
 * the Free Software Foundation, version 3.                             *
@@ -21,204 +21,104 @@
 // Manage external device control
 // NOTES:
 //
-
-#ifdef __cplusplus
- extern "C" {
-#endif
 #ifndef _CONTROLLERS_H
 #define _CONTROLLERS_H
 
-/*
-* Includes
-*/
-#include "config.h"
 #include "common.h"
 
-#include "ulib/time.h"
 
-#include "sensors.h"
-
-
-#if USE_CONTROLLERS
-
-/*
-* Static values
-*/
 //
-// Configuration flags for controller_static_t structs
+// Status flags for controller_status_t structs
+typedef enum {
+	CONTROLLER_STATUS_FLAG_INITIALIZED = 0x01U, // Controller successfully initialized
+	CONTROLLER_STATUS_FLAG_ERROR       = 0x02U, // Controller in error state; set when run() or init() return error codes
+} controller_status_flags_t;
 //
-// Run if ANY sensor's conditions are met (by default they all must be)
-#define CTRL_FLAG_TRIGGER_ANY  0x01
-// Issue a warning when the controller is engaged
-#define CTRL_FLAG_WARN_WHEN_ON 0x02
-// Issue a warning when a controller runs until timeout; mostly useful in
-// conjuction with stop pins
-#define CTRL_FLAG_WARN_WHEN_TIMEOUT 0x04
-// Run the controller even if in a low-battery or low-Vcc state
-#define CTRL_FLAG_IGNORE_POWER 0x08
-//
-// These features depend on fields removed from sensor_t in small builds
-#if USE_SMALL_CONTROLLERS < 1
-// After engaging, recheck the conditions and run again if required
-// If the conditions are still met after CONTROLLER_RETRY_MAX attempts, the
-// controller stops trying and issues a warning.
-# define CTRL_FLAG_RETRY           0x10
-// The polling time is an offset from 12AM rather than a period
-# define CTRL_FLAG_USE_TIME_OF_DAY 0x20
-#endif // USE_SMALL_CONTROLLERS < 1
-#if USE_SMALL_CONTROLLERS < 2
-// Monitor the stop pin continuously instead of periodic polling
-# define CTRL_FLAG_STOP_CHECK_CONTINUOUS 0x40
+// Status of a controller
+typedef struct {
+#if USE_CONTROLLER_DATA
+	//
+	// Data for controller-internal use
+	void *data;
 #endif
+#if USE_CONTROLLER_SCHEDULE
+	//
+	// Time of next check
+	utime_t next_run_time;
+#endif
+#if USE_CONTROLLER_STATUS
+	CONTROLLER_STATUS_T status;
+#endif
+	//
+	// Status flags
+	uint8_t status_flags;
+} controller_status_t;
 
 //
-// Internal flags for controller_t structs
+// Configuration flags for controller_cfg_t structs
+typedef enum {
+	CONTROLLER_CFG_FLAG_IGNORE_FORCED_RUN = 0x01U, // Ignore forced controller runs
+	CONTROLLER_CFG_FLAG_USE_TIME_OF_DAY   = 0x02U, // Schedule is time-of-day not period
+} controller_cfg_flags_t;
 //
-// Set if the controller is currently engaged
-#define CTRL_FLAG_ENGAGED     0x10
-// Set if the controller has sensors attached
-#define CTRL_FLAG_USES_SENSORS 0x20
-// Set when the controller wants sensor data invalidated
-#define CTRL_FLAG_INVALIDATE  0x40
-// Set if a warning was issued by the controller
-#define CTRL_FLAG_WARNING     0x80
-// Set if the controller uses the time as an input
-#define CTRL_FLAG_USES_TIME   0x01
-
-//
-// Special controller inputs
-//
-#define CTRL_INPUT_NONE        -1
-#define CTRL_INPUT_TIME_OF_DAY -2
-
-/*
-* Types
-*/
-//
-// Description of a controller input sensor
-typedef struct {
-	// Consider a sensor's conditions met if it's status is above 'above' or
-	// below 'below'
-	// If above > below run when outside a window
-	// If above < below run when inside a window
-	// If above == SENS_THRESHOLD_IGNORE only run when below 'below'
-	// If below == SENS_THRESHOLD_IGNORE only run when above 'above'
-	status_t below;
-	status_t above;
-
-	// The index of the sensor in G_sensors[] (defined in config.c)
-	// Can't be > 127.
-	// Set to CTRL_INPUT_NONE to disable.
-	// Set to CTRL_INPUT_TIME_OF_DAY to use the time of day in minutes after
-	// 00:00:00.
-	int8_t si;
-} controller_in_t;
-//
-// Description of the user-configured portion of a controller struct
-typedef struct {
-	// Name used for logging
+// Static configuration of a controller
+typedef struct controller_cfg_t {
+#if USE_CONTROLLER_NAME
+	//
+	// Name of the controller
 	// The size of name[] includes a trailing NUL byte.
 	char name[DEVICE_NAME_LEN+1];
-
-#if CONTROLLER_INPUTS_COUNT > 0
-	// The sensor(s) used to determine whether the controller is activated.
-	controller_in_t inputs[CONTROLLER_INPUTS_COUNT];
 #endif
-
-// Scheduling only makes sense with individual controller wakeup times, which
-// are absent when USE_SMALL_CONTROLLERS >= 1
-#if USE_SMALL_CONTROLLERS < 1
-	// When to check the whether the controller should be engaged
+#if USE_CONTROLLER_INIT
+	//
+	// An optional function used to initialize the controller
+	// If this returns anything other than ERR_OK, the controller is marked as
+	// uninitialied and considered to be in a state of error.
+	// Ignored if NULL.
+	err_t (*init)(CONTROLLER_CFG_STORAGE struct controller_cfg_t *cfg, controller_status_t *status);
+#endif
+	//
+	// The function used to run the controller
+	// If this returns anything other than ERR_OK, the controller is considered
+	// to be in a state of error.
+	// Must not be NULL.
+	err_t (*run)(CONTROLLER_CFG_STORAGE struct controller_cfg_t *cfg, controller_status_t *status);
+#if USE_CONTROLLER_NEXTTIME
+	//
+	// An optional function used to calculate the next time the controller
+	// should run
+	// The time returned is the system time in seconds
+	// If NULL or if this function returns 0, a time will be calculated based
+	// on the scheduled run time and configuration settings
+	utime_t (*next_run_time)(CONTROLLER_CFG_STORAGE struct controller_cfg_t *cfg, controller_status_t *status);
+#endif
+#if USE_CONTROLLER_SCHEDULE
+	//
+	// When to run the controller
 	// By default this represents the number of minutes between checks, but
-	// if the CTRL_FLAG_USE_TIME_OF_DAY flag is set it represents the number
-	// of minutes after midnight to check.
+	// if the CONTROLLER_CFG_FLAG_USE_TIME_OF_DAY flag is set it represents the
+	// number of minutes after midnight to check.
+	// If 0 and CONTROLLER_CFG_FLAG_USE_TIME_OF_DAY is unset, the controller will
+	// only be run when manually requested
 	uint16_t schedule_minutes;
-#endif // USE_SMALL_CONTROLLERS < 1
-
-	// Seconds to keep control_pins high after theyre turned on
-	// The control pins are kept high until either this timeout is reached or
-	// the stop pin goes high.
-	// If 0, the pins are kept high until a future controller check stops them
-	// or the stop pin goes high.
-	uint16_t run_timeout_seconds;
-
-	// Control flags
-	uint8_t cflags;
-
-	// MCU pin(s) used to engage the device(s)
-	// If biased, these pins are always in push-pull mode and kept at their
-	// bias state normally, then reversed when conditions are met.
-	// If not biased, these pins are normally in high-impedence mode and set
-	// to push-pull high when conditions are met.
-	pin_t control_pins[CONTROLLER_OUTPUTS_COUNT];
-#if USE_SMALL_CONTROLLERS < 2
-	// MCU pin used tell the controller that the device should stop running
-	// This pin should be high when the controller should halt; the internal
-	// pullup or pulldown can be used if present by biasing it.
-	// Ignored if unset.
-	pin_t stop_pin;
-#endif // USE_SMALL_CONTROLLERS < 2
-} controller_static_t;
-//
-// Description of the internal portion of a controller struct
-typedef struct {
-#if USE_SMALL_CONTROLLERS < 1
-	// Time of next check
-	utime_t next_check;
-	// Time when current engagement started
-	utime_t run_start;
-
-	// Number of times a device has been engaged
-	uint16_t run_count;
-	// Total number of minutes controller has run
-	uint16_t run_time_minutes;
-
-	// Number retries that have been made for this controller
-	uint8_t try_count;
-#endif // USE_SMALL_CONTROLLERS < 1
-
-	// Internal flags
-	uint8_t iflags;
-	// Index in G_controllers[]
-	// At time of last test, storing 'i' in the struct used less space on flash
-	// than pointer arithmetic for controllers but more for sensors; both used
-	// the same amount of RAM
-	//uint8_t i;
-} controller_t;
+#endif
+	//
+	// Configuration flags
+	uint8_t cfg_flags;
+} controller_cfg_t;
 
 
-/*
-* Variable declarations
-*/
-// Array of controller structs representing available output
-extern controller_t G_controllers[CONTROLLER_COUNT];
-// Array of controller configuration structs representing available output
-// Defined in config.c.
-extern _FLASH const controller_static_t CONTROLLERS[CONTROLLER_COUNT];
+err_t init_controller(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, controller_status_t *status);
+err_t run_controller(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, controller_status_t *status);
+err_t calculate_controller_alarm(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, controller_status_t *status);
 
-/*
-* Function prototypes (defined in controllers.c)
-*/
-// Initialize the controller subsystem
-void controllers_init(void);
-// Check whether a controller should be engaged
-void check_controller(controller_t *c);
-// Check for controller warnings
-void check_controller_warnings(void);
+void init_default_controllers(void);
+void run_default_controllers(bool manual, bool force);
+void calculate_default_controller_alarms(bool force);
+utime_t find_next_default_controller_alarm(void);
+void check_default_controller_warnings(void);
 
-/*
-* Macros
-*/
-#define GET_CONTROLLER_I(c) ((uint )(c - G_controllers))
-//#define GET_CONTROLLER_I(c) ((c)->i)
-
-#else // !USE_CONTROLLERS
-# define controllers_init()  ((void )0U)
-# define check_controller(...) ((void )0U)
-# define check_controller_warnings() ((void )0U)
-#endif // USE_CONTROLLERS
+extern CONTROLLER_CFG_STORAGE controller_cfg_t CONTROLLERS[];
+extern const uiter_t CONTROLLER_COUNT;
 
 #endif // _CONTROLLERS_H
-#ifdef __cplusplus
- }
-#endif

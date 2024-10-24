@@ -7,18 +7,15 @@
 
 //
 // Optional components
-// Set to '0' or comment out a line to disable corresponding feature
+// Set to '0' to disable corresponding feature
 //
 // Cut down the size of internal components at the expense of functionality
 #ifndef USE_SMALL_BUILD
 # define USE_SMALL_BUILD 0
 #endif
-//
-// Enable sensors
-#define USE_SENSORS 0
-//
-// Enable external device controllers (water pumps, fans, heaters, etc)
-#define USE_CONTROLLERS 0
+#ifndef USE_SMALL_CONTROLLERS
+# define USE_SMALL_CONTROLLERS 0
+#endif
 //
 // Enable data logging to SD cards
 #define USE_LOGGING 0
@@ -54,13 +51,10 @@
 //
 // Controller configuration
 //
-// Check whether any controllers need to be engaged every
-// CONTROLLER_CHECK_MINUTES minutes
-// If 0, they're checked when the user button is pressed.
+// Check whether any controllers need to be run every CONTROLLER_CHECK_MINUTES
+// If 0, they're only checked when requested by way of the control button.
 // Individual controllers may have their own periods specified, in which case
 // they ignore this.
-// Press the user button and release after the third LED flash to force a
-// check of all controllers, even those with their own schedules.
 #define CONTROLLER_CHECK_MINUTES 15
 //
 // If a controller was scheduled to run fewer than this many minutes in the past
@@ -68,10 +62,8 @@
 // restarted), run it now
 #define CONTROLLER_SCHEDULE_SCEW_WINDOW_MINUTES 15
 //
-// The number of controllers to manage
-// Be sure to change the G_controllers[] definition in config.c if this changes.
-// Must be >=1 and <= 255.
-#define CONTROLLER_COUNT 2
+// The storage class specifier used for the controller_cfg_t array
+#define CONTROLLER_CFG_STORAGE const FMEM_STORAGE
 
 //
 // Data logging configuration
