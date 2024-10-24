@@ -4,7 +4,7 @@ uHAL
 uHAL is a small-ish hardware abstraction layer written in C99. It doesn't do
 much and it doesn't do it very well, but it's mine.
 
-At present it supports the STM32F103, STM32F401, the ATTiny402 but can
+At present it supports the STM32F103, STM32F401, and the ATTiny402 but can
 be fairly easily extended to support other devices in those families.
 
 API documentation can be found in `Documentation/html/index.html` if I remembered
@@ -17,9 +17,10 @@ Configuration
 There are template configuration files in `./config`.
 
 Two configuration files are required:
-* The core configuration file, named `config_uHAL.h`
-* The platform configuration file, the name of which is defined in the macro
-`uHAL_PLATFORM_CONFIG` (e.g. with `-D uHAL_PLATFORM_CONFIG=\"config_STM32F103.h\"`)
+* The core configuration file, the name of which defaults to `config_uHAL.h` but
+can be set with the macro `uHAL_CONFIG` (e.g. with `-D uHAL_CONFIG="config_uHAL.h"`)
+* The platform configuration file, the name of which must be defined in the macro
+`uHAL_PLATFORM_CONFIG` (e.g. with `-D uHAL_PLATFORM_CONFIG="config_STM32F103.h"`)
 
 
 Building

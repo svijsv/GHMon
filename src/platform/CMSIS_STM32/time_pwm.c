@@ -238,7 +238,7 @@ void pwm_init(void) {
 	psc_apb1 = calculate_TIM_prescaler(RCC_BUS_APB1, PWM_APB1_HZ);
 	psc_apb2 = calculate_TIM_prescaler(RCC_BUS_APB2, PWM_APB2_HZ);
 
-	for (uiter_t i = 0; i < sizeof(timers); ++i) {
+	for (uiter_t i = 0; i < SIZEOF_ARRAY(timers); ++i) {
 		const uint_fast8_t tim_id = timers[i];
 
 		configure_pwm_timer(tim_id, is_apb1_tim(tim_id) ? psc_apb1 : psc_apb2);

@@ -1,6 +1,5 @@
 {
 	"name": "uHAL",
-	"version": "1.0.0",
 	"description": "Library of basic hardware abstractions",
 	"repository": {
 		"type": "git",
@@ -10,7 +9,7 @@
 	"build": {
 		"srcDir": "./src",
 		"includeDir": "./include",
-		"flags": "-I../../include/config -I.",
+		"flags": "-I../.. -I.",
 		"extraScript": "tools/platformio/find_platform.py"
 	}
 }
