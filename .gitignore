@@ -20,10 +20,6 @@ workspace.*
 /temp
 /notes
 
-/config/config.h
-/config/advanced.h
-/config/sensors.c
-/config/tables.c
-/config/controllers.c
 /config/bak
 /config/saved
+/config/pindefs_*
