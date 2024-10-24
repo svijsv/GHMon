@@ -95,14 +95,14 @@ $(document).ready(function(){initNavTree('index.html',''); initResizable(); });
 <div class="contents">
 <div class="textblock"><p><a class="anchor" id="md_readme"></a></p>
 <p>uHAL is a small-ish hardware abstraction layer written in C99. It doesn't do much and it doesn't do it very well, but it's mine.</p>
-<p>At present it supports the STM32F103, STM32F401, the ATTiny402 but can be fairly easily extended to support other devices in those families.</p>
+<p>At present it supports the STM32F103, STM32F401, and the ATTiny402 but can be fairly easily extended to support other devices in those families.</p>
 <p>API documentation can be found in <code>Documentation/html/index.html</code> if I remembered to build it. Otherwise it can be built with <code>./tools/build_docs.sh</code> if I remembered to write that.</p>
 <h1><a class="anchor" id="autotoc_md0"></a>
 Configuration</h1>
 <p>There are template configuration files in <code>./config</code>.</p>
 <p>Two configuration files are required:</p><ul>
-<li>The core configuration file, named <code>config_uHAL.h</code></li>
-<li>The platform configuration file, the name of which is defined in the macro <code>uHAL_PLATFORM_CONFIG</code> (e.g. with <code>-D uHAL_PLATFORM_CONFIG=\"config_STM32F103.h\\"</code>)</li>
+<li>The core configuration file, the name of which defaults to <code>config_uHAL.h</code> but can be set with the macro <code>uHAL_CONFIG</code> (e.g. with <code>-D uHAL_CONFIG="config_uHAL.h"</code>)</li>
+<li>The platform configuration file, the name of which must be defined in the macro <code>uHAL_PLATFORM_CONFIG</code> (e.g. with <code>-D uHAL_PLATFORM_CONFIG="config_STM32F103.h"</code>)</li>
 </ul>
 <h1><a class="anchor" id="autotoc_md1"></a>
 Building</h1>

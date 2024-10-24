@@ -45,15 +45,21 @@
 // Include the configuration files before anything else so that they can override
 // any other library settings if needed
 #if ! __HAVE_DOXYGEN__
-# include "config_uHAL.h"
-# include uHAL_PLATFORM_CONFIG
+# ifndef uHAL_CONFIG
+#  define uHAL_CONFIG config_uHAL.h
+# endif
+# define uHAL_STRINGIZE(_x_) #_x_
+# define uHAL_XTRINGIZE(_x_) uHAL_STRINGIZE(_x_)
+# define uHAL_INCLUDE_PLATFORM_HEADER(_dir_) uHAL_STRINGIZE(../src/platform/_dir_/platform.h)
+
+# include uHAL_XTRINGIZE(uHAL_CONFIG)
+# include uHAL_XTRINGIZE(uHAL_PLATFORM_CONFIG)
 # include "uHAL_config_fixer.h"
 
-# define _STRINGIZE(_x_) #_x_
-# define _INCLUDE_PLATFORM_HEADER(_dir_) _STRINGIZE(../src/platform/_dir_/platform.h)
-# include _INCLUDE_PLATFORM_HEADER(uHAL_PLATFORM)
-# undef _STRINGIZE
-# undef _INCLUDE_PLATFORM_HEADER
+# include uHAL_INCLUDE_PLATFORM_HEADER(uHAL_PLATFORM)
+# undef uHAL_STRINGIZE
+# undef uHAL_XTRINGIZE
+# undef uHAL_INCLUDE_PLATFORM_HEADER
 #endif
 
 #include "ulib/include/bits.h"

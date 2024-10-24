@@ -357,9 +357,7 @@ typedef enum {
 /// If set, a biased input pin will be pulled down instead of up.
 #define GPIO_CTRL_BIAS_LOW      (0b100U << GPIO_CTRL_OFFSET)
 ///
-/// If set, an output pin will be set LOW when on and HIGH when off.
-/// If set, an input pin will read @c true when LOW and @c false when HIGH.
-/// If unset, the inverse is true.
+/// If set, a pin will be set/read LOW when on and HIGH when off.
 #define GPIO_CTRL_INVERT        (0b001U << GPIO_CTRL_OFFSET)
 ///
 /// Convinience macro for setting an input with a pullup

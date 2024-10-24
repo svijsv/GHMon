@@ -312,7 +312,7 @@ void _print_platform_info(void (*printf_putc)(uint_fast8_t c)) {
 	stack_size = (RAM_BASE + RAM_PRESENT) - __get_MSP();
 	data_size = (uint )(&_edata) - (uint )(&_sdata);
 	bss_size  = (uint )(&_ebss)  - (uint )(&_sbss);
-	printf_vv(printf_putc, "RAM used: %dB/%uKB stack, %dB .data, %dB .bss\r\n", (int )stack_size, (uint )RAM_PRESENT, (int )(data_size), (int )(bss_size));
+	printf_vv(printf_putc, "RAM used: %dB/%uB stack, %dB .data, %dB .bss\r\n", (int )stack_size, (uint )RAM_PRESENT, (int )(data_size), (int )(bss_size));
 
 	return;
 }

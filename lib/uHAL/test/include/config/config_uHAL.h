@@ -24,7 +24,7 @@
 #ifndef _CONFIG_H
 #define _CONFIG_H
 
-#include "../lib/uHAL/config/config_uHAL.h"
+#include "../../lib/uHAL/config/config_uHAL.h"
 
 //
 // Helpful macros

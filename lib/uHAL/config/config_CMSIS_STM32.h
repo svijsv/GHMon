@@ -17,14 +17,12 @@
 *                                                                      *
 *                                                                      *
 ***********************************************************************/
-// config_CMSIS.h
+// config_CMSIS_STM32.h
 // uHAL configuration file
 // NOTES:
-//    The commented-out values are the defaults
-//    Any of these settings can also be set on the command line
 //
-#ifndef _uHAL_CONFIG_CMSIS_H
-#define _uHAL_CONFIG_CMSIS_H
+#ifndef _uHAL_CONFIG_CMSIS_STM32_H
+#define _uHAL_CONFIG_CMSIS_STM32_H
 
 
 // If non-zero, the SWD pins are enabled when DEBUG is non-zero
@@ -199,4 +197,4 @@
 #define I2C_SCL_PIN PINID_I2C1_SCL
 
 
-#endif //_uHAL_CONFIG_CMSIS_H
+#endif //_uHAL_CONFIG_CMSIS_STM32_H
