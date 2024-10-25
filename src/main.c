@@ -209,7 +209,6 @@ int main(void) {
 			fine_deskew_alarm = correct_deskew_alarm(now, fine_deskew_alarm, RTC_CORRECTION_PERIOD_MINUTES * SECONDS_PER_MINUTE, RTC_CORRECTION_SECONDS);
 		}
 
-		// Checking the status only updates warning blinks
 		if (do_status || ((status_alarm > 0) && (now >= status_alarm))) {
 /*
 			if (USE_SENSORS) {
@@ -266,9 +265,6 @@ static utime_t set_alarms(bool force) {
 	utime_t now, next, test;
 	char *reason = "Unknown";
 
-	// Zeroing out alarms when they're executed and only setting them if they've
-	// been zeroed allows us to catch missed alarms, such as when a controller
-	// ran longer than the wait period would have been
 	now = NOW();
 	if (USE_LOGGING && (LOG_APPEND_MINUTES > 0) && ((log_alarm == 0) || force)) {
 		log_alarm = calculate_alarm(now, LOG_APPEND_MINUTES * SECONDS_PER_MINUTE);
@@ -287,8 +283,6 @@ static utime_t set_alarms(bool force) {
 	}
 	calculate_default_controller_alarms(force);
 
-	// Check for the next alarm in a separate loop so that I don't have to keep
-	// track of what has or hasn't been set and when
 	// 12 hours should be more than long enough a default sleep period
 	next = now + (12U * SECONDS_PER_HOUR);
 	if ((log_alarm != 0) && (next > log_alarm)) {
