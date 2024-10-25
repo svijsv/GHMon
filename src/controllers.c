@@ -172,7 +172,7 @@ err_t calculate_controller_alarm(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, c
 		//
 		// If the scheduled time would be earlier than now and we're outside
 		// the clock scew window, wait until tomorrow
-		if ((next + (CONTROLLER_SCHEDULE_SCEW_WINDOW_MINUTES * SECONDS_PER_MINUTE)) < now) {
+		if ((next + (CONTROLLER_SCHEDULE_SKEW_WINDOW_MINUTES * SECONDS_PER_MINUTE)) < now) {
 			next += SECONDS_PER_DAY;
 		}
 	//

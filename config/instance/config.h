@@ -57,10 +57,10 @@
 // they ignore this.
 #define CONTROLLER_CHECK_MINUTES 15
 //
-// If a controller was scheduled to run fewer than this many minutes in the past
-// but for some reason wasn't (e.g. because the clock changed or the device
-// restarted), run it now
-#define CONTROLLER_SCHEDULE_SCEW_WINDOW_MINUTES 15
+// If a time-of-day controller would be scheduled to run more than this many
+// minutes in the past (because e.g. the clock changed or the device restarted),
+// wait until tomorrow
+#define CONTROLLER_SCHEDULE_SKEW_WINDOW_MINUTES 15
 //
 // The storage class specifier used for the controller_cfg_t array
 #define CONTROLLER_CFG_STORAGE const FMEM_STORAGE
