@@ -33,14 +33,14 @@
 #endif
 
 #if RTC_CORRECTION_PERIOD_MINUTES && RTC_CORRECTION_SECONDS
-# define DO_CLOCK_DESCEW 1
+# define DO_CLOCK_DESKEW 1
 #else
-# define DO_CLOCK_DESCEW 0
+# define DO_CLOCK_DESKEW 0
 #endif
 #if RTC_FINE_CORRECTION_PERIOD_MINUTES && RTC_FINE_CORRECTION_SECONDS
-# define DO_FINE_CLOCK_DESCEW 1
+# define DO_FINE_CLOCK_DESKEW 1
 #else
-# define DO_FINE_CLOCK_DESCEW 0
+# define DO_FINE_CLOCK_DESKEW 0
 #endif
 
 typedef enum {
@@ -54,12 +54,12 @@ uint_fast8_t ghmon_warnings = 0;
 
 static utime_t log_alarm = 0;
 static utime_t status_alarm = 0;
-static utime_t descew_alarm = 0;
-static utime_t fine_descew_alarm = 0;
+static utime_t deskew_alarm = 0;
+static utime_t fine_deskew_alarm = 0;
 
 static utime_t set_alarms(bool force);
 static void check_warnings(void);
-static void descew_clock(int_fast16_t correction);
+static void deskew_clock(int_fast16_t correction);
 static inline utime_t calculate_alarm(const utime_t now, const utime_t period);
 static inline utime_t correct_deskew_alarm(const utime_t now, const utime_t alarm, const utime_t period, const int_fast16_t correction);
 
@@ -196,17 +196,17 @@ int main(void) {
 #endif // USE_CTRL_BUTTON
 
 		now = NOW();
-		if (DO_CLOCK_DESCEW && (descew_alarm > 0) && (now >= descew_alarm)) {
-			descew_clock(RTC_CORRECTION_SECONDS);
+		if (DO_CLOCK_DESKEW && (deskew_alarm > 0) && (now >= deskew_alarm)) {
+			deskew_clock(RTC_CORRECTION_SECONDS);
 			now = NOW();
-			descew_alarm = calculate_alarm(now, RTC_CORRECTION_PERIOD_MINUTES * SECONDS_PER_MINUTE);
-			descew_alarm = correct_deskew_alarm(now, descew_alarm, RTC_CORRECTION_PERIOD_MINUTES * SECONDS_PER_MINUTE, RTC_CORRECTION_SECONDS);
+			deskew_alarm = calculate_alarm(now, RTC_CORRECTION_PERIOD_MINUTES * SECONDS_PER_MINUTE);
+			deskew_alarm = correct_deskew_alarm(now, deskew_alarm, RTC_CORRECTION_PERIOD_MINUTES * SECONDS_PER_MINUTE, RTC_CORRECTION_SECONDS);
 		}
-		if (DO_FINE_CLOCK_DESCEW && (fine_descew_alarm > 0) && (now >= fine_descew_alarm)) {
-			descew_clock(RTC_FINE_CORRECTION_SECONDS);
+		if (DO_FINE_CLOCK_DESKEW && (fine_deskew_alarm > 0) && (now >= fine_deskew_alarm)) {
+			deskew_clock(RTC_FINE_CORRECTION_SECONDS);
 			now = NOW();
-			fine_descew_alarm = calculate_alarm(now, RTC_FINE_CORRECTION_PERIOD_MINUTES * SECONDS_PER_MINUTE);
-			fine_descew_alarm = correct_deskew_alarm(now, fine_descew_alarm, RTC_CORRECTION_PERIOD_MINUTES * SECONDS_PER_MINUTE, RTC_CORRECTION_SECONDS);
+			fine_deskew_alarm = calculate_alarm(now, RTC_FINE_CORRECTION_PERIOD_MINUTES * SECONDS_PER_MINUTE);
+			fine_deskew_alarm = correct_deskew_alarm(now, fine_deskew_alarm, RTC_CORRECTION_PERIOD_MINUTES * SECONDS_PER_MINUTE, RTC_CORRECTION_SECONDS);
 		}
 
 		// Checking the status only updates warning blinks
@@ -277,13 +277,13 @@ static utime_t set_alarms(bool force) {
 		status_alarm = calculate_alarm(now, STATUS_CHECK_MINUTES * SECONDS_PER_MINUTE);
 	}
 
-	if (DO_CLOCK_DESCEW && ((descew_alarm == 0) || force)) {
-		descew_alarm = calculate_alarm(now, RTC_CORRECTION_PERIOD_MINUTES * SECONDS_PER_MINUTE);
-		descew_alarm = correct_deskew_alarm(now, descew_alarm, RTC_CORRECTION_PERIOD_MINUTES * SECONDS_PER_MINUTE, RTC_CORRECTION_SECONDS);
+	if (DO_CLOCK_DESKEW && ((deskew_alarm == 0) || force)) {
+		deskew_alarm = calculate_alarm(now, RTC_CORRECTION_PERIOD_MINUTES * SECONDS_PER_MINUTE);
+		deskew_alarm = correct_deskew_alarm(now, deskew_alarm, RTC_CORRECTION_PERIOD_MINUTES * SECONDS_PER_MINUTE, RTC_CORRECTION_SECONDS);
 	}
-	if (DO_FINE_CLOCK_DESCEW && ((fine_descew_alarm == 0) || force)) {
-		fine_descew_alarm = calculate_alarm(now, RTC_FINE_CORRECTION_PERIOD_MINUTES * SECONDS_PER_MINUTE);
-		fine_descew_alarm = correct_deskew_alarm(now, fine_descew_alarm, RTC_FINE_CORRECTION_PERIOD_MINUTES * SECONDS_PER_MINUTE, RTC_FINE_CORRECTION_SECONDS);
+	if (DO_FINE_CLOCK_DESKEW && ((fine_deskew_alarm == 0) || force)) {
+		fine_deskew_alarm = calculate_alarm(now, RTC_FINE_CORRECTION_PERIOD_MINUTES * SECONDS_PER_MINUTE);
+		fine_deskew_alarm = correct_deskew_alarm(now, fine_deskew_alarm, RTC_FINE_CORRECTION_PERIOD_MINUTES * SECONDS_PER_MINUTE, RTC_FINE_CORRECTION_SECONDS);
 	}
 	calculate_default_controller_alarms(force);
 
@@ -299,13 +299,13 @@ static utime_t set_alarms(bool force) {
 		next = status_alarm;
 		reason = "Update status";
 	}
-	if (DO_CLOCK_DESCEW && (descew_alarm != 0) && (next > descew_alarm)) {
-		next = descew_alarm;
-		reason = "Descew clock (coarse)";
+	if (DO_CLOCK_DESKEW && (deskew_alarm != 0) && (next > deskew_alarm)) {
+		next = deskew_alarm;
+		reason = "Deskew clock (coarse)";
 	}
-	if (DO_FINE_CLOCK_DESCEW && (fine_descew_alarm != 0) && (next > fine_descew_alarm)) {
-		next = fine_descew_alarm;
-		reason = "Descew clock (fine)";
+	if (DO_FINE_CLOCK_DESKEW && (fine_deskew_alarm != 0) && (next > fine_deskew_alarm)) {
+		next = fine_deskew_alarm;
+		reason = "Deskew clock (fine)";
 	}
 	test = find_next_default_controller_alarm();
 	if (test > 0 && test < next) {
@@ -317,7 +317,7 @@ static utime_t set_alarms(bool force) {
 	return next;
 }
 
-static void descew_clock(int_fast16_t correction) {
+static void deskew_clock(int_fast16_t correction) {
 	err_t res = ERR_OK;
 	utime_t now;
 
