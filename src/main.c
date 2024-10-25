@@ -60,6 +60,8 @@ static utime_t fine_descew_alarm = 0;
 static utime_t set_alarms(bool force);
 static void check_warnings(void);
 static void descew_clock(int_fast16_t correction);
+static inline utime_t calculate_alarm(const utime_t now, const utime_t period);
+static inline utime_t correct_deskew_alarm(const utime_t now, const utime_t alarm, const utime_t period, const int_fast16_t correction);
 
 #if USE_CTRL_BUTTON
 # include "ctrl_button.h"
@@ -195,19 +197,20 @@ int main(void) {
 
 		now = NOW();
 		if (DO_CLOCK_DESCEW && (descew_alarm > 0) && (now >= descew_alarm)) {
-			descew_alarm = 0;
 			descew_clock(RTC_CORRECTION_SECONDS);
 			now = NOW();
+			descew_alarm = calculate_alarm(now, RTC_CORRECTION_PERIOD_MINUTES * SECONDS_PER_MINUTE);
+			descew_alarm = correct_deskew_alarm(now, descew_alarm, RTC_CORRECTION_PERIOD_MINUTES * SECONDS_PER_MINUTE, RTC_CORRECTION_SECONDS);
 		}
 		if (DO_FINE_CLOCK_DESCEW && (fine_descew_alarm > 0) && (now >= fine_descew_alarm)) {
-			fine_descew_alarm = 0;
 			descew_clock(RTC_FINE_CORRECTION_SECONDS);
 			now = NOW();
+			fine_descew_alarm = calculate_alarm(now, RTC_FINE_CORRECTION_PERIOD_MINUTES * SECONDS_PER_MINUTE);
+			fine_descew_alarm = correct_deskew_alarm(now, fine_descew_alarm, RTC_CORRECTION_PERIOD_MINUTES * SECONDS_PER_MINUTE, RTC_CORRECTION_SECONDS);
 		}
 
 		// Checking the status only updates warning blinks
 		if (do_status || ((status_alarm > 0) && (now >= status_alarm))) {
-			status_alarm = 0;
 /*
 			if (USE_SENSORS) {
 				LOGGER("Checking sensor status");
@@ -227,13 +230,14 @@ int main(void) {
 				}
 			}
 */
+			status_alarm = calculate_alarm(now+1, STATUS_CHECK_MINUTES * SECONDS_PER_MINUTE);
 		}
 
 		if (USE_LOGGING && (do_log || ((log_alarm > 0) && (now >= log_alarm)))) {
-			log_alarm = 0;
 /*
 			log_status(force_sync);
 */
+			log_alarm = calculate_alarm(now+1, LOG_APPEND_MINUTES * SECONDS_PER_MINUTE);
 		}
 
 		run_default_controllers(do_controllers, force_controllers);
@@ -245,6 +249,19 @@ int main(void) {
 	return 1;
 }
 
+static inline utime_t calculate_alarm(const utime_t now, const utime_t period) {
+	utime_t next = now + period;
+	next = SNAP_TO_FACTOR(next, period);
+	return next;
+}
+static inline utime_t correct_deskew_alarm(const utime_t now, const utime_t alarm, const utime_t period, const int_fast16_t correction) {
+	//
+	// Without this check, a negative correction may be applied repeatedly.
+	if ((correction < 0) && (alarm <= (now + -correction))) {
+		return alarm + period;
+	}
+	return alarm;
+}
 static utime_t set_alarms(bool force) {
 	utime_t now, next, test;
 	char *reason = "Unknown";
@@ -254,35 +271,19 @@ static utime_t set_alarms(bool force) {
 	// ran longer than the wait period would have been
 	now = NOW();
 	if (USE_LOGGING && (LOG_APPEND_MINUTES > 0) && ((log_alarm == 0) || force)) {
-		const utime_t tmp = (LOG_APPEND_MINUTES * SECONDS_PER_MINUTE);
-		next = now + tmp;
-		log_alarm = SNAP_TO_FACTOR(next, tmp);
+		log_alarm = calculate_alarm(now, LOG_APPEND_MINUTES * SECONDS_PER_MINUTE);
 	}
 	if ((STATUS_CHECK_MINUTES > 0) && ((status_alarm == 0) || force)) {
-		const utime_t tmp = (STATUS_CHECK_MINUTES * SECONDS_PER_MINUTE);
-		next = now + tmp;
-		status_alarm = SNAP_TO_FACTOR(next, tmp);
+		status_alarm = calculate_alarm(now, STATUS_CHECK_MINUTES * SECONDS_PER_MINUTE);
 	}
 
 	if (DO_CLOCK_DESCEW && ((descew_alarm == 0) || force)) {
-		const utime_t tmp = (RTC_CORRECTION_PERIOD_MINUTES * SECONDS_PER_MINUTE);
-		next = now + tmp;
-		descew_alarm = SNAP_TO_FACTOR(next, tmp);
-		//
-		// Without this check, a negative correction may be applied repeatedly.
-		if ((RTC_CORRECTION_SECONDS < 0) && (descew_alarm <= (now + -RTC_CORRECTION_SECONDS))) {
-			descew_alarm += RTC_CORRECTION_PERIOD_MINUTES * SECONDS_PER_MINUTE;
-		}
+		descew_alarm = calculate_alarm(now, RTC_CORRECTION_PERIOD_MINUTES * SECONDS_PER_MINUTE);
+		descew_alarm = correct_deskew_alarm(now, descew_alarm, RTC_CORRECTION_PERIOD_MINUTES * SECONDS_PER_MINUTE, RTC_CORRECTION_SECONDS);
 	}
 	if (DO_FINE_CLOCK_DESCEW && ((fine_descew_alarm == 0) || force)) {
-		const utime_t tmp = (RTC_FINE_CORRECTION_PERIOD_MINUTES * SECONDS_PER_MINUTE);
-		next = now + tmp;
-		fine_descew_alarm = SNAP_TO_FACTOR(next, tmp);
-		//
-		// Without this check, a negative correction may be applied repeatedly.
-		if ((RTC_FINE_CORRECTION_SECONDS < 0) && (fine_descew_alarm <= (now + -RTC_FINE_CORRECTION_SECONDS))) {
-			fine_descew_alarm += RTC_FINE_CORRECTION_PERIOD_MINUTES * SECONDS_PER_MINUTE;
-		}
+		fine_descew_alarm = calculate_alarm(now, RTC_FINE_CORRECTION_PERIOD_MINUTES * SECONDS_PER_MINUTE);
+		fine_descew_alarm = correct_deskew_alarm(now, fine_descew_alarm, RTC_FINE_CORRECTION_PERIOD_MINUTES * SECONDS_PER_MINUTE, RTC_FINE_CORRECTION_SECONDS);
 	}
 	calculate_default_controller_alarms(force);
 
