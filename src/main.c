@@ -24,6 +24,7 @@
 
 #include "common.h"
 #include "controllers.h"
+#include "sensors.h"
 
 #if RTC_CORRECTION_PERIOD_MINUTES < 0
 # error "RTC_CORRECTION_PERIOD_MINUTES must be >= 0"
@@ -75,9 +76,10 @@ static inline utime_t correct_deskew_alarm(const utime_t now, const utime_t alar
 // Program entry point
 //
 int main(void) {
+	utime_t next_wakeup;
+
 	platform_init();
 
-	utime_t next_wakeup = set_alarms(false);
 #if USE_CTRL_BUTTON
 	input_pin_on(CTRL_BUTTON_PIN);
 	input_pin_listen_init(&ctrl_button_listen_handle, CTRL_BUTTON_PIN);
@@ -85,7 +87,8 @@ int main(void) {
 #if USE_UART_TERMINAL
 	uart_listen_on(UART_COMM_PORT);
 #endif
-	init_default_controllers();
+	init_common_controllers();
+	next_wakeup = set_alarms(false);
 
 	while (true) {
 		utime_t now = NOW();
@@ -218,7 +221,7 @@ int main(void) {
 				check_sensor_warnings();
 			}
 */
-			check_default_controller_warnings();
+			check_common_controller_warnings();
 			check_warnings();
 
 /*
@@ -239,7 +242,7 @@ int main(void) {
 			log_alarm = calculate_alarm(now+1, LOG_APPEND_MINUTES * SECONDS_PER_MINUTE);
 		}
 
-		run_default_controllers(do_controllers, force_controllers);
+		run_common_controllers(do_controllers, force_controllers);
 		next_wakeup = set_alarms(false);
 	}
 
@@ -281,7 +284,7 @@ static utime_t set_alarms(bool force) {
 		fine_deskew_alarm = calculate_alarm(now, RTC_FINE_CORRECTION_PERIOD_MINUTES * SECONDS_PER_MINUTE);
 		fine_deskew_alarm = correct_deskew_alarm(now, fine_deskew_alarm, RTC_FINE_CORRECTION_PERIOD_MINUTES * SECONDS_PER_MINUTE, RTC_FINE_CORRECTION_SECONDS);
 	}
-	calculate_default_controller_alarms(force);
+	calculate_common_controller_alarms(force);
 
 	// 12 hours should be more than long enough a default sleep period
 	next = now + (12U * SECONDS_PER_HOUR);
@@ -301,7 +304,7 @@ static utime_t set_alarms(bool force) {
 		next = fine_deskew_alarm;
 		reason = "Deskew clock (fine)";
 	}
-	test = find_next_default_controller_alarm();
+	test = find_next_common_controller_alarm();
 	if (test > 0 && test < next) {
 		next = test;
 		reason = "Run controllers";

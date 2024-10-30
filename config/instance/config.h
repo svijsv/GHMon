@@ -10,11 +10,15 @@
 // Set to '0' to disable corresponding feature
 //
 // Cut down the size of internal components at the expense of functionality
+// These can be controlled in more detail in advanced.h
 #ifndef USE_SMALL_BUILD
 # define USE_SMALL_BUILD 0
 #endif
 #ifndef USE_SMALL_CONTROLLERS
 # define USE_SMALL_CONTROLLERS 0
+#endif
+#ifndef USE_SMALL_SENSORS
+# define USE_SMALL_SENSORS 0
 #endif
 //
 // Enable data logging to SD cards
@@ -39,14 +43,6 @@
 // STATUS_CHECK_MINUTES minutes
 // If 0, it's checked only when the user button is pressed
 #define STATUS_CHECK_MINUTES 15
-//
-// The number of sensors used
-// Be sure to change the G_sensors[] definition in config.c if this changes.
-// Must be >= 1 and <=255.
-#define SENSOR_COUNT 4
-//
-// The number of elements in sensor lookup tables
-#define LUT_SIZE 10
 
 //
 // Controller configuration
@@ -64,6 +60,10 @@
 //
 // The storage class specifier used for the controller_cfg_t array
 #define CONTROLLER_CFG_STORAGE const FMEM_STORAGE
+
+//
+// The storage class specifier used for the sensor_cfg_t array
+#define SENSOR_CFG_STORAGE const FMEM_STORAGE
 
 //
 // Data logging configuration
@@ -97,3 +97,61 @@
 // If set, this must be > 1.
 // Set to 0 to disable.
 #define LINES_PER_FILE ((7 * 24 * 60) / LOG_APPEND_MINUTES) // 7 days per file
+
+//
+// These settings are for the sensor_defs.h and controller_defs.h configuration
+// files
+// They are specific to the implementation used here and may vary over time and
+// configuration
+//
+// The beta coefficient of any thermistors
+#define THERMISTOR_BETA_COEFFICIENT 3950U
+//
+// The reference value of any thermistors in degrees Celsius
+#define THERMISTOR_REFERENCE_VALUE  25U
+//
+// The resistance at the reference value of any thermistors
+#define THERMISTOR_REFERENCE_OHMS   20000U
+//
+// The resistance of the series resister used with any thermistors
+#define THERMISTOR_SERIES_OHMS      22000U
+//
+// The series resistor for any voltage-divider-based moisture sensors
+#define MOISTURE_SERIES_OHMS 1000U
+//
+// The values of the low- and high-side resistors used in the voltage divider to
+// measure the battery voltage
+// The relative values are what matters so e.g. 10 and 1 are the same as 10000
+// and 1000
+// The low side must be > 0
+#define BATTERY_VDIV_HIGH_SIDE_OHMS 15150U
+#define BATTERY_VDIV_LOW_SIDE_OHMS 6740U
+//#define BATTERY_VDIV_HIGH_SIDE_OHMS 150U
+//#define BATTERY_VDIV_LOW_SIDE_OHMS 68U
+//
+// If set, voltage divider-based sensors are read as having the fixed-value
+// resistor on the high side and the variable resistor on the low side
+#define SERIES_R_IS_HIGH_SIDE 1
+//
+// If true, read temperature in degree Fahrenheit instead of Celsius
+#define USE_FAHRENHEIT 1
+//
+// If > 1, scale temperatures by this factor (e.g. by 10 in order to track by
+// tenths of a degree)
+#define TEMPERATURE_SCALE 1
+
+//
+// The temperature threshold above which an inactive fan is turned on
+#define COOL_ON_THRESHOLD 85
+//
+// The temperature threshold below which an active fan is turned off
+#define COOL_OFF_THRESHOLD 75
+//
+// The temperature threshold below which an inactive heater is turned on
+#define HEAT_ON_THRESHOLD 55
+//
+// The temperature threshold above which an active heater is turned off
+#define HEAT_OFF_THRESHOLD 60
+//
+// If soil resistance is >= this many ohms, consider it dry
+#define MOIST_READING_DRY 10000

@@ -9,7 +9,6 @@
 #define USE_SMALL_CODE        USE_SMALL_BUILD
 #define SKIP_SAFETY_CHECKS    USE_SMALL_BUILD
 #define SKIP_LIB_SAFETY_CHECKS SKIP_SAFETY_CHECKS
-
 //
 // These are sub-features of USE_SMALL_CONTROLLERS
 // The configuration and status structs will change depending on these values
@@ -19,6 +18,15 @@
 #define USE_CONTROLLER_DATA     (!USE_SMALL_CONTROLLERS)
 #define USE_CONTROLLER_STATUS   (!USE_SMALL_CONTROLLERS)
 #define USE_CONTROLLER_NEXTTIME (!USE_SMALL_CONTROLLERS)
+//
+// These are sub-features of USE_SMALL_SENSORS
+// The configuration and status structs will change depending on these values
+#define USE_SENSOR_NAME     (!USE_SMALL_SENSORS)
+#define USE_SENSOR_INIT     (!USE_SMALL_SENSORS)
+#define USE_SENSOR_COOLDOWN (!USE_SMALL_SENSORS)
+#define USE_SENSOR_CFG_DATA (!USE_SMALL_SENSORS)
+#define USE_SENSOR_CFG_PIN  (!USE_SMALL_SENSORS)
+#define USE_SENSOR_DATA     (!USE_SMALL_SENSORS)
 
 //
 // Delays during status LED display
@@ -82,19 +90,33 @@
 // layout it may not be a direct relationship; typically rounding the number
 // up to the next multiple of 4 will give the number of bytes used (so that
 // setting it to 8 would use 12 bytes).
-#define DEVICE_NAME_LEN 7
+#define DEVICE_NAME_LEN 11
 //
-// The signed type used to store sensor statuses, this may need to be larger
-// for certain sensor types
-#define SENSOR_STATUS_T int16_t
+// The type used to store sensor reading values
+#define SENSOR_READING_T int32_t
 //
-// The default minimum period between reads of a single sensor, used to prevent
-// sensitive sensors from being continuously powered on and off
-#define SENSOR_DEFAULT_COOLDOWN_SECONDS 0
+// The value returned when there's an error reading a sensor
+#define SENSOR_BAD_VALUE INT32_MIN
+//
+// The type used to store sensor configuration data
+#define SENSOR_CFG_DATA_T uint32_t
+//
+// The type used to store sensor array indexes
+// The maximum sensor count is determined by this type
+// The only negative effect of a larger type is correspoindingly larger code
+#define SENSOR_INDEX_T int_fast8_t
+//
+// The default minimum period between reads of a single sensor
+#define SENSOR_COOLDOWN_SECONDS 90
 
 //
 // The type used to hold controller status values
 #define CONTROLLER_STATUS_T int
+//
+// The type used to store controller array indexes
+// The maximum controller count is determined by this type
+// The only negative effect of a larger type is correspoindingly larger code
+#define CONTROLLER_INDEX_T int_fast8_t
 
 //
 // The number of bytes used for the SD card write buffer

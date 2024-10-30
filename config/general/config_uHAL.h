@@ -84,14 +84,14 @@
 // ADC configuration options
 //
 // Enable the Analog-to-Digital Converter
-#define uHAL_USE_ADC 0
+#define uHAL_USE_ADC 1
 //
 // Number of samples to take and then average for every ADC reading
 #define ADC_SAMPLE_COUNT 1U
 //
 // The minimum number of microseconds to spend on each ADC sample
 // If 0, use the smallest allowable period
-#define ADC_SAMPLE_uS 0U
+#define ADC_SAMPLE_uS 100U
 //
 // If a conversion takes longer than this many milliseconds, abort because
 // *something* is wrong

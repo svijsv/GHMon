@@ -23,20 +23,29 @@
 //
 #include "common.h"
 #include "controllers.h"
+#include "sensors.h"
 
-#include GHMON_INCLUDE_CONFIG_HEADER(controllers.h)
+#include GHMON_INCLUDE_CONFIG_HEADER(controller_defs.h)
 
 // FIXME: This will give random-ish numbers for non-default controllers, but
 // they should stay the same in any given run and this is just for logging so
 // it's not a big deal
 #define CONTROLLER_ID(_status_) (uint )((_status_) - controllers)
 
-const uiter_t CONTROLLER_COUNT = SIZEOF_ARRAY(CONTROLLERS);
+const CONTROLLER_INDEX_T CONTROLLER_COUNT = SIZEOF_ARRAY(CONTROLLERS);
 //#define CONTROLLER_COUNT SIZEOF_ARRAY(CONTROLLERS)
 
 static controller_status_t controllers[SIZEOF_ARRAY(CONTROLLERS)];
 
+controller_status_t* get_controller_status_by_index(CONTROLLER_INDEX_T i) {
+	assert(i >= 0 && i < CONTROLLER_COUNT);
+	return &controllers[i];
+}
+
 static err_t _init_controller(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, controller_status_t *status) {
+	assert(cfg != NULL);
+	assert(status != NULL);
+
 #if USE_CONTROLLER_INIT
 	if (cfg->init != NULL) {
 		err_t res = cfg->init(cfg, status);
@@ -46,10 +55,12 @@ static err_t _init_controller(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, cont
 		}
 	}
 #endif
+	// Need to be initialized before setting the alarm
+	SET_BIT(status->status_flags, CONTROLLER_STATUS_FLAG_INITIALIZED);
+
 #if USE_CONTROLLER_SCHEDULE
 	calculate_controller_alarm(cfg, status);
 #endif
-	SET_BIT(status->status_flags, CONTROLLER_STATUS_FLAG_INITIALIZED);
 
 	return ERR_OK;
 }
@@ -61,11 +72,11 @@ err_t init_controller(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, controller_s
 	mem_init(status, 0, sizeof(*status));
 	return _init_controller(cfg, status);
 }
-void init_default_controllers(void) {
+void init_common_controllers(void) {
 	CONTROLLER_CFG_STORAGE controller_cfg_t *cfg;
 	controller_status_t *status;
 
-	for (uiter_t i = 0; i < CONTROLLER_COUNT; ++i) {
+	for (CONTROLLER_INDEX_T i = 0; i < CONTROLLER_COUNT; ++i) {
 		cfg = &CONTROLLERS[i];
 		status = &controllers[i];
 
@@ -106,11 +117,11 @@ err_t run_controller(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, controller_st
 
 	return ERR_OK;
 }
-void run_default_controllers(bool manual, bool force) {
+void run_common_controllers(bool manual, bool force) {
 	CONTROLLER_CFG_STORAGE controller_cfg_t *cfg;
 	controller_status_t *status;
 
-	for (uiter_t i = 0; i < CONTROLLER_COUNT; ++i) {
+	for (CONTROLLER_INDEX_T i = 0; i < CONTROLLER_COUNT; ++i) {
 		cfg = &CONTROLLERS[i];
 		status = &controllers[i];
 
@@ -191,12 +202,12 @@ END:
 
 	return ERR_OK;
 }
-void calculate_default_controller_alarms(bool force) {
+void calculate_common_controller_alarms(bool force) {
 #if USE_CONTROLLER_SCHEDULE
 	CONTROLLER_CFG_STORAGE controller_cfg_t *cfg;
 	controller_status_t *status;
 
-	for (uiter_t i = 0; i < CONTROLLER_COUNT; ++i) {
+	for (CONTROLLER_INDEX_T i = 0; i < CONTROLLER_COUNT; ++i) {
 		cfg = &CONTROLLERS[i];
 		status = &controllers[i];
 
@@ -208,12 +219,12 @@ void calculate_default_controller_alarms(bool force) {
 
 	return;
 }
-utime_t find_next_default_controller_alarm(void) {
+utime_t find_next_common_controller_alarm(void) {
 	controller_status_t *status;
 	utime_t next = 0;
 
 #if USE_CONTROLLER_SCHEDULE
-	for (uiter_t i = 0; i < CONTROLLER_COUNT; ++i) {
+	for (CONTROLLER_INDEX_T i = 0; i < CONTROLLER_COUNT; ++i) {
 		status = &controllers[i];
 
 		if (next == 0 || (status->next_run_time != 0 && status->next_run_time < next)) {
@@ -230,11 +241,11 @@ utime_t find_next_default_controller_alarm(void) {
 	return next;
 }
 
-void check_default_controller_warnings(void) {
+void check_common_controller_warnings(void) {
 	controller_status_t *status;
 
 	CLEAR_BIT(ghmon_warnings, WARN_CONTROLLER);
-	for (uiter_t i = 0; i < CONTROLLER_COUNT; ++i) {
+	for (CONTROLLER_INDEX_T i = 0; i < CONTROLLER_COUNT; ++i) {
 		status = &controllers[i];
 
 		if (BIT_IS_SET(status->status_flags, CONTROLLER_STATUS_FLAG_ERROR)) {

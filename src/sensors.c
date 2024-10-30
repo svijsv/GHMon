@@ -2,7 +2,7 @@
 /***********************************************************************
 *                                                                      *
 *                                                                      *
-* Copyright 2021 svijsv                                                *
+* Copyright 2021, 2024 svijsv                                          *
 * This program is free software: you can redistribute it and/or modify *
 * it under the terms of the GNU General Public License as published by *
 * the Free Software Foundation, version 3.                             *
@@ -20,299 +20,188 @@
 // sensors.c
 // Manage sensors
 // NOTES:
-//   https:// www.daycounter.com/Calculators/Steinhart-Hart-Thermistor-Calculator.phtml
-//   https:// www.allaboutcircuits.com/industry-articles/how-to-obtain-the-temperature-value-from-a-thermistor-measurement/
-//   https:// www.electroniclinic.com/what-is-a-thermistor-thermistor-types-thermistor-circuits/#Thermistor_Overview
-//   https:// www.digikey.com/en/articles/how-to-accurately-sense-temperature-using-thermistors
 //
-
-#ifdef __cplusplus
- extern "C" {
-#endif
-
-//#define DEBUG 1
-/*
-* Includes
-*/
+#include "common.h"
 #include "sensors.h"
-#include "power.h"
-#include "serial.h"
 
-#include "sensors/private.h"
+#include "ulib/include/math.h"
 
-#include "ulib/time.h"
-#include "ulib/math.h"
+#include GHMON_INCLUDE_CONFIG_HEADER(sensor_defs.h)
 
+#define SENSOR_INDEX(_cfg_) (uint )((_cfg_) - SENSORS)
+#define SENSOR_ID(_status_) (uint )((_status_) - sensors)
 
-#if SENSOR_COUNT > 255 || SENSOR_COUNT < 1
-# error "SENSOR_COUNT not between 1 and 255"
+const SENSOR_INDEX_T SENSOR_COUNT = SIZEOF_ARRAY(SENSORS);
+//#define SENSOR_COUNT SIZEOF_ARRAY(SENSORS)
+
+static sensor_status_t sensors[SIZEOF_ARRAY(SENSORS)];
+
+static err_t _init_sensor(SENSOR_CFG_STORAGE sensor_cfg_t *cfg, sensor_status_t *status) {
+	assert(cfg != NULL);
+	assert(status != NULL);
+
+#if USE_SENSOR_INIT
+	if (cfg->init != NULL) {
+		err_t res = cfg->init(cfg, status);
+		if (res != ERR_OK) {
+			SET_BIT(status->status_flags, SENSOR_STATUS_FLAG_ERROR);
+			return res;
+		}
+	}
 #endif
+	SET_BIT(status->status_flags, SENSOR_STATUS_FLAG_INITIALIZED);
 
+	return ERR_OK;
+}
 
-/*
-* Static values
-*/
-// Store multi-use strings in const arrays so they aren't duplicated
-_FLASH const char sens_invalid_msg_l[] = "Invalid sensor %u configuration: %s";
-_FLASH const char sens_invalid_msg_e[] = "Invalid sensor configuration";
+err_t init_sensor(SENSOR_CFG_STORAGE sensor_cfg_t *cfg, sensor_status_t *status) {
+	assert(cfg != NULL);
+	assert(status != NULL);
 
+	mem_init(status, 0, sizeof(*status));
+	return _init_sensor(cfg, status);
+}
+void init_common_sensors(void) {
+	SENSOR_CFG_STORAGE sensor_cfg_t *cfg;
+	sensor_status_t *status;
 
-/*
-* Types
-*/
-
-
-/*
-* Variables
-*/
-int16_t G_vcc_voltage = REGULATED_VOLTAGE_mV;
-utime_t cooldown = 0;
-sensor_t G_sensors[SENSOR_COUNT];
-
-_FLASH const sensor_dispatch_t sensor_dispatch[SENSOR_TYPE_COUNT] = {
-	{ NULL, NULL, NULL }, // SENS_NONE
-	SENSOR_DISPATCHES
-};
-
-/*
-* Local function prototypes
-*/
-static void update_sensor_warning(uiter_t si);
-
-
-/*
-* Interrupt handlers
-*/
-
-
-/*
-* Functions
-*/
-void sensors_init(void) {
-	_FLASH const sensor_static_t *cfg;
-
-	// If Vref is going to be calibrated here, do it before the sensors are
-	// initialized so they have access to the calibrated value
-#if CALIBRATE_VREF == 1
-	adc_on();
-	G_vcc_voltage = adc_read_vref_mV();
-	adc_off();
-#endif
-
-	// Check for any problems with the sensor configuration
-	for (uiter_t i = 0; i < SENSOR_COUNT; ++i) {
+	for (SENSOR_INDEX_T i = 0; i < SENSOR_COUNT; ++i) {
 		cfg = &SENSORS[i];
-
-		//s->i = i;
+		status = &sensors[i];
 
 		if (cfg->name[0] == 0) {
-			SETUP_ERR(i, "No name set; is SENSOR_COUNT correct?");
+			LOGGER("Unset name in SENSORS[%u]", (uint )i);
 		}
-
-#if USE_SMALL_SENSORS < 2
-		sensor_t *s = &G_sensors[i];
-
-		switch (cfg->warn_above) {
-		case 0:
-			// If both warn_above and warn_below were 0, they almost certainly
-			// weren't set
-			if (cfg->warn_below != 0) {
-				SET_BIT(s->iflags, SENS_FLAG_MONITORED);
-			}
-			break;
-		case SENS_THRESHOLD_IGNORE:
-			if (cfg->warn_below != SENS_THRESHOLD_IGNORE) {
-				SET_BIT(s->iflags, SENS_FLAG_MONITORED);
-			}
-			break;
-		default:
-			SET_BIT(s->iflags, SENS_FLAG_MONITORED);
-			break;
-		}
-#endif // USE_SMALL_SENSORS < 2
-
-		if (cfg->type == SENS_NONE) {
-			SETUP_ERR(i, "No sensor type specified");
-		} else if (cfg->type >= SENSOR_TYPE_COUNT) {
-			SETUP_ERR(i, "Unknown sensor type");
-		}
-
-		if (sensor_dispatch[cfg->type].init != NULL) {
-			sensor_dispatch[cfg->type].init(i);
-		}
+		init_sensor(cfg, status);
 	}
 
 	return;
 }
 
-void check_sensors() {
-	uint16_t value[SENSOR_COUNT];
-	sensor_t *s;
-	uint8_t type;
-
-	if (!RTC_TIMES_UP(cooldown)) {
-		LOGGER("Not updating sensor status; cooldown in effect");
-		return;
+SENSOR_READING_T find_sensor_value_by_type(sensor_reading_t* reading, uint_fast8_t type) {
+	if (reading == NULL) {
+		return SENSOR_BAD_VALUE;
 	}
 
-	LOGGER("Updating sensor status");
-
-	for (uiter_t i = 0; i < SENSOR_COUNT; ++i) {
-		CLEAR_BIT(G_sensors[i].iflags, SENS_FLAG_DONE);
+	if (type == 0) {
+		return reading->value;
 	}
-
-	//
-	// To minimize the time any given subsystem is powered on, the sensors are
-	// checked in groups
-	//
-	// First handle the generic sensors
-	power_on_sensors();
-#if (CALIBRATE_VREF >= 2) || USE_ADC_SENSORS
-	adc_on();
-#endif
-#if CALIBRATE_VREF >= 2
-	G_vcc_voltage = adc_read_vref_mV();
-#endif
-
-	for (uiter_t i = 0; i < SENSOR_COUNT; ++i) {
-		s = &G_sensors[i];
-		type = SENSORS[i].type;
-
-		if (!BIT_IS_SET(s->iflags, SENS_FLAG_I2C) && !BIT_IS_SET(s->iflags, SENS_FLAG_SPI) && !BIT_IS_SET(s->iflags, SENS_FLAG_DONE)) {
-			value[i] = (sensor_dispatch[type].read != NULL) ? sensor_dispatch[type].read(i) : 0;
+	do {
+		if (reading->type == type) {
+			return reading->value;
 		}
-	}
-#if (CALIBRATE_VREF >= 2) || USE_ADC_SENSORS
-	adc_off();
-#endif
-	power_off_sensors();
+		++reading;
+	} while (reading->more);
 
-	//
-	// Then SPI sensors
-#if USE_SPI_SENSORS
-	power_on_SPI();
-	for (uiter_t i = 0; i < SENSOR_COUNT; ++i) {
-		s = &G_sensors[i];
-		type = SENSORS[i].type;
-
-		if (BIT_IS_SET(s->iflags, SENS_FLAG_SPI) && !BIT_IS_SET(s->iflags, SENS_FLAG_DONE)) {
-			value[i] = (sensor_dispatch[type].read != NULL) ? sensor_dispatch[type].read(i) : 0;
-		}
-	}
-	power_off_SPI();
-#endif // USE_SPI_SENSORS
-
-	//
-	// Then I2C sensors
-#if USE_I2C_SENSORS
-	power_on_I2C();
-	for (uiter_t i = 0; i < SENSOR_COUNT; ++i) {
-		s = &G_sensors[i];
-		type = SENSORS[i].type;
-
-		if (BIT_IS_SET(s->iflags, SENS_FLAG_I2C) && !BIT_IS_SET(s->iflags, SENS_FLAG_DONE)) {
-			value[i] = (sensor_dispatch[type].read != NULL) ? sensor_dispatch[type].read(i) : 0;
-		}
-	}
-	power_off_I2C();
-#endif // USE_I2C_SENSORS
-
-	for (uiter_t i = 0; i < SENSOR_COUNT; ++i) {
-		//s = &G_sensors[i];
-		type = SENSORS[i].type;
-
-		if (sensor_dispatch[type].update != NULL) {
-			sensor_dispatch[type].update(i, value[i]);
-		}
-		update_sensor_warning(i);
-	}
-	cooldown = SET_RTC_TIMEOUT(SENS_COOLDOWN);
-
-	return;
+	return SENSOR_BAD_VALUE;
 }
-void invalidate_sensors(void) {
-	cooldown = 0;
 
-	return;
-}
-static void update_sensor_warning(uiter_t si) {
-#if USE_SMALL_SENSORS < 2
-	bool high, low, inside;
-	sensor_t *s;
-	_FLASH const sensor_static_t *cfg;
+SENSOR_READING_T read_sensor(SENSOR_CFG_STORAGE sensor_cfg_t *cfg, sensor_status_t *status, bool force_update, uint_fast8_t type) {
+	sensor_reading_t *reading;
 
-	s = &G_sensors[si];
-	cfg = &SENSORS[si];
+	assert(cfg != NULL);
+	assert(cfg->read != NULL);
+	assert(status != NULL);
 
-	if (!BIT_IS_SET(s->iflags, SENS_FLAG_MONITORED)) {
-		return;
-	}
-
-	high = (cfg->warn_above == SENS_THRESHOLD_IGNORE) ? false : (s->status > cfg->warn_above);
-	low  = (cfg->warn_below == SENS_THRESHOLD_IGNORE) ? false : (s->status < cfg->warn_below);
-	inside = ((cfg->warn_above != SENS_THRESHOLD_IGNORE) && (cfg->warn_below != SENS_THRESHOLD_IGNORE) && (cfg->warn_above < cfg->warn_below));
-
-	CLEAR_BIT(s->iflags, SENS_FLAG_WARNING);
-	if (inside) {
-		if (high && low) {
-			SET_BIT(s->iflags, SENS_FLAG_WARNING);
+	if (!BIT_IS_SET(status->status_flags, SENSOR_STATUS_FLAG_INITIALIZED)) {
+		err_t res = _init_sensor(cfg, status);
+		if (res != ERR_OK) {
+			return SENSOR_BAD_VALUE;
 		}
-	} else if (high || low) {
-		SET_BIT(s->iflags, SENS_FLAG_WARNING);
 	}
 
+#if USE_SENSOR_COOLDOWN
+	utime_t now = NOW(), prev = status->previous_reading_time;
+
+	if (!force_update && (prev != 0) && (prev <= now) && (prev + cfg->cooldown_seconds) > now) {
+# if USE_SENSOR_NAME
+		LOGGER("Using previous reading of sensor %s", FROM_FSTR(cfg->name));
+# else
+		LOGGER("Using previous reading of sensor %u", SENSOR_ID(status));
+# endif
+		reading = status->reading;
+		goto END;
+	}
+#endif
+
+#if USE_SENSOR_NAME
+	LOGGER("Reading sensor %s", FROM_FSTR(cfg->name));
 #else
-	UNUSED(si);
-#endif // USE_SMALL_SENSORS < 2
+	LOGGER("Reading sensor %u", SENSOR_ID(status));
+#endif
+
+	if (!SKIP_SAFETY_CHECKS && cfg->read == NULL) {
+		return SENSOR_BAD_VALUE;
+	}
+
+	reading = cfg->read(cfg, status);
+	if (reading == NULL) {
+		SET_BIT(status->status_flags, SENSOR_STATUS_FLAG_ERROR);
+		return SENSOR_BAD_VALUE;
+	}
+
+	status->reading = reading;
+	CLEAR_BIT(status->status_flags, SENSOR_STATUS_FLAG_ERROR);
+#if USE_SENSOR_COOLDOWN
+	status->previous_reading_time = NOW();
+#endif
+
+END:
+	return find_sensor_value_by_type(reading, type);
+}
+
+#if USE_SENSOR_NAME
+SENSOR_INDEX_T find_sensor_index_by_name(const char *name) {
+	assert(name != NULL);
+	if (!SKIP_SAFETY_CHECKS && name == NULL) {
+		return -1;
+	}
+
+	for (SENSOR_INDEX_T i = 0; i < SENSOR_COUNT; ++i) {
+		SENSOR_CFG_STORAGE char *cfg_n = SENSORS[i].name;
+		const char *find_n = name;
+
+		// Doing our own string compare simplifies things when using devices
+		// with separate namespaces for flash and RAM because we don't have to
+		// call FROM_FSTR().
+		while (*find_n != 0 && (*find_n == *cfg_n)) {
+			++find_n;
+			++cfg_n;
+		}
+		if ((*find_n == *cfg_n) && (*find_n == 0)) {
+			return i;
+		}
+	}
+
+	return -1;
+}
+SENSOR_READING_T read_sensor_by_name(const char *name, bool force_update, uint_fast8_t type) {
+	SENSOR_INDEX_T i = find_sensor_index_by_name(name);
+	if (!SKIP_SAFETY_CHECKS && i < 0) {
+		return SENSOR_BAD_VALUE;
+	}
+	return read_sensor(&SENSORS[i], &sensors[i], force_update, type);
+}
+#endif
+SENSOR_READING_T read_sensor_by_index(SENSOR_INDEX_T i, bool force_update, uint_fast8_t type) {
+	assert(i >= 0 && i < SENSOR_COUNT);
+	if (!SKIP_SAFETY_CHECKS && i >= SENSOR_COUNT) {
+		return SENSOR_BAD_VALUE;
+	}
+	return read_sensor(&SENSORS[i], &sensors[i], force_update, type);
+}
+
+void check_common_sensor_warnings(void) {
+	sensor_status_t *status;
+
+	CLEAR_BIT(ghmon_warnings, WARN_SENSOR);
+	for (SENSOR_INDEX_T i = 0; i < SENSOR_COUNT; ++i) {
+		status = &sensors[i];
+
+		if (BIT_IS_SET(status->status_flags, SENSOR_STATUS_FLAG_ERROR)) {
+			SET_BIT(ghmon_warnings, WARN_SENSOR);
+		}
+	}
 
 	return;
 }
-
-void check_sensor_warnings(void) {
-	CLEAR_BIT(G_warnings, (WARN_BATTERY_LOW|WARN_VCC_LOW|WARN_SENSOR));
-
-#if CALIBRATE_VREF >= 2
-	if (G_vcc_voltage < REGULATED_VOLTAGE_LOW_mV) {
-		SET_BIT(G_warnings, WARN_VCC_LOW);
-	}
-#endif
-
-#if USE_SMALL_SENSORS < 2
-	sensor_t *s;
-	_FLASH const sensor_static_t *cfg;
-
-	for (uiter_t i = 0; i < SENSOR_COUNT; ++i) {
-		s = &G_sensors[i];
-		cfg = &SENSORS[i];
-
-		// Batteries are checked even if they're not flagged for monitoring
-		// otherwise
-		if (BIT_IS_SET(cfg->cflags, SENS_FLAG_BATTERY)) {
-			if (s->status < cfg->warn_below) {
-				SET_BIT(G_warnings, WARN_BATTERY_LOW);
-				// If there's already a sensor warning there's no reason to check
-				// the rest of the sensors
-				if (BIT_IS_SET(G_warnings, WARN_SENSOR)) {
-					break;
-				}
-			}
-		}
-
-		if (BIT_IS_SET(s->iflags, SENS_FLAG_WARNING)) {
-			SET_BIT(G_warnings, WARN_SENSOR);
-			// If there's already a battery warning there's no reason to check the
-			// rest of the sensors
-			if (BIT_IS_SET(G_warnings, WARN_BATTERY_LOW)) {
-				break;
-			}
-		}
-	}
-#endif // USE_SMALL_SENSORS < 2
-
-	return;
-}
-
-
-#ifdef __cplusplus
- }
-#endif

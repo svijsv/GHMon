@@ -32,7 +32,7 @@
 typedef enum {
 	CONTROLLER_STATUS_FLAG_INITIALIZED = 0x01U, // Controller successfully initialized
 	CONTROLLER_STATUS_FLAG_ERROR       = 0x02U, // Controller in error state; set when run() or init() return error codes
-} controller_status_flags_t;
+} controller_status_flag_t;
 //
 // Status of a controller
 typedef struct {
@@ -63,12 +63,6 @@ typedef enum {
 //
 // Static configuration of a controller
 typedef struct controller_cfg_t {
-#if USE_CONTROLLER_NAME
-	//
-	// Name of the controller
-	// The size of name[] includes a trailing NUL byte.
-	char name[DEVICE_NAME_LEN+1];
-#endif
 #if USE_CONTROLLER_INIT
 	//
 	// An optional function used to initialize the controller
@@ -92,6 +86,12 @@ typedef struct controller_cfg_t {
 	// on the scheduled run time and configuration settings
 	utime_t (*next_run_time)(CONTROLLER_CFG_STORAGE struct controller_cfg_t *cfg, controller_status_t *status);
 #endif
+#if USE_CONTROLLER_NAME
+	//
+	// Name of the controller
+	// The size of name[] includes a trailing NUL byte.
+	char name[DEVICE_NAME_LEN+1];
+#endif
 #if USE_CONTROLLER_SCHEDULE
 	//
 	// When to run the controller
@@ -112,13 +112,15 @@ err_t init_controller(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, controller_s
 err_t run_controller(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, controller_status_t *status);
 err_t calculate_controller_alarm(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, controller_status_t *status);
 
-void init_default_controllers(void);
-void run_default_controllers(bool manual, bool force);
-void calculate_default_controller_alarms(bool force);
-utime_t find_next_default_controller_alarm(void);
-void check_default_controller_warnings(void);
+void init_common_controllers(void);
+void run_common_controllers(bool manual, bool force);
+void calculate_common_controller_alarms(bool force);
+utime_t find_next_common_controller_alarm(void);
+void check_common_controller_warnings(void);
+
+controller_status_t* get_controller_status_by_index(CONTROLLER_INDEX_T i);
 
 extern CONTROLLER_CFG_STORAGE controller_cfg_t CONTROLLERS[];
-extern const uiter_t CONTROLLER_COUNT;
+extern const CONTROLLER_INDEX_T CONTROLLER_COUNT;
 
 #endif // _CONTROLLERS_H
