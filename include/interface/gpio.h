@@ -440,6 +440,14 @@ err_t output_pin_off(gpio_pin_t pin);
 /// @returns ERR_OK if successful, otherwise an error code indicating
 ///  the nature of the problem encountered.
 err_t output_pin_toggle(gpio_pin_t pin);
+///
+/// Check if an output pin is turned on
+///
+/// @param pin The pin to examine.
+///
+/// @returns @c true if the output pin is turned on.or @c false if it's turned
+/// off or there was an error.
+bool output_pin_is_on(gpio_pin_t pin);
 
 ///
 /// Prepare a pin interrupt trigger based on it's control mask.

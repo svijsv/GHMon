@@ -27,6 +27,7 @@
 #include "time.h"
 
 #include "ulib/include/printf.h"
+#include "ulib/include/halloc.h"
 
 
 // Save a few bytes by using variables for these so they can be deduplicated
@@ -52,7 +53,7 @@ extern char _ebss;
 
 
 void _print_platform_info(void (*printf_putc)(uint_fast8_t c)) {
-	int bss_size, data_size, stack_size;
+	int bss_size, data_size, stack_size, heap_size = 0;
 	uint psc;
 
 	// Due to a bug in the hardware, the ID and revision are always 0 on the
@@ -312,7 +313,10 @@ void _print_platform_info(void (*printf_putc)(uint_fast8_t c)) {
 	stack_size = (RAM_BASE + RAM_PRESENT) - __get_MSP();
 	data_size = (uint )(&_edata) - (uint )(&_sdata);
 	bss_size  = (uint )(&_ebss)  - (uint )(&_sbss);
-	printf_vv(printf_putc, "RAM used: %dB/%uB stack, %dB .data, %dB .bss\r\n", (int )stack_size, (uint )RAM_PRESENT, (int )(data_size), (int )(bss_size));
+#if ULIB_ENABLE_HALLOC
+	heap_size = (int )halloc_total_allocated();
+#endif
+	printf_vv(printf_putc, "RAM used: %dB/%uB stack, %dB heap, %dB .data, %dB .bss\r\n", (int )stack_size, (uint )RAM_PRESENT, (int )heap_size, (int )(data_size), (int )(bss_size));
 
 	return;
 }

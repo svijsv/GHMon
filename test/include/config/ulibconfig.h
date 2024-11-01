@@ -218,6 +218,51 @@
 
 
 /*
+* Heap allocation module configuration
+*/
+// Enable this module
+#define ULIB_ENABLE_HALLOC ULIB_ENABLE_DEFAULT
+//
+// The start address for memory allocation
+// If 0, HEAP_START_LINKER_VAR must be defined.
+#define HALLOC_HEAP_START_ADDR 0
+//
+// The name of a variable whose address is the start of the heap, usually defined
+// by the linker.
+#define HALLOC_HEAP_START_LINKER_VAR __heap_start
+//
+// The end address for memory allocation
+// If 0, the heap is assumed to be below the stack and allowed to grow until it's
+// within HALLOC_STACK_MARGIN bytes of the stack pointer.
+#define HALLOC_HEAP_END_ADDR 0
+//
+// The minimum number of bytes to maintain between the top of the heap and the
+// bottom of the stack
+// If > 0, the function `size_t ulib_get_stack_pointer_addr(void)` should be
+// defined somewhere and return the address of the system stack pointer. There's
+// a default, but it's... not very good (and probably won't work on anything but
+// embedded systems).
+#define HALLOC_STACK_MARGIN 32U
+//
+// The alignment in bytes of all addresses returned
+// If 0, use sizeof(uintptr_t).
+#define HALLOC_ADDR_ALIGNMENT 0
+//
+// If non-zero, write this canary value at the end of the heap and check before
+// allocations to see if it's been changed, ulib_panic()ing if so.
+//#define HALLOC_HEAP_CANARY 0xABU
+#define HALLOC_HEAP_CANARY 0
+//
+// If >= 0, initialize allocated memory blocks to this value
+//#define HALLOC_MEM_INIT_VALUE 0
+#define HALLOC_MEM_INIT_VALUE -1
+//
+// If non-zero, perform additional checks to handle common problems like being
+// passed NULL inputs.
+#define DO_HALLOC_SAFETY_CHECKS ULIB_DO_SAFETY_CHECKS
+
+
+/*
 * Linked-list module configuration
 */
 // Enable this module

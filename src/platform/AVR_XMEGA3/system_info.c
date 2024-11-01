@@ -44,7 +44,7 @@ extern char __heap_start;
 
 
 void _print_platform_info(void (*printf_putc)(uint_fast8_t c)) {
-	int stack_size, bss_size, data_size;
+	int stack_size, bss_size, data_size, heap_size = 0;
 	uint8_t *signature = (uint8_t *)(SIGNATURES_START);
 
 	assert(printf_putc != NULL);
@@ -147,7 +147,10 @@ void _print_platform_info(void (*printf_putc)(uint_fast8_t c)) {
 	stack_size = RAMEND - stack_size;
 	data_size = (int )(&__data_end) - (int )(&__data_start);
 	bss_size  = (int )(&__bss_end ) - (int )(&__bss_start );
-	printf_vv(printf_putc, F("RAM used: %dB stack, %dB .data, %dB .bss\r\n"), (int )stack_size, (int )data_size, (int )bss_size);
+#if ULIB_ENABLE_HALLOC
+	heap_size = (int )halloc_total_allocated();
+#endif
+	printf_vv(printf_putc, F("RAM used: %dB stack, %dB heap, %dB .data, %dB .bss\r\n"), (int )stack_size, (int )heap_size, (int )data_size, (int )bss_size);
 
 	return;
 }
