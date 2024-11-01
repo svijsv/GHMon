@@ -94,10 +94,9 @@ void* halloc(size_t size) {
 		} else if (block_end > HALLOC_REAL_HEAP_END_ADDR) {
 			return NULL;
 		}
-
-		if (!canary_is_valid()) {
-			ulib_panic("Heap canary has been violated!");
-		}
+	}
+	if (!canary_is_valid()) {
+		ulib_panic("Heap canary has been violated!");
 	}
 	if (HALLOC_MEM_INIT_VALUE >= 0) {
 		mem_init((void *)next_addr, HALLOC_MEM_INIT_VALUE, size);
