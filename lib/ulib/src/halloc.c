@@ -82,7 +82,7 @@ void* halloc(size_t size) {
 	if (block_end != 0) {
 		block_end = HALLOC_ADDR_ALIGNMENT - block_end;
 	}
-	block_end += next_addr;
+	block_end += (next_addr + size);
 
 	if (DO_HALLOC_SAFETY_CHECKS) {
 		if (HALLOC_HEAP_END_ADDR <= 0) {
@@ -128,6 +128,12 @@ void halloc_truncate(void *trunc_addr) {
 
 size_t halloc_total_allocated(void) {
 	return (size_t )(next_addr - base_addr);
+}
+size_t halloc_base_addr(void) {
+	return (size_t )(base_addr);
+}
+size_t halloc_next_addr(void) {
+	return (size_t )(next_addr);
 }
 
 #else
