@@ -112,6 +112,8 @@ SENSOR_READING_T read_sensor(SENSOR_CFG_STORAGE sensor_cfg_t *cfg, sensor_status
 SENSOR_READING_T read_sensor_by_name(const char *name, bool force_update, uint_fast8_t type);
 SENSOR_READING_T read_sensor_by_index(SENSOR_INDEX_T i, bool force_update, uint_fast8_t type);
 
+// Initialization of the common sensors can be skipped if there's nothing in the
+// sensor initializers that needs to be run on startup
 void init_common_sensors(void);
 SENSOR_READING_T find_sensor_value_by_type(sensor_reading_t* reading, uint_fast8_t type);
 SENSOR_INDEX_T find_sensor_index_by_name(const char *name);

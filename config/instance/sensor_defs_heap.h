@@ -12,27 +12,40 @@
 
 #include "sensor_helpers.h"
 
+#include "ulib/include/halloc.h"
+
 uint16_t ADC_Vref_mV = REGULATED_VOLTAGE_mV;
 
-//
-// Generic initializers
-//
-err_t vdiv_init(vdiv_helper_t *helper, SENSOR_CFG_STORAGE struct sensor_cfg_t *cfg, sensor_status_t *status) {
-	gpio_set_mode(cfg->pin, GPIO_MODE_AIN, GPIO_FLOAT);
-	status->data = helper;
-
-	return ERR_OK;
-}
-err_t thermistor_init(thermistor_helper_t *helper, SENSOR_CFG_STORAGE struct sensor_cfg_t *cfg, sensor_status_t *status) {
-	gpio_set_mode(cfg->pin, GPIO_MODE_AIN, GPIO_FLOAT);
-	status->data = helper;
-	return ERR_OK;
-}
 
 //
 // Section 1
 // Initialization/Read Definitions
 //
+
+//
+// Generic initializers
+//
+err_t vdiv_init(SENSOR_CFG_STORAGE struct sensor_cfg_t *cfg, sensor_status_t *status) {
+	vdiv_helper_t *helper = halloc(sizeof(*helper));
+	if (helper == NULL) {
+		return ERR_NOMEM;
+	}
+
+	gpio_set_mode(cfg->pin, GPIO_MODE_AIN, GPIO_FLOAT);
+	status->data = helper;
+
+	return ERR_OK;
+}
+err_t thermistor_init(SENSOR_CFG_STORAGE struct sensor_cfg_t *cfg, sensor_status_t *status) {
+	thermistor_helper_t *helper = halloc(sizeof(*helper));
+	if (helper == NULL) {
+		return ERR_NOMEM;
+	}
+
+	gpio_set_mode(cfg->pin, GPIO_MODE_AIN, GPIO_FLOAT);
+	status->data = helper;
+	return ERR_OK;
+}
 
 //
 // Sensor 0, ADC voltage reference (Vcc)
@@ -75,8 +88,6 @@ sensor_reading_t* battery_read(SENSOR_CFG_STORAGE struct sensor_cfg_t *cfg, sens
 	}
 
 	adc_t adc_value = adc_read_pin(cfg->pin);
-	adc_t adc_value2 = adc_read_pin(cfg->pin);
-	adc_t adc_value3 = adc_read_pin(cfg->pin);
 
 	if (enable_adc) {
 		adc_off();
@@ -86,27 +97,6 @@ sensor_reading_t* battery_read(SENSOR_CFG_STORAGE struct sensor_cfg_t *cfg, sens
 	reading.value = adc_to_voltage(corrected_value, ADC_Vref_mV);
 
 	return &reading;
-}
-//
-// Sensor 2, Indoor thermistor
-//
-err_t inside_therm1_init(SENSOR_CFG_STORAGE struct sensor_cfg_t *cfg, sensor_status_t *status) {
-	static thermistor_helper_t helper = { 0 };
-	return thermistor_init(&helper, cfg, status);
-}
-//
-// Sensor 3, Outdoor thermistor
-//
-err_t outside_therm1_init(SENSOR_CFG_STORAGE struct sensor_cfg_t *cfg, sensor_status_t *status) {
-	static thermistor_helper_t helper = { 0 };
-	return thermistor_init(&helper, cfg, status);
-}
-//
-// Sensor 4, Soil moisture
-//
-err_t moist1_init(SENSOR_CFG_STORAGE struct sensor_cfg_t *cfg, sensor_status_t *status) {
-	static vdiv_helper_t helper = { 0 };
-	return vdiv_init(&helper, cfg, status);
 }
 
 //
@@ -140,7 +130,7 @@ SENSOR_CFG_STORAGE sensor_cfg_t SENSORS[] = {
 //static SENSOR_CFG_STORAGE sensor_cfg_t inside_therm1 = {
 {
 	.name = "IN_TEMP1",
-	.init = inside_therm1_init,
+	.init = thermistor_init,
 	.read = thermistor_read,
 	.pin = INSIDE_THERM1_PIN,
 },
@@ -151,7 +141,7 @@ SENSOR_CFG_STORAGE sensor_cfg_t SENSORS[] = {
 /*
 {
 	.name = "OUT_TEMP1",
-	.init = outside_therm1_init,
+	.init = thermistor_init,
 	.read = thermistor_read,
 	.pin = OUTSIDE_THERM1_PIN,
 },
@@ -162,7 +152,7 @@ SENSOR_CFG_STORAGE sensor_cfg_t SENSORS[] = {
 //static SENSOR_CFG_STORAGE sensor_cfg_t moist1 = {
 {
 	.name = "GND_MOIST1",
-	.init = moist1_init,
+	.init = vdiv_init,
 	.read = vdiv_ohms_read,
 	.pin = GND_MOIST1_PIN,
 	.cooldown_seconds = 120,
