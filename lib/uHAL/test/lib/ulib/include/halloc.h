@@ -2,7 +2,7 @@
 /***********************************************************************
 *                                                                      *
 *                                                                      *
-* Copyright 2022, 2023 svijsv                                          *
+* Copyright 2024 svijsv                                                *
 * This program is free software: you can redistribute it and/or modify *
 * it under the terms of the GNU General Public License as published by *
 * the Free Software Foundation, version 3.                             *
@@ -17,31 +17,40 @@
 *                                                                      *
 *                                                                      *
 ***********************************************************************/
-// util.c
-// Utility functions
+// halloc.c
+// Allocate memory on the heap
+//
 // NOTES:
+//    This differs from malloc() in the rather important respect that the
+//    allocated memory can not be conveniently free()d.
 //
+//    This will not get along well with malloc(), don't use both at the same
+//    time.
 //
-#include "util.h"
-#if ULIB_ENABLE_UTIL
+#ifndef _ULIB_HALLOC_H
+#define _ULIB_HALLOC_H
 
-#include "debug.h"
+#include "src/configify.h"
+#if ULIB_ENABLE_HALLOC
 
-#include <string.h>
+#include "types.h"
 
-void mem_init(void *mem, uint8_t value, size_t size) {
-#if DO_UTIL_SAFETY_CHECKS
-	if (mem == NULL) {
-		return;
-	}
-#endif
+//
+// Allocate a block of memory size bytes long
+void* halloc(size_t size);
+//
+// Truncate the allocated memory to this address
+void halloc_truncate(void *trunc_addr);
+//
+// Report how much memory is allocated in total
+size_t halloc_total_allocated(void);
+//
+// Report the address of the next allocation
+size_t halloc_next_addr(void);
+//
+// Report the address of the first allocation
+size_t halloc_base_addr(void);
 
-	memset(mem, value, size);
-	return;
-}
 
-
-#else
-	// ISO C forbids empty translation units, this makes it happy.
-	typedef int make_iso_compilers_happy;
-#endif // ULIB_ENABLE_UTIL
+#endif // ULIB_ENABLE_HALLOC
+#endif // _ULIB_HALLOC_H

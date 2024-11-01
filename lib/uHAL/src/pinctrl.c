@@ -178,6 +178,40 @@ err_t output_pin_toggle(gpio_pin_t pin) {
 	}
 	return output_pin_on(pin);
 }
+bool output_pin_is_on(gpio_pin_t pin) {
+	bool is_on = false;
+
+	assert(GPIO_PIN_IS_VALID(pin));
+#if ! uHAL_SKIP_INVALID_ARG_CHECKS
+	if (!GPIO_PIN_IS_VALID(pin)) {
+		return false;
+	}
+#endif
+
+	switch (gpio_get_mode(pin)) {
+	//case GPIO_MODE_RESET:
+	//case GPIO_MODE_AIN:
+	//case GPIO_MODE_HiZ:
+	case GPIO_MODE_HiZ_ALIAS:
+		if (BIT_IS_SET(pin, GPIO_CTRL_TRISTATE_HIGH)) {
+			is_on = true;
+		}
+		break;
+	case GPIO_MODE_PP:
+		if (gpio_get_output_state(pin) == GPIO_HIGH) {
+			is_on = true;
+		}
+		break;
+	// Assume an unexpected pin state is 'OFF'
+	default:
+		break;
+	}
+	if (BIT_IS_SET(pin, GPIO_CTRL_INVERT)) {
+		is_on = !is_on;
+	}
+
+	return is_on;
+}
 
 err_t input_pin_listen_init(gpio_listen_t *handle, gpio_pin_t pin) {
 	gpio_listen_cfg_t conf;
