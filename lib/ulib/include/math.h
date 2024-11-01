@@ -138,15 +138,31 @@ int64_t  div_s64_s64( int64_t n,  int64_t d);
 #define FIXED_PNT_1 ((fixed_pnt_t )1 << FIXED_PNT_FRACT_BITS)
 //
 // Create a fixed-point number from an integer
-#define FIXED_PNT_FROM(x) ((fixed_pnt_t )(x) << FIXED_PNT_FRACT_BITS)
-INLINE fixed_pnt_t fixed_pnt_from(fixed_pnt_t x) {
+#define FIXED_PNT_FROM_INT(x) ((fixed_pnt_t )(x) << FIXED_PNT_FRACT_BITS)
+INLINE fixed_pnt_t fixed_pnt_from_int(fixed_pnt_t x) {
 	return x << FIXED_PNT_FRACT_BITS;
 }
 //
+// Create a fixed-point number from a float
+#define FIXED_PNT_FROM_FLOAT(x) ((x) * (float )FIXED_PNT_1)
+INLINE fixed_pnt_t fixed_pnt_from_float(float x) {
+	return (fixed_pnt_t )(x * (float )FIXED_PNT_1);
+}
+//
 // Create an integer from a fixed-point number.
-#define FIXED_PNT_TO(x) ((fixed_pnt_t )(x) >> FIXED_PNT_FRACT_BITS)
-INLINE fixed_pnt_t fixed_pnt_to(fixed_pnt_t x) {
+#define FIXED_PNT_TO_INT(x) ((fixed_pnt_t )(x) >> FIXED_PNT_FRACT_BITS)
+INLINE fixed_pnt_t fixed_pnt_to_int(fixed_pnt_t x) {
 	return x >> FIXED_PNT_FRACT_BITS;
+}
+//
+// Create an integer from a fixed-point number, rounded.
+INLINE fixed_pnt_t fixed_pnt_to_int_rounded(fixed_pnt_t x) {
+	return (x + (FIXED_PNT_1 / 2)) >> FIXED_PNT_FRACT_BITS;
+}
+//
+// Create a float from a fixed-point number.
+INLINE float fixed_pnt_to_float(fixed_pnt_t x) {
+	return (float )x / (float )FIXED_PNT_1;
 }
 //
 // Multiply two fixed-point numbers.

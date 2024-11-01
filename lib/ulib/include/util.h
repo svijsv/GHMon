@@ -33,7 +33,7 @@
 
 //
 // Initialize a block of memory
-void mem_init(void *mem, uint8_t value, uint32_t size);
+void mem_init(void *mem, uint8_t value, size_t size);
 
 //
 // Determine the system endianess
