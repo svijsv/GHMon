@@ -71,6 +71,7 @@ static inline utime_t correct_deskew_alarm(const utime_t now, const utime_t alar
 # include "terminal.h"
 #endif
 
+#include GHMON_INCLUDE_CONFIG_HEADER(main_hooks.h)
 
 //
 // Program entry point
@@ -79,6 +80,7 @@ int main(void) {
 	utime_t next_wakeup;
 
 	platform_init();
+	early_init_hook();
 
 #if USE_CTRL_BUTTON
 	input_pin_on(CTRL_BUTTON_PIN);
@@ -91,6 +93,7 @@ int main(void) {
 	init_common_controllers();
 	next_wakeup = set_alarms(false);
 
+	late_init_hook();
 	while (true) {
 		utime_t now = NOW();
 
@@ -133,11 +136,11 @@ int main(void) {
 		}
 		ghmon_IRQs = 0;
 
-		bool do_controllers = false;
-		bool do_log         = false;
-		bool do_status      = false;
-		bool force_sync     = false;
-		bool force_controllers = false;
+		do_controllers = false;
+		do_log         = false;
+		do_status      = false;
+		force_sync     = false;
+		force_controllers = false;
 
 #if USE_CTRL_BUTTON
 		switch (ctrl_button_pressed) {
@@ -199,6 +202,8 @@ int main(void) {
 		ctrl_button_pressed = 0;
 #endif // USE_CTRL_BUTTON
 
+		early_loop_hook();
+
 		now = NOW();
 		if (DO_CLOCK_DESKEW && (deskew_alarm > 0) && (now >= deskew_alarm)) {
 			deskew_clock(RTC_CORRECTION_SECONDS);
@@ -244,6 +249,7 @@ int main(void) {
 		}
 
 		run_common_controllers(do_controllers, force_controllers);
+		late_loop_hook();
 		next_wakeup = set_alarms(false);
 	}
 
@@ -289,6 +295,10 @@ static utime_t set_alarms(bool force) {
 
 	// 12 hours should be more than long enough a default sleep period
 	next = now + (12U * SECONDS_PER_HOUR);
+	if (wake_alarm != 0 && next > wake_alarm) {
+		next = wake_alarm;
+		reason = "General wake alarm";
+	}
 	if ((log_alarm != 0) && (next > log_alarm)) {
 		next = log_alarm;
 		reason = "Write log";

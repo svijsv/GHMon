@@ -75,8 +75,6 @@ sensor_reading_t* battery_read(SENSOR_CFG_STORAGE struct sensor_cfg_t *cfg, sens
 	}
 
 	adc_t adc_value = adc_read_pin(cfg->pin);
-	adc_t adc_value2 = adc_read_pin(cfg->pin);
-	adc_t adc_value3 = adc_read_pin(cfg->pin);
 
 	if (enable_adc) {
 		adc_off();
