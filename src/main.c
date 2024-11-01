@@ -87,6 +87,7 @@ int main(void) {
 #if USE_UART_TERMINAL
 	uart_listen_on(UART_COMM_PORT);
 #endif
+	init_common_sensors();
 	init_common_controllers();
 	next_wakeup = set_alarms(false);
 
