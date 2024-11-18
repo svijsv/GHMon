@@ -25,6 +25,7 @@
 #include "common.h"
 #include "controllers.h"
 #include "sensors.h"
+#include "log.h"
 
 #if RTC_CORRECTION_PERIOD_MINUTES < 0
 # error "RTC_CORRECTION_PERIOD_MINUTES must be >= 0"
@@ -91,6 +92,9 @@ int main(void) {
 #endif
 	init_common_sensors();
 	init_common_controllers();
+#if USE_LOGGING
+	log_init();
+#endif
 	next_wakeup = set_alarms(false);
 
 	late_init_hook();
@@ -157,10 +161,6 @@ int main(void) {
 				do_log = true;
 				LOGGER("Appending to log");
 			}
-/*
-			LOGGER("Forcing sensor status check");
-			invalidate_sensors();
-*/
 			LOGGER("Updating status");
 			do_status = true;
 			break;
@@ -169,7 +169,6 @@ int main(void) {
 			led_flash(2, STATUS_LED_LONG_DELAY_MS);
 			if (USE_LOGGING) {
 				LOGGER("Forcing log sync");
-				do_log = true;
 				force_sync = true;
 			} else {
 				LOGGER("No action taken, logging disabled");
@@ -215,40 +214,30 @@ int main(void) {
 			deskew_clock(RTC_FINE_CORRECTION_SECONDS);
 			now = NOW();
 			fine_deskew_alarm = calculate_alarm(now, RTC_FINE_CORRECTION_PERIOD_MINUTES * SECONDS_PER_MINUTE);
-			fine_deskew_alarm = correct_deskew_alarm(now, fine_deskew_alarm, RTC_CORRECTION_PERIOD_MINUTES * SECONDS_PER_MINUTE, RTC_CORRECTION_SECONDS);
-		}
-
-		if (do_status || ((status_alarm > 0) && (now >= status_alarm))) {
-/*
-			if (USE_SENSORS) {
-				LOGGER("Checking sensor status");
-				check_sensors();
-				now = NOW();
-				check_sensor_warnings();
-			}
-*/
-			check_common_controller_warnings();
-			check_warnings();
-
-/*
-			if (DEBUG && USE_SENSORS) {
-				PRINTF("   VCC: %d\r\n\tIndex\tName\tStatus\r\n", (int )G_vcc_voltage);
-				for (uiter_t i = 0; i < SENSOR_COUNT; ++i) {
-					PRINTF("\t%u\t%s\t%d\r\n", (uint )i, FROM_FSTR(SENSORS[i].name), (int )G_sensors[i].status);
-				}
-			}
-*/
-			status_alarm = calculate_alarm(now+1, STATUS_CHECK_MINUTES * SECONDS_PER_MINUTE);
-		}
-
-		if (USE_LOGGING && (do_log || ((log_alarm > 0) && (now >= log_alarm)))) {
-/*
-			log_status(force_sync);
-*/
-			log_alarm = calculate_alarm(now+1, LOG_APPEND_MINUTES * SECONDS_PER_MINUTE);
+			fine_deskew_alarm = correct_deskew_alarm(now, fine_deskew_alarm, RTC_FINE_CORRECTION_PERIOD_MINUTES * SECONDS_PER_MINUTE, RTC_FINE_CORRECTION_SECONDS);
 		}
 
 		run_common_controllers(do_controllers, force_controllers);
+
+		if (do_status || ((status_alarm > 0) && (now >= status_alarm))) {
+			check_common_sensor_warnings();
+			check_common_controller_warnings();
+			check_warnings();
+
+			status_alarm = calculate_alarm(now+1, STATUS_CHECK_MINUTES * SECONDS_PER_MINUTE);
+		}
+
+		if (USE_LOGGING) {
+			if (do_log || ((log_alarm > 0) && (now >= log_alarm))) {
+				log_status();
+				log_alarm = calculate_alarm(now+1, LOG_APPEND_MINUTES * SECONDS_PER_MINUTE);
+			}
+
+			if (force_sync) {
+				write_log_to_storage();
+			}
+		}
+
 		late_loop_hook();
 		next_wakeup = set_alarms(false);
 	}
@@ -259,6 +248,10 @@ int main(void) {
 }
 
 static inline utime_t calculate_alarm(const utime_t now, const utime_t period) {
+	if (period == 0) {
+		return 0;
+	}
+
 	utime_t next = now + period;
 	next = SNAP_TO_FACTOR(next, period);
 	return next;
@@ -378,7 +371,7 @@ void issue_warning(void) {
 	return;
 }
 static void check_warnings(void) {
-	const ghmon_warning_flags_t warn_SD         = (WARN_SD_SKIPPED|WARN_SD_SKIPPED);
+	const ghmon_warning_flags_t warn_log        = (WARN_LOG_SKIPPED|WARN_LOG_ERROR);
 	const ghmon_warning_flags_t warn_power      = (WARN_BATTERY_LOW|WARN_VCC_LOW);
 	const ghmon_warning_flags_t warn_sensor     = (WARN_SENSOR);
 	const ghmon_warning_flags_t warn_controller = (WARN_CONTROLLER);
@@ -397,7 +390,7 @@ static void check_warnings(void) {
 			sleep_ms(STATUS_LED_LONG_DELAY_MS);
 			led_flash(3, STATUS_LED_ERR_DELAY_MS);
 		}
-		if (USE_SD && (ghmon_warnings & warn_SD)) {
+		if (USE_LOGGING && (ghmon_warnings & warn_log)) {
 			sleep_ms(STATUS_LED_LONG_DELAY_MS);
 			led_flash(4, STATUS_LED_ERR_DELAY_MS);
 		}

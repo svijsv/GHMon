@@ -17,47 +17,41 @@
 *                                                                      *
 *                                                                      *
 ***********************************************************************/
-// common.h
-// Header common to all components in the frontend
+// log.h
+// Manage log files
 // NOTES:
 //
-#ifndef _COMMON_H
-#define _COMMON_H
 
-// The main configuration is pulled in (indirectly) by interface.h.
-#include "uHAL/include/interface.h"
+#ifndef _LOG_H
+#define _LOG_H
 
-#include "ulib/include/debug.h"
-#include "ulib/include/types.h"
-#include "ulib/include/bits.h"
-#include "ulib/include/util.h"
-#include "ulib/include/fmem.h"
+#include "common.h"
 
+#if USE_LOGGING
 
 //
-// Warning flags
-typedef enum {
-	WARN_BATTERY_LOW = 0x01U,
-	WARN_VCC_LOW     = 0x02U,
-	WARN_SENSOR      = 0x04U,
-	WARN_CONTROLLER  = 0x08U,
-	WARN_LOG_SKIPPED = 0x10U,
-	WARN_LOG_ERROR   = 0x20U,
-} ghmon_warning_flags_t;
-//
-// Character representations of the above flags
-#define GHMON_WARNING_FLAGS "BVSClL"
-//
-// Used to track warnings in effect
-extern uint_fast8_t ghmon_warnings;
+// The SD card will need a period between when it's gone inactive and when the
+// power is removed to minimize chances of corrupted data; see
+// https:// github.com/greiman/SdFat/issues/21
+// by way of
+// https:// thecavepearlproject.org/2017/05/21/switching-off-sd-cards-for-low-power-data-logging/
+#define SD_POWEROFF_DELAY_MS 1000
 
 //
-// Control the status LED
-void led_on(void);
-void led_off(void);
-void led_toggle(void);
-void led_flash(uint8_t count, uint16_t ms);
-void issue_warning(void);
+// Initialize the logging subsystem
+void log_init(void);
+//
+// Log the current status, writing the buffer to storage if full
+void log_status(void);
+//
+// Write the log buffer to storage
+void write_log_to_storage(void);
 
 
-#endif // _COMMON_H
+#else // !USE_LOGGING
+# define log_status() ((void )0U)
+# define log_init()   ((void )0U)
+# define write_log_to_storage() ((void )0U)
+#endif // USE_LOGGING
+
+#endif // _LOG_H

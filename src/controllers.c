@@ -35,7 +35,7 @@
 const CONTROLLER_INDEX_T CONTROLLER_COUNT = SIZEOF_ARRAY(CONTROLLERS);
 //#define CONTROLLER_COUNT SIZEOF_ARRAY(CONTROLLERS)
 
-static controller_status_t controllers[SIZEOF_ARRAY(CONTROLLERS)];
+controller_status_t controllers[SIZEOF_ARRAY(CONTROLLERS)];
 
 controller_status_t* get_controller_status_by_index(CONTROLLER_INDEX_T i) {
 	assert(i >= 0 && i < CONTROLLER_COUNT);

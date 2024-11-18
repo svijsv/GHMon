@@ -50,7 +50,7 @@
 # define I2C_POWER_UP_DELAY_MS POWER_UP_DELAY_MS
 #endif
 
-#if USE_LOGGING
+#if USE_LOGGING && WRITE_LOG_TO_SD
 # define USE_SD 1
 #else
 # define USE_SD 0

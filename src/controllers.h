@@ -59,6 +59,8 @@ typedef struct {
 typedef enum {
 	CONTROLLER_CFG_FLAG_IGNORE_FORCED_RUN = 0x01U, // Ignore forced controller runs
 	CONTROLLER_CFG_FLAG_USE_TIME_OF_DAY   = 0x02U, // Schedule is time-of-day not period
+	CONTROLLER_CFG_FLAG_LOG   = 0x40U, // Log this controller
+	CONTROLLER_CFG_FLAG_NOLOG = 0x80U, // Don't log this controller
 } controller_cfg_flags_t;
 //
 // Static configuration of a controller
@@ -86,12 +88,6 @@ typedef struct controller_cfg_t {
 	// on the scheduled run time and configuration settings
 	utime_t (*next_run_time)(CONTROLLER_CFG_STORAGE struct controller_cfg_t *cfg, controller_status_t *status);
 #endif
-#if USE_CONTROLLER_NAME
-	//
-	// Name of the controller
-	// The size of name[] includes a trailing NUL byte.
-	char name[DEVICE_NAME_LEN+1];
-#endif
 #if USE_CONTROLLER_SCHEDULE
 	//
 	// When to run the controller
@@ -101,6 +97,12 @@ typedef struct controller_cfg_t {
 	// If 0 and CONTROLLER_CFG_FLAG_USE_TIME_OF_DAY is unset, the controller will
 	// only be run when manually requested
 	uint16_t schedule_minutes;
+#endif
+#if USE_CONTROLLER_NAME
+	//
+	// Name of the controller
+	// The size of name[] includes a trailing NUL byte.
+	char name[DEVICE_NAME_LEN+1];
 #endif
 	//
 	// Configuration flags
@@ -121,6 +123,7 @@ void check_common_controller_warnings(void);
 controller_status_t* get_controller_status_by_index(CONTROLLER_INDEX_T i);
 
 extern CONTROLLER_CFG_STORAGE controller_cfg_t CONTROLLERS[];
+extern controller_status_t controllers[];
 extern const CONTROLLER_INDEX_T CONTROLLER_COUNT;
 
 #endif // _CONTROLLERS_H

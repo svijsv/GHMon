@@ -67,6 +67,12 @@ typedef struct {
 } sensor_status_t;
 
 //
+// Configuration flags for sensor_cfg_t structs
+typedef enum {
+	SENSOR_CFG_FLAG_LOG   = 0x40U, // Log this sensor
+	SENSOR_CFG_FLAG_NOLOG = 0x80U, // Don't log this sensor
+} sensor_cfg_flag_t;
+//
 // Static configuration of a sensor
 typedef struct sensor_cfg_t {
 #if USE_SENSOR_CFG_DATA
@@ -105,6 +111,9 @@ typedef struct sensor_cfg_t {
 	// The size of name[] includes a trailing NUL byte.
 	char name[DEVICE_NAME_LEN+1];
 #endif
+	//
+	// Configuration flags
+	uint8_t cfg_flags;
 } sensor_cfg_t;
 
 err_t init_sensor(SENSOR_CFG_STORAGE sensor_cfg_t *cfg, sensor_status_t *status);
@@ -120,6 +129,7 @@ SENSOR_INDEX_T find_sensor_index_by_name(const char *name);
 void check_common_sensor_warnings(void);
 
 extern SENSOR_CFG_STORAGE sensor_cfg_t SENSORS[];
+extern sensor_status_t sensors[];
 extern const SENSOR_INDEX_T SENSOR_COUNT;
 
 #endif // _SENSORS_H

@@ -34,7 +34,7 @@
 const SENSOR_INDEX_T SENSOR_COUNT = SIZEOF_ARRAY(SENSORS);
 //#define SENSOR_COUNT SIZEOF_ARRAY(SENSORS)
 
-static sensor_status_t sensors[SIZEOF_ARRAY(SENSORS)];
+sensor_status_t sensors[SIZEOF_ARRAY(SENSORS)];
 
 static err_t _init_sensor(SENSOR_CFG_STORAGE sensor_cfg_t *cfg, sensor_status_t *status) {
 	assert(cfg != NULL);

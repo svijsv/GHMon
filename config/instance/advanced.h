@@ -123,7 +123,19 @@
 // FatFS has it's own 512-byte buffer so when the size of all the data to be
 // written is <= 512 bytes this just serves to minimize the number of write
 // calls that need to be made to the FatFS library.
-#define SD_PRINT_BUFFER_SIZE 0
+#define LOG_PRINT_BUFFER_SIZE 2048
+//
+// If opening the uart log output fails and this isn't set, don't write any other
+// log outputs either to avoid flushing the buffer
+#define LOG_WITH_MISSING_UART 1
+//
+// If opening the SD log output fails and this isn't set, don't write any other
+// log outputs either to avoid flushing the buffer
+#define LOG_WITH_MISSING_SD   0
+//
+// The UART settings for log output when not using the standard port
+#define UART_LOG_BAUDRATE 9600UL
+#define UART_LOG_TIMEOUT_MS 1000UL
 
 //
 // Wait this many milliseconds for device power to come up when it's turned on

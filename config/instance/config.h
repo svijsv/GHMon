@@ -22,7 +22,7 @@
 #endif
 //
 // Enable data logging to SD cards
-#define USE_LOGGING 0
+#define USE_LOGGING 1
 //
 // Use the control button
 #define USE_CTRL_BUTTON 1
@@ -69,8 +69,21 @@
 // Data logging configuration
 //
 // Check the status and append it to the log every LOG_APPEND_MINUTES minutes
-// If 0, it's checked only when the user button is pressed.
+// If 0, it's only updated when requested by way of the control button.
 #define LOG_APPEND_MINUTES 15
+//
+// If set, write the log file to an SD card
+// SPI_CS_SD_PIN must be set to the chip-select pin that controls the SD card.
+#define WRITE_LOG_TO_SD 0
+//
+// If set, write log output to a UART port
+// All buffering is still applied.
+#define WRITE_LOG_TO_UART 1
+//
+// The TX and RX pins the log is written to
+// If 0, use the standard communication port.
+#define UART_LOG_TX_PIN 0
+#define UART_LOG_RX_PIN 0
 //
 // Log file name pattern
 // Names are 8.3 format (8 characters for the name + 3 for an extension), but
@@ -80,23 +93,28 @@
 // LINES_PER_FILE is > 0.
 #define LOGFILE_NAME_PATTERN "STATUSXX.LOG"
 //
-// Instead of writing to disk every time, store this many readings into memory
-// and write them all to disk when the buffer is full.
+// Instead of writing to storage every time, keep this many readings in memory
+// and write them all when the buffer is full.
 // With 10 minute intervals, a 5-reading buffer will write once an hour (5
 // buffered + the newest).
 // Constraints to the buffer size will be available RAM and reliability of the
 // power supply and log file medium.
-// The maximum buffer size is 65,535 (0xFFFF) lines.
 // Set to 0 to disable buffering.
-// Press the user button and release after the second LED flash to force a
-// write to the SD card.
-#define LOGFILE_BUFFER_COUNT 15 // 4h with 15m intervals
+#define LOG_LINE_BUFFER_COUNT 15 // 4h with 15m intervals
 //
-// Rotate the log file after LINES_PER_FILE lines have been written to the
+// Rotate the log file after LOG_LINES_PER_FILE lines have been written to the
 // current one
 // If set, this must be > 1.
 // Set to 0 to disable.
-#define LINES_PER_FILE ((7 * 24 * 60) / LOG_APPEND_MINUTES) // 7 days per file
+#define LOG_LINES_PER_FILE ((7 * 24 * 60) / LOG_APPEND_MINUTES) // 7 days per file
+//
+// If set, log each sensor in SENSORS[] unless SENSOR_CFG_FLAG_NOLOG is set
+// Otherwise, don't log any sensor in SENSORS[] unless SENSOR_CFG_FLAG_LOG is set
+#define LOG_SENSORS_BY_DEFAULT 1
+//
+// If set, log each controller in CONTROLLERS[] unless CONTROLLER_CFG_FLAG_NOLOG is set
+// Otherwise, don't log any controller in CONTROLLERS[] unless CONTROLLER_CFG_FLAG_LOG is set
+#define LOG_CONTROLLERS_BY_DEFAULT 1
 
 //
 // These settings are for the sensor_defs.h and controller_defs.h configuration
@@ -133,7 +151,7 @@
 // resistor on the high side and the variable resistor on the low side
 #define SERIES_R_IS_HIGH_SIDE 1
 //
-// If true, read temperature in degree Fahrenheit instead of Celsius
+// If set, record temperature in degrees Fahrenheit instead of Celsius
 #define USE_FAHRENHEIT 1
 //
 // If > 1, scale temperatures by this factor (e.g. by 10 in order to track by
