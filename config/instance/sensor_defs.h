@@ -51,6 +51,8 @@ sensor_reading_t* vcc_read(SENSOR_CFG_STORAGE struct sensor_cfg_t *cfg, sensor_s
 		adc_off();
 	}
 
+	UNUSED(cfg);
+	UNUSED(status);
 	return &reading;
 }
 //
@@ -58,6 +60,8 @@ sensor_reading_t* vcc_read(SENSOR_CFG_STORAGE struct sensor_cfg_t *cfg, sensor_s
 //
 err_t battery_init(SENSOR_CFG_STORAGE struct sensor_cfg_t *cfg, sensor_status_t *status) {
 	gpio_set_mode(cfg->pin, GPIO_MODE_AIN, GPIO_FLOAT);
+
+	UNUSED(status);
 	return ERR_OK;
 }
 sensor_reading_t* battery_read(SENSOR_CFG_STORAGE struct sensor_cfg_t *cfg, sensor_status_t *status) {
@@ -83,6 +87,7 @@ sensor_reading_t* battery_read(SENSOR_CFG_STORAGE struct sensor_cfg_t *cfg, sens
 	uint32_t corrected_value = (adc_value * (series_r1 + series_r2)) / series_r2;
 	reading.value = adc_to_voltage(corrected_value, ADC_Vref_mV);
 
+	UNUSED(status);
 	return &reading;
 }
 //

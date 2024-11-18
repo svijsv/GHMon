@@ -19,11 +19,11 @@
 // Controller 0, heartbeat blink
 //
 static err_t heartbeat_run(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, controller_status_t *status) {
+	led_flash(1, 200);
+	++status->status;
+
 	UNUSED(cfg);
 	UNUSED(status);
-
-	led_flash(1, 200);
-
 	return ERR_OK;
 }
 
@@ -31,6 +31,8 @@ static err_t heartbeat_run(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, control
 // Controller 1, cooling
 //
 static err_t fan1_init(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, controller_status_t *status) {
+	UNUSED(cfg);
+	UNUSED(status);
 	output_pin_off(FAN1_CTRL_PIN);
 	return ERR_OK;
 }
@@ -57,6 +59,7 @@ static err_t fan1_run(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, controller_s
 	}
 	prev_temp = temp;
 
+	UNUSED(cfg);
 	return ERR_OK;
 }
 
@@ -66,6 +69,9 @@ static err_t fan1_run(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, controller_s
 static bool irr1_is_on = false;
 static err_t irr1_start_init(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, controller_status_t *status) {
 	output_pin_off(IRR1_CTRL_PIN);
+
+	UNUSED(cfg);
+	UNUSED(status);
 	return ERR_OK;
 }
 static err_t irr1_start_run(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, controller_status_t *status) {
@@ -81,6 +87,7 @@ static err_t irr1_start_run(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, contro
 		irr1_is_on = true;
 	}
 
+	UNUSED(cfg);
 	return ERR_OK;
 }
 
@@ -88,6 +95,7 @@ static err_t irr1_start_run(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, contro
 // Controller 3, stop irrigation
 //
 static utime_t irr1_stop_next_run_time(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, controller_status_t *status) {
+	UNUSED(cfg);
 	return ((uint )status->data == 0) ? 0 : (NOW() + (5 * SECONDS_PER_MINUTE));
 }
 static err_t irr1_stop_run(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, controller_status_t *status) {
@@ -109,6 +117,7 @@ static err_t irr1_stop_run(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, control
 		irr1_is_on = false;
 	}
 
+	UNUSED(cfg);
 	// If we're still dry, there may be something wrong so return an error
 	return (stop && dry) ? ERR_UNKNOWN : ERR_OK;
 }
