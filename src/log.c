@@ -112,6 +112,9 @@ static struct {
 } print_buffer = { 0 };
 #endif
 
+extern err_t log_pre_write_hook(void);
+extern err_t log_post_write_hook(void);
+
 static void _write_log_to_storage(void);
 static void write_log_line_to_storage(log_line_buffer_t *line);
 static bool buffer_is_full(void);
@@ -500,6 +503,12 @@ static err_t open_log_storage(void) {
 	LOGGER("Writing log data");
 	CLEAR_BIT(ghmon_warnings, WARN_LOG_ERROR);
 
+	if ((res = log_pre_write_hook()) != ERR_OK) {
+		LOGGER("Log pre-write hook failed: error %d", (int )res);
+		SET_BIT(ghmon_warnings, WARN_LOG_ERROR);
+		return res;
+	}
+
 #if WRITE_LOG_TO_UART
 	if (!abort_logging && ((res = prepare_UART()) != ERR_OK)) {
 		LOGGER("Failed to prepare log UART: error %d", (int )res);
@@ -533,6 +542,8 @@ static void close_log_storage(void) {
 #if WRITE_LOG_TO_UART
 	close_UART();
 #endif
+	log_post_write_hook();
+
 	return;
 }
 

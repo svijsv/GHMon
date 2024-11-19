@@ -49,3 +49,18 @@ static void early_loop_hook(void) {
 static void late_loop_hook(void) {
 	return;
 }
+//
+// When using the log, this hook is executed each time syncing is begun in order
+// to e.g. turn power on to an SD card
+// If it returns anything other than ERR_OK, the syncing is aborted and the
+// log is considered to be in an error state.
+err_t log_pre_write_hook(void) {
+	return ERR_OK;
+}
+//
+// When using the log, this hook is executed each time syncing is completed in order
+// to e.g. turn power off to an SD card
+// The return value is presently ignored
+err_t log_post_write_hook(void) {
+	return ERR_OK;
+}
