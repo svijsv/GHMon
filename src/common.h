@@ -46,6 +46,7 @@ typedef enum {
 } ghmon_warning_flags_t;
 //
 // Character representations of the above flags
+// If these change, the log header needs to be changed to match.
 #define GHMON_WARNING_FLAGS "BVSClL"
 //
 // Used to track warnings in effect

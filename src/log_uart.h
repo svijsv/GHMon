@@ -1,6 +1,6 @@
 #if WRITE_LOG_TO_UART
 
-static bool print_to_uart = false;
+static bool print_to_UART = false;
 static uart_port_t *uart_log_port = NULL;
 
 //#define LOG_UART_IS_COMM ((UART_LOG_TX_PIN == UART_COMM_TX_PIN && UART_LOG_RX_PIN == UART_COMM_RX_PIN) || (UART_LOG_TX_PIN == 0 && UART_LOG_RX_PIN == 0))
@@ -30,46 +30,49 @@ static void log_init_UART(void) {
 	return;
 }
 
-#if LOG_PRINT_BUFFER_SIZE > 0
-static err_t write_buffer_to_UART(void) {
-	if (uart_log_port == NULL) {
+static err_t _write_to_UART(uint8_t *buf, print_buffer_size_t bytes) {
+	if (!print_to_UART) {
+		return ERR_OK;
+	}
+	if (!SKIP_SAFETY_CHECKS && uart_log_port == NULL) {
 		return ERR_INIT;
 	}
-	return (print_to_uart) ? uart_transmit_block(uart_log_port, print_buffer.buffer, print_buffer.size, UART_LOG_TIMEOUT_MS) : ERR_OK;
-}
-#else
-static err_t write_char_to_UART(uint8_t c) {
-	if (uart_log_port == NULL) {
-		return ERR_INIT;
-	}
-	return (print_to_uart) ? uart_transmit_block(uart_log_port, &c, 1, UART_LOG_TIMEOUT_MS) : ERR_OK;
-}
-#endif
 
-static err_t prepare_UART(void) {
+	return uart_transmit_block(uart_log_port, buf, bytes, UART_LOG_TIMEOUT_MS);
+}
+static err_t write_buffer_to_UART(void) {
+	return _write_to_UART(print_buffer.buffer, print_buffer.size);
+}
+static err_t write_char_to_UART(uint8_t c) {
+	return _write_to_UART(&c, 1);
+}
+
+static err_t open_UART(void) {
 	err_t res;
 
-	if (uart_log_port == NULL) {
+	if (!SKIP_SAFETY_CHECKS && uart_log_port == NULL) {
 		return ERR_INIT;
 	}
 	res = LOG_UART_IS_COMM ? ERR_OK : uart_on(uart_log_port);
 	if (res == ERR_OK) {
-		print_to_uart = true;
+		print_to_UART = true;
 	}
 	return res;
 }
 static err_t close_UART(void) {
-	print_to_uart = false;
+	print_to_UART = false;
 
 	if (uart_log_port == NULL) {
 		return ERR_INIT;
 	}
 
-#if LOG_PRINT_BUFFER_SIZE > 0
-	write_buffer_to_UART();
-#endif
-
 	return LOG_UART_IS_COMM ? ERR_OK : uart_off(uart_log_port);
 }
 
+#else // WRITE_LOG_TO_UART
+# define log_init_UART() (void )0U
+# define write_buffer_to_UART() (ERR_OK)
+# define write_char_to_UART(_c_) (ERR_OK)
+# define open_UART() (ERR_OK)
+# define close_UART() (ERR_OK)
 #endif // WRITE_LOG_TO_UART

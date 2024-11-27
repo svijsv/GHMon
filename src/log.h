@@ -30,14 +30,6 @@
 #if USE_LOGGING
 
 //
-// The SD card will need a period between when it's gone inactive and when the
-// power is removed to minimize chances of corrupted data; see
-// https:// github.com/greiman/SdFat/issues/21
-// by way of
-// https:// thecavepearlproject.org/2017/05/21/switching-off-sd-cards-for-low-power-data-logging/
-#define SD_POWEROFF_DELAY_MS 1000
-
-//
 // Initialize the logging subsystem
 void log_init(void);
 //
@@ -46,12 +38,16 @@ void log_status(void);
 //
 // Write the log buffer to storage
 void write_log_to_storage(void);
+//
+// Print the log header using pf()
+void print_log_header(void (*pf)(const char *format, ...));
 
 
 #else // !USE_LOGGING
-# define log_status() ((void )0U)
 # define log_init()   ((void )0U)
+# define log_status() ((void )0U)
 # define write_log_to_storage() ((void )0U)
+# define print_log_header(...) ((void )0U)
 #endif // USE_LOGGING
 
 #endif // _LOG_H

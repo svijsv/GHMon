@@ -51,9 +51,8 @@
 #endif
 
 #if USE_LOGGING && WRITE_LOG_TO_SD
-# define USE_SD 1
-#else
-# define USE_SD 0
+# define uHAL_USE_SPI 1
+# define uHAL_USE_FATFS 1
 #endif
 
 #define uHAL_USE_UART_COMM (USE_UART_OUTPUT || USE_UART_TERMINAL)

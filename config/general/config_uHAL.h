@@ -162,7 +162,9 @@
 // SPI configuration options
 //
 // Enable SPI peripherals
-#define uHAL_USE_SPI uHAL_USE_SUBSYSTEM_DEFAULT
+#ifndef uHAL_USE_SPI
+# define uHAL_USE_SPI uHAL_USE_SUBSYSTEM_DEFAULT
+#endif
 //
 // Target speed of the SPI bus; it will generally be somewhat higher due to
 // hardware limitations
@@ -198,7 +200,9 @@
 // This requires the FatFS library (http://elm-chan.org/fsw/ff/)
 //
 // Enable FatFS support
-#define uHAL_USE_FATFS uHAL_USE_SUBSYSTEM_DEFAULT
+#ifndef uHAL_USE_FATFS
+# define uHAL_USE_FATFS uHAL_USE_SUBSYSTEM_DEFAULT
+#endif
 //
 // The path to the FatFS header 'ff.h'
 #define FATFS_FF_H_PATH "FatFS/ff.h"
