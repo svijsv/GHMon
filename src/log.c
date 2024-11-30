@@ -369,8 +369,8 @@ void write_log_to_storage(void) {
 }
 
 static char* format_print_time(utime_t uptime) {
-	// 17 is enough to hold '2021.02.15 12:00' with a trailing NUL
-	static char timestr[17];
+	// 20 is enough to hold '2021.02.15 12:00:00' with a trailing NUL
+	static char timestr[20];
 
 	if (LOG_USES_SYSTEM_TIME) {
 		cstring_from_uint(timestr, SIZEOF_ARRAY(timestr), uptime, 10);
@@ -427,10 +427,9 @@ static char* format_print_time(utime_t uptime) {
 		timestr[i++] = ':';
 		timestr[i++] = '0' + ((minute / 10 ));
 		timestr[i++] = '0' + ((minute % 10 ));
-		// Dont do seconds
-		// timestr[i++] = ':';
-		// timestr[i++] = '0' + ((second / 10 ));
-		// timestr[i++] = '0' + ((second % 10 ));
+		timestr[i++] = ':';
+		timestr[i++] = '0' + ((second / 10 ));
+		timestr[i++] = '0' + ((second % 10 ));
 
 		timestr[i] = 0;
 	}
