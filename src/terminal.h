@@ -73,6 +73,15 @@ static int terminalcmd_led_toggle(const char *line_in) {
 }
 #endif // USE_STATUS_LED
 
+#if USE_LOGGING && LOG_LINE_BUFFER_COUNT > 0
+static int terminalcmd_play_log(const char *line_in) {
+	UNUSED(line_in);
+
+	print_log(serial_printf);
+	return 0;
+}
+#endif
+
 static int terminalcmd_reset(const char *line_in) {
 	UNUSED(line_in);
 
@@ -89,6 +98,9 @@ FMEM_STORAGE const terminal_cmd_t terminal_extra_cmds[] = {
 	{ terminalcmd_led_off,     "led_off",     7 },
 	{ terminalcmd_led_toggle,  "led_toggle", 10 },
 #endif
+#if USE_LOGGING && LOG_LINE_BUFFER_COUNT > 0
+	{ terminalcmd_play_log,    "play_log",    8 },
+#endif
 	{ terminalcmd_reset,       "reset",       5 },
 	{ NULL, {0}, 0 },
 };
@@ -98,6 +110,9 @@ FMEM_STORAGE const char terminal_extra_help[] =
 "   led_on            - Turn the LED on\r\n"
 "   led_off           - Turn the LED off\r\n"
 "   led_toggle        - Toggle the LED\r\n"
+#endif
+#if USE_LOGGING && LOG_LINE_BUFFER_COUNT > 0
+"   play_log          - Print the log buffer"
 #endif
 "   reset             - Reset the device\r\n"
 ;

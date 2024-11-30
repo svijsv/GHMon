@@ -41,13 +41,17 @@ void write_log_to_storage(void);
 //
 // Print the log header using pf()
 void print_log_header(void (*pf)(const char *format, ...));
-
+//
+// Print the buffered log using pf()
+// This includes previously-written entries
+void print_log(void (*pf)(const char *format, ...));
 
 #else // !USE_LOGGING
 # define log_init()   ((void )0U)
 # define log_status() ((void )0U)
 # define write_log_to_storage() ((void )0U)
 # define print_log_header(...) ((void )0U)
+# define print_log(...) ((void )0U)
 #endif // USE_LOGGING
 
 #endif // _LOG_H

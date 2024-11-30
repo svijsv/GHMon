@@ -250,6 +250,7 @@ void log_status(void) {
 	}
 	return;
 }
+
 static err_t _write_log_to_storage(void) {
 #if LOG_LINE_BUFFER_COUNT > 0
 	log_line_buffer_size_t head;
@@ -275,6 +276,29 @@ static err_t _write_log_to_storage(void) {
 #endif // LOG_LINE_BUFFER_COUNT > 0
 	return ERR_OK;
 }
+void print_log(void (*pf)(const char *format, ...)) {
+#if LOG_LINE_BUFFER_COUNT > 0
+	log_line_buffer_size_t head, size, tail;
+
+	// Replay the whole buffer, even if it's been written out and even if
+	// there was never an entry
+	size = LOG_LINE_BUFFER_COUNT;
+	tail = log_buffer.tail;
+	head = tail;
+
+	for (; size > 0; --size) {
+		print_log_line(pf, &log_buffer.lines[head]);
+
+		++head;
+		if (head == LOG_LINE_BUFFER_COUNT) {
+			head = 0;
+		}
+	}
+
+#endif // LOG_LINE_BUFFER_COUNT > 0
+	return;
+}
+
 static void print_log_line(void (*pf)(const char *format, ...), log_line_buffer_t *line) {
 	pf("%s\t%s", format_print_time(line->system_time), format_warnings(line->ghmon_warnings));
 
