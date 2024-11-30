@@ -26,7 +26,7 @@
 
 #include "ulib/include/math.h"
 
-#include GHMON_INCLUDE_CONFIG_HEADER(sensor_defs.h)
+#include GHMON_INCLUDE_CONFIG_HEADER(sensors/sensor_defs.h)
 
 #define SENSOR_INDEX(_cfg_) (uint )((_cfg_) - SENSORS)
 #define SENSOR_ID(_status_) (uint )((_status_) - sensors)

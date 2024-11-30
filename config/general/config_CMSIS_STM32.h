@@ -26,10 +26,12 @@
 #ifndef _uHAL_CONFIG_CMSIS_H
 #define _uHAL_CONFIG_CMSIS_H
 
+#include GHMON_INCLUDE_CONFIG_HEADER(lib/config_CMSIS_STM32.h)
+
 #if defined(STM32F103x6) || defined(STM32F103xB) || defined(STM32F103xE) || defined(STM32F103xG)
-# include GHMON_INCLUDE_CONFIG_HEADER(pindefs_stm32f103.h)
+# include GHMON_INCLUDE_CONFIG_HEADER(pindefs/stm32f103.h)
 #elif defined(STM32F401xC) || defined(STM32F401xE)
-# include GHMON_INCLUDE_CONFIG_HEADER(pindefs_stm32f401.h)
+# include GHMON_INCLUDE_CONFIG_HEADER(pindefs/stm32f401.h)
 #endif
 #if USE_UART_TERMINAL
   // The UART clock is disabled in deep sleep but we need to be able to wake up

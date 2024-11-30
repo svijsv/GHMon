@@ -26,8 +26,10 @@
 #ifndef _uHAL_CONFIG_AVR_XMEGA3_H
 #define _uHAL_CONFIG_AVR_XMEGA3_H
 
+#include GHMON_INCLUDE_CONFIG_HEADER(lib/config_AVR_XMEGA3.h)
+
 #if defined(__AVR_ATtiny402__)
-# include GHMON_INCLUDE_CONFIG_HEADER(pindefs_attiny402.h)
+# include GHMON_INCLUDE_CONFIG_HEADER(pindefs/attiny402.h)
 # define uHAL_USE_INTERNAL_OSC 1
 # define uHAL_USE_INTERNAL_LS_OSC 1
 #endif

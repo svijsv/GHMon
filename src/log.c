@@ -55,7 +55,7 @@
  typedef uint8_t log_line_buffer_size_t;
 #endif
 
-#include GHMON_INCLUDE_CONFIG_HEADER(logfile.h)
+#include GHMON_INCLUDE_CONFIG_HEADER(log/logfile.h)
 
 #if LOG_LINES_PER_FILE == 1
   // Why not? There was a note about it causing an infinite recursion but I

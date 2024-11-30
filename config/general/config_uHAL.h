@@ -30,6 +30,7 @@
 // Include the GHMon configuration before anything else, it may control some
 // features.
 #include "config/general/config.h"
+#include GHMON_INCLUDE_CONFIG_HEADER(lib/config_uHAL.h)
 
 //
 // The program name and version.
@@ -78,13 +79,15 @@
 //
 // When hibernating, print the expected duration and mode of sleep to the
 // UART terminal
-#define uHAL_ANNOUNCE_HIBERNATE 1
+#define uHAL_ANNOUNCE_HIBERNATE (DEBUG)
 
 //
 // ADC configuration options
 //
 // Enable the Analog-to-Digital Converter
-#define uHAL_USE_ADC 1
+#ifndef uHAL_USE_ADC
+# define uHAL_USE_ADC 1
+#endif
 //
 // Number of samples to take and then average for every ADC reading
 #define ADC_SAMPLE_COUNT 1U

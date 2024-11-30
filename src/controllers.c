@@ -25,7 +25,7 @@
 #include "controllers.h"
 #include "sensors.h"
 
-#include GHMON_INCLUDE_CONFIG_HEADER(controller_defs.h)
+#include GHMON_INCLUDE_CONFIG_HEADER(controllers/controller_defs.h)
 
 // FIXME: This will give random-ish numbers for non-default controllers, but
 // they should stay the same in any given run and this is just for logging so
