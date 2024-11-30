@@ -27,11 +27,15 @@
 
 // Use the less-accurate but lower-power internal oscillator for the system
 // instead of the external crystal
-#define uHAL_USE_INTERNAL_OSC 1
+#ifndef uHAL_USE_INTERNAL_OSC
+# define uHAL_USE_INTERNAL_OSC 1
+#endif
 //
 // This is the desired frequency of the main system clock
 // Normally F_CPU will be set when invoking the compiler
-#define F_CORE F_CPU
+#ifndef F_CORE
+# define F_CORE F_CPU
+#endif
 //
 // This is the frequency of the main oscillator
 // It must be defined either here or on the command line
@@ -42,18 +46,26 @@
 //#define F_OSC 20000000UL
 
 // Use the internal low-speed oscillator rather than an external crystal
-#define uHAL_USE_INTERNAL_LS_OSC 1
+#ifndef uHAL_USE_INTERNAL_LS_OSC
+# define uHAL_USE_INTERNAL_LS_OSC 1
+#endif
 //
 // This is the frequency of the low-speed clock
-#define F_LS_OSC 32768UL
+#ifndef F_LS_OSC
+# define F_LS_OSC 32768UL
+#endif
 
 // This is the voltage of the internal voltage-reference
 // Each device has several internal reference sources and one is selected
 // for use based on this value
-#define INTERNAL_VREF_mV 1100U
+#ifndef INTERNAL_VREF_mV
+# define INTERNAL_VREF_mV 1100U
+#endif
 
 // This is the regulated voltage applied to the MCUs power pin
-#define REGULATED_VOLTAGE_mV 3300U
+#ifndef REGULATED_VOLTAGE_mV
+# define REGULATED_VOLTAGE_mV 3300U
+#endif
 
 //
 // The preferred frequency of the ADC clock
@@ -68,7 +80,9 @@
 // The maximum value returned by the ADC
 // On some devices this can be set lower to reliably use higher ADC clock
 // frequencies
-#define ADC_MAX 0x3FF
+#ifndef ADC_MAX
+# define ADC_MAX 0x3FF
+#endif
 
 // The timer used to track millisecond system ticks
 // Options are TIMER_RTT, TIMER_TCA0, TIMER_TCA0_HIGH, TIMER_TCA0_LOW, and
@@ -84,7 +98,9 @@
 //
 // When using any TCB timer, the PWM outputs associated with that timer will
 // be disabled
-#define SYSTICK_TIMER TIMER_RTT
+#ifndef SYSTICK_TIMER
+# define SYSTICK_TIMER TIMER_RTT
+#endif
 //
 // The number of system ticks per second, used by the RTC emulation code
 // When undefined this will be set according to the system tick source
@@ -102,8 +118,12 @@
 // during deep sleep
 // Depending on device this may or may not work for a particular timer - specifically
 // TCA doesn't always support it
-#define USE_STDBY_TCB 0
-#define USE_STDBY_TCA 0
+#ifndef USE_STDBY_TCB
+# define USE_STDBY_TCB 0
+#endif
+#ifndef USE_STDBY_TCA
+# define USE_STDBY_TCA 0
+#endif
 
 // The timer used to count micro-second periods
 // The options are the same as for SYSTICK_TIMER (except for TIMER_RTT) and have
@@ -111,22 +131,30 @@
 // experience overshoots while using the counter
 // This can auto-selected by setting it to '0' or 'TIMER_NONE'
 // This is disabled if uHAL_USE_USCOUNTER is '0'
-#define USCOUNTER_TIMER 0
+#ifndef USCOUNTER_TIMER
+# define USCOUNTER_TIMER 0
+#endif
 
 // The Real-Time Timer used to wake from sleep uses a not-very-accurate
 // internal clock and can calibrate itself against the main system clock
 // periodically after this many seconds
 // Set to '0' to disable
-#define RTT_RECALIBRATE_INTERVAL_S (60U * 30U) // Every 30 Minutes
+#ifndef RTT_RECALIBRATE_INTERVAL_S
+# define RTT_RECALIBRATE_INTERVAL_S (60U * 30U) // Every 30 Minutes
+#endif
 //
 // The RTT calibration period is this many RTT clock cycles
-#define RTT_CALIBRATE_CYCLES (512UL)
+#ifndef RTT_CALIBRATE_CYCLES
+# define RTT_CALIBRATE_CYCLES (512UL)
+#endif
 //
 // Use the high-speed external oscillator as the Real-Time Counter source instead
 // of the low-speed oscillator
 // This is ignored if the high-speed oscillator is not external
 // This is entirely untested
-#define RTT_USE_EXTCLK_SRC 0
+#ifndef RTT_USE_EXTCLK_SRC
+# define RTT_USE_EXTCLK_SRC 0
+#endif
 
 // The scale to use internally for PWM duty cycles
 // Normally this is automatically calculated based on PWM_DUTY_CYCLE_SCALE
@@ -141,7 +169,9 @@
 
 // If non-zero, use RTC emulation code
 // There's no other RTC option for this platform
-#define uHAL_USE_RTC_EMULATION uHAL_USE_RTC
+#ifndef uHAL_USE_RTC_EMULATION
+# define uHAL_USE_RTC_EMULATION uHAL_USE_RTC
+#endif
 
 
 //

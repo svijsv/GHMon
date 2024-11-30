@@ -57,7 +57,7 @@ template="
 # define IS_UARTnnn(_rxp_, _txp_) (IS_UARTnnn_RX(_rxp_) && IS_UARTnnn_TX(_txp_))
 # define IS_UARTnnn_STRUCT(_p_) (IS_UARTnnn((_p_)->rx_pin, (_p_)->tx_pin))
 
-# if uHAL_USE_UART_COMM && IS_UARTnnn(UART_COMM_RX_PIN, UART_COMM_TX_PIN)
+# if uHAL_USE_UART_COMM && !defined(UART_COMM_IRQn) && IS_UARTnnn(UART_COMM_RX_PIN, UART_COMM_TX_PIN)
 #  define UART_COMM_IRQn       USARTnnn_IRQn
 #  define UART_COMM_IRQHandler USARTnnn_IRQHandler
 #  define UART_COMM_CLOCKEN    RCC_PERIPH_UARTnnn
