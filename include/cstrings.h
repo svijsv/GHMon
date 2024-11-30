@@ -79,8 +79,8 @@ char *cstring_tr(char *s, char old, char new);
 // the trailing NUL byte
 // If the string wouldn't fit the contents of 'dest' are undefined
 // The base must be >= 2 and <= 16
-// The return value is the number of bytes that would have been needed to
-// store the whole string, including the trailing NUL byte
+// The return value is the number of bytes needed to store the whole string,
+// excluding the trailing NUL byte
 // Returns 0 on any error other than the buffer being too small
 uint_t cstring_from_uint(char *dest, uint_t size, uint_t src, uint_t base);
 

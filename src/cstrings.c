@@ -30,10 +30,6 @@
 
 #include <string.h>
 
-static const char base16_table[] = {
-	'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
-};
-
 bool cstring_eq(const char *s1, const char *s2) {
 	ulib_assert(s1 != NULL);
 	ulib_assert(s2 != NULL);
@@ -272,13 +268,13 @@ uint_t cstring_from_uint(char *dest, uint_t size, uint_t src, uint_t base) {
 
 		do {
 			--i;
-			dest[i] = base16_table[(src % base)];
+			uint_t d = src % base;
+			dest[i] = (char )ASCII_FROM_XDIGIT(d);
 			src /= base;
 		} while ((src != 0));
 	}
 
-	// Add 1 for the trailing NUL byte
-	return w + 1;
+	return w;
 }
 
 #else
