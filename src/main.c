@@ -234,7 +234,9 @@ int main(void) {
 			}
 
 			if (force_sync) {
+				led_on();
 				write_log_to_storage();
+				led_off();
 			}
 		}
 
