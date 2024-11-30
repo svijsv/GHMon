@@ -49,7 +49,7 @@ template="
 
 # define IS_I2Cnnn(_sdap_, _sclp_) (IS_I2Cnnn_SDA(_sdap_) && IS_I2Cnnn_SCL(_sclp_))
 
-# if IS_I2Cnnn(I2C_SDA_PIN, I2C_SCL_PIN)
+# if !defined(I2Cx) && IS_I2Cnnn(I2C_SDA_PIN, I2C_SCL_PIN)
 #  define I2Cx I2Cnnn
 #  define I2Cx_CLOCKEN RCC_PERIPH_I2Cnnn
 #  define I2Cx_AF GPIOAF_I2Cnnn

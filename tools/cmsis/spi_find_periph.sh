@@ -66,7 +66,7 @@ template="
 
 # define IS_SPInnn(_mosi_, _miso_, _sck_) (IS_SPInnn_MOSI(_mosi_) && IS_SPInnn_MISO(_miso_) && IS_SPInnn_SCK(_sck_))
 
-# if IS_SPInnn(SPI_MOSI_PIN, SPI_MISO_PIN, SPI_SCK_PIN)
+# if !defined(SPIx) && IS_SPInnn(SPI_MOSI_PIN, SPI_MISO_PIN, SPI_SCK_PIN)
 #  define SPIx SPInnn
 #  define SPIx_CLOCKEN RCC_PERIPH_SPInnn
 #  define SPIx_AF GPIOAF_SPInnn
