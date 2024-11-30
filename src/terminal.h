@@ -80,6 +80,12 @@ static int terminalcmd_play_log(const char *line_in) {
 	print_log(serial_printf);
 	return 0;
 }
+static int terminalcmd_write_log(const char *line_in) {
+	UNUSED(line_in);
+
+	write_log_to_storage();
+	return 0;
+}
 #endif
 
 static int terminalcmd_reset(const char *line_in) {
@@ -100,6 +106,7 @@ FMEM_STORAGE const terminal_cmd_t terminal_extra_cmds[] = {
 #endif
 #if USE_LOGGING && LOG_LINE_BUFFER_COUNT > 0
 	{ terminalcmd_play_log,    "play_log",    8 },
+	{ terminalcmd_write_log,   "write_log",   9 },
 #endif
 	{ terminalcmd_reset,       "reset",       5 },
 	{ NULL, {0}, 0 },
@@ -113,6 +120,7 @@ FMEM_STORAGE const char terminal_extra_help[] =
 #endif
 #if USE_LOGGING && LOG_LINE_BUFFER_COUNT > 0
 "   play_log          - Print the log buffer"
+"   write_log         - Write the log buffer to storage"
 #endif
 "   reset             - Reset the device\r\n"
 ;
