@@ -481,9 +481,9 @@ static void buffer_status_line(void) {
 	LOGGER("Buffering log line %u of %u", (uint )lineno, (uint )LOG_LINE_BUFFER_COUNT);
 
 	log_status_line(&log_buffer.lines[log_buffer.tail]);
-	if (DEBUG) {
-		print_log_line(serial_printf, &log_buffer.lines[log_buffer.tail]);
-	}
+#if DEBUG && uHAL_USE_UART_COMM
+	print_log_line(serial_printf, &log_buffer.lines[log_buffer.tail]);
+#endif
 
 	++log_buffer.tail;
 	if (log_buffer.tail == LOG_LINE_BUFFER_COUNT) {

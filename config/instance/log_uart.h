@@ -21,23 +21,23 @@ static bool print_to_UART = false;
 static uart_port_t *uart_log_port = NULL;
 
 static void init_log_UART(void) {
-	if (LOG_UART_IS_COMM) {
-		uart_log_port = UART_COMM_PORT;
-	} else {
-		err_t res;
-		static uart_port_t _uart_log_port;
-		uart_port_cfg_t cfg = {
-			.baud_rate = UART_LOG_BAUDRATE,
-			.tx_pin = UART_LOG_TX_PIN,
-			.rx_pin = UART_LOG_RX_PIN
-		};
+#if LOG_UART_IS_COMM
+	uart_log_port = UART_COMM_PORT;
+#else
+	err_t res;
+	static uart_port_t _uart_log_port;
+	uart_port_cfg_t cfg = {
+		.baud_rate = UART_LOG_BAUDRATE,
+		.tx_pin = UART_LOG_TX_PIN,
+		.rx_pin = UART_LOG_RX_PIN
+	};
 
-		if ((res = uart_init_port(&_uart_log_port, &cfg)) != ERR_OK) {
-			LOGGER("UART log initialization failed: error %d", (int )res);
-		} else {
-			uart_log_port = &_uart_log_port;
-		}
+	if ((res = uart_init_port(&_uart_log_port, &cfg)) != ERR_OK) {
+		LOGGER("UART log initialization failed: error %d", (int )res);
+	} else {
+		uart_log_port = &_uart_log_port;
 	}
+#endif
 
 	return;
 }
