@@ -35,14 +35,6 @@
 #include "ulib/include/halloc.h"
 #include "ulib/include/printf.h"
 
-#if LOG_LINES_PER_FILE == 1
-  // Why not? There was a note about it causing an infinite recursion but I
-  // can't find where that would happen.
-# error "LOG_LINES_PER_FILE can't be '1'"
-#endif
-
-#define NEED_LOG_FILE_NAME (WRITE_LOG_TO_SD)
-
 #if LOG_PRINT_BUFFER_SIZE > 0xFFFFFFFF
  typedef uint64_t print_buffer_size_t;
 #elif LOG_PRINT_BUFFER_SIZE > 0xFFFF
@@ -63,13 +55,27 @@
  typedef uint8_t log_line_buffer_size_t;
 #endif
 
-#if NEED_LOG_FILE_NAME
- static char logfile_name[] = LOGFILE_NAME_PATTERN;
+#include GHMON_INCLUDE_CONFIG_HEADER(logfile.h)
+
+#if LOG_LINES_PER_FILE == 1
+  // Why not? There was a note about it causing an infinite recursion but I
+  // can't find where that would happen.
+# error "LOG_LINES_PER_FILE can't be '1'"
 #endif
 
-static const char *invalid_value = "(invalid)";
-static const char *no_status = "(unavailable)";
-static const char *line_end = "\r\n";
+#ifndef USE_LOG_FILE_NAME
+# define USE_LOG_FILE_NAME 0
+#endif
+
+#if USE_LOG_FILE_NAME
+ static char logfile_name[] = LOG_FILE_NAME_PATTERN;
+#else
+# define logfile_name (NULL)
+#endif
+
+static const char invalid_value[] = LOG_INVALID_VALUE;
+static const char no_value[] = LOG_NO_VALUE;
+static const char line_end[] = LOG_LINE_END;
 
 static bool have_log_header = false;
 static uint32_t lines_logged_this_file = 0;
@@ -119,10 +125,7 @@ static struct {
 } print_buffer = { 0 };
 #endif
 
-extern err_t log_pre_write_hook(void);
-extern err_t log_post_write_hook(void);
-
-static void _write_log_to_storage(void);
+static err_t _write_log_to_storage(void);
 static err_t write_log_line_to_storage(log_line_buffer_t *line);
 static void print_log_line(void (*pf)(const char *format, ...), log_line_buffer_t *line);
 static bool buffer_is_full(void);
@@ -138,9 +141,6 @@ static void close_log_storage(void);
 static err_t rotate_log_file(void);
 static void reset_print_buffer(void);
 static void write_log_header(void);
-
-#include "log_uart.h"
-#include "log_sd.h"
 
 void log_init(void) {
 	SENSOR_INDEX_T sn = 0;
@@ -174,12 +174,7 @@ void log_init(void) {
 	}
 #endif
 
-#if WRITE_LOG_TO_SD
-	log_init_SD();
-#endif
-#if WRITE_LOG_TO_UART
-	log_init_UART();
-#endif
+	init_output_device();
 
 	LOGGER("Initialized logging for %u sensors and %u controllers", (uint )sn, (uint )cn);
 
@@ -217,7 +212,21 @@ static void log_status_line(log_line_buffer_t *line) {
 }
 
 void log_status(void) {
+	bool buffer_line = true;
+
 	if (buffer_is_full()) {
+		if (skip_log_writes()) {
+			SET_BIT(ghmon_warnings, WARN_LOG_SKIPPED);
+		} else if (open_log_storage() == ERR_OK) {
+			if (_write_log_to_storage() == ERR_OK) {
+				buffer_line = false;
+			} else {
+				close_log_storage();
+			}
+		}
+	}
+
+	if (!buffer_line) {
 		log_line_buffer_t current_status;
 		SENSOR_READING_T sensor_reading[sensor_count];
 #if USE_CONTROLLER_STATUS
@@ -233,13 +242,7 @@ void log_status(void) {
 #endif
 		current_status.controller_status_flags = controller_status_flags;
 
-		if (open_log_storage() != ERR_OK) {
-			buffer_status_line();
-			return;
-		}
-
 		log_status_line(&current_status);
-		_write_log_to_storage();
 		write_log_line_to_storage(&current_status);
 		close_log_storage();
 	} else {
@@ -247,7 +250,7 @@ void log_status(void) {
 	}
 	return;
 }
-static void _write_log_to_storage(void) {
+static err_t _write_log_to_storage(void) {
 #if LOG_LINE_BUFFER_COUNT > 0
 	log_line_buffer_size_t head;
 
@@ -257,8 +260,9 @@ static void _write_log_to_storage(void) {
 		head = log_buffer.tail - log_buffer.size;
 	}
 	while (log_buffer.size > 0) {
-		if (write_log_line_to_storage(&log_buffer.lines[head]) != ERR_OK) {
-			return;
+		err_t res;
+		if ((res = write_log_line_to_storage(&log_buffer.lines[head])) != ERR_OK) {
+			return res;
 		}
 
 		++head;
@@ -269,7 +273,7 @@ static void _write_log_to_storage(void) {
 	}
 
 #endif // LOG_LINE_BUFFER_COUNT > 0
-	return;
+	return ERR_OK;
 }
 static void print_log_line(void (*pf)(const char *format, ...), log_line_buffer_t *line) {
 	pf("%s\t%s", format_print_time(line->system_time), format_warnings(line->ghmon_warnings));
@@ -308,7 +312,7 @@ static void print_log_line(void (*pf)(const char *format, ...), log_line_buffer_
 #if USE_CONTROLLER_STATUS
 			pf("%d", (int )line->controller_status[si]);
 #else
-			pf("%s", no_status);
+			pf("%s", no_value);
 #endif
 		}
 		++si;
@@ -344,13 +348,17 @@ static char* format_print_time(utime_t uptime) {
 	// 17 is enough to hold '2021.02.15 12:00' with a trailing NUL
 	static char timestr[17];
 
+	if (LOG_USES_SYSTEM_TIME) {
+		cstring_from_uint(timestr, SIZEOF_ARRAY(timestr), uptime, 10);
+
 	// Assume that if the year hasn't been set, this is an uptime not a date
 	// Also assume that it's at least 3 years since YEAR_0 and that this won't
 	// run continuously for more than 3 years
-	if (uptime < (SECONDS_PER_YEAR * 3)) {
+	} else if (uptime < (SECONDS_PER_YEAR * 3)) {
 		uint offset;
 		const uint len = SIZEOF_ARRAY(timestr);
 
+		// FIXME: Buffer overflow with days > 999999 (~2740 years)
 		// Days
 		offset = cstring_from_uint(timestr, len, (uptime / SECONDS_PER_DAY), 10);
 		timestr[offset] = 'd'; ++offset;
@@ -361,8 +369,13 @@ static char* format_print_time(utime_t uptime) {
 		timestr[offset] = 'h'; ++offset;
 
 		// Minutes
-		offset += cstring_from_uint(&timestr[offset], len - offset, ((uptime % SECONDS_PER_HOUR) / SECONDS_PER_MINUTE), 10);
-		timestr[offset] = 'm';
+		uptime %= SECONDS_PER_HOUR;
+		offset += cstring_from_uint(&timestr[offset], len - offset, (uptime / SECONDS_PER_MINUTE), 10);
+		timestr[offset] = 'm'; ++offset;
+
+		// Seconds
+		offset += cstring_from_uint(&timestr[offset], len - offset, (uptime % SECONDS_PER_MINUTE), 10);
+		timestr[offset] = 's';
 		timestr[offset+1] = 0;
 	} else {
 		uiter_t i;
@@ -426,7 +439,7 @@ static char* format_warnings(uint8_t warnings) {
 	return wstr;
 }
 
-#if LOG_LINE_BUFFER_COUNT != 0
+#if LOG_LINE_BUFFER_COUNT > 0
 static bool buffer_is_full(void) {
 	return (log_buffer.size == LOG_LINE_BUFFER_COUNT);
 }
@@ -436,6 +449,8 @@ static void buffer_status_line(void) {
 	assert(log_buffer.tail <  LOG_LINE_BUFFER_COUNT);
 	assert(log_buffer.size <= LOG_LINE_BUFFER_COUNT);
 
+	// This check makes sure we don't print e.g. '5 of 4' if there was a problem
+	// writing the log out and we're overwriting old entries.
 	lineno = log_buffer.size+1;
 	if (lineno > LOG_LINE_BUFFER_COUNT) {
 		lineno = LOG_LINE_BUFFER_COUNT;
@@ -486,13 +501,9 @@ static void lprintf_putc(uint_fast8_t c) {
 	++print_buffer.size;
 
 	if (print_buffer.size == LOG_PRINT_BUFFER_SIZE) {
-#if WRITE_LOG_TO_SD
-		write_buffer_to_SD();
-#endif
-#if WRITE_LOG_TO_UART
-		write_buffer_to_UART();
-#endif
-
+		if (write_buffer_to_storage(print_buffer.buffer, print_buffer.size) != ERR_OK) {
+			SET_BIT(ghmon_warnings, WARN_LOG_ERROR);
+		}
 		print_buffer.size = 0;
 	}
 
@@ -504,12 +515,9 @@ static void reset_print_buffer(void) {
 }
 #else // LOG_PRINT_BUFFER_SIZE > 0
 static void lprintf_putc(uint_fast8_t c) {
-#if WRITE_LOG_TO_SD
-	write_char_to_SD(c);
-#endif
-#if WRITE_LOG_TO_UART
-		write_char_to_UART();
-#endif
+	if (write_byte_to_storage(c) != ERR_OK) {
+		SET_BIT(ghmon_warnings, WARN_LOG_ERROR);
+	}
 	return;
 }
 static void reset_print_buffer(void) {
@@ -518,94 +526,51 @@ static void reset_print_buffer(void) {
 #endif // LOG_PRINT_BUFFER_SIZE > 0
 
 static err_t open_log_storage(void) {
-	err_t res = ERR_OK;
-	bool abort_logging = false;
+	err_t res;
 
 	LOGGER("Writing log data");
 	CLEAR_BIT(ghmon_warnings, WARN_LOG_ERROR);
 	CLEAR_BIT(ghmon_warnings, WARN_LOG_SKIPPED);
 	reset_print_buffer();
 
-	if ((res = log_pre_write_hook()) != ERR_OK) {
-		LOGGER("Log pre-write hook failed: error %d", (int )res);
+	if ((res = open_output_device()) == ERR_OK && (res = open_log_file()) != ERR_OK) {
+		close_output_device();
+	}
+	if (res != ERR_OK) {
 		SET_BIT(ghmon_warnings, WARN_LOG_ERROR);
-		return res;
 	}
 
-	if (WRITE_LOG_TO_UART && !abort_logging) {
-		if ((res = open_UART()) != ERR_OK) {
-			LOGGER("Failed to open log UART: error %d", (int )res);
-			SET_BIT(ghmon_warnings, WARN_LOG_ERROR);
-			if (!LOG_WITH_MISSING_UART) {
-				abort_logging = true;
-			}
-		}
-	}
-
-	if (WRITE_LOG_TO_SD && !abort_logging) {
-		if ((res = open_SD()) != ERR_OK) {
-			LOGGER("Failed to open log SD: error %d", (int )res);
-			SET_BIT(ghmon_warnings, WARN_LOG_ERROR);
-			if (!LOG_WITH_MISSING_SD) {
-				abort_logging = true;
-				close_UART();
-			}
-		}
-	}
-
-	if (!abort_logging) {
-		if ((res = open_log_file()) != ERR_OK) {
-			abort_logging = true;
-			close_UART();
-			close_SD();
-		}
-	}
-
-	return (abort_logging) ? res : ERR_OK;
+	return res;
 }
 static err_t open_log_file(void) {
 	if (!have_log_header) {
 		return rotate_log_file();
 	}
 
-	err_t res, err = ERR_OK;
-	if ((res = open_SD_file()) != ERR_OK && !LOG_WITH_MISSING_SD) {
-		err = res;
-	}
-
-	return err;
+	return open_output_file(logfile_name);
 }
 
 static err_t flush_print_buffer(void) {
-	err_t err = ERR_OK;
+	err_t res = ERR_OK;
 
 #if LOG_PRINT_BUFFER_SIZE > 0
-	err_t res;
-
 	if (print_buffer.size > 0) {
-		if ((res = write_buffer_to_UART()) != ERR_OK) {
-			err = res;
-		}
-		if ((res = write_buffer_to_SD()) != ERR_OK) {
-			err = res;
-		}
+		res = write_buffer_to_storage(print_buffer.buffer, print_buffer.size);
 		reset_print_buffer();
 	}
 #endif
 
-	return err;
+	return res;
 }
 static void close_log_storage(void) {
 	flush_print_buffer();
-	close_SD();
-	close_UART();
-	log_post_write_hook();
+	close_output_device();
 
 	return;
 }
 
-static void find_log_file_name(void) {
-#if NEED_LOG_FILE_NAME && LOG_LINES_PER_FILE > 0
+static err_t find_log_file_name(void) {
+#if USE_LOG_FILE_NAME && LOG_LINES_PER_FILE > 0
 	// This gets us two positions before the file extension
 	const uint_fast8_t mod_p = SIZEOF_ARRAY(logfile_name) - 7;
 
@@ -620,48 +585,55 @@ static void find_log_file_name(void) {
 	// reopen that and set the current line number.
 	for (; logfile_name[mod_p] <= '9'; ++logfile_name[mod_p]) {
 		for (; logfile_name[mod_p+1] <= '9'; ++logfile_name[mod_p+1]) {
-			bool valid = true;
-
-			if (WRITE_LOG_TO_SD && SD_file_exists(logfile_name)) {
-				valid = false;
-			}
-			if (valid) {
-				return;
+			switch (output_file_is_available(logfile_name)) {
+			case ERR_OK:
+				return ERR_OK;
+			case ERR_RETRY:
+				return ERR_RETRY;
+			default:
+				break;
 			}
 		}
-		logfile_name[mod_p] = '0';
+		logfile_name[mod_p+1] = '0';
 	}
 	// TODO: Start using letter suffixes when numbers run out
 	logfile_name[mod_p] = 'A';
 	logfile_name[mod_p+1] = '0';
 
-	LOGGER("Using log file %s", logfile_name);
 #endif
-	return;
+	return ERR_OK;
 }
 static err_t rotate_log_file(void) {
-	err_t res, err = ERR_OK;
+	err_t res;
 
 	have_log_header = false;
 	if ((res = flush_print_buffer()) != ERR_OK) {
-		return res;
+		goto END;
 	}
-	find_log_file_name();
-
-	if (WRITE_LOG_TO_SD && err == ERR_OK) {
-		close_SD_file();
-		if ((res = open_SD_file()) != ERR_OK) {
-			err = res;
-		}
+	if ((res = close_output_file()) != ERR_OK) {
+		goto END;
 	}
-
-	if (err == ERR_OK) {
-		lines_logged_this_file = 0;
-		have_log_header = true;
-		write_log_header();
+	//
+	// Don't return an error when we couldn't find the name, that just means the
+	// device is temporarily unvavailable and we'll try again later.
+	//if ((res = find_log_file_name()) != ERR_OK) {
+	if ((find_log_file_name()) != ERR_OK) {
+		goto END;
 	}
 
-	return err;
+	lines_logged_this_file = 0;
+	if (USE_LOG_FILE_NAME) {
+		LOGGER("Using log file %s", logfile_name);
+	}
+	if ((res = open_output_file(logfile_name)) != ERR_OK) {
+		goto END;
+	}
+
+	write_log_header();
+	have_log_header = true;
+
+END:
+	return res;
 }
 
 void print_log_header(void (*pf)(const char *format, ...)) {

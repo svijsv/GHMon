@@ -3,7 +3,6 @@
 #include "FatFS/ff.h"
 
 static bool print_to_SD = false;
-
 static uint8_t write_errors;
 
 static FATFS fs;
@@ -51,21 +50,25 @@ static err_t FRESULT_to_err_t(FRESULT fres) {
 	return (fres == FR_OK) ? ERR_OK : ERR_UNKNOWN;
 }
 
-static void log_init_SD(void) {
+static void init_log_SD(void) {
 	output_pin_on(SPI_CS_SD_PIN);
 	return;
 }
 
-static err_t open_SD_file(void) {
+static err_t open_SD_file(const char *path) {
 	FRESULT fres;
 
-	if (!print_to_SD) {
-		return ERR_OK;
+	if (!SD_IS_MOUNTED()) {
+		if (SKIP_SAFETY_CHECKS || !print_to_SD) {
+			return ERR_OK;
+		} else {
+			return ERR_INIT;
+		}
 	}
 
-	if ((fres = f_open(&fh, logfile_name, FA_WRITE|FA_OPEN_APPEND)) != FR_OK) {
+	print_to_SD = true;
+	if ((fres = f_open(&fh, path, FA_WRITE|FA_OPEN_APPEND)) != FR_OK) {
 		LOGGER("f_open(): FatFS error %u", (uint )fres);
-		SET_BIT(ghmon_warnings, WARN_LOG_ERROR);
 		print_to_SD = false;
 	}
 
@@ -75,13 +78,10 @@ static err_t open_SD(void) {
 	FRESULT fres;
 
 	spi_on();
-	print_to_SD = true;
 
 	if ((fres = f_mount(&fs, "", 1)) != FR_OK) {
 		LOGGER("f_mount(): FatFS error %u", (uint )fres);
-		SET_BIT(ghmon_warnings, WARN_LOG_ERROR);
 		spi_off();
-		print_to_SD = false;
 	}
 
 	return FRESULT_to_err_t(fres);
@@ -98,7 +98,6 @@ static err_t close_SD_file(void) {
 
 	if ((fres = f_close(&fh)) != FR_OK) {
 		LOGGER("f_close(): FatFS error %u", (uint )fres);
-		SET_BIT(ghmon_warnings, WARN_LOG_ERROR);
 	}
 
 	return FRESULT_to_err_t(fres);
@@ -113,20 +112,18 @@ static err_t close_SD(void) {
 	close_SD_file();
 
 	if (write_errors != 0) {
-		SET_BIT(ghmon_warnings, WARN_LOG_ERROR);
 		LOGGER("%u log SD write errors", (uint )write_errors);
 		write_errors = 0;
 	}
 	if ((fres = f_unmount("")) != FR_OK) {
 		LOGGER("f_unmount(): FatFS error %u", (uint )fres);
-		SET_BIT(ghmon_warnings, WARN_LOG_ERROR);
 	}
 	spi_off();
 
 	return FRESULT_to_err_t(fres);
 }
 
-static err_t _write_to_SD(uint8_t *buf, print_buffer_size_t bytes) {
+static err_t write_buffer_to_SD(uint8_t *buf, print_buffer_size_t bytes) {
 	FRESULT fres;
 	UINT bw = 0;
 
@@ -140,31 +137,35 @@ static err_t _write_to_SD(uint8_t *buf, print_buffer_size_t bytes) {
 	if ((fres = f_write(&fh, buf, bytes, &bw)) != FR_OK) {
 		// Not much else we can do about problems here
 		++write_errors;
-		LOGGER("f_write(): FatFS error %u (%u bytes written)", (uint )fres, (uint )bw);
+		LOGGER("f_write(): FatFS error %u (%u of %u bytes written)", (uint )fres, (uint )bw, (uint )bytes);
 	}
 
 	return FRESULT_to_err_t(fres);
 }
-static err_t write_buffer_to_SD(void) {
-	return _write_to_SD(print_buffer.buffer, print_buffer.size);
-}
-static err_t write_char_to_SD(uint8_t c) {
-	return _write_to_SD(&c, 1);
-}
 
-static bool SD_file_exists(const char *path) {
+static err_t SD_file_is_available(const char *path) {
 	FILINFO st;
 
-	return (f_stat(path, &st) == FR_OK);
+	//
+	// If the file doesn't exist already, the name is available (ERR_OK).
+	// If the file exists, we should check the next option (ERR_UNKNOWN).
+	// For all other errors, abort for now and try again later (ERR_RETRY).
+	switch (f_stat(path, &st)) {
+	case FR_NO_FILE:
+		return ERR_OK;
+	case FR_OK:
+		return ERR_UNKNOWN;
+	default:
+		return ERR_RETRY;
+	}
 }
 
-
 #else // WRITE_LOG_TO_SD
-# define log_init_SD() (void )0U
-# define write_buffer_to_SD() (ERR_OK)
-# define write_char_to_SD(_c_) (ERR_OK)
+# define init_log_SD() (void )0U
+# define write_buffer_to_SD(_b_, _s_) (ERR_OK)
 # define open_SD() (ERR_OK)
-# define open_SD_file() (ERR_OK)
+# define open_SD_file(_p_) (ERR_OK)
 # define close_SD() (ERR_OK)
 # define close_SD_file() (ERR_OK)
+# define SD_file_is_available(_p_) (ERR_OK)
 #endif // WRITE_LOG_TO_SD

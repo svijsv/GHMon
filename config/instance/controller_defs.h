@@ -194,7 +194,7 @@ CONTROLLER_CFG_STORAGE controller_cfg_t CONTROLLERS[] = {
 	.run = heartbeat_run,
 	.next_run_time = NULL,
 	.schedule_minutes = 1,
-	.cfg_flags = CONTROLLER_CFG_FLAG_IGNORE_FORCED_RUN
+	.cfg_flags = CONTROLLER_CFG_FLAG_IGNORE_FORCED_RUN | CONTROLLER_CFG_FLAG_NOLOG
 },
 //
 // Controller 1, cooling

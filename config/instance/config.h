@@ -72,27 +72,6 @@
 // If 0, it's only updated when requested by way of the control button.
 #define LOG_APPEND_MINUTES 15
 //
-// If set, write the log file to an SD card
-// SPI_CS_SD_PIN must be set to the chip-select pin that controls the SD card.
-#define WRITE_LOG_TO_SD 0
-//
-// If set, write log output to a UART port
-// All buffering is still applied.
-#define WRITE_LOG_TO_UART 1
-//
-// The TX and RX pins the log is written to
-// If 0, use the standard communication port.
-#define UART_LOG_TX_PIN 0
-#define UART_LOG_RX_PIN 0
-//
-// Log file name pattern
-// Names are 8.3 format (8 characters for the name + 3 for an extension), but
-// can include directories.
-// The path is relative to the SD card root and parent directories must exist.
-// This name is modified at the 5th and 6th places before the end if
-// LINES_PER_FILE is > 0.
-#define LOGFILE_NAME_PATTERN "STATUSXX.LOG"
-//
 // Instead of writing to storage every time, keep this many readings in memory
 // and write them all when the buffer is full.
 // With 10 minute intervals, a 5-reading buffer will write once an hour (5
@@ -102,12 +81,6 @@
 // Set to 0 to disable buffering.
 #define LOG_LINE_BUFFER_COUNT 15 // 4h with 15m intervals
 //
-// Rotate the log file after LOG_LINES_PER_FILE lines have been written to the
-// current one
-// If set, this must be > 1.
-// Set to 0 to disable.
-#define LOG_LINES_PER_FILE ((7 * 24 * 60) / LOG_APPEND_MINUTES) // 7 days per file
-//
 // If set, log each sensor in SENSORS[] unless SENSOR_CFG_FLAG_NOLOG is set
 // Otherwise, don't log any sensor in SENSORS[] unless SENSOR_CFG_FLAG_LOG is set
 #define LOG_SENSORS_BY_DEFAULT 1
@@ -115,6 +88,31 @@
 // If set, log each controller in CONTROLLERS[] unless CONTROLLER_CFG_FLAG_NOLOG is set
 // Otherwise, don't log any controller in CONTROLLERS[] unless CONTROLLER_CFG_FLAG_LOG is set
 #define LOG_CONTROLLERS_BY_DEFAULT 1
+//
+// Rotate the log file after LOG_LINES_PER_FILE lines have been written to the
+// current one
+// If set, this must be > 1.
+// Set to 0 to disable.
+#define LOG_LINES_PER_FILE ((7 * 24 * 60) / LOG_APPEND_MINUTES) // 7 days per file
+//
+// Log file name pattern
+// Names are 8.3 format (8 characters for the name + 3 for an extension), but
+// can include directories.
+// The path is relative to the storage root and any parent directories must exist.
+// The maximum path size is 255 bytes.
+// If LOG_LINES_PER_FILE is > 0, this name is modified at the 5th and 6th places
+// before the end and those characters must be 'XX'.
+#define LOG_FILE_NAME_PATTERN "STATUSXX.LOG"
+//
+// If set, keep track of the current log file name
+// Without this LOGFILE_NAME_PATTERN does nothing and LOG_LINES_PER_FILE just
+// reprints the header when the file would otherwise be rotated.
+#define USE_LOG_FILE_NAME (WRITE_LOG_TO_SD)
+//
+// If set, use the raw system uptime in seconds as the log file system time field
+// Otherwise, print the time as either 'DDdHHhMMmSSs' or 'YYYY.MM.DD_hh:mm:ss'
+// depending on whether we think the date has been set.
+#define LOG_USES_SYSTEM_TIME 0
 
 //
 // These settings are for the sensor_defs.h and controller_defs.h configuration
@@ -173,3 +171,54 @@
 //
 // If soil resistance is >= this many ohms, consider it dry
 #define MOIST_READING_DRY 10000
+
+//
+// These settings are for the logfile.h configuration file
+// They are specific to the implementation used here and may vary over time and
+// configuration
+// If set, write the log file to an SD card
+// SPI_CS_SD_PIN must be set to the chip-select pin that controls the SD card.
+#define WRITE_LOG_TO_SD 1
+//
+// If opening the SD log output fails and this isn't set, don't write any other
+// log outputs either to avoid flushing the buffer
+#define LOG_WITH_MISSING_SD 0
+//
+// If set, write log output to a UART port
+// All log buffering is still applied.
+#define WRITE_LOG_TO_UART 1
+//
+// If opening the uart log output fails and this isn't set, don't write any other
+// log outputs either to avoid flushing the buffer
+#define LOG_WITH_MISSING_UART 1
+//
+// The TX and RX pins the log is written to
+// If 0, use the standard communication port.
+#define UART_LOG_TX_PIN 0
+#define UART_LOG_RX_PIN 0
+//
+// The UART settings for log output when not using the standard port
+#define UART_LOG_BAUDRATE 9600UL
+#define UART_LOG_TIMEOUT_MS 1000UL
+//
+// The pin used to control power to the logging device(s)
+// Unused if 0.
+#define LOG_POWER_PIN 0
+//
+// The number of milliseconds to delay after turning on the power pin to allow
+// the source to stabilize
+#define LOG_POWER_UP_DELAY_MS 100
+//
+// The number of milliseconds to delay before turning off the power pin to allow
+// the devices to shut down properly.
+// An SD card will need a period between when it's gone inactive and when the
+// power is removed to minimize chances of corrupted data; see
+// https://github.com/greiman/SdFat/issues/21
+// by way of
+// https://thecavepearlproject.org/2017/05/21/switching-off-sd-cards-for-low-power-data-logging/
+#define LOG_POWER_DOWN_DELAY_MS 100
+
+#if USE_LOGGING && WRITE_LOG_TO_SD
+# define uHAL_USE_SPI 1
+# define uHAL_USE_FATFS 1
+#endif

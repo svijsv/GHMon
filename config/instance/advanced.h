@@ -125,22 +125,11 @@
 // calls that need to be made to the FatFS library.
 #define LOG_PRINT_BUFFER_SIZE 2048
 //
-// If opening the uart log output fails and this isn't set, don't write any other
-// log outputs either to avoid flushing the buffer
-#define LOG_WITH_MISSING_UART 1
+// The string printed to the log for invalid values
+#define LOG_INVALID_VALUE "(invalid)"
 //
-// If opening the SD log output fails and this isn't set, don't write any other
-// log outputs either to avoid flushing the buffer
-#define LOG_WITH_MISSING_SD   0
+// The string printed to the log for fields that aren't supported
+#define LOG_NO_VALUE "(unavailable)"
 //
-// The UART settings for log output when not using the standard port
-#define UART_LOG_BAUDRATE 9600UL
-#define UART_LOG_TIMEOUT_MS 1000UL
-
-//
-// Wait this many milliseconds for device power to come up when it's turned on
-// In testing, 20ms was too short for reliable AC amplitude measurement and
-// may have been the cause of unreliable single-measurement ADC values
-// 50ms was much better but not as good as 75ms and 100ms wasn't signifantly
-// better than 75ms
-#define POWER_UP_DELAY_MS 75
+// The string printed at the end of each log line
+#define LOG_LINE_END "\r\n"
