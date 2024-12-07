@@ -12,7 +12,7 @@
 
 //
 // Section 1
-// Initialization/Run Definitions
+// Function Definitions
 //
 
 //
@@ -64,67 +64,80 @@ static err_t fan1_run(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, controller_s
 }
 
 //
-// Controller 2, start irrigation
+// Controller 2, irrigation
 //
-static bool irr1_is_on = false;
-static err_t irr1_start_init(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, controller_status_t *status) {
+static err_t irr1_init(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, controller_status_t *status) {
 	output_pin_off(IRR1_CTRL_PIN);
 
 	UNUSED(cfg);
 	UNUSED(status);
 	return ERR_OK;
 }
-static err_t irr1_start_run(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, controller_status_t *status) {
-	if (BIT_IS_SET(ghmon_warnings, WARN_BATTERY_LOW | WARN_VCC_LOW)) {
-		//status->status = ERR_RETRY;
-		return ERR_RETRY;
-	}
-
-	if (read_sensor_by_name("GND_MOIST1", true, 0) >= MOIST_READING_DRY) {
-		// Turn on the irrigation pump, it's turned off by the irr1_stop controller
-		output_pin_on(IRR1_CTRL_PIN);
-		status->status = NOW();
-		irr1_is_on = true;
-	}
-
+static err_t irr1_run(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, controller_status_t *status) {
 	UNUSED(cfg);
+
+	bool turned_on = status->status != 0;
+
+	if (!turned_on) {
+		//
+		// Don't run if we have a low battery - this isn't time-critical, we can
+		// wait until it recharges.
+		if (BIT_IS_SET(ghmon_warnings, WARN_BATTERY_LOW | WARN_VCC_LOW)) {
+			//status->status = ERR_RETRY;
+			return ERR_RETRY;
+		}
+
+		if (read_sensor_by_name("GND_MOIST1", true, 0) >= MOIST_READING_DRY) {
+			output_pin_on(IRR1_CTRL_PIN);
+			//
+			// Use status->data to track the time of last status change
+			status->status = NOW();
+			//
+			// Use status->data to track whether we're turned on.
+			status->data = (void *)1;
+		}
+
+	} else {
+		bool turn_off =
+			//
+			// Use the status->data field to limit ourselves to two run-periods on,
+			// any more than that is probably indicative of a problem somewhere.
+		   status->data == (void *)2 ||
+			//
+			// Turn off if we have a low battery - this isn't time-critical, we can
+			// wait until it recharges.
+			BIT_IS_SET(ghmon_warnings, WARN_BATTERY_LOW | WARN_VCC_LOW) ||
+			read_sensor_by_name("GND_MOIST1", true, 0) <= MOIST_READING_DRY
+			;
+
+		if (turn_off) {
+			output_pin_off(IRR1_CTRL_PIN);
+			status->status = NOW();
+			status->data = (void *)0;
+		} else {
+			++status->data;
+		}
+	}
+
 	return ERR_OK;
 }
-
-//
-// Controller 3, stop irrigation
-//
-static utime_t irr1_stop_next_run_time(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, controller_status_t *status) {
+static utime_t irr1_next_run_time(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, controller_status_t *status) {
 	UNUSED(cfg);
-	return ((uint )status->data == 0) ? 0 : (NOW() + (5 * SECONDS_PER_MINUTE));
-}
-static err_t irr1_stop_run(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, controller_status_t *status) {
-	//if (!output_pin_is_on(IRR1_CTRL_PIN)) {
-	if (!irr1_is_on) {
-		return ERR_OK;
-	}
 
-	bool stop = true;
-	bool dry = (read_sensor_by_name("GND_MOIST1", true, 0) >= MOIST_READING_DRY);
-	uint count = (uint )status->data;
-	if (count < 2) {
-		stop = false;
-		status->data = (void *)(count + 1);
-	}
-	if (stop) {
-		output_pin_off(IRR1_CTRL_PIN);
-		status->status = NOW();
-		irr1_is_on = false;
-	}
+	bool turned_on = status->data != 0;
 
-	UNUSED(cfg);
-	// If we're still dry, there may be something wrong so return an error
-	return (stop && dry) ? ERR_UNKNOWN : ERR_OK;
+	//
+	// This may cause problems if the rescheduling is forced (e.g. because of
+	// changes to the system time) but should work OK for most part. Another
+	// solution might be to take the time of last turn-on in the status->status
+	// field and use five minutes after that, but there would still be problems
+	// with forward time leaps - the next turn-on could be years in the future.
+	return (turned_on) ? (NOW() + (5 * SECONDS_PER_MINUTE)) : 0;
 }
 
 /*
 //
-// Controller 4, OK alarm
+// Controller 3, OK alarm
 // Sound an alarm every 1 minute as long as everything's OK
 //
 static err_t OK_alarm_init(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, controller_status_t *status) {
@@ -210,32 +223,19 @@ CONTROLLER_CFG_STORAGE controller_cfg_t CONTROLLERS[] = {
 },
 //
 // Controller 2, start irrigation
-// Every afternoon at 17:00, check soil moisture and irrigate if required
+// Every day at 17:00, check soil moisture and irrigate if required
 //static CONTROLLER_CFG_STORAGE controller_cfg_t irr1_start = {
 {
-	.name = "IRR1_START",
-	.init = irr1_start_init,
-	.run = irr1_start_run,
-	.next_run_time = NULL,
+	.name = "IRR1",
+	.init = irr1_init,
+	.run = irr1_run,
+	.next_run_time = irr1_next_run_time,
 	.schedule_minutes = (17 * MINUTES_PER_HOUR),
-	.cfg_flags = CONTROLLER_CFG_FLAG_USE_TIME_OF_DAY
-},
-//
-// Controller 3, stop irrigation
-// Every afternoon at 17:10, stop irrigation if it's running and no longer
-// required
-//static CONTROLLER_CFG_STORAGE controller_cfg_t irr1_stop = {
-{
-	.name = "IRR1_STOP",
-	.init = NULL,
-	.run = irr1_stop_run,
-	.next_run_time = irr1_stop_next_run_time,
-	.schedule_minutes = (17 * MINUTES_PER_HOUR) + 10,
 	.cfg_flags = CONTROLLER_CFG_FLAG_USE_TIME_OF_DAY
 },
 /*
 //
-// Controller 4, OK alarm
+// Controller 3, OK alarm
 // Sound an alarm every 1 minute as long as everything's OK
 //static CONTROLLER_CFG_STORAGE controller_cfg_t OK_alarm = {
 {
