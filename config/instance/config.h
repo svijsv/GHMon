@@ -21,7 +21,7 @@
 # define USE_SMALL_SENSORS 0
 #endif
 //
-// Enable data logging to SD cards
+// Enable data logging
 #define USE_LOGGING 1
 //
 // Use the control button
@@ -217,8 +217,3 @@
 // by way of
 // https://thecavepearlproject.org/2017/05/21/switching-off-sd-cards-for-low-power-data-logging/
 #define LOG_POWER_DOWN_DELAY_MS 100
-
-#if USE_LOGGING && WRITE_LOG_TO_SD
-# define uHAL_USE_SPI 1
-# define uHAL_USE_FATFS 1
-#endif

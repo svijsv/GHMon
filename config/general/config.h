@@ -50,8 +50,8 @@
 // Instance configuration
 #include GHMON_INCLUDE_CONFIG_HEADER(config.h)
 #include GHMON_INCLUDE_CONFIG_HEADER(advanced.h)
-#include "config/general/config_unify.h"
 
+// We use these elsewhere
 //#undef GHMON_STRINGIZE
 //#undef _GHMON_INCLUDE_CONFIG_HEADER
 //#undef GHMON_INCLUDE_CONFIG_HEADER
