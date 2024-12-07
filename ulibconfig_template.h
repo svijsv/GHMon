@@ -2,7 +2,6 @@
 // config.h
 // Configuration file for the ulib modules
 //
-// This file should only be included by configify.h
 
 /*
 * Global configuration
