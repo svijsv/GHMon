@@ -25,6 +25,7 @@
 #include "sensors.h"
 
 #include "ulib/include/math.h"
+#include "ulib/include/util.h"
 
 #include GHMON_INCLUDE_CONFIG_HEADER(sensors/sensor_defs.h)
 
@@ -39,6 +40,8 @@ sensor_status_t sensors[SIZEOF_ARRAY(SENSORS)];
 static err_t _init_sensor(SENSOR_CFG_STORAGE sensor_cfg_t *cfg, sensor_status_t *status) {
 	assert(cfg != NULL);
 	assert(status != NULL);
+
+	mem_init(status, 0, sizeof(*status));
 
 #if USE_SENSOR_INIT
 	if (cfg->init != NULL) {

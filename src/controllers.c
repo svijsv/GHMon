@@ -25,6 +25,8 @@
 #include "controllers.h"
 #include "sensors.h"
 
+#include "ulib/include/util.h"
+
 #include GHMON_INCLUDE_CONFIG_HEADER(controllers/controller_defs.h)
 
 // FIXME: This will give random-ish numbers for non-default controllers, but
@@ -45,6 +47,8 @@ controller_status_t* get_controller_status_by_index(CONTROLLER_INDEX_T i) {
 static err_t _init_controller(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, controller_status_t *status) {
 	assert(cfg != NULL);
 	assert(status != NULL);
+
+	mem_init(status, 0, sizeof(*status));
 
 #if USE_CONTROLLER_INIT
 	if (cfg->init != NULL) {
