@@ -21,9 +21,6 @@
 // uHAL configuration file
 // NOTES:
 //
-#ifndef _uHAL_CONFIG_AVR_XMEGA3_H
-#define _uHAL_CONFIG_AVR_XMEGA3_H
-
 
 // Use the less-accurate but lower-power internal oscillator for the system
 // instead of the external crystal
@@ -174,6 +171,7 @@
 #endif
 
 
+/*
 //
 // Pin configuration
 //
@@ -221,5 +219,4 @@
 // I2C pins
 #define I2C_SDA_PIN PINID_I2C0_SDA
 #define I2C_SCL_PIN PINID_I2C0_SCL
-
-#endif //_uHAL_CONFIG_AVR_XMEGA3_H
+*/
