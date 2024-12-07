@@ -21,9 +21,6 @@
 // uHAL configuration file
 // NOTES:
 //
-#ifndef _uHAL_CONFIG_CMSIS_STM32_H
-#define _uHAL_CONFIG_CMSIS_STM32_H
-
 
 // If non-zero, the SWD pins are enabled when DEBUG is non-zero
 #ifndef uHAL_SWD_DEBUG
@@ -149,6 +146,7 @@
 #endif
 
 
+/*
 //
 // Pin configuration
 // Platform-specific
@@ -227,5 +225,4 @@
 // I2C pins
 #define I2C_SDA_PIN PINID_I2C1_SDA
 #define I2C_SCL_PIN PINID_I2C1_SCL
-
-#endif //_uHAL_CONFIG_CMSIS_STM32_H
+*/

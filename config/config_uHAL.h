@@ -21,9 +21,6 @@
 // uHAL configuration file
 // NOTES:
 //
-#ifndef _uHAL_CONFIG_H
-#define _uHAL_CONFIG_H
-
 
 //
 // The program name and version.
@@ -350,6 +347,3 @@
 #ifndef SSD1306_INCLUDE_DEFAULT_FONT
 # define SSD1306_INCLUDE_DEFAULT_FONT 1
 #endif
-
-
-#endif // _uHAL_CONFIG_H
