@@ -10,9 +10,9 @@
 // section and an array of sensor configurations are defined in the second part.
 //
 
-#include "sensor_helpers.h"
-
 #include "ulib/include/halloc.h"
+
+#include "sensor_helpers.h"
 
 uint16_t ADC_Vref_mV = REGULATED_VOLTAGE_mV;
 
@@ -53,6 +53,9 @@ err_t thermistor_init(SENSOR_CFG_STORAGE struct sensor_cfg_t *cfg, sensor_status
 sensor_reading_t* vcc_read(SENSOR_CFG_STORAGE struct sensor_cfg_t *cfg, sensor_status_t *status) {
 	static sensor_reading_t reading = { 0 };
 
+	UNUSED(cfg);
+	UNUSED(status);
+
 	bool enable_adc = (!adc_is_on());
 	if (enable_adc) {
 		adc_on();
@@ -70,6 +73,8 @@ sensor_reading_t* vcc_read(SENSOR_CFG_STORAGE struct sensor_cfg_t *cfg, sensor_s
 // Sensor 1, Battery voltage
 //
 err_t battery_init(SENSOR_CFG_STORAGE struct sensor_cfg_t *cfg, sensor_status_t *status) {
+	UNUSED(status);
+
 	gpio_set_mode(cfg->pin, GPIO_MODE_AIN, GPIO_FLOAT);
 	return ERR_OK;
 }
@@ -77,6 +82,8 @@ sensor_reading_t* battery_read(SENSOR_CFG_STORAGE struct sensor_cfg_t *cfg, sens
 	static sensor_reading_t reading = { 0 };
 	const uint32_t series_r1 = BATTERY_VDIV_HIGH_SIDE_OHMS;
 	const uint32_t series_r2 = BATTERY_VDIV_LOW_SIDE_OHMS;
+
+	UNUSED(status);
 
 	if (series_r2 == 0) {
 		return NULL;

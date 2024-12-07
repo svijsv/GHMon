@@ -119,7 +119,7 @@ sensor_reading_t* thermistor_read(SENSOR_CFG_STORAGE struct sensor_cfg_t *cfg, s
 		// This is the smallest non-zero value our fixed-point number can be
 		tmp = 1;
 	}
-	tmp = fixed_pnt_div(FIXED_PNT_FROM_INT(THERMISTOR_BETA_COEFFICIENT), tmp);
+	tmp = fixed_pnt_div(fixed_pnt_from_int(THERMISTOR_BETA_COEFFICIENT), tmp);
 
 	if (USE_FAHRENHEIT) {
 		tmp = K_TO_F(tmp);
