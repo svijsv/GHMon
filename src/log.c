@@ -27,6 +27,7 @@
 
 #include "log.h"
 
+#include "actuators.h"
 #include "sensors.h"
 #include "controllers.h"
 
@@ -90,23 +91,42 @@ static uint32_t lines_logged_this_file = 0;
 #else
 # define DO_CONTROLLER(_i_) (BIT_IS_SET(CONTROLLERS[_i_].cfg_flags, CONTROLLER_CFG_FLAG_LOG))
 #endif
+#if LOG_ACTUATORS_BY_DEFAULT
+# define DO_ACTUATOR(_i_) (!BIT_IS_SET(ACTUATORS[_i_].cfg_flags, ACTUATOR_CFG_FLAG_NOLOG))
+#else
+# define DO_ACTUATOR(_i_) (BIT_IS_SET(ACTUATORS[_i_].cfg_flags, ACTUATOR_CFG_FLAG_LOG))
+#endif
 
-// This only need to save information which changes and is actually recorded
+// This only needs to save information which changes and is actually recorded
 typedef struct {
 	utime_t  system_time;
 
 #if USE_CONTROLLER_STATUS
 	CONTROLLER_STATUS_T *controller_status;
 #endif
+
 	SENSOR_READING_T *sensor_reading;
+
+	ACTUATOR_STATUS_T *actuator_status;
+#if USE_ACTUATOR_STATUS_CHANGE_TIME
+	utime_t *actuator_status_change_time;
+#endif
+#if USE_ACTUATOR_ON_TIME_COUNT
+	utime_t *actuator_on_time_minutes;
+#endif
+#if USE_ACTUATOR_STATUS_CHANGE_COUNT
+	uint_t *actuator_status_change_count;
+#endif
 
 	uint8_t *controller_status_flags;
 	uint8_t *sensor_status_flags;
+	uint8_t *actuator_status_flags;
 
 	uint8_t ghmon_warnings;
 } log_line_buffer_t;
 static SENSOR_INDEX_T sensor_count;
 static CONTROLLER_INDEX_T controller_count;
+static ACTUATOR_INDEX_T actuator_count;
 
 #if LOG_LINE_BUFFER_COUNT > 0
 // Use a ring buffer so that if there's a problem preventing us from writing
@@ -145,6 +165,7 @@ static void write_log_header(void);
 void log_init(void) {
 	SENSOR_INDEX_T sn = 0;
 	CONTROLLER_INDEX_T cn = 0;
+	ACTUATOR_INDEX_T an = 0;
 
 	for (SENSOR_INDEX_T i = 0; i < SENSOR_COUNT; ++i) {
 		if (DO_SENSOR(i)) {
@@ -160,6 +181,13 @@ void log_init(void) {
 	}
 	controller_count = cn;
 
+	for (ACTUATOR_INDEX_T i = 0; i < ACTUATOR_COUNT; ++i) {
+		if (DO_ACTUATOR(i)) {
+			++an;
+		}
+	}
+	actuator_count = an;
+
 #if LOG_LINE_BUFFER_COUNT > 0
 	for (log_line_buffer_size_t i = 0; i < LOG_LINE_BUFFER_COUNT; ++i) {
 		if (sn > 0) {
@@ -168,15 +196,31 @@ void log_init(void) {
 		}
 
 		if (cn > 0) {
+# if USE_CONTROLLER_STATUS
 			log_buffer.lines[i].controller_status = halloc(cn * sizeof(*log_buffer.lines[0].controller_status));
+# endif
 			log_buffer.lines[i].controller_status_flags = halloc(cn * sizeof(*log_buffer.lines[0].controller_status_flags));
+		}
+
+		if (an > 0) {
+			log_buffer.lines[i].actuator_status = halloc(sn * sizeof(*log_buffer.lines[0].actuator_status));
+			log_buffer.lines[i].actuator_status_flags = halloc(sn * sizeof(*log_buffer.lines[0].actuator_status_flags));
+# if USE_ACTUATOR_STATUS_CHANGE_TIME
+			log_buffer.lines[i].actuator_status_change_time = halloc(sn * sizeof(*log_buffer.lines[0].actuator_status_change_time));
+# endif
+# if USE_ACTUATOR_ON_TIME_COUNT
+			log_buffer.lines[i].actuator_on_time_minutes = halloc(sn * sizeof(*log_buffer.lines[0].actuator_on_time_minutes));
+# endif
+# if USE_ACTUATOR_STATUS_CHANGE_COUNT
+			log_buffer.lines[i].actuator_status_change_count = halloc(sn * sizeof(*log_buffer.lines[0].actuator_status_change_count));
+# endif
 		}
 	}
 #endif
 
 	init_output_device();
 
-	LOGGER("Initialized logging for %u sensors and %u controllers", (uint )sn, (uint )cn);
+	LOGGER("Initialized logging for %u sensors, %u controllers, and %u actuators", (uint )sn, (uint )cn, (uint )an);
 
 	return;
 }
@@ -186,6 +230,7 @@ static void log_status_line(log_line_buffer_t *line) {
 
 	check_common_sensor_warnings();
 	check_common_controller_warnings();
+	check_common_actuator_warnings();
 
 	line->ghmon_warnings = ghmon_warnings;
 	line->system_time = NOW();
@@ -206,6 +251,24 @@ static void log_status_line(log_line_buffer_t *line) {
 #endif
 		line->controller_status_flags[si] = controllers[i].status_flags;
 		++si;
+	}
+
+	for (ACTUATOR_INDEX_T i = 0, ai = 0; i < ACTUATOR_COUNT; ++i) {
+		if (!DO_ACTUATOR(i)) {
+			continue;
+		}
+		line->actuator_status[ai] = actuators[i].status;
+		line->actuator_status_flags[ai] = actuators[i].status_flags;
+# if USE_ACTUATOR_STATUS_CHANGE_TIME
+		line->actuator_status_change_time[ai] = actuators[i].status_change_time;
+# endif
+# if USE_ACTUATOR_ON_TIME_COUNT
+		line->actuator_on_time_minutes[ai] = actuators[i].on_time_minutes;
+# endif
+# if USE_ACTUATOR_STATUS_CHANGE_COUNT
+		line->actuator_status_change_count[ai] = actuators[i].status_change_count;
+# endif
+		++ai;
 	}
 
 	return;
@@ -232,15 +295,39 @@ void log_status(void) {
 #if USE_CONTROLLER_STATUS
 		CONTROLLER_STATUS_T controller_status[controller_count];
 #endif
+		ACTUATOR_STATUS_T actuator_status[actuator_count];
+#if USE_ACTUATOR_STATUS_CHANGE_TIME
+		utime_t actuator_status_change_time[actuator_count];
+#endif
+#if USE_ACTUATOR_ON_TIME_COUNT
+		utime_t actuator_on_time_minutes[actuator_count];
+#endif
+#if USE_ACTUATOR_STATUS_CHANGE_COUNT
+		uint_t actuator_status_change_count[actuator_count];
+#endif
 		uint8_t sensor_status_flags[sensor_count];
 		uint8_t controller_status_flags[controller_count];
+		uint8_t actuator_status_flags[actuator_count];
 
 		current_status.sensor_reading = sensor_reading;
 		current_status.sensor_status_flags = sensor_status_flags;
+
 #if USE_CONTROLLER_STATUS
 		current_status.controller_status = controller_status;
 #endif
 		current_status.controller_status_flags = controller_status_flags;
+
+		current_status.actuator_status = actuator_status;
+		current_status.actuator_status_flags = actuator_status_flags;
+#if USE_ACTUATOR_STATUS_CHANGE_TIME
+		current_status.actuator_status_change_time = actuator_status_change_time;
+#endif
+#if USE_ACTUATOR_ON_TIME_COUNT
+		current_status.actuator_on_time_minutes = actuator_on_time_minutes;
+#endif
+#if USE_ACTUATOR_STATUS_CHANGE_COUNT
+		current_status.actuator_status_change_count = actuator_status_change_count;
+#endif
 
 		log_status_line(&current_status);
 		write_log_line_to_storage(&current_status);
@@ -341,6 +428,43 @@ static void print_log_line(void (*pf)(const char *format, ...), log_line_buffer_
 		}
 		++si;
 	}
+
+	for (ACTUATOR_INDEX_T i = 0, si = 0; i < ACTUATOR_COUNT; ++i) {
+		if (!DO_ACTUATOR(i)) {
+			continue;
+		}
+
+		if (BIT_IS_SET(line->actuator_status_flags[si], ACTUATOR_STATUS_FLAG_ERROR)) {
+			pf("\t!");
+		} else {
+			pf("\t");
+		}
+		if (!BIT_IS_SET(line->actuator_status_flags[si], ACTUATOR_STATUS_FLAG_INITIALIZED)) {
+			pf("%s", invalid_value);
+			if (USE_ACTUATOR_STATUS_CHANGE_TIME) {
+				pf("\t%s", invalid_value);
+			}
+			if (USE_ACTUATOR_ON_TIME_COUNT) {
+				pf("\t%s", invalid_value);
+			}
+			if (USE_ACTUATOR_STATUS_CHANGE_COUNT) {
+				pf("\t%s", invalid_value);
+			}
+		} else {
+			pf("%d", (int )line->actuator_status[si]);
+#if USE_ACTUATOR_STATUS_CHANGE_TIME
+			pf("\t%s", format_print_time(line->actuator_status_change_time[si]));
+#endif
+#if USE_ACTUATOR_ON_TIME_COUNT
+			pf("\t%lu", (long unsigned )line->actuator_on_time_minutes[si]);
+#endif
+#if USE_ACTUATOR_STATUS_CHANGE_COUNT
+			pf("\t%u", (unsigned )line->actuator_status_change_count[si]);
+#endif
+		}
+		++si;
+	}
+
 	pf("%s", line_end);
 
 	return;
@@ -670,8 +794,8 @@ void print_log_header(void (*pf)(const char *format, ...)) {
 		const char *name = FROM_FSTR(SENSORS[i].name);
 #else
 		char name[] = "sens_XX";
-		name[5] = i/10;
-		name[6] = i%10;
+		name[5] = '0' + i/10;
+		name[6] = '0' + i%10;
 #endif
 		pf("\t%s_reading", name);
 	}
@@ -684,16 +808,39 @@ void print_log_header(void (*pf)(const char *format, ...)) {
 		const char *name = FROM_FSTR(CONTROLLERS[i].name);
 #else
 		char name[] = "ctrl_XX";
-		name[5] = i/10;
-		name[6] = i%10;
+		name[5] = '0' + i/10;
+		name[6] = '0' + i%10;
 #endif
 		pf("\t%s_status", name);
 	}
-	pf("%s", line_end);
 
+	for (ACTUATOR_INDEX_T i = 0; i < ACTUATOR_COUNT; ++i) {
+		if (!DO_ACTUATOR(i)) {
+			continue;
+		}
+#if USE_ACTUATOR_NAME
+		const char *name = FROM_FSTR(ACTUATORS[i].name);
+#else
+		char name[] = "actr_XX";
+		name[5] = '0' + i/10;
+		name[6] = '0' + i%10;
+#endif
+		pf("\t%s_status", name);
+#if USE_ACTUATOR_STATUS_CHANGE_TIME
+		pf("\t%s_last_status_change", name);
+#endif
+#if USE_ACTUATOR_ON_TIME_COUNT
+		pf("\t%s_on_time_minutes", name);
+#endif
+#if USE_ACTUATOR_STATUS_CHANGE_COUNT
+		pf("\t%s_status_change_count", name);
+#endif
+	}
+
+	pf("%s", line_end);
 	// This needs to be split to fit in the buffer for F()
 	pf(F("# Warnings: B=battery low, V=Vcc low, S=sensor warning, C=controller warning, "));
-	pf(F("l=log write skipped, L=log write error%s"), line_end);
+	pf(F("A=Actuator warning, l=log write skipped, L=log write error%s"), line_end);
 
 	return;
 }

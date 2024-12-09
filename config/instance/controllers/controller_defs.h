@@ -67,7 +67,7 @@ static err_t fan1_run(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, controller_s
 // Controller 2, irrigation
 //
 static err_t irr1_init(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, controller_status_t *status) {
-	output_pin_off(IRR1_CTRL_PIN);
+	set_actuator_by_name("IRR1", 0);
 
 	UNUSED(cfg);
 	UNUSED(status);
@@ -76,7 +76,7 @@ static err_t irr1_init(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, controller_
 static err_t irr1_run(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, controller_status_t *status) {
 	UNUSED(cfg);
 
-	bool turned_on = status->status != 0;
+	bool turned_on = status->data != 0;
 
 	if (!turned_on) {
 		//
@@ -88,7 +88,7 @@ static err_t irr1_run(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, controller_s
 		}
 
 		if (read_sensor_by_name("GND_MOIST1", true, 0) >= MOIST_READING_DRY) {
-			output_pin_on(IRR1_CTRL_PIN);
+			set_actuator_by_name("IRR1", 1);
 			//
 			// Use status->data to track the time of last status change
 			status->status = NOW();
@@ -111,7 +111,7 @@ static err_t irr1_run(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, controller_s
 			;
 
 		if (turn_off) {
-			output_pin_off(IRR1_CTRL_PIN);
+			set_actuator_by_name("IRR1", 0);
 			status->status = NOW();
 			status->data = (void *)0;
 		} else {
@@ -224,7 +224,7 @@ CONTROLLER_CFG_STORAGE controller_cfg_t CONTROLLERS[] = {
 //
 // Controller 2, start irrigation
 // Every day at 17:00, check soil moisture and irrigate if required
-//static CONTROLLER_CFG_STORAGE controller_cfg_t irr1_start = {
+//static CONTROLLER_CFG_STORAGE controller_cfg_t irr1 = {
 {
 	.name = "IRR1",
 	.init = irr1_init,

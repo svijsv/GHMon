@@ -23,8 +23,9 @@
 //
 
 #include "common.h"
-#include "controllers.h"
+#include "actuators.h"
 #include "sensors.h"
+#include "controllers.h"
 #include "log.h"
 
 #if RTC_CORRECTION_PERIOD_MINUTES < 0
@@ -90,6 +91,10 @@ int main(void) {
 #if USE_UART_TERMINAL
 	uart_listen_on(UART_COMM_PORT);
 #endif
+	//
+	// Initialize actuators first because the other two may use them and
+	// sensors before controller because controllers may depend on sensors
+	init_common_actuators();
 	init_common_sensors();
 	init_common_controllers();
 #if USE_LOGGING
@@ -220,6 +225,7 @@ int main(void) {
 		run_common_controllers(do_controllers, force_controllers);
 
 		if (do_status || ((status_alarm > 0) && (now >= status_alarm))) {
+			check_common_actuator_warnings();
 			check_common_sensor_warnings();
 			check_common_controller_warnings();
 			check_warnings();
@@ -375,6 +381,7 @@ void issue_warning(void) {
 static void check_warnings(void) {
 	const ghmon_warning_flags_t warn_log        = (WARN_LOG_SKIPPED|WARN_LOG_ERROR);
 	const ghmon_warning_flags_t warn_power      = (WARN_BATTERY_LOW|WARN_VCC_LOW);
+	const ghmon_warning_flags_t warn_actuator   = (WARN_ACTUATOR);
 	const ghmon_warning_flags_t warn_sensor     = (WARN_SENSOR);
 	const ghmon_warning_flags_t warn_controller = (WARN_CONTROLLER);
 
@@ -384,17 +391,21 @@ static void check_warnings(void) {
 		sleep_ms(STATUS_LED_LONG_DELAY_MS);
 		led_flash(1, STATUS_LED_ERR_DELAY_MS);
 	} else {
-		if (ghmon_warnings & warn_sensor) {
+		if (ghmon_warnings & warn_actuator) {
 			sleep_ms(STATUS_LED_LONG_DELAY_MS);
 			led_flash(2, STATUS_LED_ERR_DELAY_MS);
 		}
-		if (ghmon_warnings & warn_controller) {
+		if (ghmon_warnings & warn_sensor) {
 			sleep_ms(STATUS_LED_LONG_DELAY_MS);
 			led_flash(3, STATUS_LED_ERR_DELAY_MS);
 		}
-		if (USE_LOGGING && (ghmon_warnings & warn_log)) {
+		if (ghmon_warnings & warn_controller) {
 			sleep_ms(STATUS_LED_LONG_DELAY_MS);
 			led_flash(4, STATUS_LED_ERR_DELAY_MS);
+		}
+		if (USE_LOGGING && (ghmon_warnings & warn_log)) {
+			sleep_ms(STATUS_LED_LONG_DELAY_MS);
+			led_flash(5, STATUS_LED_ERR_DELAY_MS);
 		}
 	}
 

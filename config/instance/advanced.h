@@ -1,7 +1,5 @@
 //
 // Advanced Program Configuration
-// This stuff is kept out of the user configuration file because it will rarely
-// need to be changed 
 //
 
 //
@@ -9,6 +7,15 @@
 #define USE_SMALL_CODE        USE_SMALL_BUILD
 #define SKIP_SAFETY_CHECKS    USE_SMALL_BUILD
 #define SKIP_LIB_SAFETY_CHECKS SKIP_SAFETY_CHECKS
+//
+// These are sub-features of USE_SMALL_SENSORS
+// The configuration and status structs will change depending on these values
+#define USE_SENSOR_NAME     (!USE_SMALL_SENSORS)
+#define USE_SENSOR_INIT     (!USE_SMALL_SENSORS)
+#define USE_SENSOR_COOLDOWN (!USE_SMALL_SENSORS)
+#define USE_SENSOR_CFG_DATA (!USE_SMALL_SENSORS)
+#define USE_SENSOR_CFG_PIN  (!USE_SMALL_SENSORS)
+#define USE_SENSOR_DATA     (!USE_SMALL_SENSORS)
 //
 // These are sub-features of USE_SMALL_CONTROLLERS
 // The configuration and status structs will change depending on these values
@@ -19,14 +26,17 @@
 #define USE_CONTROLLER_STATUS   (!USE_SMALL_CONTROLLERS)
 #define USE_CONTROLLER_NEXTTIME (!USE_SMALL_CONTROLLERS)
 //
-// These are sub-features of USE_SMALL_SENSORS
+// These are sub-features of USE_SMALL_ACTUATORS
 // The configuration and status structs will change depending on these values
-#define USE_SENSOR_NAME     (!USE_SMALL_SENSORS)
-#define USE_SENSOR_INIT     (!USE_SMALL_SENSORS)
-#define USE_SENSOR_COOLDOWN (!USE_SMALL_SENSORS)
-#define USE_SENSOR_CFG_DATA (!USE_SMALL_SENSORS)
-#define USE_SENSOR_CFG_PIN  (!USE_SMALL_SENSORS)
-#define USE_SENSOR_DATA     (!USE_SMALL_SENSORS)
+#define USE_ACTUATOR_NAME     (!USE_SMALL_ACTUATORS)
+#define USE_ACTUATOR_INIT     (!USE_SMALL_ACTUATORS)
+#define USE_ACTUATOR_IS_ON    (!USE_SMALL_ACTUATORS)
+#define USE_ACTUATOR_CFG_DATA (!USE_SMALL_ACTUATORS)
+#define USE_ACTUATOR_CFG_PIN  (!USE_SMALL_ACTUATORS)
+#define USE_ACTUATOR_DATA     (!USE_SMALL_ACTUATORS)
+#define USE_ACTUATOR_STATUS_CHANGE_COUNT (!USE_SMALL_ACTUATORS)
+#define USE_ACTUATOR_STATUS_CHANGE_TIME  (!USE_SMALL_ACTUATORS)
+#define USE_ACTUATOR_ON_TIME_COUNT (!USE_SMALL_ACTUATORS && USE_ACTUATOR_IS_ON && USE_ACTUATOR_STATUS_CHANGE_TIME)
 
 //
 // Delays during status LED display
@@ -85,12 +95,13 @@
 #define CALIBRATE_VREF_COOLDOWN_MINUTES 15
 
 //
-// Maximum length of sensor and controller names
+// Maximum length of sensor, controller, and actuator names
 // Increasing this will increase the ROM space used, but depending on struct
 // layout it may not be a direct relationship; typically rounding the number
 // up to the next multiple of 4 will give the number of bytes used (so that
-// setting it to 8 would use 12 bytes).
+// setting it to 8 would use 12 bytes per device).
 #define DEVICE_NAME_LEN 11
+
 //
 // The type used to store sensor reading values
 #define SENSOR_READING_T int32_t
@@ -108,6 +119,9 @@
 //
 // The default minimum period between reads of a single sensor
 #define SENSOR_COOLDOWN_SECONDS 90
+//
+// The storage class specifier used for the sensor_cfg_t array
+#define SENSOR_CFG_STORAGE const FMEM_STORAGE
 
 //
 // The type used to hold controller status values
@@ -117,6 +131,24 @@
 // The maximum controller count is determined by this type
 // The only negative effect of a larger type is correspoindingly larger code
 #define CONTROLLER_INDEX_T int_fast8_t
+//
+// The storage class specifier used for the controller_cfg_t array
+#define CONTROLLER_CFG_STORAGE const FMEM_STORAGE
+
+//
+// The type used to hold actuator status values
+#define ACTUATOR_STATUS_T int
+//
+// The type used to store actuator configuration data
+#define ACTUATOR_CFG_DATA_T uint32_t
+//
+// The type used to store actuator array indexes
+// The maximum actuator count is determined by this type
+// The only negative effect of a larger type is correspoindingly larger code
+#define ACTUATOR_INDEX_T int_fast8_t
+//
+// The storage class specifier used for the actuator_cfg_t array
+#define ACTUATOR_CFG_STORAGE const FMEM_STORAGE
 
 //
 // The number of bytes used for the SD card write buffer

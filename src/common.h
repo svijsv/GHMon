@@ -41,13 +41,14 @@ typedef enum {
 	WARN_VCC_LOW     = 0x02U,
 	WARN_SENSOR      = 0x04U,
 	WARN_CONTROLLER  = 0x08U,
-	WARN_LOG_SKIPPED = 0x10U,
-	WARN_LOG_ERROR   = 0x20U,
+	WARN_ACTUATOR    = 0x10U,
+	WARN_LOG_SKIPPED = 0x20U,
+	WARN_LOG_ERROR   = 0x40U,
 } ghmon_warning_flags_t;
 //
 // Character representations of the above flags
 // If these change, the log header needs to be changed to match.
-#define GHMON_WARNING_FLAGS "BVSClL"
+#define GHMON_WARNING_FLAGS "BVSCAlL "
 //
 // Used to track warnings in effect
 extern uint_fast8_t ghmon_warnings;

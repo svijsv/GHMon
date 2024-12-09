@@ -14,11 +14,14 @@
 #ifndef USE_SMALL_BUILD
 # define USE_SMALL_BUILD 0
 #endif
+#ifndef USE_SMALL_SENSORS
+# define USE_SMALL_SENSORS 0
+#endif
 #ifndef USE_SMALL_CONTROLLERS
 # define USE_SMALL_CONTROLLERS 0
 #endif
-#ifndef USE_SMALL_SENSORS
-# define USE_SMALL_SENSORS 0
+#ifndef USE_SMALL_ACTUATORS
+# define USE_SMALL_ACTUATORS 0
 #endif
 //
 // Enable data logging
@@ -57,13 +60,6 @@
 // minutes in the past (because e.g. the clock changed or the device restarted),
 // wait until tomorrow
 #define CONTROLLER_SCHEDULE_SKEW_WINDOW_MINUTES 15
-//
-// The storage class specifier used for the controller_cfg_t array
-#define CONTROLLER_CFG_STORAGE const FMEM_STORAGE
-
-//
-// The storage class specifier used for the sensor_cfg_t array
-#define SENSOR_CFG_STORAGE const FMEM_STORAGE
 
 //
 // Data logging configuration
@@ -88,6 +84,10 @@
 // If set, log each controller in CONTROLLERS[] unless CONTROLLER_CFG_FLAG_NOLOG is set
 // Otherwise, don't log any controller in CONTROLLERS[] unless CONTROLLER_CFG_FLAG_LOG is set
 #define LOG_CONTROLLERS_BY_DEFAULT 1
+//
+// If set, log each actuator in ACTUATORS[] unless ACTUATOR_CFG_FLAG_NOLOG is set
+// Otherwise, don't log any actuator in ACTUATORS[] unless ACTUATOR_CFG_FLAG_LOG is set
+#define LOG_ACTUATORS_BY_DEFAULT 0
 //
 // Rotate the log file after LOG_LINES_PER_FILE lines have been written to the
 // current one
@@ -133,7 +133,7 @@
 #define THERMISTOR_SERIES_OHMS      22000U
 //
 // The series resistor for any voltage-divider-based moisture sensors
-#define MOISTURE_SERIES_OHMS 1000U
+#define MOISTURE_SERIES_OHMS 10000U
 //
 // The values of the low- and high-side resistors used in the voltage divider to
 // measure the battery voltage
