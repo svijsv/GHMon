@@ -41,8 +41,6 @@ static err_t _init_sensor(SENSOR_CFG_STORAGE sensor_cfg_t *cfg, sensor_status_t 
 	assert(cfg != NULL);
 	assert(status != NULL);
 
-	mem_init(status, 0, sizeof(*status));
-
 #if USE_SENSOR_INIT
 	if (cfg->init != NULL) {
 		err_t res = cfg->init(cfg, status);
@@ -188,7 +186,7 @@ SENSOR_READING_T read_sensor_by_name(const char *name, bool force_update, uint_f
 #endif
 SENSOR_READING_T read_sensor_by_index(SENSOR_INDEX_T i, bool force_update, uint_fast8_t type) {
 	assert(i >= 0 && i < SENSOR_COUNT);
-	if (!SKIP_SAFETY_CHECKS && i >= SENSOR_COUNT) {
+	if (!SKIP_SAFETY_CHECKS && (i < 0 || i >= SENSOR_COUNT)) {
 		return SENSOR_BAD_VALUE;
 	}
 	return read_sensor(&SENSORS[i], &sensors[i], force_update, type);
@@ -203,6 +201,7 @@ void check_common_sensor_warnings(void) {
 
 		if (BIT_IS_SET(status->status_flags, SENSOR_STATUS_FLAG_ERROR)) {
 			SET_BIT(ghmon_warnings, WARN_SENSOR);
+			return;
 		}
 	}
 

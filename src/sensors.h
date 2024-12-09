@@ -76,13 +76,17 @@ typedef enum {
 // Static configuration of a sensor
 typedef struct sensor_cfg_t {
 #if USE_SENSOR_CFG_DATA
+	//
+	// An optional data field to be used as needed by the sensor definitions
 	SENSOR_CFG_DATA_T data;
 #endif
 #if USE_SENSOR_INIT
 	//
 	// An optional function used to initialize the sensor
 	// If this returns anything other than ERR_OK, the sensor is marked as
-	// uninitialied and considered to be in a state of error.
+	// uninitialied and considered to be in a state of error. Initialization may
+	// be re-attempted at a later time, in which case the status struct is not
+	// zeroed out.
 	// Ignored if NULL.
 	err_t (*init)(SENSOR_CFG_STORAGE struct sensor_cfg_t *cfg, sensor_status_t *status);
 #endif
@@ -103,6 +107,8 @@ typedef struct sensor_cfg_t {
 	uint16_t cooldown_seconds;
 #endif
 #if USE_SENSOR_CFG_PIN
+	//
+	// An optional data field to be used as needed by the sensor definitions
 	gpio_pin_t pin;
 #endif
 #if USE_SENSOR_NAME
@@ -121,6 +127,7 @@ SENSOR_READING_T read_sensor(SENSOR_CFG_STORAGE sensor_cfg_t *cfg, sensor_status
 SENSOR_READING_T read_sensor_by_name(const char *name, bool force_update, uint_fast8_t type);
 SENSOR_READING_T read_sensor_by_index(SENSOR_INDEX_T i, bool force_update, uint_fast8_t type);
 
+//
 // Initialization of the common sensors can be skipped if there's nothing in the
 // sensor initializers that needs to be run on startup
 void init_common_sensors(void);

@@ -23,13 +23,14 @@
 //
 #include "common.h"
 #include "controllers.h"
+#include "actuators.h"
 #include "sensors.h"
 
 #include "ulib/include/util.h"
 
 #include GHMON_INCLUDE_CONFIG_HEADER(controllers/controller_defs.h)
 
-// FIXME: This will give random-ish numbers for non-default controllers, but
+// FIXME: This will give random-ish numbers for non-common controllers, but
 // they should stay the same in any given run and this is just for logging so
 // it's not a big deal
 #define CONTROLLER_ID(_status_) (uint )((_status_) - controllers)
@@ -47,8 +48,6 @@ controller_status_t* get_controller_status_by_index(CONTROLLER_INDEX_T i) {
 static err_t _init_controller(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, controller_status_t *status) {
 	assert(cfg != NULL);
 	assert(status != NULL);
-
-	mem_init(status, 0, sizeof(*status));
 
 #if USE_CONTROLLER_INIT
 	if (cfg->init != NULL) {
@@ -254,6 +253,7 @@ void check_common_controller_warnings(void) {
 
 		if (BIT_IS_SET(status->status_flags, CONTROLLER_STATUS_FLAG_ERROR)) {
 			SET_BIT(ghmon_warnings, WARN_CONTROLLER);
+			return;
 		}
 	}
 

@@ -69,7 +69,9 @@ typedef struct controller_cfg_t {
 	//
 	// An optional function used to initialize the controller
 	// If this returns anything other than ERR_OK, the controller is marked as
-	// uninitialied and considered to be in a state of error.
+	// uninitialied and considered to be in a state of error. Initialization may
+	// be re-attempted at a later time, in which case the status struct is not
+	// zeroed out.
 	// Ignored if NULL.
 	err_t (*init)(CONTROLLER_CFG_STORAGE struct controller_cfg_t *cfg, controller_status_t *status);
 #endif
