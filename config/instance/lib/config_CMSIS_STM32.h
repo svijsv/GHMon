@@ -1,6 +1,7 @@
 //
 // uHAL settings that should be overridden for STM32 devices go in here
 
+#define uHAL_BACKUP_DOMAIN_RESET 0
 #define uHAL_USE_INTERNAL_OSC 0
 #define uHAL_USE_INTERNAL_LS_OSC 0
 
