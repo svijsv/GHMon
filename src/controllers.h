@@ -88,7 +88,7 @@ typedef struct controller_cfg_t {
 	// The time returned is the system time in seconds
 	// If NULL or if this function returns 0, a time will be calculated based
 	// on the scheduled run time and configuration settings
-	utime_t (*next_run_time)(CONTROLLER_CFG_STORAGE struct controller_cfg_t *cfg, controller_status_t *status);
+	utime_t (*next_run_time)(CONTROLLER_CFG_STORAGE struct controller_cfg_t *cfg, controller_status_t *status, utime_t now);
 #endif
 #if USE_CONTROLLER_SCHEDULE
 	//

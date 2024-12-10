@@ -121,18 +121,21 @@ static err_t irr1_run(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, controller_s
 
 	return ERR_OK;
 }
-static utime_t irr1_next_run_time(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, controller_status_t *status) {
+static utime_t irr1_next_run_time(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, controller_status_t *status, utime_t now) {
 	UNUSED(cfg);
 
 	bool turned_on = status->data != 0;
-
 	//
 	// This may cause problems if the rescheduling is forced (e.g. because of
-	// changes to the system time) but should work OK for most part. Another
+	// changes to the system time) but should work OK for the most part. Another
 	// solution might be to take the time of last turn-on in the status->status
 	// field and use five minutes after that, but there would still be problems
-	// with forward time leaps - the next turn-on could be years in the future.
-	return (turned_on) ? (NOW() + (5 * SECONDS_PER_MINUTE)) : 0;
+	// with backward time leaps - the next turn-on could be years in the future.
+	//
+	// If this returns 0 and CONTROLLER_SCHEDULE_SKEW_WINDOW_MINUTES is less than
+	// the time since the daily schedule run, the controller will run again
+	// immediately.
+	return (turned_on) ? (now + (5 * SECONDS_PER_MINUTE)) : 0;
 }
 
 /*

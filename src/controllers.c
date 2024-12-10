@@ -161,7 +161,7 @@ err_t calculate_controller_alarm(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, c
 
 #if USE_CONTROLLER_NEXTTIME
 	if (cfg->next_run_time != NULL) {
-		next = cfg->next_run_time(cfg, status);
+		next = cfg->next_run_time(cfg, status, now);
 		if (next != 0) {
 			goto END;
 		}
@@ -200,6 +200,12 @@ err_t calculate_controller_alarm(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, c
 	}
 
 END:
+# if USE_CONTROLLER_NAME
+	LOGGER("Next alarm for controller %s at %lu", FROM_FSTR(cfg->name), next);
+# else
+	LOGGER("Next alarm for controller %u at %lu", CONTROLLER_ID(status), next);
+# endif
+
 	status->next_run_time = next;
 #endif // USE_CONTROLLER_SCHEDULE
 
