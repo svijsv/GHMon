@@ -25,6 +25,7 @@
 #define _SENSORS_H
 
 #include "common.h"
+#if USE_SENSORS
 
 //
 // The value of a sensor reading
@@ -139,4 +140,13 @@ extern SENSOR_CFG_STORAGE sensor_cfg_t SENSORS[];
 extern sensor_status_t sensors[];
 extern const SENSOR_INDEX_T SENSOR_COUNT;
 
+#else // USE_SENSORS
+INLINE void init_common_sensors(void) {
+	return;
+}
+INLINE void check_common_sensor_warnings(void) {
+	return;
+}
+static const SENSOR_INDEX_T SENSOR_COUNT = 0;
+#endif // USE_SENSORS
 #endif // _SENSORS_H

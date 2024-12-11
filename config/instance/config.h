@@ -9,8 +9,11 @@
 // Optional components
 // Set to '0' to disable corresponding feature
 //
+// Enable sensors
+#define USE_SENSORS 1
+//
 // Enable controllers
-#define USE_CONTROLLERS 0
+#define USE_CONTROLLERS 1
 //
 // Enable actuators
 #define USE_ACTUATORS 1

@@ -22,6 +22,8 @@
 // NOTES:
 //
 #include "common.h"
+#if USE_SENSORS
+
 #include "sensors.h"
 
 #include "ulib/include/math.h"
@@ -207,3 +209,4 @@ void check_common_sensor_warnings(void) {
 
 	return;
 }
+#endif // USE_SENSORS

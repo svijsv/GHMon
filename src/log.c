@@ -101,13 +101,15 @@ static uint32_t lines_logged_this_file = 0;
 typedef struct {
 	utime_t  system_time;
 
+#if USE_SENSORS
+	SENSOR_READING_T *sensor_reading;
+#endif
+
 #if USE_CONTROLLERS
 # if USE_CONTROLLER_STATUS
 	CONTROLLER_STATUS_T *controller_status;
 # endif
 #endif
-
-	SENSOR_READING_T *sensor_reading;
 
 #if USE_ACTUATORS
 	ACTUATOR_STATUS_T *actuator_status;
@@ -125,14 +127,18 @@ typedef struct {
 #if USE_CONTROLLERS
 	uint8_t *controller_status_flags;
 #endif
+#if USE_SENSORS
 	uint8_t *sensor_status_flags;
+#endif
 #if USE_ACTUATORS
 	uint8_t *actuator_status_flags;
 #endif
 
 	uint8_t ghmon_warnings;
 } log_line_buffer_t;
-static SENSOR_INDEX_T sensor_count;
+#if USE_SENSORS
+ static SENSOR_INDEX_T sensor_count;
+#endif
 #if USE_CONTROLLERS
  static CONTROLLER_INDEX_T controller_count;
 #endif
@@ -179,12 +185,14 @@ void log_init(void) {
 	CONTROLLER_INDEX_T cn = 0;
 	ACTUATOR_INDEX_T an = 0;
 
+#if USE_SENSORS
 	for (SENSOR_INDEX_T i = 0; i < SENSOR_COUNT; ++i) {
 		if (DO_SENSOR(i)) {
 			++sn;
 		}
 	}
 	sensor_count = sn;
+#endif
 
 #if USE_CONTROLLERS
 	for (CONTROLLER_INDEX_T i = 0; i < CONTROLLER_COUNT; ++i) {
@@ -206,10 +214,13 @@ void log_init(void) {
 
 #if LOG_LINE_BUFFER_COUNT > 0
 	for (log_line_buffer_size_t i = 0; i < LOG_LINE_BUFFER_COUNT; ++i) {
+
+#if USE_SENSORS
 		if (sn > 0) {
 			log_buffer.lines[i].sensor_reading = halloc(sn * sizeof(*log_buffer.lines[0].sensor_reading));
 			log_buffer.lines[i].sensor_status_flags = halloc(sn * sizeof(*log_buffer.lines[0].sensor_status_flags));
 		}
+#endif
 
 # if USE_CONTROLLERS
 		if (cn > 0) {
@@ -254,6 +265,7 @@ static void log_status_line(log_line_buffer_t *line) {
 
 	line->ghmon_warnings = ghmon_warnings;
 	line->system_time = NOW();
+#if USE_SENSORS
 	for (SENSOR_INDEX_T i = 0, si = 0; i < SENSOR_COUNT; ++i) {
 		if (!DO_SENSOR(i)) {
 			continue;
@@ -262,6 +274,7 @@ static void log_status_line(log_line_buffer_t *line) {
 		line->sensor_status_flags[si] = sensors[i].status_flags;
 		++si;
 	}
+#endif
 
 #if USE_CONTROLLERS
 	for (CONTROLLER_INDEX_T i = 0, si = 0; i < CONTROLLER_COUNT; ++i) {
@@ -316,11 +329,14 @@ void log_status(void) {
 
 	if (!buffer_line) {
 		log_line_buffer_t current_status;
+
+#if USE_SENSORS
 		SENSOR_READING_T sensor_reading[sensor_count];
 		uint8_t sensor_status_flags[sensor_count];
 
 		current_status.sensor_reading = sensor_reading;
 		current_status.sensor_status_flags = sensor_status_flags;
+#endif
 
 #if USE_CONTROLLERS
 		uint8_t controller_status_flags[controller_count];
@@ -411,6 +427,7 @@ void print_log(void (*pf)(const char *format, ...)) {
 static void print_log_line(void (*pf)(const char *format, ...), log_line_buffer_t *line) {
 	pf("%s\t%s", format_print_time(line->system_time), format_warnings(line->ghmon_warnings));
 
+#if USE_SENSORS
 	for (SENSOR_INDEX_T i = 0, si = 0; i < SENSOR_COUNT; ++i) {
 		if (!DO_SENSOR(i)) {
 			continue;
@@ -428,6 +445,7 @@ static void print_log_line(void (*pf)(const char *format, ...), log_line_buffer_
 		}
 		++si;
 	}
+#endif
 
 #if USE_CONTROLLERS
 	for (CONTROLLER_INDEX_T i = 0, si = 0; i < CONTROLLER_COUNT; ++i) {
@@ -812,6 +830,7 @@ END:
 void print_log_header(void (*pf)(const char *format, ...)) {
 	pf(F("# Time\tWarnings"));
 
+#if USE_SENSORS
 	for (SENSOR_INDEX_T i = 0; i < SENSOR_COUNT; ++i) {
 		if (!DO_SENSOR(i)) {
 			continue;
@@ -825,6 +844,7 @@ void print_log_header(void (*pf)(const char *format, ...)) {
 #endif
 		pf("\t%s_reading", name);
 	}
+#endif
 
 #if USE_CONTROLLERS
 	for (CONTROLLER_INDEX_T i = 0; i < CONTROLLER_COUNT; ++i) {
