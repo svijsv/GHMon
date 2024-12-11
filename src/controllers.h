@@ -25,7 +25,7 @@
 #define _CONTROLLERS_H
 
 #include "common.h"
-
+#if USE_CONTROLLERS
 
 //
 // Status flags for controller_status_t structs
@@ -128,4 +128,25 @@ extern CONTROLLER_CFG_STORAGE controller_cfg_t CONTROLLERS[];
 extern controller_status_t controllers[];
 extern const CONTROLLER_INDEX_T CONTROLLER_COUNT;
 
+#else // USE_CONTROLLERS
+INLINE void init_common_controllers(void) {
+	return;
+}
+INLINE void run_common_controllers(bool manual, bool force) {
+	UNUSED(manual);
+	UNUSED(force);
+	return;
+}
+INLINE void calculate_common_controller_alarms(bool force) {
+	UNUSED(force);
+	return;
+}
+INLINE utime_t find_next_common_controller_alarm(void) {
+	return 0;
+}
+INLINE void check_common_controller_warnings(void) {
+	return;
+}
+static const CONTROLLER_INDEX_T CONTROLLER_COUNT = 0;
+#endif // USE_CONTROLLERS
 #endif // _CONTROLLERS_H

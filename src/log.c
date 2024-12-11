@@ -101,8 +101,10 @@ static uint32_t lines_logged_this_file = 0;
 typedef struct {
 	utime_t  system_time;
 
-#if USE_CONTROLLER_STATUS
+#if USE_CONTROLLERS
+# if USE_CONTROLLER_STATUS
 	CONTROLLER_STATUS_T *controller_status;
+# endif
 #endif
 
 	SENSOR_READING_T *sensor_reading;
@@ -120,7 +122,9 @@ typedef struct {
 # endif
 #endif
 
+#if USE_CONTROLLERS
 	uint8_t *controller_status_flags;
+#endif
 	uint8_t *sensor_status_flags;
 #if USE_ACTUATORS
 	uint8_t *actuator_status_flags;
@@ -129,9 +133,11 @@ typedef struct {
 	uint8_t ghmon_warnings;
 } log_line_buffer_t;
 static SENSOR_INDEX_T sensor_count;
-static CONTROLLER_INDEX_T controller_count;
+#if USE_CONTROLLERS
+ static CONTROLLER_INDEX_T controller_count;
+#endif
 #if USE_ACTUATORS
-static ACTUATOR_INDEX_T actuator_count;
+ static ACTUATOR_INDEX_T actuator_count;
 #endif
 
 #if LOG_LINE_BUFFER_COUNT > 0
@@ -180,12 +186,14 @@ void log_init(void) {
 	}
 	sensor_count = sn;
 
+#if USE_CONTROLLERS
 	for (CONTROLLER_INDEX_T i = 0; i < CONTROLLER_COUNT; ++i) {
 		if (DO_CONTROLLER(i)) {
 			++cn;
 		}
 	}
 	controller_count = cn;
+#endif
 
 #if USE_ACTUATORS
 	for (ACTUATOR_INDEX_T i = 0; i < ACTUATOR_COUNT; ++i) {
@@ -203,12 +211,14 @@ void log_init(void) {
 			log_buffer.lines[i].sensor_status_flags = halloc(sn * sizeof(*log_buffer.lines[0].sensor_status_flags));
 		}
 
+# if USE_CONTROLLERS
 		if (cn > 0) {
-# if USE_CONTROLLER_STATUS
+#  if USE_CONTROLLER_STATUS
 			log_buffer.lines[i].controller_status = halloc(cn * sizeof(*log_buffer.lines[0].controller_status));
-# endif
+#  endif
 			log_buffer.lines[i].controller_status_flags = halloc(cn * sizeof(*log_buffer.lines[0].controller_status_flags));
 		}
+# endif
 
 # if USE_ACTUATORS
 		if (an > 0) {
@@ -252,16 +262,19 @@ static void log_status_line(log_line_buffer_t *line) {
 		line->sensor_status_flags[si] = sensors[i].status_flags;
 		++si;
 	}
+
+#if USE_CONTROLLERS
 	for (CONTROLLER_INDEX_T i = 0, si = 0; i < CONTROLLER_COUNT; ++i) {
 		if (!DO_CONTROLLER(i)) {
 			continue;
 		}
-#if USE_CONTROLLER_STATUS
+# if USE_CONTROLLER_STATUS
 		line->controller_status[si] = controllers[i].status;
-#endif
+# endif
 		line->controller_status_flags[si] = controllers[i].status_flags;
 		++si;
 	}
+#endif
 
 #if USE_ACTUATORS
 	for (ACTUATOR_INDEX_T i = 0, ai = 0; i < ACTUATOR_COUNT; ++i) {
@@ -306,43 +319,34 @@ void log_status(void) {
 		SENSOR_READING_T sensor_reading[sensor_count];
 		uint8_t sensor_status_flags[sensor_count];
 
-#if USE_CONTROLLER_STATUS
-		CONTROLLER_STATUS_T controller_status[controller_count];
-#endif
+		current_status.sensor_reading = sensor_reading;
+		current_status.sensor_status_flags = sensor_status_flags;
+
+#if USE_CONTROLLERS
 		uint8_t controller_status_flags[controller_count];
+		current_status.controller_status_flags = controller_status_flags;
+# if USE_CONTROLLER_STATUS
+		CONTROLLER_STATUS_T controller_status[controller_count];
+		current_status.controller_status = controller_status;
+# endif
+#endif
 
 #if USE_ACTUATORS
 		ACTUATOR_STATUS_T actuator_status[actuator_count];
 		uint8_t actuator_status_flags[actuator_count];
-# if USE_ACTUATOR_STATUS_CHANGE_TIME
-		utime_t actuator_status_change_time[actuator_count];
-# endif
-# if USE_ACTUATOR_ON_TIME_COUNT
-		utime_t actuator_on_time_minutes[actuator_count];
-# endif
-# if USE_ACTUATOR_STATUS_CHANGE_COUNT
-		uint_t actuator_status_change_count[actuator_count];
-# endif
-#endif
-
-		current_status.sensor_reading = sensor_reading;
-		current_status.sensor_status_flags = sensor_status_flags;
-
-#if USE_CONTROLLER_STATUS
-		current_status.controller_status = controller_status;
-#endif
-		current_status.controller_status_flags = controller_status_flags;
-
-#if USE_ACTUATORS
 		current_status.actuator_status = actuator_status;
 		current_status.actuator_status_flags = actuator_status_flags;
+
 # if USE_ACTUATOR_STATUS_CHANGE_TIME
+		utime_t actuator_status_change_time[actuator_count];
 		current_status.actuator_status_change_time = actuator_status_change_time;
 # endif
 # if USE_ACTUATOR_ON_TIME_COUNT
+		utime_t actuator_on_time_minutes[actuator_count];
 		current_status.actuator_on_time_minutes = actuator_on_time_minutes;
 # endif
 # if USE_ACTUATOR_STATUS_CHANGE_COUNT
+		uint_t actuator_status_change_count[actuator_count];
 		current_status.actuator_status_change_count = actuator_status_change_count;
 # endif
 #endif
@@ -425,6 +429,7 @@ static void print_log_line(void (*pf)(const char *format, ...), log_line_buffer_
 		++si;
 	}
 
+#if USE_CONTROLLERS
 	for (CONTROLLER_INDEX_T i = 0, si = 0; i < CONTROLLER_COUNT; ++i) {
 		if (!DO_CONTROLLER(i)) {
 			continue;
@@ -438,14 +443,15 @@ static void print_log_line(void (*pf)(const char *format, ...), log_line_buffer_
 		if (!BIT_IS_SET(line->controller_status_flags[si], CONTROLLER_STATUS_FLAG_INITIALIZED)) {
 			pf("%s", invalid_value);
 		} else {
-#if USE_CONTROLLER_STATUS
+# if USE_CONTROLLER_STATUS
 			pf("%d", (int )line->controller_status[si]);
-#else
+# else
 			pf("%s", no_value);
-#endif
+# endif
 		}
 		++si;
 	}
+#endif
 
 #if USE_ACTUATORS
 	for (ACTUATOR_INDEX_T i = 0, si = 0; i < ACTUATOR_COUNT; ++i) {
@@ -820,19 +826,21 @@ void print_log_header(void (*pf)(const char *format, ...)) {
 		pf("\t%s_reading", name);
 	}
 
+#if USE_CONTROLLERS
 	for (CONTROLLER_INDEX_T i = 0; i < CONTROLLER_COUNT; ++i) {
 		if (!DO_CONTROLLER(i)) {
 			continue;
 		}
-#if USE_CONTROLLER_NAME
+# if USE_CONTROLLER_NAME
 		const char *name = FROM_FSTR(CONTROLLERS[i].name);
-#else
+# else
 		char name[] = "ctrl_XX";
 		name[5] = '0' + i/10;
 		name[6] = '0' + i%10;
-#endif
+# endif
 		pf("\t%s_status", name);
 	}
+#endif
 
 #if USE_ACTUATORS
 	for (ACTUATOR_INDEX_T i = 0; i < ACTUATOR_COUNT; ++i) {

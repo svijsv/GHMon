@@ -22,6 +22,8 @@
 // NOTES:
 //
 #include "common.h"
+#if USE_CONTROLLERS
+
 #include "controllers.h"
 #include "actuators.h"
 #include "sensors.h"
@@ -265,3 +267,5 @@ void check_common_controller_warnings(void) {
 
 	return;
 }
+
+#endif // USE_CONTROLLERS

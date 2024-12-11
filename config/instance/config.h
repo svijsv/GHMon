@@ -9,6 +9,12 @@
 // Optional components
 // Set to '0' to disable corresponding feature
 //
+// Enable controllers
+#define USE_CONTROLLERS 0
+//
+// Enable actuators
+#define USE_ACTUATORS 1
+//
 // Cut down the size of internal components at the expense of functionality
 // These can be controlled in more detail in advanced.h
 #ifndef USE_SMALL_BUILD
@@ -23,9 +29,6 @@
 #ifndef USE_SMALL_ACTUATORS
 # define USE_SMALL_ACTUATORS 0
 #endif
-//
-// Enable actuators
-#define USE_ACTUATORS 0
 //
 // Enable data logging
 #define USE_LOGGING 1
