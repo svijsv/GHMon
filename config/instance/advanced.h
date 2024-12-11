@@ -165,3 +165,7 @@
 //
 // The string printed at the end of each log line
 #define LOG_LINE_END "\r\n"
+//
+// The format of the system time printed in the log
+// Possible values are TIME_FORMAT_{AUTO,SECONDS,DURATION,DATE}
+#define LOG_TIME_FORMAT TIME_FORMAT_AUTO

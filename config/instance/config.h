@@ -118,11 +118,6 @@
 // Without this LOGFILE_NAME_PATTERN does nothing and LOG_LINES_PER_FILE just
 // reprints the header when the file would otherwise be rotated.
 #define USE_LOG_FILE_NAME (WRITE_LOG_TO_SD)
-//
-// If set, use the raw system uptime in seconds as the log file system time field
-// Otherwise, print the time as either 'DDdHHhMMmSSs' or 'YYYY.MM.DD_hh:mm:ss'
-// depending on whether we think the date has been set.
-#define LOG_USES_SYSTEM_TIME 0
 
 //
 // These settings are for the sensor_defs.h and controller_defs.h configuration

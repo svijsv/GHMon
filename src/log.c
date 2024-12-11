@@ -58,6 +58,13 @@
 
 #include GHMON_INCLUDE_CONFIG_HEADER(log/logfile.h)
 
+typedef enum {
+	TIME_FORMAT_AUTO = 0,
+	TIME_FORMAT_SECONDS,
+	TIME_FORMAT_DURATION,
+	TIME_FORMAT_DATE
+} time_format_t;
+
 #if LOG_LINES_PER_FILE == 1
   // Why not? There was a note about it causing an infinite recursion but I
   // can't find where that would happen.
@@ -175,7 +182,7 @@ static void buffer_status_line(void);
 static void lprintf_putc(uint_fast8_t c);
 static void lprintf(const char *format, ...)
 	__attribute__ ((format(printf, 1, 2)));
-static char* format_print_time(utime_t uptime);
+static char* format_print_time(utime_t uptime, time_format_t format);
 static char* format_warnings(uint8_t warnings);
 static err_t open_log_storage(void);
 static err_t open_log_file(void);
@@ -388,7 +395,7 @@ void print_log(void (*pf)(const char *format, ...)) {
 }
 
 static void print_log_line(void (*pf)(const char *format, ...), log_line_buffer_t *line) {
-	pf("%s\t%s", format_print_time(line->system_time), format_warnings(line->ghmon_warnings));
+	pf("%s\t%s", format_print_time(line->system_time, LOG_TIME_FORMAT), format_warnings(line->ghmon_warnings));
 
 #if USE_SENSORS
 	for (SENSOR_INDEX_T i = 0, si = 0; i < SENSOR_COUNT; ++i) {
@@ -459,10 +466,10 @@ static void print_log_line(void (*pf)(const char *format, ...), log_line_buffer_
 		} else {
 			pf("%d", (int )line->actuators[si].status);
 # if USE_ACTUATOR_STATUS_CHANGE_TIME
-			pf("\t%s", format_print_time(line->actuators[si].status_change_time));
+			pf("\t%s", format_print_time(line->actuators[si].status_change_time, LOG_TIME_FORMAT));
 # endif
 # if USE_ACTUATOR_ON_TIME_COUNT
-			pf("\t%s", format_print_time(line->actuators[si].on_time_seconds));
+			pf("\t%s", format_print_time(line->actuators[si].on_time_seconds, TIME_FORMAT_DURATION));
 # endif
 # if USE_ACTUATOR_STATUS_CHANGE_COUNT
 			pf("\t%u", (unsigned )line->actuators[si].status_change_count);
@@ -499,17 +506,25 @@ void write_log_to_storage(void) {
 	return;
 }
 
-static char* format_print_time(utime_t uptime) {
+static char* format_print_time(utime_t uptime, time_format_t format) {
 	// 20 is enough to hold '2021.02.15 12:00:00' with a trailing NUL
 	static char timestr[20];
 
-	if (LOG_USES_SYSTEM_TIME) {
+	if (format == TIME_FORMAT_AUTO) {
+		// Assume that if the year hasn't been set, this is an uptime not a date
+		// Also assume that it's at least 3 years since YEAR_0 and that this won't
+		// run continuously for more than 3 years
+		if (uptime < (SECONDS_PER_YEAR * 3)) {
+			format = TIME_FORMAT_DURATION;
+		} else {
+			format = TIME_FORMAT_DATE;
+		}
+	}
+
+	if (format == TIME_FORMAT_SECONDS) {
 		cstring_from_uint(timestr, SIZEOF_ARRAY(timestr), uptime, 10);
 
-	// Assume that if the year hasn't been set, this is an uptime not a date
-	// Also assume that it's at least 3 years since YEAR_0 and that this won't
-	// run continuously for more than 3 years
-	} else if (uptime < (SECONDS_PER_YEAR * 3)) {
+	} else if (format == TIME_FORMAT_DURATION) {
 		uint offset;
 		const uint len = SIZEOF_ARRAY(timestr);
 
@@ -532,6 +547,7 @@ static char* format_print_time(utime_t uptime) {
 		offset += cstring_from_uint(&timestr[offset], len - offset, (uptime % SECONDS_PER_MINUTE), 10);
 		timestr[offset] = 's';
 		timestr[offset+1] = 0;
+
 	} else {
 		uiter_t i;
 		uint8_t year, month, day, hour, minute, second;
