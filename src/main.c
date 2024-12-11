@@ -322,7 +322,7 @@ static utime_t set_alarms(bool force) {
 		reason = "Run controllers";
 	}
 
-	int diff = (next > now) ? next - now : -((int )(now - next));
+	int diff = (next > now) ? (int )(next - now) : -((int )(now - next));
 	LOGGER("Next alarm in %d seconds: %s", diff, reason);
 	return next;
 }
