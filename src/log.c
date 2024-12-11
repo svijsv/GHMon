@@ -97,45 +97,49 @@ static uint32_t lines_logged_this_file = 0;
 # define DO_ACTUATOR(_i_) (BIT_IS_SET(ACTUATORS[_i_].cfg_flags, ACTUATOR_CFG_FLAG_LOG))
 #endif
 
-// This only needs to save information which changes and is actually recorded
+// These only need to save information which changes and is actually recorded
+typedef struct {
+	SENSOR_READING_T reading;
+	uint8_t status_flags;
+} sensor_log_buffer_t;
+
+typedef struct {
+# if USE_CONTROLLER_STATUS
+	CONTROLLER_STATUS_T status;
+# endif
+	uint8_t status_flags;
+} controller_log_buffer_t;
+
+typedef struct {
+# if USE_ACTUATOR_STATUS_CHANGE_TIME
+	utime_t status_change_time;
+# endif
+# if USE_ACTUATOR_ON_TIME_COUNT
+	utime_t on_time_seconds;
+# endif
+# if USE_ACTUATOR_STATUS_CHANGE_COUNT
+	uint_t status_change_count;
+# endif
+	ACTUATOR_STATUS_T status;
+	uint8_t status_flags;
+} actuator_log_buffer_t;
+
 typedef struct {
 	utime_t  system_time;
 
 #if USE_SENSORS
-	SENSOR_READING_T *sensor_reading;
+	sensor_log_buffer_t *sensors;
 #endif
-
 #if USE_CONTROLLERS
-# if USE_CONTROLLER_STATUS
-	CONTROLLER_STATUS_T *controller_status;
-# endif
-#endif
-
-#if USE_ACTUATORS
-	ACTUATOR_STATUS_T *actuator_status;
-# if USE_ACTUATOR_STATUS_CHANGE_TIME
-	utime_t *actuator_status_change_time;
-# endif
-# if USE_ACTUATOR_ON_TIME_COUNT
-	utime_t *actuator_on_time_minutes;
-# endif
-# if USE_ACTUATOR_STATUS_CHANGE_COUNT
-	uint_t *actuator_status_change_count;
-# endif
-#endif
-
-#if USE_CONTROLLERS
-	uint8_t *controller_status_flags;
-#endif
-#if USE_SENSORS
-	uint8_t *sensor_status_flags;
+	controller_log_buffer_t *controllers;
 #endif
 #if USE_ACTUATORS
-	uint8_t *actuator_status_flags;
+	actuator_log_buffer_t *actuators;
 #endif
 
 	uint8_t ghmon_warnings;
 } log_line_buffer_t;
+
 #if USE_SENSORS
  static SENSOR_INDEX_T sensor_count;
 #endif
@@ -217,33 +221,17 @@ void log_init(void) {
 
 #if USE_SENSORS
 		if (sn > 0) {
-			log_buffer.lines[i].sensor_reading = halloc(sn * sizeof(*log_buffer.lines[0].sensor_reading));
-			log_buffer.lines[i].sensor_status_flags = halloc(sn * sizeof(*log_buffer.lines[0].sensor_status_flags));
+			log_buffer.lines[i].sensors = halloc(sn * sizeof(log_buffer.lines[0].sensors[0]));
 		}
 #endif
-
 # if USE_CONTROLLERS
 		if (cn > 0) {
-#  if USE_CONTROLLER_STATUS
-			log_buffer.lines[i].controller_status = halloc(cn * sizeof(*log_buffer.lines[0].controller_status));
-#  endif
-			log_buffer.lines[i].controller_status_flags = halloc(cn * sizeof(*log_buffer.lines[0].controller_status_flags));
+			log_buffer.lines[i].controllers = halloc(cn * sizeof(log_buffer.lines[0].controllers[0]));
 		}
 # endif
-
 # if USE_ACTUATORS
 		if (an > 0) {
-			log_buffer.lines[i].actuator_status = halloc(an * sizeof(*log_buffer.lines[0].actuator_status));
-			log_buffer.lines[i].actuator_status_flags = halloc(an * sizeof(*log_buffer.lines[0].actuator_status_flags));
-#  if USE_ACTUATOR_STATUS_CHANGE_TIME
-			log_buffer.lines[i].actuator_status_change_time = halloc(an * sizeof(*log_buffer.lines[0].actuator_status_change_time));
-#  endif
-#  if USE_ACTUATOR_ON_TIME_COUNT
-			log_buffer.lines[i].actuator_on_time_minutes = halloc(an * sizeof(*log_buffer.lines[0].actuator_on_time_minutes));
-#  endif
-#  if USE_ACTUATOR_STATUS_CHANGE_COUNT
-			log_buffer.lines[i].actuator_status_change_count = halloc(an * sizeof(*log_buffer.lines[0].actuator_status_change_count));
-#  endif
+			log_buffer.lines[i].actuators = halloc(an * sizeof(log_buffer.lines[0].actuators[0]));
 		}
 # endif // USE_ACTUATORS
 	}
@@ -270,8 +258,8 @@ static void log_status_line(log_line_buffer_t *line) {
 		if (!DO_SENSOR(i)) {
 			continue;
 		}
-		line->sensor_reading[si] = read_sensor_by_index(i, false, 0);
-		line->sensor_status_flags[si] = sensors[i].status_flags;
+		line->sensors[si].reading = read_sensor_by_index(i, false, 0);
+		line->sensors[si].status_flags = sensors[i].status_flags;
 		++si;
 	}
 #endif
@@ -282,30 +270,30 @@ static void log_status_line(log_line_buffer_t *line) {
 			continue;
 		}
 # if USE_CONTROLLER_STATUS
-		line->controller_status[si] = controllers[i].status;
+		line->controllers[si].status = controllers[i].status;
 # endif
-		line->controller_status_flags[si] = controllers[i].status_flags;
+		line->controllers[si].status_flags = controllers[i].status_flags;
 		++si;
 	}
 #endif
 
 #if USE_ACTUATORS
-	for (ACTUATOR_INDEX_T i = 0, ai = 0; i < ACTUATOR_COUNT; ++i) {
+	for (ACTUATOR_INDEX_T i = 0, si = 0; i < ACTUATOR_COUNT; ++i) {
 		if (!DO_ACTUATOR(i)) {
 			continue;
 		}
-		line->actuator_status[ai] = actuators[i].status;
-		line->actuator_status_flags[ai] = actuators[i].status_flags;
+		line->actuators[si].status = actuators[i].status;
+		line->actuators[si].status_flags = actuators[i].status_flags;
 # if USE_ACTUATOR_STATUS_CHANGE_TIME
-		line->actuator_status_change_time[ai] = actuators[i].status_change_time;
+		line->actuators[si].status_change_time = actuators[i].status_change_time;
 # endif
 # if USE_ACTUATOR_ON_TIME_COUNT
-		line->actuator_on_time_minutes[ai] = actuators[i].on_time_minutes;
+		line->actuators[si].on_time_seconds = actuators[i].on_time_seconds;
 # endif
 # if USE_ACTUATOR_STATUS_CHANGE_COUNT
-		line->actuator_status_change_count[ai] = actuators[i].status_change_count;
+		line->actuators[si].status_change_count = actuators[i].status_change_count;
 # endif
-		++ai;
+		++si;
 	}
 #endif
 
@@ -328,43 +316,18 @@ void log_status(void) {
 	}
 
 	if (!buffer_line) {
-		log_line_buffer_t current_status;
-
+		log_line_buffer_t current_status = { 0 };
 #if USE_SENSORS
-		SENSOR_READING_T sensor_reading[sensor_count];
-		uint8_t sensor_status_flags[sensor_count];
-
-		current_status.sensor_reading = sensor_reading;
-		current_status.sensor_status_flags = sensor_status_flags;
+		sensor_log_buffer_t sensors_m[sensor_count];
+		current_status.sensors = sensors_m;
 #endif
-
 #if USE_CONTROLLERS
-		uint8_t controller_status_flags[controller_count];
-		current_status.controller_status_flags = controller_status_flags;
-# if USE_CONTROLLER_STATUS
-		CONTROLLER_STATUS_T controller_status[controller_count];
-		current_status.controller_status = controller_status;
-# endif
+		controller_log_buffer_t controllers_m[controller_count];
+		current_status.controllers = controllers_m;
 #endif
-
 #if USE_ACTUATORS
-		ACTUATOR_STATUS_T actuator_status[actuator_count];
-		uint8_t actuator_status_flags[actuator_count];
-		current_status.actuator_status = actuator_status;
-		current_status.actuator_status_flags = actuator_status_flags;
-
-# if USE_ACTUATOR_STATUS_CHANGE_TIME
-		utime_t actuator_status_change_time[actuator_count];
-		current_status.actuator_status_change_time = actuator_status_change_time;
-# endif
-# if USE_ACTUATOR_ON_TIME_COUNT
-		utime_t actuator_on_time_minutes[actuator_count];
-		current_status.actuator_on_time_minutes = actuator_on_time_minutes;
-# endif
-# if USE_ACTUATOR_STATUS_CHANGE_COUNT
-		uint_t actuator_status_change_count[actuator_count];
-		current_status.actuator_status_change_count = actuator_status_change_count;
-# endif
+		actuator_log_buffer_t actuators_m[actuator_count];
+		current_status.actuators = actuators_m;
 #endif
 
 		log_status_line(&current_status);
@@ -433,15 +396,15 @@ static void print_log_line(void (*pf)(const char *format, ...), log_line_buffer_
 			continue;
 		}
 
-		if (BIT_IS_SET(line->sensor_status_flags[si], SENSOR_STATUS_FLAG_ERROR)) {
+		if (BIT_IS_SET(line->sensors[si].status_flags, SENSOR_STATUS_FLAG_ERROR)) {
 			pf("\t!");
 		} else {
 			pf("\t");
 		}
-		if (!BIT_IS_SET(line->sensor_status_flags[si], SENSOR_STATUS_FLAG_INITIALIZED)) {
+		if (!BIT_IS_SET(line->sensors[si].status_flags, SENSOR_STATUS_FLAG_INITIALIZED)) {
 			pf("%s", invalid_value);
 		} else {
-			pf("%d", (int )line->sensor_reading[si]);
+			pf("%d", (int )line->sensors[si].reading);
 		}
 		++si;
 	}
@@ -453,16 +416,16 @@ static void print_log_line(void (*pf)(const char *format, ...), log_line_buffer_
 			continue;
 		}
 
-		if (BIT_IS_SET(line->controller_status_flags[si], CONTROLLER_STATUS_FLAG_ERROR)) {
+		if (BIT_IS_SET(line->controllers[si].status_flags, CONTROLLER_STATUS_FLAG_ERROR)) {
 			pf("\t!");
 		} else {
 			pf("\t");
 		}
-		if (!BIT_IS_SET(line->controller_status_flags[si], CONTROLLER_STATUS_FLAG_INITIALIZED)) {
+		if (!BIT_IS_SET(line->controllers[si].status_flags, CONTROLLER_STATUS_FLAG_INITIALIZED)) {
 			pf("%s", invalid_value);
 		} else {
 # if USE_CONTROLLER_STATUS
-			pf("%d", (int )line->controller_status[si]);
+			pf("%d", (int )line->controllers[si].status);
 # else
 			pf("%s", no_value);
 # endif
@@ -477,12 +440,12 @@ static void print_log_line(void (*pf)(const char *format, ...), log_line_buffer_
 			continue;
 		}
 
-		if (BIT_IS_SET(line->actuator_status_flags[si], ACTUATOR_STATUS_FLAG_ERROR)) {
+		if (BIT_IS_SET(line->actuators[si].status_flags, ACTUATOR_STATUS_FLAG_ERROR)) {
 			pf("\t!");
 		} else {
 			pf("\t");
 		}
-		if (!BIT_IS_SET(line->actuator_status_flags[si], ACTUATOR_STATUS_FLAG_INITIALIZED)) {
+		if (!BIT_IS_SET(line->actuators[si].status_flags, ACTUATOR_STATUS_FLAG_INITIALIZED)) {
 			pf("%s", invalid_value);
 			if (USE_ACTUATOR_STATUS_CHANGE_TIME) {
 				pf("\t%s", invalid_value);
@@ -494,15 +457,15 @@ static void print_log_line(void (*pf)(const char *format, ...), log_line_buffer_
 				pf("\t%s", invalid_value);
 			}
 		} else {
-			pf("%d", (int )line->actuator_status[si]);
+			pf("%d", (int )line->actuators[si].status);
 # if USE_ACTUATOR_STATUS_CHANGE_TIME
-			pf("\t%s", format_print_time(line->actuator_status_change_time[si]));
+			pf("\t%s", format_print_time(line->actuators[si].status_change_time));
 # endif
 # if USE_ACTUATOR_ON_TIME_COUNT
-			pf("\t%lu", (long unsigned )line->actuator_on_time_minutes[si]);
+			pf("\t%s", format_print_time(line->actuators[si].on_time_seconds));
 # endif
 # if USE_ACTUATOR_STATUS_CHANGE_COUNT
-			pf("\t%u", (unsigned )line->actuator_status_change_count[si]);
+			pf("\t%u", (unsigned )line->actuators[si].status_change_count);
 # endif
 		}
 		++si;
@@ -879,7 +842,7 @@ void print_log_header(void (*pf)(const char *format, ...)) {
 		pf("\t%s_last_status_change", name);
 # endif
 # if USE_ACTUATOR_ON_TIME_COUNT
-		pf("\t%s_on_time_minutes", name);
+		pf("\t%s_on_time", name);
 # endif
 # if USE_ACTUATOR_STATUS_CHANGE_COUNT
 		pf("\t%s_status_change_count", name);
