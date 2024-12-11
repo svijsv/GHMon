@@ -24,6 +24,8 @@
 #include "common.h"
 #include "actuators.h"
 
+#if USE_ACTUATORS
+
 #include "ulib/include/math.h"
 #include "ulib/include/util.h"
 
@@ -192,3 +194,5 @@ void check_common_actuator_warnings(void) {
 
 	return;
 }
+
+#endif // USE_ACTUATORS

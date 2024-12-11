@@ -24,6 +24,9 @@
 # define USE_SMALL_ACTUATORS 0
 #endif
 //
+// Enable actuators
+#define USE_ACTUATORS 0
+//
 // Enable data logging
 #define USE_LOGGING 1
 //
@@ -56,9 +59,10 @@
 // they ignore this.
 #define CONTROLLER_CHECK_MINUTES 15
 //
-// If a time-of-day controller would be scheduled to run more than this many
+// If a time-of-day controller would be scheduled to run fewer than this many
 // minutes in the past (because e.g. the clock changed or the device restarted),
-// wait until tomorrow
+// run it immediately instead of waiting for tomorrow
+// Be careful using this in conjunction with controller_cfg_t.next_run_time().
 #define CONTROLLER_SCHEDULE_SKEW_WINDOW_MINUTES 15
 
 //

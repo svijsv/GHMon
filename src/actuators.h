@@ -25,6 +25,7 @@
 #define _ACTUATORS_H
 
 #include "common.h"
+#if USE_ACTUATORS
 
 //
 // Status flags for actuator_status_t structs
@@ -131,4 +132,13 @@ extern ACTUATOR_CFG_STORAGE actuator_cfg_t ACTUATORS[];
 extern actuator_status_t actuators[];
 extern const ACTUATOR_INDEX_T ACTUATOR_COUNT;
 
+#else // USE_ACTUATORS
+INLINE void init_common_actuators(void) {
+	return;
+}
+INLINE void check_common_actuator_warnings(void) {
+	return;
+}
+static const ACTUATOR_INDEX_T ACTUATOR_COUNT = 0;
+#endif // USE_ACTUATORS
 #endif // _ACTUATORS_H
