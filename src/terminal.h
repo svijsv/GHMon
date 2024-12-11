@@ -119,8 +119,8 @@ FMEM_STORAGE const char terminal_extra_help[] =
 "   led_toggle        - Toggle the LED\r\n"
 #endif
 #if USE_LOGGING && LOG_LINE_BUFFER_COUNT > 0
-"   play_log          - Print the log buffer"
-"   write_log         - Write the log buffer to storage"
+"   play_log          - Print the log buffer\r\n"
+"   write_log         - Write the log buffer to storage\r\n"
 #endif
 "   reset             - Reset the device\r\n"
 ;
