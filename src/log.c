@@ -233,16 +233,16 @@ void log_init(void) {
 
 # if USE_ACTUATORS
 		if (an > 0) {
-			log_buffer.lines[i].actuator_status = halloc(sn * sizeof(*log_buffer.lines[0].actuator_status));
-			log_buffer.lines[i].actuator_status_flags = halloc(sn * sizeof(*log_buffer.lines[0].actuator_status_flags));
+			log_buffer.lines[i].actuator_status = halloc(an * sizeof(*log_buffer.lines[0].actuator_status));
+			log_buffer.lines[i].actuator_status_flags = halloc(an * sizeof(*log_buffer.lines[0].actuator_status_flags));
 #  if USE_ACTUATOR_STATUS_CHANGE_TIME
-			log_buffer.lines[i].actuator_status_change_time = halloc(sn * sizeof(*log_buffer.lines[0].actuator_status_change_time));
+			log_buffer.lines[i].actuator_status_change_time = halloc(an * sizeof(*log_buffer.lines[0].actuator_status_change_time));
 #  endif
 #  if USE_ACTUATOR_ON_TIME_COUNT
-			log_buffer.lines[i].actuator_on_time_minutes = halloc(sn * sizeof(*log_buffer.lines[0].actuator_on_time_minutes));
+			log_buffer.lines[i].actuator_on_time_minutes = halloc(an * sizeof(*log_buffer.lines[0].actuator_on_time_minutes));
 #  endif
 #  if USE_ACTUATOR_STATUS_CHANGE_COUNT
-			log_buffer.lines[i].actuator_status_change_count = halloc(sn * sizeof(*log_buffer.lines[0].actuator_status_change_count));
+			log_buffer.lines[i].actuator_status_change_count = halloc(an * sizeof(*log_buffer.lines[0].actuator_status_change_count));
 #  endif
 		}
 # endif // USE_ACTUATORS
