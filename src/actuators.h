@@ -50,7 +50,7 @@ typedef struct {
 	//
 	// The total time the actuator has been engaged as determined by actuator_cfg_t.is_on()
 	// If it's currently on, this excludes the current on-time
-	utime_t on_time_minutes;
+	utime_t on_time_seconds;
 #endif
 #if USE_ACTUATOR_STATUS_CHANGE_COUNT
 	//
