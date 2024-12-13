@@ -10,3 +10,13 @@
 #else
 # error "Unhandled device"
 #endif
+
+//
+// Some devices don't support PWM or certain other peripherals in standby mode
+// If using such a device and PWM is needed while sleeping, uncomment this block.
+/*
+#if uHAL_USE_PWM && (!defined(uHAL_HIBERNATE_LIMIT) || uHAL_HIBERNATE_LIMIT == 0)
+# undef uHAL_HIBERNATE_LIMIT
+# define uHAL_HIBERNATE_LIMIT HIBERNATE_LIGHT
+#endif
+*/
