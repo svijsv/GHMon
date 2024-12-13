@@ -7,36 +7,94 @@
 #define USE_SMALL_CODE        USE_SMALL_BUILD
 #define SKIP_SAFETY_CHECKS    USE_SMALL_BUILD
 #define SKIP_LIB_SAFETY_CHECKS SKIP_SAFETY_CHECKS
+
 //
 // These are sub-features of USE_SMALL_SENSORS
 // The configuration and status structs will change depending on these values
+//
+// Include the .name field in sensor_cfg_t for managing sensors by name
 #define USE_SENSOR_NAME     (!USE_SMALL_SENSORS)
+//
+// Include the .init() field in sensor_cfg_t for initializing sensors
 #define USE_SENSOR_INIT     (!USE_SMALL_SENSORS)
+//
+// Include the .cooldown_seconds field in sensor_cfg_t and the .previous_reading_time
+// field in sensor_status_t to handle sensor read cooldown periods
 #define USE_SENSOR_COOLDOWN (!USE_SMALL_SENSORS)
+//
+// Include the .data field in sensor_cfg_t to allow additional configuration of
+// individual sensors
 #define USE_SENSOR_CFG_DATA (!USE_SMALL_SENSORS)
+//
+// Include the .pin field in sensor_cfg_t to allow additional configuration of
+// individual sensors
 #define USE_SENSOR_CFG_PIN  (!USE_SMALL_SENSORS)
+//
+// Include the .data field in sensor_status_t to allow the helper functions to
+// pass around information
 #define USE_SENSOR_DATA     (!USE_SMALL_SENSORS)
+
 //
 // These are sub-features of USE_SMALL_CONTROLLERS
 // The configuration and status structs will change depending on these values
-#define USE_CONTROLLER_SCHEDULE (!USE_SMALL_CONTROLLERS)
-#define USE_CONTROLLER_INIT     1
+//
+// Include the .name field in controller_cfg_t for managing controllers by name
 #define USE_CONTROLLER_NAME     (!USE_SMALL_CONTROLLERS)
-#define USE_CONTROLLER_DATA     (!USE_SMALL_CONTROLLERS)
-#define USE_CONTROLLER_STATUS   (!USE_SMALL_CONTROLLERS)
+//
+// Include the .schedule_minutes field in controller_cfg_t for scheduling controllers
+#define USE_CONTROLLER_SCHEDULE (!USE_SMALL_CONTROLLERS)
+//
+// Include the .init() field in controller_cfg_t for initializing controllers
+#define USE_CONTROLLER_INIT     (!USE_SMALL_CONTROLLERS)
+//
+// Include the .next_run_time() field in controller_cfg_t to calculate the next
+// time the controller should be run
 #define USE_CONTROLLER_NEXTTIME (!USE_SMALL_CONTROLLERS)
+//
+// Include the .data field in controller_status_t to allow the helper functions
+// to pass around information
+#define USE_CONTROLLER_DATA     (!USE_SMALL_CONTROLLERS)
+//
+// Include the .status field in controller_status_t to allow the helper functions
+// to store and log status information
+#define USE_CONTROLLER_STATUS   (!USE_SMALL_CONTROLLERS)
+
 //
 // These are sub-features of USE_SMALL_ACTUATORS
 // The configuration and status structs will change depending on these values
+//
+// Include the .name field in actuator_cfg_t for managing actuators by name
 #define USE_ACTUATOR_NAME     (!USE_SMALL_ACTUATORS)
+//
+// Include the .init() field in actuator_cfg_t for initializing actuators
 #define USE_ACTUATOR_INIT     (!USE_SMALL_ACTUATORS)
-#define USE_ACTUATOR_IS_ON    (!USE_SMALL_ACTUATORS)
+//
+// Include the .is_on() field in actuator_cfg_t for testing if an actuator is on
+#define USE_ACTUATOR_IS_ON    (!USE_SMALL_ACTUATORS || USE_ACTUATOR_ON_TIME_COUNT)
+//
+// Include the .pin field in actuator_cfg_t to allow additional configuration of
+// individual actuators
 #define USE_ACTUATOR_CFG_DATA (!USE_SMALL_ACTUATORS)
+//
+// Include the .pin field in actuator_cfg_t to allow additional configuration of
+// individual actuators
 #define USE_ACTUATOR_CFG_PIN  (!USE_SMALL_ACTUATORS)
+//
+// Include the .data field in actuator_status_t to allow the helper functions
+// to pass around information
 #define USE_ACTUATOR_DATA     (!USE_SMALL_ACTUATORS)
+//
+// Track the number of times the actuator status has changed in the
+// .status_change_count field of actuator_status_t
 #define USE_ACTUATOR_STATUS_CHANGE_COUNT (!USE_SMALL_ACTUATORS)
-#define USE_ACTUATOR_STATUS_CHANGE_TIME  (!USE_SMALL_ACTUATORS)
-#define USE_ACTUATOR_ON_TIME_COUNT (!USE_SMALL_ACTUATORS && USE_ACTUATOR_IS_ON && USE_ACTUATOR_STATUS_CHANGE_TIME)
+//
+// Track the last time the actuator status changed in the .status_change_time
+// field of actuator_status_t
+#define USE_ACTUATOR_STATUS_CHANGE_TIME  (!USE_SMALL_ACTUATORS || USE_ACTUATOR_ON_TIME_COUNT)
+//
+// Track the total time an actuator has been 'on' in the .on_time_seconds
+// field of actuator_status_t
+#define USE_ACTUATOR_ON_TIME_COUNT (!USE_SMALL_ACTUATORS)
 
 //
 // Delays during status LED display
