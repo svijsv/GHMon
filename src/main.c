@@ -62,6 +62,7 @@ static utime_t fine_deskew_alarm = 0;
 
 static utime_t set_alarms(bool force);
 static void check_warnings(void);
+static void update_warnings(void);
 static void deskew_clock(int_fast16_t correction);
 static inline utime_t calculate_alarm(const utime_t now, const utime_t period);
 static inline utime_t correct_deskew_alarm(const utime_t now, const utime_t alarm, const utime_t period, const int_fast16_t correction);
@@ -110,10 +111,19 @@ int main(void) {
 		input_pin_listen_on(&ctrl_button_listen_handle);
 #endif
 		if ((next_wakeup > now) && (ghmon_IRQs == 0)) {
+			if (STATUS_LED_LIGHTS_ON_WARNING) {
+				update_warnings();
+				if (ghmon_warnings != 0) {
+					led_on();
+				}
+			}
 			hibernate_s(next_wakeup - now, HIBERNATE_DEEP, uHAL_CFG_ALLOW_INTERRUPTS);
 			// Clear the status *after* hibernation so that we wake instantly if we
 			// recieved an interrupt while something besides sleep was happening
 			uHAL_CLEAR_STATUS(uHAL_FLAG_IRQ);
+			if (STATUS_LED_LIGHTS_ON_WARNING) {
+				led_off();
+			}
 		} else {
 			// This message would have saved me many hours tracking down a bug in
 			// set_alarms(); don't remove without a good reason.
@@ -225,9 +235,6 @@ int main(void) {
 		run_common_controllers(do_controllers, force_controllers);
 
 		if (do_status || ((status_alarm > 0) && (now >= status_alarm))) {
-			check_common_actuator_warnings();
-			check_common_sensor_warnings();
-			check_common_controller_warnings();
 			check_warnings();
 
 			status_alarm = calculate_alarm(now+1, STATUS_CHECK_MINUTES * SECONDS_PER_MINUTE);
@@ -254,7 +261,12 @@ int main(void) {
 	//ERROR_STATE("Reached the end of main()?!");
 	return 1;
 }
-
+static void update_warnings(void) {
+	check_common_actuator_warnings();
+	check_common_sensor_warnings();
+	check_common_controller_warnings();
+	return;
+}
 static inline utime_t calculate_alarm(const utime_t now, const utime_t period) {
 	if (period == 0) {
 		return 0;
@@ -385,6 +397,8 @@ static void check_warnings(void) {
 	const ghmon_warning_flags_t warn_actuator   = (WARN_ACTUATOR);
 	const ghmon_warning_flags_t warn_sensor     = (WARN_SENSOR);
 	const ghmon_warning_flags_t warn_controller = (WARN_CONTROLLER);
+
+	update_warnings();
 
 	// Delay briefly first so that it doesn't blend into any
 	// acknowledgement flashes
