@@ -122,6 +122,25 @@ static err_t irr1_run(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, controller_s
 	return ERR_OK;
 }
 static utime_t irr1_next_run_time(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, controller_status_t *status, utime_t now) {
+	static utime_t next = 0;
+	bool turned_on = status->data != 0;
+
+	UNUSED(cfg);
+
+	if (turned_on) {
+		utime_t test = now + (5 * SECONDS_PER_MINUTE);
+
+		if (next == 0 || next > test) {
+			next = test;
+		}
+	} else {
+		next = 0;
+	}
+
+	return next;
+}
+/*
+static utime_t irr1_next_run_time(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, controller_status_t *status, utime_t now) {
 	UNUSED(cfg);
 
 	bool turned_on = status->data != 0;
@@ -137,6 +156,7 @@ static utime_t irr1_next_run_time(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, 
 	// immediately.
 	return (turned_on) ? (now + (5 * SECONDS_PER_MINUTE)) : 0;
 }
+*/
 
 /*
 //
