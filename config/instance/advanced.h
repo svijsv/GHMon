@@ -33,6 +33,10 @@
 // Include the .data field in sensor_status_t to allow the helper functions to
 // pass around information
 #define USE_SENSOR_DATA     (!USE_SMALL_SENSORS)
+//
+// Include the .status field in sensor_status_t to allow the helper functions
+// to store and log status information
+#define USE_SENSOR_STATUS   (!USE_SMALL_SENSORS)
 
 //
 // These are sub-features of USE_SMALL_CONTROLLERS
@@ -166,6 +170,9 @@
 //
 // The value returned when there's an error reading a sensor
 #define SENSOR_BAD_VALUE INT32_MIN
+//
+// The type used to hold sensor status values
+#define SENSOR_STATUS_T int
 //
 // The type used to store sensor configuration data
 #define SENSOR_CFG_DATA_T uint32_t

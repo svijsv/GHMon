@@ -108,6 +108,9 @@ static uint32_t lines_logged_this_file = 0;
 #if USE_SENSORS
 typedef struct {
 	sensor_reading_t *reading;
+#if USE_SENSOR_STATUS
+	SENSOR_STATUS_T status;
+#endif
 	uint8_t status_flags;
 } sensor_log_buffer_t;
 static const sensor_reading_t default_reading_value = {
@@ -305,6 +308,9 @@ static void log_status_line(log_line_buffer_t *line) {
 			}
 		}
 
+# if USE_SENSOR_STATUS
+		line->sensors[si].status = sensors[i].status;
+# endif
 		line->sensors[si].status_flags = sensors[i].status_flags;
 		++si;
 	}
@@ -446,24 +452,27 @@ static void print_log_line(void (*pf)(const char *format, ...), log_line_buffer_
 			continue;
 		}
 
-		char *es;
-		if (BIT_IS_SET(line->sensors[si].status_flags, SENSOR_STATUS_FLAG_ERROR)) {
-			es = "\t!";
-		} else {
-			es = "\t";
-		}
+		const char *es;
+		es = BIT_IS_SET(line->sensors[si].status_flags, SENSOR_STATUS_FLAG_ERROR) ? "\t!" : "\t";
+
 		if (!BIT_IS_SET(line->sensors[si].status_flags, SENSOR_STATUS_FLAG_INITIALIZED)) {
+			pf("%s%s", es, invalid_value);
 			for (uint_fast8_t ri = 0; ri < sensor_reading_count[si]; ++ri) {
-				pf("%s%s", es, invalid_value);
+				pf("\t%s", invalid_value);
 			}
 		} else {
+# if USE_SENSOR_STATUS
+			pf("%s%d", es, (int )line->sensors[si].status);
+# else
+			pf("%s%s", es, no_value);
+# endif
 			for (uint_fast8_t ri = 0; ri < sensor_reading_count[si]; ++ri) {
 				const char *tn;
 
 				if (LOG_PRINT_SENSOR_TYPE && (tn = sensor_type_to_name(line->sensors[si].reading[ri].type)) != NULL) {
-					pf("%s%d %s", es, (int )line->sensors[si].reading[ri].value, tn);
+					pf("\t%d %s", (int )line->sensors[si].reading[ri].value, tn);
 				} else {
-					pf("%s%d", es, (int )line->sensors[si].reading[ri].value);
+					pf("\t%d", (int )line->sensors[si].reading[ri].value);
 				}
 			}
 		}
@@ -477,18 +486,16 @@ static void print_log_line(void (*pf)(const char *format, ...), log_line_buffer_
 			continue;
 		}
 
-		if (BIT_IS_SET(line->controllers[si].status_flags, CONTROLLER_STATUS_FLAG_ERROR)) {
-			pf("\t!");
-		} else {
-			pf("\t");
-		}
+		const char *es;
+		es = BIT_IS_SET(line->controllers[si].status_flags, CONTROLLER_STATUS_FLAG_ERROR) ? "\t!" : "\t";
+
 		if (!BIT_IS_SET(line->controllers[si].status_flags, CONTROLLER_STATUS_FLAG_INITIALIZED)) {
-			pf("%s", invalid_value);
+			pf("%s%s", es, invalid_value);
 		} else {
 # if USE_CONTROLLER_STATUS
-			pf("%d", (int )line->controllers[si].status);
+			pf("%s%d", es, (int )line->controllers[si].status);
 # else
-			pf("%s", no_value);
+			pf("%s%s", es, no_value);
 # endif
 		}
 		++si;
@@ -864,7 +871,7 @@ void print_log_header(void (*pf)(const char *format, ...)) {
 	pf(F("# Time\tWarnings"));
 
 #if USE_SENSORS
-	for (SENSOR_INDEX_T i = 0; i < SENSOR_COUNT; ++i) {
+	for (SENSOR_INDEX_T i = 0, si = 0; i < SENSOR_COUNT; ++i) {
 		if (!DO_SENSOR(i)) {
 			continue;
 		}
@@ -876,9 +883,11 @@ void print_log_header(void (*pf)(const char *format, ...)) {
 		name[6] = '0' + i%10;
 #endif
 
-		for (uint8_t ri = 0; ri < sensor_reading_count[i]; ++ri) {
-			pf("\t%s_reading_%u", name, (uint )i);
+		pf("\t%s_status", name);
+		for (uint8_t ri = 0; ri < sensor_reading_count[si]; ++ri) {
+			pf("\t%s_reading_%u", name, (uint )ri);
 		}
+		++si;
 	}
 #endif
 

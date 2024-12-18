@@ -58,6 +58,13 @@ typedef struct {
 	// Time of last successful reading
 	utime_t previous_reading_time;
 #endif
+#if USE_SENSOR_STATUS
+	//
+	// The status of the sensor
+	// This is set and used by the sensor definitions, it's not used internally
+	// except in log output.
+	SENSOR_STATUS_T status;
+#endif
 	//
 	// Status flags
 	uint8_t status_flags;
