@@ -105,10 +105,16 @@ static uint32_t lines_logged_this_file = 0;
 #endif
 
 // These only need to save information which changes and is actually recorded
+#if USE_SENSORS
 typedef struct {
-	SENSOR_READING_T reading;
+	sensor_reading_t *reading;
 	uint8_t status_flags;
 } sensor_log_buffer_t;
+static const sensor_reading_t default_reading_value = {
+	SENSOR_BAD_VALUE,
+	0
+};
+#endif
 
 typedef struct {
 # if USE_CONTROLLER_STATUS
@@ -149,6 +155,8 @@ typedef struct {
 
 #if USE_SENSORS
  static SENSOR_INDEX_T sensor_count;
+ static uint_fast16_t sensor_reading_total_count;
+ static uint8_t *sensor_reading_count;
 #endif
 #if USE_CONTROLLERS
  static CONTROLLER_INDEX_T controller_count;
@@ -229,6 +237,19 @@ void log_init(void) {
 #if USE_SENSORS
 		if (sn > 0) {
 			log_buffer.lines[i].sensors = halloc(sn * sizeof(log_buffer.lines[0].sensors[0]));
+			sensor_reading_count = halloc(sn * sizeof(sensor_reading_count[0]));
+
+			for (SENSOR_INDEX_T ii = 0, si = 0; ii < SENSOR_COUNT; ++ii) {
+				if (!DO_SENSOR(ii)) {
+					continue;
+				}
+				uint_fast8_t cnt = (SENSORS[ii].value_count > 0) ? SENSORS[ii].value_count : 1;
+
+				sensor_reading_total_count += cnt;
+				sensor_reading_count[si] = cnt;
+				log_buffer.lines[i].sensors[si].reading = halloc(cnt * sizeof(log_buffer.lines[0].sensors[0].reading[0]));
+				++si;
+			}
 		}
 #endif
 # if USE_CONTROLLERS
@@ -265,7 +286,25 @@ static void log_status_line(log_line_buffer_t *line) {
 		if (!DO_SENSOR(i)) {
 			continue;
 		}
-		line->sensors[si].reading = read_sensor_by_index(i, false, 0);
+		if (LOG_UPDATES_SENSORS) {
+			read_sensor(&SENSORS[i], &sensors[i], false, 0);
+		}
+
+		uint_fast8_t cnt = sensor_reading_count[si];
+		//
+		// Don't use memcpy() here, it would cause problems if either the struct
+		// used for the buffer or the one in sensor_status_t are ever changed and
+		// I doubt it saves many (if any) cycles in this case.
+		if (sensors[i].reading != NULL) {
+			for (uint_fast8_t vi = 0; vi < cnt; ++vi) {
+				line->sensors[si].reading[vi] = sensors[i].reading[vi];
+			}
+		} else {
+			for (uint_fast8_t vi = 0; vi < cnt; ++vi) {
+				line->sensors[si].reading[vi] = default_reading_value;
+			}
+		}
+
 		line->sensors[si].status_flags = sensors[i].status_flags;
 		++si;
 	}
@@ -326,6 +365,11 @@ void log_status(void) {
 		log_line_buffer_t current_status = { 0 };
 #if USE_SENSORS
 		sensor_log_buffer_t sensors_m[sensor_count];
+		sensor_reading_t readings_m[sensor_reading_total_count];
+		for (SENSOR_INDEX_T si = 0, ri = 0; si < sensor_count; ++si) {
+			sensors_m[si].reading = &readings_m[ri];
+			ri += sensor_reading_count[si];
+		}
 		current_status.sensors = sensors_m;
 #endif
 #if USE_CONTROLLERS
@@ -373,13 +417,12 @@ static err_t _write_log_to_storage(void) {
 }
 void print_log(void (*pf)(const char *format, ...)) {
 #if LOG_LINE_BUFFER_COUNT > 0
-	log_line_buffer_size_t head, size, tail;
+	log_line_buffer_size_t head, size;
 
 	// Replay the whole buffer, even if it's been written out and even if
 	// there was never an entry
 	size = LOG_LINE_BUFFER_COUNT;
-	tail = log_buffer.tail;
-	head = tail;
+	head = log_buffer.tail;
 
 	for (; size > 0; --size) {
 		print_log_line(pf, &log_buffer.lines[head]);
@@ -389,8 +432,8 @@ void print_log(void (*pf)(const char *format, ...)) {
 			head = 0;
 		}
 	}
-
 #endif // LOG_LINE_BUFFER_COUNT > 0
+
 	return;
 }
 
@@ -403,15 +446,26 @@ static void print_log_line(void (*pf)(const char *format, ...), log_line_buffer_
 			continue;
 		}
 
+		char *es;
 		if (BIT_IS_SET(line->sensors[si].status_flags, SENSOR_STATUS_FLAG_ERROR)) {
-			pf("\t!");
+			es = "\t!";
 		} else {
-			pf("\t");
+			es = "\t";
 		}
 		if (!BIT_IS_SET(line->sensors[si].status_flags, SENSOR_STATUS_FLAG_INITIALIZED)) {
-			pf("%s", invalid_value);
+			for (uint_fast8_t ri = 0; ri < sensor_reading_count[si]; ++ri) {
+				pf("%s%s", es, invalid_value);
+			}
 		} else {
-			pf("%d", (int )line->sensors[si].reading);
+			for (uint_fast8_t ri = 0; ri < sensor_reading_count[si]; ++ri) {
+				const char *tn;
+
+				if (LOG_PRINT_SENSOR_TYPE && (tn = sensor_type_to_name(line->sensors[si].reading[ri].type)) != NULL) {
+					pf("%s%d %s", es, (int )line->sensors[si].reading[ri].value, tn);
+				} else {
+					pf("%s%d", es, (int )line->sensors[si].reading[ri].value);
+				}
+			}
 		}
 		++si;
 	}
@@ -821,7 +875,10 @@ void print_log_header(void (*pf)(const char *format, ...)) {
 		name[5] = '0' + i/10;
 		name[6] = '0' + i%10;
 #endif
-		pf("\t%s_reading", name);
+
+		for (uint8_t ri = 0; ri < sensor_reading_count[i]; ++ri) {
+			pf("\t%s_reading_%u", name, (uint )i);
+		}
 	}
 #endif
 

@@ -81,20 +81,27 @@ void init_common_sensors(void) {
 	return;
 }
 
-SENSOR_READING_T find_sensor_value_by_type(sensor_reading_t* reading, uint_fast8_t type) {
+SENSOR_READING_T find_sensor_value_by_type(SENSOR_CFG_STORAGE sensor_cfg_t *cfg, sensor_status_t *status, uint_fast8_t type) {
+	assert(cfg != NULL);
+	assert(status != NULL);
+
+	sensor_reading_t* reading = status->reading;
+
 	if (reading == NULL) {
 		return SENSOR_BAD_VALUE;
 	}
-
 	if (type == 0) {
 		return reading->value;
 	}
+
+	uiter_t i = cfg->value_count;
 	do {
 		if (reading->type == type) {
 			return reading->value;
 		}
 		++reading;
-	} while (reading->more);
+	// 0 and 1 are both valid for 1-item arrays
+	} while (i-- > 1);
 
 	return SENSOR_BAD_VALUE;
 }
@@ -150,7 +157,7 @@ SENSOR_READING_T read_sensor(SENSOR_CFG_STORAGE sensor_cfg_t *cfg, sensor_status
 #endif
 
 END:
-	return find_sensor_value_by_type(reading, type);
+	return find_sensor_value_by_type(cfg, status, type);
 }
 
 #if USE_SENSOR_NAME

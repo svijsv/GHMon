@@ -35,11 +35,7 @@ typedef struct {
 	// The type is for the configuration files sensor_defs.h and controller_defs.h
 	// to coordinate, we don't care about the actual value unless it's 0, in which
 	// case the first reading in the array is always matched
-	uint8_t type :7;
-	//
-	// When a sensor returns more than one reading, all but the last in the array
-	// must have the 'more' bit set
-	uint8_t more :1;
+	uint8_t type;
 } sensor_reading_t;
 
 //
@@ -119,6 +115,10 @@ typedef struct sensor_cfg_t {
 	char name[DEVICE_NAME_LEN+1];
 #endif
 	//
+	// The number of values in the sensor_reading_t array returned by .read()
+	// If 0, assume there's actually 1.
+	uint8_t value_count;
+	//
 	// Configuration flags
 	uint8_t cfg_flags;
 } sensor_cfg_t;
@@ -132,7 +132,7 @@ SENSOR_READING_T read_sensor_by_index(SENSOR_INDEX_T i, bool force_update, uint_
 // Initialization of the common sensors can be skipped if there's nothing in the
 // sensor initializers that needs to be run on startup
 void init_common_sensors(void);
-SENSOR_READING_T find_sensor_value_by_type(sensor_reading_t* reading, uint_fast8_t type);
+SENSOR_READING_T find_sensor_value_by_type(SENSOR_CFG_STORAGE sensor_cfg_t *cfg, sensor_status_t *status, uint_fast8_t type);
 SENSOR_INDEX_T find_sensor_index_by_name(const char *name);
 void check_common_sensor_warnings(void);
 

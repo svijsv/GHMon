@@ -9,6 +9,21 @@
 #include "log_sd.h"
 
 //
+// Convert a sensor type ID into a string
+static const char* sensor_type_to_name(uint8_t type) {
+	if (type != 0) {
+		static char type_name[7] = "(T:";
+		type_name[3] = '0' + (type / 10);
+		type_name[4] = '0' + (type % 10);
+		type_name[5] = ')';
+		type_name[6] = 0;
+		return type_name;
+	}
+
+	return NULL;
+}
+
+//
 // Initialize the output device
 static void init_output_device(void) {
 	init_log_UART();

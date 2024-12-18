@@ -95,6 +95,13 @@
 // Otherwise, don't log any sensor in SENSORS[] unless SENSOR_CFG_FLAG_LOG is set
 #define LOG_SENSORS_BY_DEFAULT 1
 //
+// If set, sensors are read to update their values for logging
+// Otherwise whatever values were last read are used.
+#define LOG_UPDATES_SENSORS 1
+//
+// If set, print the type of each sensor value
+#define LOG_PRINT_SENSOR_TYPE 1
+//
 // If set, log each controller in CONTROLLERS[] unless CONTROLLER_CFG_FLAG_NOLOG is set
 // Otherwise, don't log any controller in CONTROLLERS[] unless CONTROLLER_CFG_FLAG_LOG is set
 #define LOG_CONTROLLERS_BY_DEFAULT 1
