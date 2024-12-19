@@ -63,9 +63,7 @@ static err_t _init_controller(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, cont
 	// Need to be initialized before setting the alarm
 	SET_BIT(status->status_flags, CONTROLLER_STATUS_FLAG_INITIALIZED);
 
-#if USE_CONTROLLER_SCHEDULE
 	calculate_controller_alarm(cfg, status);
-#endif
 
 	return ERR_OK;
 }
@@ -130,10 +128,14 @@ void run_common_controllers(bool manual, bool force) {
 		cfg = &CONTROLLERS[i];
 		status = &controllers[i];
 
-#if USE_CONTROLLER_SCHEDULE
+#if USE_CONTROLLER_SCHEDULE || USE_CONTROLLER_NEXTTIME
 		if ((force && !BIT_IS_SET(cfg->cfg_flags, CONTROLLER_CFG_FLAG_IGNORE_FORCED_RUN)) ||
-		    (manual && cfg->schedule_minutes == 0 && !BIT_IS_SET(cfg->cfg_flags, CONTROLLER_CFG_FLAG_USE_TIME_OF_DAY)) ||
-		    (status->next_run_time != 0 && (NOW() >= status->next_run_time))
+		    (status->next_run_time != 0 && (NOW() >= status->next_run_time)) ||
+# if USE_CONTROLLER_SCHEDULE
+		    (manual && cfg->schedule_minutes == 0 && !BIT_IS_SET(cfg->cfg_flags, CONTROLLER_CFG_FLAG_USE_TIME_OF_DAY))
+# else
+		    (manual)
+# endif
 		   ) {
 			run_controller(cfg, status);
 			// Update the next run time here instead of run_controller() so that
@@ -153,7 +155,7 @@ err_t calculate_controller_alarm(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, c
 	assert(cfg != NULL);
 	assert(status != NULL);
 
-#if USE_CONTROLLER_SCHEDULE
+#if USE_CONTROLLER_SCHEDULE || USE_CONTROLLER_NEXTTIME
 	utime_t next = 0;
 	utime_t now = NOW();
 
@@ -161,15 +163,16 @@ err_t calculate_controller_alarm(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, c
 		return ERR_INIT;
 	}
 
-#if USE_CONTROLLER_NEXTTIME
+# if USE_CONTROLLER_NEXTTIME
 	if (cfg->next_run_time != NULL) {
 		next = cfg->next_run_time(cfg, status, now);
 		if (next != 0) {
 			goto END;
 		}
 	}
-#endif
+# endif
 
+# if USE_CONTROLLER_SCHEDULE
 	//
 	// Use the default polling frequency
 	if (cfg->schedule_minutes == 0 && !BIT_IS_SET(cfg->cfg_flags, CONTROLLER_CFG_FLAG_USE_TIME_OF_DAY)) {
@@ -200,21 +203,30 @@ err_t calculate_controller_alarm(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, c
 		next = now + sm;
 		next = SNAP_TO_FACTOR(next, sm);
 	}
+# endif
 
 END:
 # if USE_CONTROLLER_NAME
-	LOGGER("Next alarm for controller %s at %lu", FROM_FSTR(cfg->name), next);
+	if (next != 0) {
+		LOGGER("Next alarm for controller %s at %lu", FROM_FSTR(cfg->name), next);
+	} else {
+		LOGGER("No alarm scheduled for controller %s", FROM_FSTR(cfg->name));
+	}
 # else
-	LOGGER("Next alarm for controller %u at %lu", CONTROLLER_ID(status), next);
+	if (next != 0) {
+		LOGGER("Next alarm for controller %u at %lu", CONTROLLER_ID(status), next);
+	} else {
+		LOGGER("No alarm scheduled for controller %u", CONTROLLER_ID(status));
+	}
 # endif
 
 	status->next_run_time = next;
-#endif // USE_CONTROLLER_SCHEDULE
+#endif // USE_CONTROLLER_SCHEDULE || USE_CONTROLLER_NEXTTIME
 
 	return ERR_OK;
 }
 void calculate_common_controller_alarms(bool force) {
-#if USE_CONTROLLER_SCHEDULE
+#if USE_CONTROLLER_SCHEDULE || USE_CONTROLLER_NEXTTIME
 	CONTROLLER_CFG_STORAGE controller_cfg_t *cfg;
 	controller_status_t *status;
 
@@ -234,7 +246,7 @@ utime_t find_next_common_controller_alarm(void) {
 	controller_status_t *status;
 	utime_t next = 0;
 
-#if USE_CONTROLLER_SCHEDULE
+#if USE_CONTROLLER_SCHEDULE || USE_CONTROLLER_NEXTTIME
 	for (CONTROLLER_INDEX_T i = 0; i < CONTROLLER_COUNT; ++i) {
 		status = &controllers[i];
 

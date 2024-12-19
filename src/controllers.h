@@ -41,7 +41,7 @@ typedef struct {
 	// Data for controller-internal use
 	void *data;
 #endif
-#if USE_CONTROLLER_SCHEDULE
+#if USE_CONTROLLER_SCHEDULE || USE_CONTROLLER_NEXTTIME
 	//
 	// Time of next check
 	utime_t next_run_time;
