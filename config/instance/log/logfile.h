@@ -3,12 +3,6 @@
 //
 
 //
-// We have two supported (optional) outputs, UART and an SPI-controlled SD card,
-// each defined in their own header for convenience.
-#include "log_uart.h"
-#include "log_sd.h"
-
-//
 // Convert a sensor type ID into a string
 static const char* sensor_type_to_name(uint8_t type) {
 	if (type != 0) {
@@ -16,12 +10,45 @@ static const char* sensor_type_to_name(uint8_t type) {
 		type_name[3] = '0' + (type / 10);
 		type_name[4] = '0' + (type % 10);
 		type_name[5] = ')';
-		type_name[6] = 0;
 		return type_name;
 	}
 
 	return NULL;
 }
+
+//
+// Print extra at the end of each log line
+// To disable this functionality, return NULL.
+//
+// These just print the buffer index; doing so serves no practical purpose,
+// it's for demonstation only.
+static const char* print_header_extra(void) {
+	return "log_buffer_index";
+}
+// Because of the way printing is implemented, we need to treat the final (nominally
+// unbuffered) line as though it were buffered.
+static log_line_buffer_size_t log_line_indexes[LOG_LINE_BUFFER_COUNT+1];
+static void buffer_line_extra(log_line_buffer_size_t index) {
+	log_line_indexes[index] = index;
+	return;
+}
+static const char* print_line_extra(log_line_buffer_size_t index) {
+	static char buf[] = "index_XX";
+
+	if (index == LOG_LINE_BUFFER_COUNT) {
+		return "(unbuffered)";
+	}
+	buf[6] = '0' + (index / 10);
+	buf[7] = '0' + (index % 10);
+
+	return buf;
+}
+
+//
+// We have two supported (optional) outputs, UART and an SPI-controlled SD card,
+// each defined in their own header for convenience.
+#include "log_uart.h"
+#include "log_sd.h"
 
 //
 // Initialize the output device

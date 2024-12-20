@@ -186,8 +186,8 @@ static struct {
 #endif
 
 static err_t _write_log_to_storage(void);
-static err_t write_log_line_to_storage(log_line_buffer_t *line);
-static void print_log_line(void (*pf)(const char *format, ...), log_line_buffer_t *line);
+static err_t write_log_line_to_storage(log_line_buffer_t *line, const char *extra);
+static void print_log_line(void (*pf)(const char *format, ...), log_line_buffer_t *line, const char *extra);
 static bool buffer_is_full(void);
 static void buffer_status_line(void);
 static void lprintf_putc(uint_fast8_t c);
@@ -388,7 +388,8 @@ void log_status(void) {
 #endif
 
 		log_status_line(&current_status);
-		write_log_line_to_storage(&current_status);
+		buffer_line_extra(LOG_LINE_BUFFER_COUNT);
+		write_log_line_to_storage(&current_status, print_line_extra(LOG_LINE_BUFFER_COUNT));
 		close_log_storage();
 	} else {
 		buffer_status_line();
@@ -407,7 +408,7 @@ static err_t _write_log_to_storage(void) {
 	}
 	while (log_buffer.size > 0) {
 		err_t res;
-		if ((res = write_log_line_to_storage(&log_buffer.lines[head])) != ERR_OK) {
+		if ((res = write_log_line_to_storage(&log_buffer.lines[head], print_line_extra(head))) != ERR_OK) {
 			return res;
 		}
 
@@ -431,7 +432,7 @@ void print_log(void (*pf)(const char *format, ...)) {
 	head = log_buffer.tail;
 
 	for (; size > 0; --size) {
-		print_log_line(pf, &log_buffer.lines[head]);
+		print_log_line(pf, &log_buffer.lines[head], print_line_extra(head));
 
 		++head;
 		if (head == LOG_LINE_BUFFER_COUNT) {
@@ -443,7 +444,7 @@ void print_log(void (*pf)(const char *format, ...)) {
 	return;
 }
 
-static void print_log_line(void (*pf)(const char *format, ...), log_line_buffer_t *line) {
+static void print_log_line(void (*pf)(const char *format, ...), log_line_buffer_t *line, const char *extra) {
 	pf("%s\t%s", format_print_time(line->system_time, LOG_TIME_FORMAT), format_warnings(line->ghmon_warnings));
 
 #if USE_SENSORS
@@ -540,11 +541,15 @@ static void print_log_line(void (*pf)(const char *format, ...), log_line_buffer_
 	}
 #endif
 
-	pf("%s", line_end);
+	if (extra != NULL) {
+		pf("\t%s%s", extra, line_end);
+	} else {
+		pf("%s", line_end);
+	}
 
 	return;
 }
-static err_t write_log_line_to_storage(log_line_buffer_t *line) {
+static err_t write_log_line_to_storage(log_line_buffer_t *line, const char *extra) {
 	if (LOG_LINES_PER_FILE > 0 && lines_logged_this_file == LOG_LINES_PER_FILE) {
 		err_t res;
 
@@ -553,7 +558,7 @@ static err_t write_log_line_to_storage(log_line_buffer_t *line) {
 		}
 	}
 
-	print_log_line(lprintf, line);
+	print_log_line(lprintf, line, extra);
 	++lines_logged_this_file;
 
 	return ERR_OK;
@@ -689,8 +694,10 @@ static void buffer_status_line(void) {
 	LOGGER("Buffering log line %u of %u", (uint )lineno, (uint )LOG_LINE_BUFFER_COUNT);
 
 	log_status_line(&log_buffer.lines[log_buffer.tail]);
+	buffer_line_extra(log_buffer.tail);
+
 #if DEBUG && uHAL_USE_UART_COMM
-	print_log_line(serial_printf, &log_buffer.lines[log_buffer.tail]);
+	print_log_line(serial_printf, &log_buffer.lines[log_buffer.tail], print_line_extra(log_buffer.tail));
 #endif
 
 	++log_buffer.tail;
@@ -931,6 +938,11 @@ void print_log_header(void (*pf)(const char *format, ...)) {
 # endif
 	}
 #endif
+
+	const char *extra = print_header_extra();
+	if (extra != NULL) {
+		pf("\t%s", extra);
+	}
 
 	pf("%s", line_end);
 	// This needs to be split to fit in the buffer for F()
