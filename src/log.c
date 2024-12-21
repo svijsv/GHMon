@@ -78,7 +78,8 @@ typedef enum {
 #if USE_LOG_FILE_NAME
  static char logfile_name[] = LOG_FILE_NAME_PATTERN;
 #else
-# define logfile_name (NULL)
+ static char logfile_name[] = "";
+//# define logfile_name ((char *)NULL)
 #endif
 
 static const char invalid_value[] = LOG_INVALID_VALUE;

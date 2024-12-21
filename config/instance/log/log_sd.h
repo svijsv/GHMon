@@ -161,11 +161,29 @@ static err_t SD_file_is_available(const char *path) {
 }
 
 #else // WRITE_LOG_TO_SD
-# define init_log_SD() (void )0U
-# define write_buffer_to_SD(_b_, _s_) (ERR_OK)
-# define open_SD() (ERR_OK)
-# define open_SD_file(_p_) (ERR_OK)
-# define close_SD() (ERR_OK)
-# define close_SD_file() (ERR_OK)
-# define SD_file_is_available(_p_) (ERR_OK)
+static void init_log_SD(void) {
+	return;
+}
+static err_t open_SD_file(const char *path) {
+	UNUSED(path);
+	return ERR_OK;
+}
+static err_t open_SD(void) {
+	return ERR_OK;
+}
+static err_t close_SD_file(void) {
+	return ERR_OK;
+}
+static err_t close_SD(void) {
+	return ERR_OK;
+}
+static err_t write_buffer_to_SD(uint8_t *buf, print_buffer_size_t bytes) {
+	UNUSED(buf);
+	UNUSED(bytes);
+	return ERR_OK;
+}
+static err_t SD_file_is_available(const char *path) {
+	UNUSED(path);
+	return ERR_OK;
+}
 #endif // WRITE_LOG_TO_SD
