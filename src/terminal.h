@@ -83,7 +83,9 @@ static int terminalcmd_play_log(const char *line_in) {
 static int terminalcmd_write_log(const char *line_in) {
 	UNUSED(line_in);
 
-	write_log_to_storage();
+	uint_fast8_t flags = (cstring_eqz("force", NEXT_TOK(line_in, ' '))) ? LOG_WRITE_PRESERVE_STATE|LOG_WRITE_REWRITE_ALL : 0;
+
+	write_log_to_storage(flags);
 	return 0;
 }
 #endif
@@ -120,7 +122,7 @@ FMEM_STORAGE const char terminal_extra_help[] =
 #endif
 #if USE_LOGGING && LOG_LINE_BUFFER_COUNT > 0
 "   play_log          - Print the log buffer\r\n"
-"   write_log         - Write the log buffer to storage\r\n"
+"   write_log [force] - Write the log buffer to storage\r\n"
 #endif
 "   reset             - Reset the device\r\n"
 ;

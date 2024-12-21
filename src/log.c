@@ -186,8 +186,8 @@ static struct {
 } print_buffer = { 0 };
 #endif
 
-static err_t _write_log_to_storage(void);
-static err_t write_log_line_to_storage(log_line_buffer_t *line, const char *extra);
+static err_t _write_log_to_storage(uint_fast8_t flags);
+static err_t write_log_line_to_storage(log_line_buffer_t *line, const char *extra, uint_fast8_t flags);
 static void print_log_line(void (*pf)(const char *format, ...), log_line_buffer_t *line, const char *extra);
 static bool buffer_is_full(void);
 static void buffer_status_line(void);
@@ -360,7 +360,7 @@ void log_status(void) {
 		if (skip_log_writes()) {
 			SET_BIT(ghmon_warnings, WARN_LOG_SKIPPED);
 		} else if (open_log_storage() == ERR_OK) {
-			if (_write_log_to_storage() == ERR_OK) {
+			if (_write_log_to_storage(0) == ERR_OK) {
 				buffer_line = false;
 			} else {
 				close_log_storage();
@@ -390,7 +390,7 @@ void log_status(void) {
 
 		log_status_line(&current_status);
 		buffer_line_extra(LOG_LINE_BUFFER_COUNT);
-		write_log_line_to_storage(&current_status, print_line_extra(LOG_LINE_BUFFER_COUNT));
+		write_log_line_to_storage(&current_status, print_line_extra(LOG_LINE_BUFFER_COUNT), 0);
 		close_log_storage();
 	} else {
 		buffer_status_line();
@@ -398,27 +398,35 @@ void log_status(void) {
 	return;
 }
 
-static err_t _write_log_to_storage(void) {
+static err_t _write_log_to_storage(uint_fast8_t flags) {
 #if LOG_LINE_BUFFER_COUNT > 0
-	log_line_buffer_size_t head;
+	err_t res;
+	log_line_buffer_size_t head, size;
 
-	if (log_buffer.size > log_buffer.tail) {
-		head = LOG_LINE_BUFFER_COUNT - (log_buffer.size - log_buffer.tail);
+	size = (BIT_IS_SET(flags, LOG_WRITE_REWRITE_ALL)) ? LOG_LINE_BUFFER_COUNT : log_buffer.size;
+
+	if (size > log_buffer.tail) {
+		head = LOG_LINE_BUFFER_COUNT - (size - log_buffer.tail);
 	} else {
-		head = log_buffer.tail - log_buffer.size;
+		head = log_buffer.tail - size;
 	}
-	while (log_buffer.size > 0) {
-		err_t res;
-		if ((res = write_log_line_to_storage(&log_buffer.lines[head], print_line_extra(head))) != ERR_OK) {
-			return res;
+	while (size > 0) {
+		if ((res = write_log_line_to_storage(&log_buffer.lines[head], print_line_extra(head), flags)) != ERR_OK) {
+			goto END;
 		}
 
 		++head;
 		if (head == LOG_LINE_BUFFER_COUNT) {
 			head = 0;
 		}
-		--log_buffer.size;
+		--size;
 	}
+
+END:
+	if (!BIT_IS_SET(flags, LOG_WRITE_PRESERVE_STATE) && (size < log_buffer.size)) {
+		log_buffer.size = size;
+	}
+	return res;
 
 #endif // LOG_LINE_BUFFER_COUNT > 0
 	return ERR_OK;
@@ -550,7 +558,12 @@ static void print_log_line(void (*pf)(const char *format, ...), log_line_buffer_
 
 	return;
 }
-static err_t write_log_line_to_storage(log_line_buffer_t *line, const char *extra) {
+static err_t write_log_line_to_storage(log_line_buffer_t *line, const char *extra, uint_fast8_t flags) {
+	if (BIT_IS_SET(flags, LOG_WRITE_PRESERVE_STATE)) {
+		print_log_line(lprintf, line, extra);
+		return ERR_OK;
+	}
+
 	if (LOG_LINES_PER_FILE > 0 && lines_logged_this_file == LOG_LINES_PER_FILE) {
 		err_t res;
 
@@ -564,11 +577,11 @@ static err_t write_log_line_to_storage(log_line_buffer_t *line, const char *extr
 
 	return ERR_OK;
 }
-void write_log_to_storage(void) {
+void write_log_to_storage(uint_fast8_t flags) {
 	if (open_log_storage() != ERR_OK) {
 		return;
 	}
-	_write_log_to_storage();
+	_write_log_to_storage(flags);
 	close_log_storage();
 	return;
 }

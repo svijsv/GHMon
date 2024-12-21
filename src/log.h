@@ -27,6 +27,13 @@
 
 #include "common.h"
 
+//
+// Control flags for write_log_to_storage()
+typedef enum {
+	LOG_WRITE_PRESERVE_STATE = 0x01U, // Don't mark newly-written lines as written
+	LOG_WRITE_REWRITE_ALL    = 0x02U  // Write the whole buffer, including previously-written lines
+} log_write_flags_t;
+
 #if USE_LOGGING
 
 //
@@ -37,7 +44,7 @@ void log_init(void);
 void log_status(void);
 //
 // Write the log buffer to storage
-void write_log_to_storage(void);
+void write_log_to_storage(uint_fast8_t flags);
 //
 // Print the log header using pf()
 void print_log_header(void (*pf)(const char *format, ...));
@@ -49,7 +56,7 @@ void print_log(void (*pf)(const char *format, ...));
 #else // !USE_LOGGING
 # define log_init()   ((void )0U)
 # define log_status() ((void )0U)
-# define write_log_to_storage() ((void )0U)
+# define write_log_to_storage(_f_) ((void )0U)
 # define print_log_header(...) ((void )0U)
 # define print_log(...) ((void )0U)
 #endif // USE_LOGGING
