@@ -79,9 +79,6 @@
 #ifndef uHAL_USE_INTERNAL_LS_OSC
 # define uHAL_USE_INTERNAL_LS_OSC 1
 #endif
-#ifndef uHAL_CALIBRATE_LS_CLOCK
-# define uHAL_CALIBRATE_LS_CLOCK uHAL_USE_INTERNAL_LS_OSC
-#endif
 
 // Don't hibernate longer than this many seconds
 // Must be < 24 hours for calendar-based RTCs due to how the wakeup timer
