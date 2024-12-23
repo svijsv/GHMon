@@ -73,7 +73,7 @@ void init_common_actuators(void) {
 		status = &actuators[i];
 
 		if (cfg->name[0] == 0) {
-			LOGGER("Unset name in ACTUATORS[%u]", (uint )i);
+			PRINTF("Unset name in ACTUATORS[%u]", (uint )i);
 		}
 		init_actuator(cfg, status);
 	}

@@ -68,7 +68,7 @@ static err_t open_SD_file(const char *path) {
 
 	print_to_SD = true;
 	if ((fres = f_open(&fh, path, FA_WRITE|FA_OPEN_APPEND)) != FR_OK) {
-		LOGGER("f_open(): FatFS error %u", (uint )fres);
+		PRINTF("f_open(): FatFS error %u", (uint )fres);
 		print_to_SD = false;
 	}
 
@@ -80,7 +80,7 @@ static err_t open_SD(void) {
 	spi_on();
 
 	if ((fres = f_mount(&fs, "", 1)) != FR_OK) {
-		LOGGER("f_mount(): FatFS error %u", (uint )fres);
+		PRINTF("f_mount(): FatFS error %u", (uint )fres);
 		spi_off();
 	}
 
@@ -97,7 +97,7 @@ static err_t close_SD_file(void) {
 	}
 
 	if ((fres = f_close(&fh)) != FR_OK) {
-		LOGGER("f_close(): FatFS error %u", (uint )fres);
+		PRINTF("f_close(): FatFS error %u", (uint )fres);
 	}
 
 	return FRESULT_to_err_t(fres);
@@ -112,11 +112,11 @@ static err_t close_SD(void) {
 	close_SD_file();
 
 	if (write_errors != 0) {
-		LOGGER("%u log SD write errors", (uint )write_errors);
+		PRINTF("%u log SD write errors", (uint )write_errors);
 		write_errors = 0;
 	}
 	if ((fres = f_unmount("")) != FR_OK) {
-		LOGGER("f_unmount(): FatFS error %u", (uint )fres);
+		PRINTF("f_unmount(): FatFS error %u", (uint )fres);
 	}
 	spi_off();
 
@@ -137,7 +137,7 @@ static err_t write_buffer_to_SD(uint8_t *buf, print_buffer_size_t bytes) {
 	if ((fres = f_write(&fh, buf, bytes, &bw)) != FR_OK) {
 		// Not much else we can do about problems here
 		++write_errors;
-		LOGGER("f_write(): FatFS error %u (%u of %u bytes written)", (uint )fres, (uint )bw, (uint )bytes);
+		PRINTF("f_write(): FatFS error %u (%u of %u bytes written)", (uint )fres, (uint )bw, (uint )bytes);
 	}
 
 	return FRESULT_to_err_t(fres);

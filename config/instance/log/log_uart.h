@@ -33,7 +33,7 @@ static void init_log_UART(void) {
 	};
 
 	if ((res = uart_init_port(&_uart_log_port, &cfg)) != ERR_OK) {
-		LOGGER("UART log initialization failed: error %d", (int )res);
+		PRINTF("UART log initialization failed: error %d", (int )res);
 	} else {
 		uart_log_port = &_uart_log_port;
 	}

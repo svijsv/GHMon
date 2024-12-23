@@ -75,7 +75,7 @@ static err_t open_output_device(void) {
 
 	if (WRITE_LOG_TO_UART && !abort_logging) {
 		if ((res = open_UART()) != ERR_OK) {
-			LOGGER("Failed to open log UART: error %d", (int )res);
+			PRINTF("Failed to open log UART: error %d", (int )res);
 			if (!LOG_WITH_MISSING_UART) {
 				abort_logging = true;
 			}
@@ -84,7 +84,7 @@ static err_t open_output_device(void) {
 
 	if (WRITE_LOG_TO_SD && !abort_logging) {
 		if ((res = open_SD()) != ERR_OK) {
-			LOGGER("Failed to open log SD: error %d", (int )res);
+			PRINTF("Failed to open log SD: error %d", (int )res);
 			if (!LOG_WITH_MISSING_SD) {
 				abort_logging = true;
 				close_UART();

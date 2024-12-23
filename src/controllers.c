@@ -84,7 +84,7 @@ void init_common_controllers(void) {
 		status = &controllers[i];
 
 		if (cfg->name[0] == 0) {
-			LOGGER("Unset name in CONTROLLERS[%u]", (uint )i);
+			PRINTF("Unset name in CONTROLLERS[%u]", (uint )i);
 		}
 		init_controller(cfg, status);
 	}
