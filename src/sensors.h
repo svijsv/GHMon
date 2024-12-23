@@ -42,7 +42,7 @@ typedef struct {
 // Status flags for sensor_status_t structs
 typedef enum {
 	SENSOR_STATUS_FLAG_INITIALIZED = 0x01U, // Sensor successfully initialized
-	SENSOR_STATUS_FLAG_ERROR       = 0x02U, // Sensor in error state; set when read() or init() return error codes
+	SENSOR_STATUS_FLAG_ERROR       = 0x02U, // Sensor in error state
 } sensor_status_flag_t;
 //
 // Status of a sensor
@@ -52,6 +52,8 @@ typedef struct {
 	// Data for sensor-internal use
 	void *data;
 #endif
+	//
+	// The most recent sensor readings
 	sensor_reading_t* reading;
 #if USE_SENSOR_COOLDOWN
 	//
@@ -61,8 +63,8 @@ typedef struct {
 #if USE_SENSOR_STATUS
 	//
 	// The status of the sensor
-	// This is set and used by the sensor definitions, it's not used internally
-	// except in log output.
+	// This is set and maintained by the sensor and only used externally for
+	// logging
 	SENSOR_STATUS_T status;
 #endif
 	//
@@ -96,9 +98,9 @@ typedef struct sensor_cfg_t {
 #endif
 	//
 	// The function used to read the sensor
-	// This returns an array of readings from the sensor, all but the last of which
-	// has the flag .more set. This array must remain valid until the next time
-	// read() is called if a cooldown period is specified.
+	// This returns an array of readings from the sensor, the size of which must
+	// match the value_count field.
+	// This array must remain valid until the next time read() is called.
 	// If this returns NULL, the sensor is considered to be in a state of error.
 	// Must not be NULL.
 	sensor_reading_t* (*read)(SENSOR_CFG_STORAGE struct sensor_cfg_t *cfg, sensor_status_t *status);
@@ -130,9 +132,17 @@ typedef struct sensor_cfg_t {
 	uint8_t cfg_flags;
 } sensor_cfg_t;
 
+//
+// Initialize a sensor
 err_t init_sensor(SENSOR_CFG_STORAGE sensor_cfg_t *cfg, sensor_status_t *status);
+//
+// Read a sensor
 SENSOR_READING_T read_sensor(SENSOR_CFG_STORAGE sensor_cfg_t *cfg, sensor_status_t *status, bool force_update, uint_fast8_t type);
+//
+// Read a sensor identified by it's name
 SENSOR_READING_T read_sensor_by_name(const char *name, bool force_update, uint_fast8_t type);
+//
+// Read a sensor identified by it's index in SENSORS[]
 SENSOR_READING_T read_sensor_by_index(SENSOR_INDEX_T i, bool force_update, uint_fast8_t type);
 
 //

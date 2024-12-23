@@ -9,6 +9,8 @@
 // the functions used to initialize and read the sensors are defined in one
 // section and an array of sensor configurations are defined in the second part.
 //
+// See src/sensors.h for details of the data structures involved.
+//
 
 #include "sensor_helpers.h"
 
@@ -91,6 +93,33 @@ sensor_reading_t* battery_read(SENSOR_CFG_STORAGE struct sensor_cfg_t *cfg, sens
 	return &reading;
 }
 //
+// Sensor ??, System voltage
+//
+sensor_reading_t* system_voltage_read(SENSOR_CFG_STORAGE struct sensor_cfg_t *cfg, sensor_status_t *status) {
+	static sensor_reading_t reading[2] = { 0 };
+
+	sensor_reading_t *tmp = sensors[0].reading;
+	if (tmp != NULL) {
+		reading[0] = *tmp;
+	} else {
+		reading[0].value = SENSOR_BAD_VALUE;
+	}
+	reading[0].type = 1;
+
+	tmp = sensors[1].reading;
+	if (tmp != NULL) {
+		reading[1] = *tmp;
+	} else {
+		reading[1].value = SENSOR_BAD_VALUE;
+	}
+	reading[1].type = 2;
+
+	UNUSED(cfg);
+	UNUSED(status);
+	return reading;
+}
+
+//
 // Sensor 2, Indoor thermistor
 //
 err_t inside_therm1_init(SENSOR_CFG_STORAGE struct sensor_cfg_t *cfg, sensor_status_t *status) {
@@ -136,6 +165,17 @@ SENSOR_CFG_STORAGE sensor_cfg_t SENSORS[] = {
 	.init = battery_init,
 	.read = battery_read,
 	.pin = BATTERY_CHECK_PIN,
+},
+//
+// Sensor ??, System voltage
+// This is a combination of Vcc and battery sensors, present only to provide an
+// example of multi-value sensors.
+{
+	.name = "VOLT",
+	.init = NULL,
+	.read = system_voltage_read,
+	.pin = 0,
+	.value_count = 2,
 },
 //
 // Sensor 2, Indoor thermistor

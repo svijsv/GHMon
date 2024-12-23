@@ -86,8 +86,10 @@
 // and write them all when the buffer is full.
 // With 10 minute intervals, a 5-reading buffer will write once an hour (5
 // buffered + the newest).
-// Constraints to the buffer size will be available RAM and reliability of the
-// power supply and log file medium.
+// The log buffer is allocated at run-time so any RAM usage report offered by the
+// build system is going to be wrong. Generally you can expect 36 bytes per
+// buffered line on 32-bit devices with the default build settings or 26 bytes
+// for 8/16 bit devices.
 // Set to 0 to disable buffering.
 #define LOG_LINE_BUFFER_COUNT 15 // 4h with 15m intervals
 //

@@ -31,7 +31,7 @@
 // Status flags for controller_status_t structs
 typedef enum {
 	CONTROLLER_STATUS_FLAG_INITIALIZED = 0x01U, // Controller successfully initialized
-	CONTROLLER_STATUS_FLAG_ERROR       = 0x02U, // Controller in error state; set when run() or init() return error codes
+	CONTROLLER_STATUS_FLAG_ERROR       = 0x02U, // Controller in error state
 } controller_status_flag_t;
 //
 // Status of a controller
@@ -47,6 +47,10 @@ typedef struct {
 	utime_t next_run_time;
 #endif
 #if USE_CONTROLLER_STATUS
+	//
+	// The controller status code
+	// This is set and maintained by the controller and only used externally for
+	// logging
 	CONTROLLER_STATUS_T status;
 #endif
 	//
@@ -111,9 +115,14 @@ typedef struct controller_cfg_t {
 	uint8_t cfg_flags;
 } controller_cfg_t;
 
-
+//
+// Initialize a controller
 err_t init_controller(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, controller_status_t *status);
+//
+// Run a controller
 err_t run_controller(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, controller_status_t *status);
+//
+// Calculate the next run time of a controller, updating status->next_run_time
 err_t calculate_controller_alarm(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, controller_status_t *status);
 
 void init_common_controllers(void);

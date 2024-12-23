@@ -48,7 +48,7 @@ typedef enum {
 //
 // Character representations of the above flags
 // If these change, the log header needs to be changed to match.
-#define GHMON_WARNING_FLAGS "BVSCAlL "
+#define GHMON_WARNING_FLAGS "BVSCAlL"
 //
 // Used to track warnings in effect
 extern uint_fast8_t ghmon_warnings;

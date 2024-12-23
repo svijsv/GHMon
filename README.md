@@ -1,86 +1,85 @@
 ## Introduction
 GHMon is a configurable low-power firmware for autonomous small-scale
 greenhouse control and data logging. At present it supports STM32F103-,
-STM32F4-, and ATMega328-based devices with wired resistance- and
-voltage-based sensors, DHT11 temperature/humidity sensors, and BMP280/BME280
-temperature/air pressure/humidity sensors.
+STM32F401-, and ATTiny402-based devices. It doesn't do very much and it doesn't
+do it very well, but it's mine.
 
 
-## Configuring
-Configuration files are located in `config/` and examples for all the files
-can be found in `config/templates/`. More detailed configuration information
-can be found in `config/README.md`.
+## Overview
+There are three broad groups of devices in the GHMon worldview:
+* Sensors read the world.
+* Actuators control the world.
+* Controllers mediate between the two.
+
+GHMon provides a means of organizing these three catagories while also providing
+scheduling, logging, and rudimentary control terminal support.
+
+
+## Configuration
+In order to maintain flexibility, configuration is performed by defining settings,
+data structures, and functions in `config/`.
+
+General settings universal to all builds are located in `config/general`. This
+directory can mostly be ignored.
+
+Settings specific to a particular build are taken from an 'instance' directory
+defined in the environment variable `INSTANCE_DIR`, an example of which can be
+found at `config/instance`.
+* `config.h` and `advanced.h` contain general configuration details.
+* `sensors/sensor_defs.h` contains the implementation details of the sensors.
+* `actuators/actuator_defs.h` contains the implementation details of the actuators.
+* `controllers/controller_defs.h` contains the implementation details of the controllers.
+* `log/logfile.h` contains the implementation details of the logger.
+* `main_hooks.h` contains hooks used to influence the main control loop.
+* `lib/` contains overrides for library configuration.
+
+The example instance directory additionally contains files included by the primary
+ones for organizational reasons.
+
+Details can be found in the example files.
 
 
 ## Installing
-GHMon uses [PlatformIO](https://platformio.org/) for building and installing.
+GHMon uses [PlatformIO](https://platformio.org/) for building and uploading.
 
-Build configuration files are provided for a few boards and can be found in
+Build configuration files are provided for a few devices and can be found in
 `pio_inis/`; they're included by `platformio.ini` by default. New (compatible)
-boards can be added by copying an existing .ini file and editing it where
+devices can be added by copying an existing .ini file and editing it where
 appropriate.
 
 
 ## Usage
 The primary user interface is a button in combination with an LED.
 
-* Pressing the button briefly will wake the monitor, blink the LED once, then
-check the sensors and blink a few times if there are any warnings - one flash
-to aknowledge followed by one flash for a power warning, two for a sensor
-warning, three for a controller warning, and four for a logging warning.
-Multiple warnings may be issued in succession.
-* Holding the button until it has blinked a total of two times will sync any
-cached log data to the SD card (if it's enabled); it will blink once when done
-if everything's OK or a few times if there was an error.
-* Holding until three blinks forces a check for any device controllers that
-need to be run (if they're enabled).
-* Holding until four blinks sets the internal time to 12PM.
-* Holding for five or more blinks cancels the command.
+Pressing the button:
+* Briefly will wake the monitor and check for warnings, then:
+  * Issue status flashes if required
+  * Run any controllers without scheduled run times if there is no globally-scheduled run time
+  * Append to the log if there is no scheduled time to do so
+* Holding for two LED blinks forces the log buffer to be writting out
+* Holding for three LED blinks forces the controllers to be run
+* Holding for four LED blinks sets the device time to a preset value, 12:00PM
+by default
+* Holding for longer will flash quickly twice and then do nothing
 
-After releasing the button, the LED will blink a number of times to indicate
-which action it will take, or else flash briefly twice to indicate it will
-take no action.
+The status LED may flash as follows either when the button is pressed or when
+status checks are scheduled (multiple warnings may be issued in succession):
+* Once to indicate a power warning (low battery or low Vcc)
+* Twice to indicate an actuator warning
+* Three times to indicate a sensor warning
+* Four times to indicate a controller warning
+* Five times to indicate a logging warning
 
-If the monitor is busy when the button is pressed, the LED will flash briefly
-and then continue with whatever it's doing.
-
-A primitive serial terminal can be reached if nothing goes wrong during
-initialiation by setting `USE_TERMINAL` in `config.h`.
-
-
-## Hardware
-Testing has been done with STM32F103 Bluepill, Arduino Pro Mini 3.3V/8MHz, and
-Arduino UNO R3 boards but it should be possible to run on any board with an
-STM32F103, ATMega328, or ATMega168 MCU provided a new PlatformIO build target
-is configured for it.
-
-See the schematics in `schematics/` for some typical setups.
-
-If power usage is a concern, the power LED should be removed from the
-development board.
-
-Certain SD card Arduino modules designed to interface with 5V logic circuits
-may not work with 3.3v boards.
+A primitive terminal can be reached over UART if nothing goes wrong during
+initialiation by sending any data (e.g. a key press) while connected.
 
 
 ## Troubleshooting
-It's normal for the LED to blink several times at irregular intervals when
-powering on.
-
 If there's been an error in configuration or in device initialization, the
 LED will turn on then off every half second. Connecting to a serial monitor
-with `USE_SERIAL` set in `config.h` will give a more detailed error message.
-Otherwise, check to make sure that:
+with `USE_UART_OUTPUT` set in `config.h` will give a more detailed error message.
 
-* `SENSOR_COUNT` and `CONTROLLER_COUNT` match the number of sensors and
-controllers defined in `sensors.c` and `controllers.c`
-* The correct `devcfg` field has been set for each chosen sensor type
-* There's enough free RAM for runtime usage; 256 bytes may work but 384 bytes
-or more is better especially when logging is used.
 
-If using an SD card for logging and it isn't being recognized, [this](https://www.sdcard.org/downloads/formatter/)
-(ideally) or the internal formatter (with `USE_FDISK` set in `config.h`) may
-fix the problem.
-
-If using an SD card for logging, a FAT codepage other than the default latin1
-can be chosen in `lib/fatfs/ffconf.h`.
+## Libraries
+GHMon uses my own uHAL and ulib libraries as well as elmchan's FatFS library. All
+three are included in the `lib/` root directory.

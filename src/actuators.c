@@ -120,7 +120,9 @@ err_t set_actuator(ACTUATOR_CFG_STORAGE actuator_cfg_t *cfg, actuator_status_t *
 		if (prev_on && (cfg->is_on != NULL && cfg->is_on(cfg, status))) {
 			// FIXME: This is going to be wrong if the system time changes, but I'll
 			// need to track up-time separately from clock time to change that.
-			status->on_time_seconds += (status->status_change_time - now);
+			if (status->status_change_time > now) {
+				status->on_time_seconds += (status->status_change_time - now);
+			}
 		}
 #endif
 #if USE_ACTUATOR_STATUS_CHANGE_TIME

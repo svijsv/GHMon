@@ -31,7 +31,7 @@
 // Status flags for actuator_status_t structs
 typedef enum {
 	ACTUATOR_STATUS_FLAG_INITIALIZED = 0x01U, // Actuator successfully initialized
-	ACTUATOR_STATUS_FLAG_ERROR       = 0x02U, // Actuator in error state; set when set() returns an error code
+	ACTUATOR_STATUS_FLAG_ERROR       = 0x02U, // Actuator in error state
 } actuator_status_flag_t;
 //
 // Status of an actuator
@@ -57,6 +57,10 @@ typedef struct {
 	// The number of times the status has changed
 	uint_t status_change_count;
 #endif
+	//
+	// The actuator status code
+	// This is set and maintained by the actuator and only used externally for
+	// logging and tracking status changes
 	ACTUATOR_STATUS_T status;
 	//
 	// Status flags
@@ -94,11 +98,9 @@ typedef struct actuator_cfg_t {
 	bool (*is_on)(ACTUATOR_CFG_STORAGE struct actuator_cfg_t *cfg, actuator_status_t *status);
 #endif
 	//
-	// The function used to read the actuator
-	// This returns an array of readings from the actuator, all but the last of which
-	// has the flag .more set. This array must remain valid until the next time
-	// read() is called if a cooldown period is specified.
-	// If this returns NULL, the actuator is considered to be in a state of error.
+	// The function used to set the actuator
+	// If this returns anything other than ERR_OK, the actuator is considered to
+	// be in a state of error.
 	// Must not be NULL.
 	err_t (*set)(ACTUATOR_CFG_STORAGE struct actuator_cfg_t *cfg, actuator_status_t *status, ACTUATOR_STATUS_T value);
 #if USE_ACTUATOR_CFG_PIN
@@ -117,19 +119,40 @@ typedef struct actuator_cfg_t {
 	uint8_t cfg_flags;
 } actuator_cfg_t;
 
+//
+// Initialize an actuator
 err_t init_actuator(ACTUATOR_CFG_STORAGE actuator_cfg_t *cfg, actuator_status_t *status);
+//
+// Set an actuator to a new value
 err_t set_actuator(ACTUATOR_CFG_STORAGE actuator_cfg_t *cfg, actuator_status_t *status, ACTUATOR_STATUS_T value);
+//
+// Set an actuator identified by name to a new value
 err_t set_actuator_by_name(const char *name, ACTUATOR_STATUS_T value);
+//
+// Set an actuator identified by an index into ACTUATORS[] to a new value
 err_t set_actuator_by_index(ACTUATOR_INDEX_T i, ACTUATOR_STATUS_T value);
 
+//
+// Initialize the 'common' actuators (those in ACTUATORS[])
 // Initialization of the common actuators can be skipped if there's nothing in the
-// actuator initializers that needs to be run on startup
+// actuator initializers that needs to be run on startup.
 void init_common_actuators(void);
+//
+// Find an actuator's index in ACTUATORS[] based on it's name
 ACTUATOR_INDEX_T find_actuator_index_by_name(const char *name);
+//
+// Check if any actuators have the warning bit set and set WARN_ACTUATOR in
+// ghmon_warnings if so
 void check_common_actuator_warnings(void);
 
+//
+// The actuator configuration array
 extern ACTUATOR_CFG_STORAGE actuator_cfg_t ACTUATORS[];
+//
+// The actuator status array
 extern actuator_status_t actuators[];
+//
+// The number of actuators in the above arrays
 extern const ACTUATOR_INDEX_T ACTUATOR_COUNT;
 
 #else // USE_ACTUATORS

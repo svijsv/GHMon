@@ -9,6 +9,8 @@
 // the functions used to initialize and run the controllers are defined in one
 // section and an array of controller configurations are defined in the second part.
 //
+// See src/controllers.h for details of the data structures involved.
+//
 
 //
 // Section 1

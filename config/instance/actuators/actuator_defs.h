@@ -9,6 +9,8 @@
 // the functions used to initialize and set the actuators are defined in one
 // section and an array of actuator configurations are defined in the second part.
 //
+// See src/actuators.h for details of the data structures involved.
+//
 
 //
 // Section 1
