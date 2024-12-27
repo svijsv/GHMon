@@ -356,21 +356,21 @@ static void deskew_clock(int_fast16_t correction) {
 }
 
 void led_on(void) {
-	if (USE_STATUS_LED) {
-		output_pin_on(STATUS_LED_PIN);
-	}
+#if USE_STATUS_LED
+	output_pin_on(STATUS_LED_PIN);
+#endif
 	return;
 }
 void led_off(void) {
-	if (USE_STATUS_LED) {
-		output_pin_off(STATUS_LED_PIN);
-	}
+#if USE_STATUS_LED
+	output_pin_off(STATUS_LED_PIN);
+#endif
 	return;
 }
 void led_toggle(void) {
-	if (USE_STATUS_LED) {
-		output_pin_toggle(STATUS_LED_PIN);
-	}
+#if USE_STATUS_LED
+	output_pin_toggle(STATUS_LED_PIN);
+#endif
 	return;
 }
 void led_flash(uint8_t count, uint16_t ms) {

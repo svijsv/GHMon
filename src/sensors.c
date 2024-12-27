@@ -72,9 +72,11 @@ void init_common_sensors(void) {
 		cfg = &SENSORS[i];
 		status = &sensors[i];
 
+#if USE_SENSOR_NAME
 		if (cfg->name[0] == 0) {
 			PRINTF("Unset name in SENSORS[%u]", (uint )i);
 		}
+#endif
 		init_sensor(cfg, status);
 	}
 

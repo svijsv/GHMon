@@ -72,9 +72,11 @@ void init_common_actuators(void) {
 		cfg = &ACTUATORS[i];
 		status = &actuators[i];
 
+#if USE_ACTUATOR_NAME
 		if (cfg->name[0] == 0) {
 			PRINTF("Unset name in ACTUATORS[%u]", (uint )i);
 		}
+#endif
 		init_actuator(cfg, status);
 	}
 
@@ -100,8 +102,8 @@ err_t set_actuator(ACTUATOR_CFG_STORAGE actuator_cfg_t *cfg, actuator_status_t *
 #endif
 
 	ACTUATOR_STATUS_T prev_status = status->status;
-	bool prev_on = false;
 #if USE_ACTUATOR_ON_TIME_COUNT
+	bool prev_on = false;
 	if (cfg->is_on != NULL) {
 		prev_on = cfg->is_on(cfg, status);
 	}
