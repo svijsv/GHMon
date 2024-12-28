@@ -258,8 +258,16 @@ utime_t find_next_common_controller_alarm(void) {
 	}
 #else
 	if (CONTROLLER_CHECK_MINUTES > 0) {
+		/*
+		const utime_t tmp = (CONTROLLER_CHECK_MINUTES * SECONDS_PER_MINUTE);
+		next = NOW() + tmp;
+		next = SNAP_TO_FACTOR(next, tmp);
+		*/
+
+		// I don't know why this version is smaller on the attiny402 but it is.
 		next = (NOW() / SECONDS_PER_MINUTE) + CONTROLLER_CHECK_MINUTES;
 		next = SNAP_TO_FACTOR(next, CONTROLLER_CHECK_MINUTES);
+		next *= SECONDS_PER_MINUTE;
 	}
 #endif
 
