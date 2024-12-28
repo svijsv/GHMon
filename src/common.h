@@ -61,5 +61,8 @@ void led_toggle(void);
 void led_flash(uint8_t count, uint16_t ms);
 void issue_warning(void);
 
+#if USE_DELAY_INSTEAD_OF_SLEEP
+# define sleep_ms(_x_) delay_ms(_x_)
+#endif
 
 #endif // _COMMON_H
