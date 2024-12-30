@@ -56,8 +56,8 @@
 // If 0, it's checked only when the user button is pressed
 #define STATUS_CHECK_MINUTES 15
 //
-// If and USE_STATUS_LED is also set, the status LED is lighted during sleep when
-// there's a warning instead of only flashing when the status is checked
+// If set and USE_STATUS_LED is also set, the status LED is lighted during sleep
+// when there's a warning instead of only flashing when the status is checked
 #define STATUS_LED_LIGHTS_ON_WARNING 0
 
 //
