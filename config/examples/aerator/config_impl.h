@@ -15,7 +15,7 @@
 #define TEMPERATURE_SCALE 1
 
 //
-// sensor_defs.h configuration
+// Sensor configuration
 //
 // The beta coefficient of any thermistors
 #define THERMISTOR_BETA_COEFFICIENT 3950U
@@ -28,7 +28,6 @@
 //
 // The resistance of the series resister used with any thermistors
 #define THERMISTOR_SERIES_OHMS      22000U
-
 //
 // The values of the low- and high-side resistors used in the voltage divider to
 // measure the pre-regulator input voltage
@@ -38,12 +37,13 @@
 // The low side must be > 0
 #define VIN_VDIV_HIGH_SIDE_OHMS 100U
 #define VIN_VDIV_LOW_SIDE_OHMS 33U
-
 //
 // If set, voltage divider-based sensors are read as having the fixed-value
 // resistor on the high side and the variable resistor on the low side
 #define SERIES_R_IS_HIGH_SIDE 1
 
+//
+// Controller configuration
 //
 // The minimum water reservoir temperature required to enable pumping
 #define PUMP_MIN_WATER_TEMP 45U
