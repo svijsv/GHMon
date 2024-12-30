@@ -35,7 +35,7 @@
 #if !defined(HALLOC_HEAP_START_LINKER_VAR)
 # define HALLOC_HEAP_START_LINKER_VAR __heap_start
 #endif
-#if DEBUG
+#if defined(DEBUG) && DEBUG
 # define HALLOC_HEAP_CANARY 0xABU
 # define HALLOC_MEM_INIT_VALUE 0
 #else
