@@ -35,6 +35,10 @@ static void early_init_hook(void) {
 //
 // Hook executed right before entering main loop
 static void late_init_hook(void) {
+	// Run the controller as soon as we start so we can use long check periods
+	// with spotty power if desired
+	run_controller(&CONTROLLERS[0], &controllers[0]);
+
 	return;
 }
 //

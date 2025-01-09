@@ -45,7 +45,15 @@
 //
 // Controller configuration
 //
+// If the thermistor reading the water temperature is <= this value, the water is
+// considered warm enough for pumping
+// If this is 0, calculate the temperature using the thermistor values defined
+// above and PUMP_MIN_WATER_TEMP below.
+#define WATER_TEMP_OK_OHMS 36850U // 7C, ~45F
+//#define WATER_TEMP_OK_OHMS 27500U // 18C, ~65F
+//
 // The minimum water reservoir temperature required to enable pumping
+// Only used if WATER_TEMP_OK_OHMS is 0.
 #define PUMP_MIN_WATER_TEMP 45U
 //
 // The minimum Vin required to enable pumping
@@ -54,3 +62,7 @@
 #else
 # define PUMP_MINIMUM_VIN_mV (1200U * 4U)
 #endif
+//
+// If set, the water level is considered OK when the sense pin is pulled down.
+// Otherwise it's considered OK when pulled up.
+#define WATER_LEVEL_OK_LOW 1

@@ -114,24 +114,24 @@ static err_t pump_init(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, controller_
 	//status->status = 0;
 
 	UNUSED(cfg);
+	UNUSED(status);
 	return ERR_OK;
 }
 static err_t pump_run(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, controller_status_t *status) {
-	uint_fast16_t water_temp, voltage;
-	bool water_ok;
+	bool water_level_ok, water_temp_ok, voltage_ok;
 
 	if (WATER_LEVEL_SENSE_PIN != 0) {
-		gpio_set_mode(WATER_LEVEL_SENSE_PIN, GPIO_MODE_IN, GPIO_HIGH);
+		gpio_state_t pull_dir = (WATER_LEVEL_OK_LOW) ? GPIO_HIGH : GPIO_LOW;
+		gpio_state_t ok_state = (WATER_LEVEL_OK_LOW) ? GPIO_LOW  : GPIO_HIGH;
+
+		gpio_set_mode(WATER_LEVEL_SENSE_PIN, GPIO_MODE_IN, pull_dir);
 		//
 		// Delay long enough for the pin pullup to take effect
 		sleep_ms(50);
-		//
-		// The water level sense pin is pulled up normally but when the water is
-		// high enough, it's pulled low.
-		water_ok = (gpio_get_input_state(WATER_LEVEL_SENSE_PIN) == GPIO_LOW);
+		water_level_ok = (gpio_get_input_state(WATER_LEVEL_SENSE_PIN) == ok_state);
 		gpio_set_mode(WATER_LEVEL_SENSE_PIN, GPIO_MODE_RESET, GPIO_FLOAT);
 	} else {
-		water_ok = true;
+		water_level_ok = true;
 	}
 
 	bool set_analog_mode = (GPIO_MODE_RESET_ALIAS != GPIO_MODE_AIN);
@@ -144,20 +144,37 @@ static err_t pump_run(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, controller_s
 	}
 
 	if (WATER_TEMP_SENSE_PIN != 0) {
-		if (set_analog_mode) {
-			gpio_set_mode(WATER_TEMP_SENSE_PIN, GPIO_MODE_AIN, GPIO_FLOAT);
-		}
+		if (WATER_TEMP_OK_OHMS != 0) {
+			adc_t tmp = adc_read_pin(WATER_TEMP_SENSE_PIN);
+			if (!SERIES_R_IS_HIGH_SIDE) {
+				tmp = ADC_MAX - tmp;
+			}
 
-		water_temp = read_thermistor(WATER_TEMP_SENSE_PIN);
+			uint32_t R = adc_to_resistance(tmp, THERMISTOR_SERIES_OHMS);
+			water_temp_ok = R <= WATER_TEMP_OK_OHMS;
 
-		if (set_analog_mode) {
-			gpio_set_mode(WATER_TEMP_SENSE_PIN, GPIO_MODE_RESET, GPIO_FLOAT);
+		} else {
+			uint_fast16_t water_temp;
+
+			if (set_analog_mode) {
+				gpio_set_mode(WATER_TEMP_SENSE_PIN, GPIO_MODE_AIN, GPIO_FLOAT);
+			}
+
+			water_temp = read_thermistor(WATER_TEMP_SENSE_PIN);
+
+			if (set_analog_mode) {
+				gpio_set_mode(WATER_TEMP_SENSE_PIN, GPIO_MODE_RESET, GPIO_FLOAT);
+			}
+
+			water_temp_ok = water_temp >= PUMP_MIN_WATER_TEMP;
 		}
 	} else {
-		water_temp = PUMP_MIN_WATER_TEMP;
+		water_temp_ok = true;
 	}
 
 	if (VIN_SENSE_PIN != 0) {
+		uint_fast16_t voltage;
+
 		if (set_analog_mode) {
 			gpio_set_mode(VIN_SENSE_PIN, GPIO_MODE_AIN, GPIO_FLOAT);
 		}
@@ -169,15 +186,17 @@ static err_t pump_run(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, controller_s
 		if (set_analog_mode) {
 			gpio_set_mode(VIN_SENSE_PIN, GPIO_MODE_RESET, GPIO_FLOAT);
 		}
+
+		voltage_ok = voltage >= PUMP_MINIMUM_VIN_mV;
 	} else {
-		voltage = PUMP_MINIMUM_VIN_mV;
+		voltage_ok = true;
 	}
 
 	if (enable_adc) {
 		adc_off();
 	}
 
-	bool want_on = (voltage >= PUMP_MINIMUM_VIN_mV && water_temp >= PUMP_MIN_WATER_TEMP && water_ok);
+	bool want_on = (voltage_ok && water_temp_ok && water_level_ok);
 
 	if (want_on) {
 		//set_actuator_by_index(0, 1);
@@ -193,6 +212,7 @@ static err_t pump_run(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, controller_s
 	}
 
 	UNUSED(cfg);
+	UNUSED(status);
 	return ERR_OK;
 }
 

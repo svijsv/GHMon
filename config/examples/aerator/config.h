@@ -71,7 +71,7 @@
 // If 0, they're only checked when requested by way of the control button.
 // Individual controllers may have their own periods specified, in which case
 // they ignore this.
-#define CONTROLLER_CHECK_MINUTES 15
+#define CONTROLLER_CHECK_MINUTES 1
 //
 // If a time-of-day controller would be scheduled to run fewer than this many
 // minutes in the past (because e.g. the clock changed or the device restarted),
