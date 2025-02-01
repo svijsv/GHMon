@@ -120,7 +120,7 @@ void dumb_delay_cycles(uint32_t cycles) {
 	}
 
 	// 4 cycles per iteration in _delay_loop_2()
-	count = SHIFT_DIV_4(cycles);
+	count = cycles / 4;
 	while (count > 0xFFFFU) {
 		_delay_loop_2(0xFFFFU);
 		count -= 0xFFFFU;
