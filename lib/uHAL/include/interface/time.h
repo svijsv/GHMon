@@ -199,17 +199,6 @@ err_t fix_uptime(utime_t new_now, utime_t old_now);
 ///
 /// @returns The number of seconds which have elapsed since the system booted.
 utime_t get_uptime(void);
-
-///
-/// Print an uptime duration in the format @c DDDDdHHhMMmSSs
-///
-/// @param seconds The duration to print.
-/// @param buf The buffer used to hold the string.
-/// @param buf_size The length of @c buf in bytes. This must be >= 12.
-///
-/// @returns A pointer to the start of the string within the buffer @c buf if
-///  successful or an empty string otherwise.
-const char* print_uptime(utime_t seconds, char *buf, uint_fast8_t buf_size);
 /// @}
 #endif // uHAL_USE_UPTIME
 

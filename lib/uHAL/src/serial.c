@@ -293,7 +293,7 @@ void print_system_info(void) {
 
 #if uHAL_USE_UPTIME
 	char buf[16];
-	PRINTF("Current system uptime is %s\r\n", print_uptime(get_uptime(), buf, SIZEOF_ARRAY(buf)));
+	PRINTF("Current system uptime is %s\r\n", print_duration(buf, SIZEOF_ARRAY(buf), get_uptime()));
 #endif
 
 # if uHAL_USE_FATFS
