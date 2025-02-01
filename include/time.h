@@ -32,8 +32,14 @@
 #include "util.h"
 
 
-// A possibly-smaller-than-time_t unsigned time-tracking type for embedded systems.
+// Time-tracking types for embedded systems. These are used rather than time_t
+// because:
+//    A. time_t may be either signed or unsigned
+//    B. time_t may be larger than 32 bits but we don't really need that
 typedef uint32_t utime_t;
+#define UTIME_MAX UINT32_MAX
+typedef int32_t  itime_t;
+#define ITIME_MAX INT32_MAX
 
 /*
 * Periods
@@ -45,13 +51,13 @@ typedef uint32_t utime_t;
 #define DAYS(x)    ((x) * SECONDS_PER_DAY)
 #define YEARS(x)   ((x) * SECONDS_PER_YEAR)
 */
-#define SECONDS_PER_MINUTE (60UL)
-#define SECONDS_PER_HOUR   (SECONDS_PER_MINUTE * 60UL)
+#define SECONDS_PER_MINUTE (60U)
+#define SECONDS_PER_HOUR   (SECONDS_PER_MINUTE * 60U)
 #define SECONDS_PER_DAY    (SECONDS_PER_HOUR   * 24UL)
 #define SECONDS_PER_YEAR   (SECONDS_PER_DAY    * 365UL)
 //
 // Minutes in a given time period.
-#define MINUTES_PER_HOUR (60UL)
+#define MINUTES_PER_HOUR (60U)
 #define MINUTES_PER_DAY  (MINUTES_PER_HOUR * 24UL)
 #define MINUTES_PER_YEAR (MINUTES_PER_DAY  * 365UL)
 //
@@ -61,23 +67,38 @@ typedef uint32_t utime_t;
 #define HZ_TO_MS(freq) ((1000U + (freq/2U)) / freq)
 //
 // Convert a frequency to a microsecond time period, truncated.
-#define HZ_TO_US_TRUNC(freq) (1000000U / freq)
+#define HZ_TO_US_TRUNC(freq) (1000000UL / freq)
 // Convert a frequency to a microsecond time period, rounded.
-#define HZ_TO_US(freq) ((1000000U + (freq/2U)) / freq)
+#define HZ_TO_US(freq) ((1000000UL + (freq/2U)) / freq)
 
 
 /*
 * Dates
 */
+//
+// The type used to represent a year.
+typedef uint_fast16_t time_year_t;
+//
+// The structure used to define a date/time
+typedef struct {
+	time_year_t  year;
+	uint_fast8_t month;
+	uint_fast8_t day;
+	uint_fast8_t hour;
+	uint_fast8_t minute;
+	uint_fast8_t second;
+} datetime_t;
+//
 // A list of the number of days in each month.
-extern FMEM_STORAGE const uint8_t days_per_month[];
+extern FMEM_STORAGE const uint_fast8_t days_per_month[];
 //
 // Convert between epoch-based times and calendar times.
-// year is the number of years after TIME_YEAR_0.
-utime_t date_to_seconds(uint8_t year, uint8_t month, uint8_t day);
-utime_t time_to_seconds(uint8_t hour, uint8_t minute, uint8_t second);
-void seconds_to_date(utime_t seconds, uint8_t *restrict ret_year, uint8_t *restrict ret_month, uint8_t *restrict ret_day);
-void seconds_to_time(utime_t seconds, uint8_t *restrict ret_hour, uint8_t *restrict ret_minute, uint8_t *restrict ret_second);
+utime_t datetime_to_seconds(const datetime_t *datetime);
+utime_t date_to_seconds(const datetime_t *datetime);
+utime_t time_to_seconds(const datetime_t *datetime);
+void seconds_to_datetime(utime_t seconds, datetime_t *ret_datetime);
+void seconds_to_date(utime_t seconds, datetime_t *ret_datetime);
+void seconds_to_time(utime_t seconds, datetime_t *ret_datetime);
 
 /*
 * Timers

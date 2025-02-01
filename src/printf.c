@@ -63,9 +63,9 @@
 // one character per bit. If we're not printing binary though, we use one
 // character per three bits.
 #if PRINT_BINARY
-# define PRINTF_BUFFER_BYTES (PRINTF_MAX_INT_BYTES * 8)
+# define PRINTF_BUFFER_BYTES (PRINTF_MAX_INT_BYTES * 8U)
 #else
-# define PRINTF_BUFFER_BYTES (PRINTF_MAX_INT_BYTES * 3)
+# define PRINTF_BUFFER_BYTES (((PRINTF_MAX_INT_BYTES * 8U) / 3U) + 1)
 #endif
 
 
@@ -521,6 +521,21 @@ void printf_va(void(*pputc)(uint_fast8_t c), const char *restrict fmt_s, va_list
 			break;
 		case 't':
 			opts.int_size = sizeof(ptrdiff_t);
+			break;
+		case 'I':
+			if (*fmt == '8') {
+				++fmt;
+				opts.int_size = 1;
+			} else if (*fmt == '1' && fmt[1] == '6') {
+				fmt += 2;
+				opts.int_size = 2;
+			} else if (*fmt == '3' && fmt[1] == '2') {
+				fmt += 2;
+				opts.int_size = 4;
+			} else if (*fmt == '6' && fmt[1] == '4') {
+				fmt += 2;
+				opts.int_size = 8;
+			}
 			break;
 #endif
 		case 'l':
