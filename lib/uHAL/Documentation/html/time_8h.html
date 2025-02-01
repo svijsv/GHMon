@@ -90,25 +90,87 @@ $(document).ready(function(){initNavTree('time_8h.html',''); initResizable(); })
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#define-members">Macros</a>  </div>
   <div class="headertitle"><div class="title">time.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
 
 <p>Time Management Interface.  
 <a href="#details">More...</a></p>
-
+<div class="textblock"><code>#include &quot;ulib/include/time.h&quot;</code><br />
+</div>
 <p><a href="time_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
+Macros</h2></td></tr>
+<tr class="memitem:a9e1f10144cee8f7e6efb6408fb0f8f34" id="r_a9e1f10144cee8f7e6efb6408fb0f8f34"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="time_8h.html#a9e1f10144cee8f7e6efb6408fb0f8f34">NOW</a>()</td></tr>
+<tr class="memdesc:a9e1f10144cee8f7e6efb6408fb0f8f34"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the system time enumerated in seconds.  <br /></td></tr>
+<tr class="separator:a9e1f10144cee8f7e6efb6408fb0f8f34"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8a5ce59db31a33eaefe92a7d0989b691" id="r_a8a5ce59db31a33eaefe92a7d0989b691"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="time_8h.html#a8a5ce59db31a33eaefe92a7d0989b691">NOW_MS</a>()</td></tr>
+<tr class="memdesc:a8a5ce59db31a33eaefe92a7d0989b691"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read the systick counter.  <br /></td></tr>
+<tr class="separator:a8a5ce59db31a33eaefe92a7d0989b691"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
+<tr><td colspan="2"><div class="groupHeader">SYSTICK Interface.</div></td></tr>
+<tr class="memitem:a0a92f1971223597c49b1fc5924fd5b4b" id="r_a0a92f1971223597c49b1fc5924fd5b4b"><td class="memItemLeft" align="right" valign="top"><a id="a0a92f1971223597c49b1fc5924fd5b4b" name="a0a92f1971223597c49b1fc5924fd5b4b"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>enable_systick</b> (void)</td></tr>
+<tr class="memdesc:a0a92f1971223597c49b1fc5924fd5b4b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enable the system millisecond tick counter. <br /></td></tr>
+<tr class="separator:a0a92f1971223597c49b1fc5924fd5b4b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa457bea9a15cb4b6889ed3b038e3dda0" id="r_aa457bea9a15cb4b6889ed3b038e3dda0"><td class="memItemLeft" align="right" valign="top"><a id="aa457bea9a15cb4b6889ed3b038e3dda0" name="aa457bea9a15cb4b6889ed3b038e3dda0"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>disable_systick</b> (void)</td></tr>
+<tr class="memdesc:aa457bea9a15cb4b6889ed3b038e3dda0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disable the system millisecond tick counter. <br /></td></tr>
+<tr class="separator:aa457bea9a15cb4b6889ed3b038e3dda0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a955e2f36f9266c3c5b5742ddad24dda2" id="r_a955e2f36f9266c3c5b5742ddad24dda2"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="time_8h.html#a955e2f36f9266c3c5b5742ddad24dda2">systick_is_enabled</a> (void)</td></tr>
+<tr class="memdesc:a955e2f36f9266c3c5b5742ddad24dda2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if the systick counter is enabled.  <br /></td></tr>
+<tr class="separator:a955e2f36f9266c3c5b5742ddad24dda2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr><td colspan="2"><div class="groupHeader">Real-Time Clock Interface.</div></td></tr>
+<tr class="memitem:a48c9f79ab84e3f2223606d58415a56aa" id="r_a48c9f79ab84e3f2223606d58415a56aa"><td class="memItemLeft" align="right" valign="top">err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="time_8h.html#a48c9f79ab84e3f2223606d58415a56aa">set_RTC_datetime</a> (const datetime_t *datetime)</td></tr>
+<tr class="memdesc:a48c9f79ab84e3f2223606d58415a56aa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set system date/time.  <br /></td></tr>
+<tr class="separator:a48c9f79ab84e3f2223606d58415a56aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a733e49a0431bf1f2ee85fb281b9a4ea5" id="r_a733e49a0431bf1f2ee85fb281b9a4ea5"><td class="memItemLeft" align="right" valign="top">err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="time_8h.html#a733e49a0431bf1f2ee85fb281b9a4ea5">get_RTC_datetime</a> (datetime_t *datetime)</td></tr>
+<tr class="memdesc:a733e49a0431bf1f2ee85fb281b9a4ea5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read the system date/time.  <br /></td></tr>
+<tr class="separator:a733e49a0431bf1f2ee85fb281b9a4ea5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac0157d972d076b858e21460870852615" id="r_ac0157d972d076b858e21460870852615"><td class="memItemLeft" align="right" valign="top">err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="time_8h.html#ac0157d972d076b858e21460870852615">set_RTC_seconds</a> (utime_t s)</td></tr>
+<tr class="memdesc:ac0157d972d076b858e21460870852615"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the system time enumerated in seconds.  <br /></td></tr>
+<tr class="separator:ac0157d972d076b858e21460870852615"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6d11761096f44bb99533ee2adc82ea48" id="r_a6d11761096f44bb99533ee2adc82ea48"><td class="memItemLeft" align="right" valign="top">utime_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="time_8h.html#a6d11761096f44bb99533ee2adc82ea48">get_RTC_seconds</a> (void)</td></tr>
+<tr class="memdesc:a6d11761096f44bb99533ee2adc82ea48"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the system time enumerated in seconds.  <br /></td></tr>
+<tr class="separator:a6d11761096f44bb99533ee2adc82ea48"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a527a959a902d36856fb40a72933157df" id="r_a527a959a902d36856fb40a72933157df"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="time_8h.html#a527a959a902d36856fb40a72933157df">add_RTC_millis</a> (uint_fast16_t ms)</td></tr>
+<tr class="memdesc:a527a959a902d36856fb40a72933157df"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add milliseconds to the RTC.  <br /></td></tr>
+<tr class="separator:a527a959a902d36856fb40a72933157df"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a88bf20e5e7d34e6d24aa8f60bae48390" id="r_a88bf20e5e7d34e6d24aa8f60bae48390"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="time_8h.html#a88bf20e5e7d34e6d24aa8f60bae48390">subtract_RTC_millis</a> (uint_fast16_t ms)</td></tr>
+<tr class="memdesc:a88bf20e5e7d34e6d24aa8f60bae48390"><td class="mdescLeft">&#160;</td><td class="mdescRight">Subtract milliseconds from the RTC.  <br /></td></tr>
+<tr class="separator:a88bf20e5e7d34e6d24aa8f60bae48390"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr><td colspan="2"><div class="groupHeader">Uptime Counter Interface.</div></td></tr>
+<tr class="memitem:a151e0c3ba3ba65de875e040c07189087" id="r_a151e0c3ba3ba65de875e040c07189087"><td class="memItemLeft" align="right" valign="top">err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="time_8h.html#a151e0c3ba3ba65de875e040c07189087">init_uptime</a> (void)</td></tr>
+<tr class="memdesc:a151e0c3ba3ba65de875e040c07189087"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the uptime counter.  <br /></td></tr>
+<tr class="separator:a151e0c3ba3ba65de875e040c07189087"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8c99248f539a2a79a541cc87cfedc334" id="r_a8c99248f539a2a79a541cc87cfedc334"><td class="memItemLeft" align="right" valign="top">err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="time_8h.html#a8c99248f539a2a79a541cc87cfedc334">set_uptime</a> (utime_t uptime_seconds)</td></tr>
+<tr class="memdesc:a8c99248f539a2a79a541cc87cfedc334"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the uptime counter.  <br /></td></tr>
+<tr class="separator:a8c99248f539a2a79a541cc87cfedc334"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5b79e9b097b075c1629a21f36cd770d8" id="r_a5b79e9b097b075c1629a21f36cd770d8"><td class="memItemLeft" align="right" valign="top">err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="time_8h.html#a5b79e9b097b075c1629a21f36cd770d8">adj_uptime</a> (itime_t adjustment_seconds)</td></tr>
+<tr class="memdesc:a5b79e9b097b075c1629a21f36cd770d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adjust the uptime counter.  <br /></td></tr>
+<tr class="separator:a5b79e9b097b075c1629a21f36cd770d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a865ea0a86ae17d25b6271a737b6e7337" id="r_a865ea0a86ae17d25b6271a737b6e7337"><td class="memItemLeft" align="right" valign="top">err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="time_8h.html#a865ea0a86ae17d25b6271a737b6e7337">fix_uptime</a> (utime_t new_now, utime_t old_now)</td></tr>
+<tr class="memdesc:a865ea0a86ae17d25b6271a737b6e7337"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fix the uptime counter after an RTC update.  <br /></td></tr>
+<tr class="separator:a865ea0a86ae17d25b6271a737b6e7337"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8e8384bce1b89f636facd7dc35d14d9f" id="r_a8e8384bce1b89f636facd7dc35d14d9f"><td class="memItemLeft" align="right" valign="top">utime_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="time_8h.html#a8e8384bce1b89f636facd7dc35d14d9f">get_uptime</a> (void)</td></tr>
+<tr class="memdesc:a8e8384bce1b89f636facd7dc35d14d9f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the system uptime in seconds.  <br /></td></tr>
+<tr class="separator:a8e8384bce1b89f636facd7dc35d14d9f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a53010e90df55e81dbcc3e1a1aeefaa65" id="r_a53010e90df55e81dbcc3e1a1aeefaa65"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="time_8h.html#a53010e90df55e81dbcc3e1a1aeefaa65">print_uptime</a> (utime_t seconds, char *buf, uint_fast8_t buf_size)</td></tr>
+<tr class="memdesc:a53010e90df55e81dbcc3e1a1aeefaa65"><td class="mdescLeft">&#160;</td><td class="mdescRight">Print an uptime duration in the format <code>DDDDdHHhMMmSSs</code>.  <br /></td></tr>
+<tr class="separator:a53010e90df55e81dbcc3e1a1aeefaa65"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Microsecond Counter Interface.</div></td></tr>
-<tr class="memitem:a711845634b8007ea7fff41c9bc5040d2" id="r_a711845634b8007ea7fff41c9bc5040d2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="time_8h.html#a711845634b8007ea7fff41c9bc5040d2">uscounter_on</a> (void)</td></tr>
+<tr class="memitem:a711845634b8007ea7fff41c9bc5040d2" id="r_a711845634b8007ea7fff41c9bc5040d2"><td class="memItemLeft" align="right" valign="top">err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="time_8h.html#a711845634b8007ea7fff41c9bc5040d2">uscounter_on</a> (void)</td></tr>
 <tr class="memdesc:a711845634b8007ea7fff41c9bc5040d2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enable the microsecond counter.  <br /></td></tr>
 <tr class="separator:a711845634b8007ea7fff41c9bc5040d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af6ada3b516a5521c1afd97036635fa26" id="r_af6ada3b516a5521c1afd97036635fa26"><td class="memItemLeft" align="right" valign="top"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="time_8h.html#af6ada3b516a5521c1afd97036635fa26">uscounter_off</a> (void)</td></tr>
+<tr class="memitem:af6ada3b516a5521c1afd97036635fa26" id="r_af6ada3b516a5521c1afd97036635fa26"><td class="memItemLeft" align="right" valign="top">err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="time_8h.html#af6ada3b516a5521c1afd97036635fa26">uscounter_off</a> (void)</td></tr>
 <tr class="memdesc:af6ada3b516a5521c1afd97036635fa26"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disable the microsecond counter.  <br /></td></tr>
 <tr class="separator:af6ada3b516a5521c1afd97036635fa26"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a33ae8d8d506da960523681b6244b48d8" id="r_a33ae8d8d506da960523681b6244b48d8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="time_8h.html#a33ae8d8d506da960523681b6244b48d8">uscounter_start</a> (void)</td></tr>
+<tr class="memitem:a33ae8d8d506da960523681b6244b48d8" id="r_a33ae8d8d506da960523681b6244b48d8"><td class="memItemLeft" align="right" valign="top">err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="time_8h.html#a33ae8d8d506da960523681b6244b48d8">uscounter_start</a> (void)</td></tr>
 <tr class="memdesc:a33ae8d8d506da960523681b6244b48d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Start the microsecond counter.  <br /></td></tr>
 <tr class="separator:a33ae8d8d506da960523681b6244b48d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a82a6b46e9549edef0f5a5716147f34aa" id="r_a82a6b46e9549edef0f5a5716147f34aa"><td class="memItemLeft" align="right" valign="top">uint_fast32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="time_8h.html#a82a6b46e9549edef0f5a5716147f34aa">uscounter_stop</a> (void)</td></tr>
@@ -127,57 +189,10 @@ Functions</h2></td></tr>
 <tr class="memitem:ac7b2ed95eb0c6471432f18ead2e5b393" id="r_ac7b2ed95eb0c6471432f18ead2e5b393"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="time_8h.html#ac7b2ed95eb0c6471432f18ead2e5b393">dumb_delay_cycles</a> (uint_fast32_t cycles)</td></tr>
 <tr class="memdesc:ac7b2ed95eb0c6471432f18ead2e5b393"><td class="mdescLeft">&#160;</td><td class="mdescRight">A 'dumber' delay that doesn't even know about milliseconds.  <br /></td></tr>
 <tr class="separator:ac7b2ed95eb0c6471432f18ead2e5b393"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader">SYSTICK Interface.</h2></td></tr>
-<tr class="memitem:a8a5ce59db31a33eaefe92a7d0989b691" id="r_a8a5ce59db31a33eaefe92a7d0989b691"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="time_8h.html#a8a5ce59db31a33eaefe92a7d0989b691">NOW_MS</a>()</td></tr>
-<tr class="memdesc:a8a5ce59db31a33eaefe92a7d0989b691"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read the systick counter.  <br /></td></tr>
-<tr class="separator:a8a5ce59db31a33eaefe92a7d0989b691"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a95d83e618f9f9d89825554eebbdfcefb" id="r_a95d83e618f9f9d89825554eebbdfcefb"><td class="memItemLeft" align="right" valign="top"><a id="a95d83e618f9f9d89825554eebbdfcefb" name="a95d83e618f9f9d89825554eebbdfcefb"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>GET_SYSTICKS_MS</b>()</td></tr>
-<tr class="memdesc:a95d83e618f9f9d89825554eebbdfcefb"><td class="mdescLeft">&#160;</td><td class="mdescRight">An alias for <code><a class="el" href="time_8h.html#a8a5ce59db31a33eaefe92a7d0989b691" title="Read the systick counter.">NOW_MS()</a></code> required by <code>ulib</code>. <br /></td></tr>
-<tr class="separator:a95d83e618f9f9d89825554eebbdfcefb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0a92f1971223597c49b1fc5924fd5b4b" id="r_a0a92f1971223597c49b1fc5924fd5b4b"><td class="memItemLeft" align="right" valign="top"><a id="a0a92f1971223597c49b1fc5924fd5b4b" name="a0a92f1971223597c49b1fc5924fd5b4b"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>enable_systick</b> (void)</td></tr>
-<tr class="memdesc:a0a92f1971223597c49b1fc5924fd5b4b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enable the system millisecond tick. <br /></td></tr>
-<tr class="separator:a0a92f1971223597c49b1fc5924fd5b4b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa457bea9a15cb4b6889ed3b038e3dda0" id="r_aa457bea9a15cb4b6889ed3b038e3dda0"><td class="memItemLeft" align="right" valign="top"><a id="aa457bea9a15cb4b6889ed3b038e3dda0" name="aa457bea9a15cb4b6889ed3b038e3dda0"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>disable_systick</b> (void)</td></tr>
-<tr class="memdesc:aa457bea9a15cb4b6889ed3b038e3dda0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disable the system millisecond tick. <br /></td></tr>
-<tr class="separator:aa457bea9a15cb4b6889ed3b038e3dda0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a955e2f36f9266c3c5b5742ddad24dda2" id="r_a955e2f36f9266c3c5b5742ddad24dda2"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="time_8h.html#a955e2f36f9266c3c5b5742ddad24dda2">systick_is_enabled</a> (void)</td></tr>
-<tr class="memdesc:a955e2f36f9266c3c5b5742ddad24dda2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if the systick is enabled.  <br /></td></tr>
-<tr class="separator:a955e2f36f9266c3c5b5742ddad24dda2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader">Real-Time Clock Interface.</h2></td></tr>
-<tr class="memitem:a9e1f10144cee8f7e6efb6408fb0f8f34" id="r_a9e1f10144cee8f7e6efb6408fb0f8f34"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="time_8h.html#a9e1f10144cee8f7e6efb6408fb0f8f34">NOW</a>()</td></tr>
-<tr class="memdesc:a9e1f10144cee8f7e6efb6408fb0f8f34"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the system time enumerated in seconds.  <br /></td></tr>
-<tr class="separator:a9e1f10144cee8f7e6efb6408fb0f8f34"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab4ad2f41126776f271ba44dcf034f5ea" id="r_ab4ad2f41126776f271ba44dcf034f5ea"><td class="memItemLeft" align="right" valign="top"><a id="ab4ad2f41126776f271ba44dcf034f5ea" name="ab4ad2f41126776f271ba44dcf034f5ea"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>RTCTICKS</b></td></tr>
-<tr class="memdesc:ab4ad2f41126776f271ba44dcf034f5ea"><td class="mdescLeft">&#160;</td><td class="mdescRight">An alias for <code><a class="el" href="time_8h.html#a9e1f10144cee8f7e6efb6408fb0f8f34" title="Get the system time enumerated in seconds.">NOW()</a></code> required by <code>ulib</code>. <br /></td></tr>
-<tr class="separator:ab4ad2f41126776f271ba44dcf034f5ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac11d915169a6c0b4c867b37bfc30b127" id="r_ac11d915169a6c0b4c867b37bfc30b127"><td class="memItemLeft" align="right" valign="top"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="time_8h.html#ac11d915169a6c0b4c867b37bfc30b127">set_time</a> (uint8_t hour, uint8_t minute, uint8_t second)</td></tr>
-<tr class="memdesc:ac11d915169a6c0b4c867b37bfc30b127"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set system time.  <br /></td></tr>
-<tr class="separator:ac11d915169a6c0b4c867b37bfc30b127"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6b7b38470c0ab93c728a378cc4f2e77b" id="r_a6b7b38470c0ab93c728a378cc4f2e77b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="time_8h.html#a6b7b38470c0ab93c728a378cc4f2e77b">set_date</a> (uint8_t year, uint8_t month, uint8_t day)</td></tr>
-<tr class="memdesc:a6b7b38470c0ab93c728a378cc4f2e77b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set system date.  <br /></td></tr>
-<tr class="separator:a6b7b38470c0ab93c728a378cc4f2e77b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac0157d972d076b858e21460870852615" id="r_ac0157d972d076b858e21460870852615"><td class="memItemLeft" align="right" valign="top"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="time_8h.html#ac0157d972d076b858e21460870852615">set_RTC_seconds</a> (utime_t s)</td></tr>
-<tr class="memdesc:ac0157d972d076b858e21460870852615"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the system time enumerated in seconds.  <br /></td></tr>
-<tr class="separator:ac0157d972d076b858e21460870852615"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6d11761096f44bb99533ee2adc82ea48" id="r_a6d11761096f44bb99533ee2adc82ea48"><td class="memItemLeft" align="right" valign="top">utime_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="time_8h.html#a6d11761096f44bb99533ee2adc82ea48">get_RTC_seconds</a> (void)</td></tr>
-<tr class="memdesc:a6d11761096f44bb99533ee2adc82ea48"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the system time enumerated in seconds.  <br /></td></tr>
-<tr class="separator:a6d11761096f44bb99533ee2adc82ea48"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a527a959a902d36856fb40a72933157df" id="r_a527a959a902d36856fb40a72933157df"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="time_8h.html#a527a959a902d36856fb40a72933157df">add_RTC_millis</a> (uint_fast16_t ms)</td></tr>
-<tr class="memdesc:a527a959a902d36856fb40a72933157df"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add milliseconds to the RTC.  <br /></td></tr>
-<tr class="separator:a527a959a902d36856fb40a72933157df"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a88bf20e5e7d34e6d24aa8f60bae48390" id="r_a88bf20e5e7d34e6d24aa8f60bae48390"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="time_8h.html#a88bf20e5e7d34e6d24aa8f60bae48390">subtract_RTC_millis</a> (uint_fast16_t ms)</td></tr>
-<tr class="memdesc:a88bf20e5e7d34e6d24aa8f60bae48390"><td class="mdescLeft">&#160;</td><td class="mdescRight">Subtract milliseconds from the RTC.  <br /></td></tr>
-<tr class="separator:a88bf20e5e7d34e6d24aa8f60bae48390"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Time Management Interface. </p>
-<dl class="section attention"><dt>Attention</dt><dd>This file should only be included by <a class="el" href="interface_8h.html" title="Interface between the frontend and backend code.">interface.h</a>. </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This file should only be included by <a class="el" href="interface_8h.html" title="Interface between the frontend and backend code.">interface.h</a>. </dd></dl>
 </div><h2 class="groupheader">Macro Definition Documentation</h2>
 <a id="a9e1f10144cee8f7e6efb6408fb0f8f34" name="a9e1f10144cee8f7e6efb6408fb0f8f34"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a9e1f10144cee8f7e6efb6408fb0f8f34">&#9670;&#160;</a></span>NOW</h2>
@@ -196,7 +211,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>disable_systick</b> (
 
 <p>Get the system time enumerated in seconds. </p>
 <p>This updates even during sleep.</p>
-<dl class="section attention"><dt>Attention</dt><dd>This may be lower for a later read if the system time was set in the meantime. </dd></dl>
+<dl class="section attention"><dt>Attention</dt><dd>This may return either the system time or the system uptime depending on configuration.</dd>
+<dd>
+This may be lower for a later read if the system time was changed in the meantime. </dd></dl>
 
 </div>
 </div>
@@ -239,13 +256,40 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>disable_systick</b> (
 </div><div class="memdoc">
 
 <p>Add milliseconds to the RTC. </p>
-<dl class="section attention"><dt>Attention</dt><dd>This only impacts emulated RTCs.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This only impacts emulated RTCs.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">ms</td><td>The number of milliseconds to add to the RTC. </td></tr>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="a5b79e9b097b075c1629a21f36cd770d8" name="a5b79e9b097b075c1629a21f36cd770d8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5b79e9b097b075c1629a21f36cd770d8">&#9670;&#160;</a></span>adj_uptime()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">err_t adj_uptime </td>
+          <td>(</td>
+          <td class="paramtype">itime_t&#160;</td>
+          <td class="paramname"><em>adjustment_seconds</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Adjust the uptime counter. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">adjustment_seconds</td><td>The number of seconds to adjust the counter by.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>ERR_OK if successful, otherwise an error code indicating the nature of the problem encountered. </dd></dl>
 
 </div>
 </div>
@@ -293,7 +337,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>disable_systick</b> (
 </div><div class="memdoc">
 
 <p>A 'dumber' delay that doesn't even know about milliseconds. </p>
-<dl class="section attention"><dt>Attention</dt><dd>Don't expect this to be very accurate.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Don't expect this to be very accurate.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">cycles</td><td>The number of cycles to pause. </td></tr>
@@ -320,13 +364,79 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>disable_systick</b> (
 </div><div class="memdoc">
 
 <p>A 'dumb' delay that doesn't know about ticks. </p>
-<dl class="section attention"><dt>Attention</dt><dd>Don't expect this to be very accurate.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Don't expect this to be very accurate.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">ms</td><td>The number of milliseconds to pause. </td></tr>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="a865ea0a86ae17d25b6271a737b6e7337" name="a865ea0a86ae17d25b6271a737b6e7337"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a865ea0a86ae17d25b6271a737b6e7337">&#9670;&#160;</a></span>fix_uptime()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">err_t fix_uptime </td>
+          <td>(</td>
+          <td class="paramtype">utime_t&#160;</td>
+          <td class="paramname"><em>new_now</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">utime_t&#160;</td>
+          <td class="paramname"><em>old_now</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Fix the uptime counter after an RTC update. </p>
+<dl class="section note"><dt>Note</dt><dd>This is only used for emulated uptime counters.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">new_now</td><td>The new value of the RTC in seconds. </td></tr>
+    <tr><td class="paramname">old_now</td><td>The previous value of the RTC in seconds.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>ERR_OK if successful, otherwise an error code indicating the nature of the problem encountered. </dd></dl>
+
+</div>
+</div>
+<a id="a733e49a0431bf1f2ee85fb281b9a4ea5" name="a733e49a0431bf1f2ee85fb281b9a4ea5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a733e49a0431bf1f2ee85fb281b9a4ea5">&#9670;&#160;</a></span>get_RTC_datetime()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">err_t get_RTC_datetime </td>
+          <td>(</td>
+          <td class="paramtype">datetime_t *&#160;</td>
+          <td class="paramname"><em>datetime</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Read the system date/time. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">datetime</td><td>The object used to return the current date/time. Must not be NULL.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>ERR_OK if successful, otherwise an error code indicating the nature of the problem encountered. </dd></dl>
 
 </div>
 </div>
@@ -351,29 +461,72 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>disable_systick</b> (
 
 </div>
 </div>
-<a id="a6b7b38470c0ab93c728a378cc4f2e77b" name="a6b7b38470c0ab93c728a378cc4f2e77b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6b7b38470c0ab93c728a378cc4f2e77b">&#9670;&#160;</a></span>set_date()</h2>
+<a id="a8e8384bce1b89f636facd7dc35d14d9f" name="a8e8384bce1b89f636facd7dc35d14d9f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8e8384bce1b89f636facd7dc35d14d9f">&#9670;&#160;</a></span>get_uptime()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a> set_date </td>
+          <td class="memname">utime_t get_uptime </td>
           <td>(</td>
-          <td class="paramtype">uint8_t&#160;</td>
-          <td class="paramname"><em>year</em>, </td>
+          <td class="paramtype">void&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Return the system uptime in seconds. </p>
+<dl class="section return"><dt>Returns</dt><dd>The number of seconds which have elapsed since the system booted. </dd></dl>
+
+</div>
+</div>
+<a id="a151e0c3ba3ba65de875e040c07189087" name="a151e0c3ba3ba65de875e040c07189087"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a151e0c3ba3ba65de875e040c07189087">&#9670;&#160;</a></span>init_uptime()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">err_t init_uptime </td>
+          <td>(</td>
+          <td class="paramtype">void&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Initialize the uptime counter. </p>
+<p>This will normally be called by the platform initialization code.</p>
+<dl class="section return"><dt>Returns</dt><dd>ERR_OK if successful, otherwise an error code indicating the nature of the problem encountered. </dd></dl>
+
+</div>
+</div>
+<a id="a53010e90df55e81dbcc3e1a1aeefaa65" name="a53010e90df55e81dbcc3e1a1aeefaa65"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a53010e90df55e81dbcc3e1a1aeefaa65">&#9670;&#160;</a></span>print_uptime()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const char * print_uptime </td>
+          <td>(</td>
+          <td class="paramtype">utime_t&#160;</td>
+          <td class="paramname"><em>seconds</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">uint8_t&#160;</td>
-          <td class="paramname"><em>month</em>, </td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>buf</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">uint8_t&#160;</td>
-          <td class="paramname"><em>day</em>&#160;</td>
+          <td class="paramtype">uint_fast8_t&#160;</td>
+          <td class="paramname"><em>buf_size</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -383,15 +536,45 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>disable_systick</b> (
       </table>
 </div><div class="memdoc">
 
-<p>Set system date. </p>
+<p>Print an uptime duration in the format <code>DDDDdHHhMMmSSs</code>. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">year</td><td>The last 2 digits of the year part of the new system date. </td></tr>
-    <tr><td class="paramname">month</td><td>The month part of the new system date. </td></tr>
-    <tr><td class="paramname">day</td><td>The day part of the new system date.</td></tr>
+    <tr><td class="paramname">seconds</td><td>The duration to print. </td></tr>
+    <tr><td class="paramname">buf</td><td>The buffer used to hold the string. </td></tr>
+    <tr><td class="paramname">buf_size</td><td>The length of <code>buf</code> in bytes. This must be &gt;= 12.</td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>A pointer to the start of the string within the buffer <code>buf</code> if successful or an empty string otherwise. </dd></dl>
+
+</div>
+</div>
+<a id="a48c9f79ab84e3f2223606d58415a56aa" name="a48c9f79ab84e3f2223606d58415a56aa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a48c9f79ab84e3f2223606d58415a56aa">&#9670;&#160;</a></span>set_RTC_datetime()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">err_t set_RTC_datetime </td>
+          <td>(</td>
+          <td class="paramtype">const datetime_t *&#160;</td>
+          <td class="paramname"><em>datetime</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Set system date/time. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">datetime</td><td>The new system date/time. Must not be NULL.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>If the year, month, and day are all <code>0</code>, the date isn't set. </dd>
+<dd>
+If the hour, minute, and second are all <code>0</code>, the time isn't set.</dd></dl>
 <dl class="section return"><dt>Returns</dt><dd>ERR_OK if successful, otherwise an error code indicating the nature of the problem encountered. </dd></dl>
 
 </div>
@@ -403,7 +586,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>disable_systick</b> (
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a> set_RTC_seconds </td>
+          <td class="memname">err_t set_RTC_seconds </td>
           <td>(</td>
           <td class="paramtype">utime_t&#160;</td>
           <td class="paramname"><em>s</em></td><td>)</td>
@@ -413,7 +596,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>disable_systick</b> (
 </div><div class="memdoc">
 
 <p>Set the system time enumerated in seconds. </p>
-<dl class="section attention"><dt>Attention</dt><dd>This has the effect of setting both the date and the time.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This has the effect of setting both the date and the time.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">s</td><td>The new system time.</td></tr>
@@ -424,44 +607,26 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>disable_systick</b> (
 
 </div>
 </div>
-<a id="ac11d915169a6c0b4c867b37bfc30b127" name="ac11d915169a6c0b4c867b37bfc30b127"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac11d915169a6c0b4c867b37bfc30b127">&#9670;&#160;</a></span>set_time()</h2>
+<a id="a8c99248f539a2a79a541cc87cfedc334" name="a8c99248f539a2a79a541cc87cfedc334"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8c99248f539a2a79a541cc87cfedc334">&#9670;&#160;</a></span>set_uptime()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a> set_time </td>
+          <td class="memname">err_t set_uptime </td>
           <td>(</td>
-          <td class="paramtype">uint8_t&#160;</td>
-          <td class="paramname"><em>hour</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
+          <td class="paramtype">utime_t&#160;</td>
+          <td class="paramname"><em>uptime_seconds</em></td><td>)</td>
           <td></td>
-          <td class="paramtype">uint8_t&#160;</td>
-          <td class="paramname"><em>minute</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint8_t&#160;</td>
-          <td class="paramname"><em>second</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Set system time. </p>
+<p>Set the uptime counter. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">hour</td><td>The hour part of the new system time, in the range 0-23. </td></tr>
-    <tr><td class="paramname">minute</td><td>The minute part of the new system time. </td></tr>
-    <tr><td class="paramname">second</td><td>The second part of the new system time.</td></tr>
+    <tr><td class="paramname">uptime_seconds</td><td>The number of seconds to set the counter to.</td></tr>
   </table>
   </dd>
 </dl>
@@ -486,7 +651,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>disable_systick</b> (
 </div><div class="memdoc">
 
 <p>Subtract milliseconds from the RTC. </p>
-<dl class="section attention"><dt>Attention</dt><dd>This only impacts emulated RTCs.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This only impacts emulated RTCs.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">ms</td><td>The number of milliseconds to add to the RTC. </td></tr>
@@ -512,7 +677,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>disable_systick</b> (
       </table>
 </div><div class="memdoc">
 
-<p>Check if the systick is enabled. </p>
+<p>Check if the systick counter is enabled. </p>
 <dl class="retval"><dt>Return values</dt><dd>
   <table class="retval">
     <tr><td class="paramname">true</td><td>if turned on. </td></tr>
@@ -530,7 +695,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>disable_systick</b> (
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a> uscounter_off </td>
+          <td class="memname">err_t uscounter_off </td>
           <td>(</td>
           <td class="paramtype">void&#160;</td>
           <td class="paramname"></td><td>)</td>
@@ -551,7 +716,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>disable_systick</b> (
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a> uscounter_on </td>
+          <td class="memname">err_t uscounter_on </td>
           <td>(</td>
           <td class="paramtype">void&#160;</td>
           <td class="paramname"></td><td>)</td>
@@ -593,7 +758,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>disable_systick</b> (
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a> uscounter_start </td>
+          <td class="memname">err_t uscounter_start </td>
           <td>(</td>
           <td class="paramtype">void&#160;</td>
           <td class="paramname"></td><td>)</td>

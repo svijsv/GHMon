@@ -144,6 +144,9 @@ static void pins_off(void) {
 err_t spi_on(void) {
 	clock_enable(SPIx_CLOCKEN);
 	SET_BIT(SPIx->CR1, SPI_CR1_SPE);
+	while (!BIT_IS_SET(SPIx->CR1, SPI_CR1_SPE)) {
+		// Nothing to do here
+	}
 
 	pins_on();
 
@@ -152,7 +155,7 @@ err_t spi_on(void) {
 err_t spi_off(void) {
 	uint16_t rx;
 
-	assert(clock_is_enabled(SPIx_CLOCKEN));
+	uHAL_assert(clock_is_enabled(SPIx_CLOCKEN));
 #if ! uHAL_SKIP_INIT_CHECKS
 #endif
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
@@ -186,6 +189,9 @@ err_t spi_off(void) {
 	pins_off();
 
 	CLEAR_BIT(SPIx->CR1, SPI_CR1_SPE);
+	while (BIT_IS_SET(SPIx->CR1, SPI_CR1_SPE)) {
+		// Nothing to do here
+	}
 	clock_disable(SPIx_CLOCKEN);
 
 	return ERR_OK;
@@ -197,7 +203,7 @@ bool spi_is_on(void) {
 err_t spi_exchange_byte(uint8_t tx, uint8_t *rx, utime_t timeout) {
 	err_t res;
 
-	assert(rx != NULL);
+	uHAL_assert(rx != NULL);
 #if ! uHAL_SKIP_INIT_CHECKS
 #endif
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
@@ -234,8 +240,8 @@ err_t spi_receive_block(uint8_t *rx_buffer, txsize_t rx_size, uint8_t tx, utime_
 	err_t res;
 	txsize_t i;
 
-	assert(rx_buffer != NULL);
-	assert(rx_size > 0);
+	uHAL_assert(rx_buffer != NULL);
+	uHAL_assert(rx_size > 0);
 #if ! uHAL_SKIP_INIT_CHECKS
 #endif
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
@@ -293,8 +299,8 @@ err_t spi_transmit_block(const uint8_t *tx_buffer, txsize_t tx_size, utime_t tim
 	uint16_t rx;
 	txsize_t i;
 
-	assert(tx_buffer != NULL);
-	assert(tx_size > 0);
+	uHAL_assert(tx_buffer != NULL);
+	uHAL_assert(tx_size > 0);
 #if ! uHAL_SKIP_INIT_CHECKS
 #endif
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS

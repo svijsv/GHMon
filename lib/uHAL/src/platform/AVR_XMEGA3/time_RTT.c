@@ -256,7 +256,7 @@ void calibrate_RTT(void) {
 
 	READ_VOLATILE(post_calib, G_sys_msticks);
 	rtt_calibration = (uint16_t )(post_calib - pre_calib);
-	assert(rtt_calibration > 0);
+	uHAL_assert(rtt_calibration > 0);
 
 	RESTORE_INTERRUPTS(sreg);
 
@@ -307,7 +307,7 @@ uint_fast16_t get_RTT_calibration(void) {
 uint16_t set_wakeup_alarm(uint16_t ms) {
 	uint16_t per, adjust_ms = 0;
 
-	assert(rtt_calibration > 0);
+	uHAL_assert(rtt_calibration > 0);
 
 	wakeup_alarm_is_set = false;
 

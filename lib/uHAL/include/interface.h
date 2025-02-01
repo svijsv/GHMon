@@ -64,28 +64,9 @@
 
 #include "ulib/include/bits.h"
 //#include "ulib/include/debug.h"
+#include "ulib/include/error.h"
 #include "ulib/include/types.h"
 #include "ulib/include/util.h"
-
-///
-/// Error status return values.
-typedef enum {
-	ERR_OK = 0, ///< No error
-
-	ERR_BADARG,   ///< Function passed a bad argument.
-	ERR_INIT,     ///< Structure or peripheral not initialized.
-	ERR_IO,       ///< Input/output error.
-	ERR_NODEV,    ///< No such device.
-	ERR_NOMEM,    ///< Not enough memory.
-	ERR_NOTSUP,   ///< Operation not supported.
-	ERR_IMPOSSIBLE, ///< Operation not possible.
-	ERR_RETRY,    ///< Device or resource temporarily unavailable.
-	ERR_PERM,     ///< Operation not permitted.
-	ERR_TIMEOUT,  ///< Operation timed out.
-	ERR_INTERRUPT, ///< Operation interrupted.
-
-	ERR_UNKNOWN = 127 ///< Unknown error.
-} err_t;
 
 ///
 /// The type used to track byte counts during data transmissions.

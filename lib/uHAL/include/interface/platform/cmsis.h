@@ -19,16 +19,16 @@
 ***********************************************************************/
 /// @file
 /// @brief Platform-specific features.
-/// @attention
+/// @note
 ///    This file should only be included by interface.h
-/// @attention
+/// @note
 ///    This file is only included when using the CMSIS platform
 ///
 
 ///
 /// @name Clock Calibration
 ///
-/// @attention
+/// @note
 /// These are only available when Timer 5 is present.
 /// @{
 //
@@ -45,7 +45,7 @@ typedef enum {
 /// @attention
 /// It can take several seconds for the LSE to stabilize after being enabled,
 /// check the datasheet.
-/// @attention
+/// @note
 /// STM32F1 devices don't support measuring the low-speed external oscillator.
 ///
 /// @param mode The low-speed oscillator to measure.
@@ -58,7 +58,7 @@ err_t tim5_oscillator_calibration(osc_calib_t mode, uint32_t *LS_cycles, uint32_
 ///
 /// Calibrate the RTC clock against the high-speed oscillator.
 ///
-/// @attention
+/// @note
 /// This only does anything when @c uHAL_USE_INTERNAL_LS_OSC is set.
 ///
 /// @returns ERR_OK if successful, otherwise an error code indicating

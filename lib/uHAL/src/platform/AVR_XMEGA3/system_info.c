@@ -28,6 +28,7 @@
 #include "time.h"
 
 #include "ulib/include/printf.h"
+#include "ulib/include/halloc.h"
 
 #include <avr/io.h>
 
@@ -47,7 +48,7 @@ void _print_platform_info(void (*printf_putc)(uint_fast8_t c)) {
 	int stack_size, bss_size, data_size, heap_size = 0;
 	uint8_t *signature = (uint8_t *)(SIGNATURES_START);
 
-	assert(printf_putc != NULL);
+	uHAL_assert(printf_putc != NULL);
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
 	if (printf_putc == NULL) {
 		return;

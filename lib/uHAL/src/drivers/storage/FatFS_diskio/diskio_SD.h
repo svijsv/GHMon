@@ -15,7 +15,8 @@
 /// those used throughout the rest of the HAL.
 ///
 /// @attention
-/// The macro @c SPI_CS_SD_PIN must be set to the gpio_pin_t of the SD card's chip-select pin.
+/// The macro @c SPI_CS_SD_PIN must be set to the gpio_pin_t of the SD card's chip-select pin
+/// and must be set to GPIO_MODE_PP and set HIGH on initialization.
 ///
 // This file was originally a modification of FatFS's diskio.h. It just adds Doxygen
 // comments and re-arranges things a bit. I'm abandoning most of it because it's no

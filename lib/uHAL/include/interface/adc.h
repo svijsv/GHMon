@@ -19,7 +19,7 @@
 ***********************************************************************/
 /// @file
 /// @brief Analog to Digital Converter Interface
-/// @attention
+/// @note
 ///    This file should only be included by interface.h.
 ///
 
@@ -30,7 +30,7 @@
 ///
 /// Type used to hold the value read by an ADC.
 ///
-/// @attention
+/// @note
 /// The actual definition will vary based on the value of ADC_MAX.
 typedef uint_t adc_t;
 
@@ -40,7 +40,7 @@ typedef uint_t adc_t;
 /// This is needed for operations which may overflow adc_t such as multiplication
 /// or those which may involve negative values.
 ///
-/// @attention
+/// @note
 /// The actual definition will vary based on the value of ADC_MAX.
 typedef long int adcm_t;
 

@@ -91,6 +91,7 @@ $(document).ready(function(){initNavTree('pwm_8h.html',''); initResizable(); });
 
 <div class="header">
   <div class="summary">
+<a href="#typedef-members">Typedefs</a> &#124;
 <a href="#func-members">Functions</a>  </div>
   <div class="headertitle"><div class="title">pwm.h File Reference</div></div>
 </div><!--header-->
@@ -101,21 +102,28 @@ $(document).ready(function(){initNavTree('pwm_8h.html',''); initResizable(); });
 
 <p><a href="pwm_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
+Typedefs</h2></td></tr>
+<tr class="memitem:afcf4aca933277e364198303880b69075" id="r_afcf4aca933277e364198303880b69075"><td class="memItemLeft" align="right" valign="top"><a id="afcf4aca933277e364198303880b69075" name="afcf4aca933277e364198303880b69075"></a>
+typedef struct <a class="el" href="pwm_8h.html#afcf4aca933277e364198303880b69075">pwm_output_t</a>&#160;</td><td class="memItemRight" valign="bottom"><b>pwm_output_t</b></td></tr>
+<tr class="memdesc:afcf4aca933277e364198303880b69075"><td class="mdescLeft">&#160;</td><td class="mdescRight">The handle used to manage a PWM output. <br /></td></tr>
+<tr class="separator:afcf4aca933277e364198303880b69075"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:ac109b96db7b9e6b96cbcd31e22d7cacf" id="r_ac109b96db7b9e6b96cbcd31e22d7cacf"><td class="memItemLeft" align="right" valign="top"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="pwm_8h.html#ac109b96db7b9e6b96cbcd31e22d7cacf">pwm_on</a> (pwm_output_t *output, <a class="el" href="gpio_8h.html#ace75a5937fba13a24bef9d8846be73fa">gpio_pin_t</a> pin, uint_fast16_t duty_cycle)</td></tr>
+<tr class="memitem:ac109b96db7b9e6b96cbcd31e22d7cacf" id="r_ac109b96db7b9e6b96cbcd31e22d7cacf"><td class="memItemLeft" align="right" valign="top">err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="pwm_8h.html#ac109b96db7b9e6b96cbcd31e22d7cacf">pwm_on</a> (<a class="el" href="pwm_8h.html#afcf4aca933277e364198303880b69075">pwm_output_t</a> *output, <a class="el" href="gpio_8h.html#ace75a5937fba13a24bef9d8846be73fa">gpio_pin_t</a> pin, uint_fast16_t duty_cycle)</td></tr>
 <tr class="memdesc:ac109b96db7b9e6b96cbcd31e22d7cacf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enable hardware PWM output on an IO pin.  <br /></td></tr>
 <tr class="separator:ac109b96db7b9e6b96cbcd31e22d7cacf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac41cda2f936c9e43937cee89cc85758b" id="r_ac41cda2f936c9e43937cee89cc85758b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="pwm_8h.html#ac41cda2f936c9e43937cee89cc85758b">pwm_off</a> (pwm_output_t *output)</td></tr>
+<tr class="memitem:ac41cda2f936c9e43937cee89cc85758b" id="r_ac41cda2f936c9e43937cee89cc85758b"><td class="memItemLeft" align="right" valign="top">err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="pwm_8h.html#ac41cda2f936c9e43937cee89cc85758b">pwm_off</a> (<a class="el" href="pwm_8h.html#afcf4aca933277e364198303880b69075">pwm_output_t</a> *output)</td></tr>
 <tr class="memdesc:ac41cda2f936c9e43937cee89cc85758b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disable hardware PWM output on an IO pin.  <br /></td></tr>
 <tr class="separator:ac41cda2f936c9e43937cee89cc85758b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af12145da7f24b3e37a94d1bde077a2ba" id="r_af12145da7f24b3e37a94d1bde077a2ba"><td class="memItemLeft" align="right" valign="top"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="pwm_8h.html#af12145da7f24b3e37a94d1bde077a2ba">pwm_set</a> (pwm_output_t *output, uint_fast16_t duty_cycle)</td></tr>
+<tr class="memitem:af12145da7f24b3e37a94d1bde077a2ba" id="r_af12145da7f24b3e37a94d1bde077a2ba"><td class="memItemLeft" align="right" valign="top">err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="pwm_8h.html#af12145da7f24b3e37a94d1bde077a2ba">pwm_set</a> (<a class="el" href="pwm_8h.html#afcf4aca933277e364198303880b69075">pwm_output_t</a> *output, uint_fast16_t duty_cycle)</td></tr>
 <tr class="memdesc:af12145da7f24b3e37a94d1bde077a2ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adjust hardware PWM output on an IO pin.  <br /></td></tr>
 <tr class="separator:af12145da7f24b3e37a94d1bde077a2ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Pulse-Width Modulation Interface. </p>
-<dl class="section attention"><dt>Attention</dt><dd>This file should only be included by <a class="el" href="interface_8h.html" title="Interface between the frontend and backend code.">interface.h</a>. </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This file should only be included by <a class="el" href="interface_8h.html" title="Interface between the frontend and backend code.">interface.h</a>. </dd></dl>
 </div><h2 class="groupheader">Function Documentation</h2>
 <a id="ac41cda2f936c9e43937cee89cc85758b" name="ac41cda2f936c9e43937cee89cc85758b"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ac41cda2f936c9e43937cee89cc85758b">&#9670;&#160;</a></span>pwm_off()</h2>
@@ -124,9 +132,9 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a> pwm_off </td>
+          <td class="memname">err_t pwm_off </td>
           <td>(</td>
-          <td class="paramtype">pwm_output_t *&#160;</td>
+          <td class="paramtype"><a class="el" href="pwm_8h.html#afcf4aca933277e364198303880b69075">pwm_output_t</a> *&#160;</td>
           <td class="paramname"><em>output</em></td><td>)</td>
           <td></td>
         </tr>
@@ -134,7 +142,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Disable hardware PWM output on an IO pin. </p>
-<dl class="section attention"><dt>Attention</dt><dd>The pin may be set to HiZ mode when turned off.</dd></dl>
+<dl class="section attention"><dt>Attention</dt><dd>The pin may be set to HiZ or Reset mode when turned off.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">output</td><td>The handle used to manage the pin. Must not be NULL.</td></tr>
@@ -152,9 +160,9 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a> pwm_on </td>
+          <td class="memname">err_t pwm_on </td>
           <td>(</td>
-          <td class="paramtype">pwm_output_t *&#160;</td>
+          <td class="paramtype"><a class="el" href="pwm_8h.html#afcf4aca933277e364198303880b69075">pwm_output_t</a> *&#160;</td>
           <td class="paramname"><em>output</em>, </td>
         </tr>
         <tr>
@@ -198,9 +206,9 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a> pwm_set </td>
+          <td class="memname">err_t pwm_set </td>
           <td>(</td>
-          <td class="paramtype">pwm_output_t *&#160;</td>
+          <td class="paramtype"><a class="el" href="pwm_8h.html#afcf4aca933277e364198303880b69075">pwm_output_t</a> *&#160;</td>
           <td class="paramname"><em>output</em>, </td>
         </tr>
         <tr>

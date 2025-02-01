@@ -25,8 +25,50 @@
 
 #include "common.h"
 
-#if uHAL_USE_RTC && uHAL_USE_RTC_EMULATION
+#if uHAL_USE_RTC
 
+//
+// Utility functions for handling the date and time on systems that use second-
+// counter-based RTCs
+// These aren't in any headers, the prototypes should be copied into the files that use them.
+utime_t RTC_datetime_to_second_counter(const datetime_t *datetime, utime_t now) {
+	utime_t new_now = 0;
+
+	uHAL_assert(datetime != NULL);
+	if (!uHAL_SKIP_INVALID_ARG_CHECKS && datetime == NULL) {
+		return 0;
+	}
+
+	// Only change the date if it's set in the new structure
+	if ((datetime->year | datetime->month | datetime->day) != 0) {
+		uHAL_assert((IS_IN_RANGE(datetime->month, 1, 12)) && (IS_IN_RANGE(datetime->day, 1, 31)));
+		if (!uHAL_SKIP_INVALID_ARG_CHECKS && ((!IS_IN_RANGE(datetime->month, 1, 12)) || (!IS_IN_RANGE(datetime->day, 1, 31)))) {
+			return ERR_BADARG;
+		}
+		new_now = date_to_seconds(datetime);
+	} else {
+		new_now = SNAP_TO_FACTOR(now, SECONDS_PER_DAY);
+	}
+
+	// Only change the time if it's set in the new structure
+	if ((datetime->hour | datetime->minute | datetime->second) != 0) {
+		uHAL_assert((datetime->hour <= 23) || (datetime->minute <= 59) || (datetime->second <= 59));
+		if (!uHAL_SKIP_INVALID_ARG_CHECKS && ((datetime->hour > 23) || (datetime->minute > 59) || (datetime->second > 59))) {
+			return ERR_BADARG;
+		}
+		new_now += time_to_seconds(datetime);
+	} else {
+		new_now += now % SECONDS_PER_DAY;
+	}
+
+	// Use set_RTC_seconds() directly if you want to reset the clock.
+	if (!uHAL_SKIP_OTHER_CHECKS && new_now == 0) {
+		return 0;
+	}
+	return new_now;
+}
+
+#if uHAL_USE_RTC_EMULATION
 
 #if ! SYSTICKS_PER_S
 # undef SYSTICKS_PER_S
@@ -51,11 +93,6 @@ static int32_t RTC_millis = 0;
 utime_t get_RTC_seconds(void) {
 	utime_t msticks;
 
-#if ! uHAL_SKIP_INIT_CHECKS
-#endif
-#if ! uHAL_SKIP_INVALID_ARG_CHECKS
-#endif
-
 	msticks = NOW_MS();
 	RTC_millis += (msticks - RTC_prev_msticks);
 	RTC_prev_msticks = msticks;
@@ -79,9 +116,8 @@ utime_t get_RTC_seconds(void) {
 	return RTC_ticks;
 }
 err_t set_RTC_seconds(utime_t s) {
-#if ! uHAL_SKIP_INIT_CHECKS
-#endif
-#if ! uHAL_SKIP_INVALID_ARG_CHECKS
+#if uHAL_USE_UPTIME_EMULATION
+	fix_uptime(s, get_RTC_seconds());
 #endif
 
 	RTC_ticks = s;
@@ -90,22 +126,26 @@ err_t set_RTC_seconds(utime_t s) {
 
 	return ERR_OK;
 }
-void add_RTC_millis(uint16_t ms) {
-#if ! uHAL_SKIP_INIT_CHECKS
-#endif
-#if ! uHAL_SKIP_INVALID_ARG_CHECKS
-#endif
 
+err_t set_RTC_datetime(const datetime_t *datetime) {
+	return set_RTC_seconds(RTC_datetime_to_second_counter(datetime, get_RTC_seconds()));
+}
+err_t get_RTC_datetime(datetime_t *datetime) {
+	uHAL_assert(datetime != NULL);
+	if (!uHAL_SKIP_INVALID_ARG_CHECKS && datetime == NULL) {
+		return ERR_BADARG;
+	}
+
+	seconds_to_datetime(get_RTC_seconds(), datetime);
+	return ERR_OK;
+}
+
+void add_RTC_millis(uint_fast16_t ms) {
 	RTC_millis += ms;
 
 	return;
 }
-void subtract_RTC_millis(uint16_t ms) {
-#if ! uHAL_SKIP_INIT_CHECKS
-#endif
-#if ! uHAL_SKIP_INVALID_ARG_CHECKS
-#endif
-
+void subtract_RTC_millis(uint_fast16_t ms) {
 	if (ms < RTC_millis) {
 		RTC_millis -= ms;
 	} else {
@@ -115,4 +155,5 @@ void subtract_RTC_millis(uint16_t ms) {
 	return;
 }
 
-#endif // uHAL_USE_RTC && uHAL_USE_RTC_EMULATION
+#endif // uHAL_USE_RTC_EMULATION
+#endif // uHAL_USE_RTC

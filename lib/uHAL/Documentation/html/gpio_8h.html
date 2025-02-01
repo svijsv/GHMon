@@ -107,43 +107,8 @@ Data Structures</h2></td></tr>
 <tr class="memdesc:structgpio__listen__cfg__t"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the configuration of a GPIO-generated interrupt.  <a href="gpio_8h.html#structgpio__listen__cfg__t">More...</a><br /></td></tr>
 <tr class="separator:structgpio__listen__cfg__t"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:structpinctrl__cfg__t" id="r_structpinctrl__cfg__t"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#structpinctrl__cfg__t">pinctrl_cfg_t</a></td></tr>
-<tr class="memdesc:structpinctrl__cfg__t"><td class="mdescLeft">&#160;</td><td class="mdescRight">The structure used to configure a GPIO pin.  <a href="gpio_8h.html#structpinctrl__cfg__t">More...</a><br /></td></tr>
+<tr class="memdesc:structpinctrl__cfg__t"><td class="mdescLeft">&#160;</td><td class="mdescRight">A structure used to configure a GPIO pin.  <a href="gpio_8h.html#structpinctrl__cfg__t">More...</a><br /></td></tr>
 <tr class="separator:structpinctrl__cfg__t"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
-Functions</h2></td></tr>
-<tr><td colspan="2"><div class="groupHeader">Experimental GPIO High-Level Digital Interface</div></td></tr>
-<tr><td colspan="2"><div class="groupText"><dl class="section attention"><dt>Attention</dt><dd>This interface should not be mixed with the mode or state setting functions of other GPIO interfaces because it tracks state. Calling <code><a class="el" href="gpio_8h.html#a4d3a62ffb95c196feb734390547be6e4" title="Initialize a pinctrl_handle_t based on a pinctrl_cfg_t struct.">pinctrl_init()</a></code> will put it back in order again if needed.</dd>
-<dd>
-This interface was intended to be a more runtime-efficient, reliable, and powerful replacement for the other high-level interface but seems to produce notably larger code at least in small test programs and requires a lot more overhead in configuring, so it's relegated to EXPERMENTAL status until it can be tested and refined further. </dd></dl>
-</div></td></tr>
-<tr class="memitem:a4d3a62ffb95c196feb734390547be6e4" id="r_a4d3a62ffb95c196feb734390547be6e4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#a4d3a62ffb95c196feb734390547be6e4">pinctrl_init</a> (pinctrl_handle_t *handle, const <a class="el" href="gpio_8h.html#structpinctrl__cfg__t">pinctrl_cfg_t</a> *cfg)</td></tr>
-<tr class="memdesc:a4d3a62ffb95c196feb734390547be6e4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize a <code>pinctrl_handle_t</code> based on a <code><a class="el" href="gpio_8h.html#structpinctrl__cfg__t" title="The structure used to configure a GPIO pin.">pinctrl_cfg_t</a></code> struct.  <br /></td></tr>
-<tr class="separator:a4d3a62ffb95c196feb734390547be6e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a30e0ecf537479a79aa6d932d884c5064" id="r_a30e0ecf537479a79aa6d932d884c5064"><td class="memItemLeft" align="right" valign="top"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#a30e0ecf537479a79aa6d932d884c5064">pinctrl_init2_input</a> (pinctrl_handle_t *handle, <a class="el" href="gpio_8h.html#ace75a5937fba13a24bef9d8846be73fa">gpio_pin_t</a> pin)</td></tr>
-<tr class="memdesc:a30e0ecf537479a79aa6d932d884c5064"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize a <code>pinctrl_handle_t</code> based on an input pin's control bits.  <br /></td></tr>
-<tr class="separator:a30e0ecf537479a79aa6d932d884c5064"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a08c3a80c8562f0aafcef9e02cfe4d72f" id="r_a08c3a80c8562f0aafcef9e02cfe4d72f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#a08c3a80c8562f0aafcef9e02cfe4d72f">pinctrl_init2_output</a> (pinctrl_handle_t *handle, <a class="el" href="gpio_8h.html#ace75a5937fba13a24bef9d8846be73fa">gpio_pin_t</a> pin)</td></tr>
-<tr class="memdesc:a08c3a80c8562f0aafcef9e02cfe4d72f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize a <code>pinctrl_handle_t</code> based on an output pin's control bits.  <br /></td></tr>
-<tr class="separator:a08c3a80c8562f0aafcef9e02cfe4d72f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af928c52b6b782003d489678ddebf0650" id="r_af928c52b6b782003d489678ddebf0650"><td class="memItemLeft" align="right" valign="top"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#af928c52b6b782003d489678ddebf0650">pinctrl_on</a> (pinctrl_handle_t *handle)</td></tr>
-<tr class="memdesc:af928c52b6b782003d489678ddebf0650"><td class="mdescLeft">&#160;</td><td class="mdescRight">Turn a pin ON.  <br /></td></tr>
-<tr class="separator:af928c52b6b782003d489678ddebf0650"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa47f2356d89ec8ddc642cfb85ee57095" id="r_aa47f2356d89ec8ddc642cfb85ee57095"><td class="memItemLeft" align="right" valign="top"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#aa47f2356d89ec8ddc642cfb85ee57095">pinctrl_off</a> (pinctrl_handle_t *handle)</td></tr>
-<tr class="memdesc:aa47f2356d89ec8ddc642cfb85ee57095"><td class="mdescLeft">&#160;</td><td class="mdescRight">Turn a pin OFF.  <br /></td></tr>
-<tr class="separator:aa47f2356d89ec8ddc642cfb85ee57095"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae7f69ad0b1b0355976e8edf850dd21c2" id="r_ae7f69ad0b1b0355976e8edf850dd21c2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#ae7f69ad0b1b0355976e8edf850dd21c2">pinctrl_toggle</a> (pinctrl_handle_t *handle)</td></tr>
-<tr class="memdesc:ae7f69ad0b1b0355976e8edf850dd21c2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Toggle the state of a pin.  <br /></td></tr>
-<tr class="separator:ae7f69ad0b1b0355976e8edf850dd21c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac7494b7af071dd5724339d06b85c83a4" id="r_ac7494b7af071dd5724339d06b85c83a4"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#ac7494b7af071dd5724339d06b85c83a4">pinctrl_is_on</a> (pinctrl_handle_t *handle)</td></tr>
-<tr class="memdesc:ac7494b7af071dd5724339d06b85c83a4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read the state of a pin.  <br /></td></tr>
-<tr class="separator:ac7494b7af071dd5724339d06b85c83a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a260e7b925f47f181c67845a34d485d81" id="r_a260e7b925f47f181c67845a34d485d81"><td class="memItemLeft" align="right" valign="top"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#a260e7b925f47f181c67845a34d485d81">pinctrl_suspend</a> (pinctrl_handle_t *handle)</td></tr>
-<tr class="memdesc:a260e7b925f47f181c67845a34d485d81"><td class="mdescLeft">&#160;</td><td class="mdescRight">Put a pin in low-power mode.  <br /></td></tr>
-<tr class="separator:a260e7b925f47f181c67845a34d485d81"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac148cdd840db1c61b419cb2863b896b0" id="r_ac148cdd840db1c61b419cb2863b896b0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#ac148cdd840db1c61b419cb2863b896b0">pinctrl_resume</a> (pinctrl_handle_t *handle)</td></tr>
-<tr class="memdesc:ac148cdd840db1c61b419cb2863b896b0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return a pin to it's previous state from low-power mode.  <br /></td></tr>
-<tr class="separator:ac148cdd840db1c61b419cb2863b896b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader">GPIO Basic Interface</h2></td></tr>
 <tr class="memitem:aeba09ff854e6237422ef9d0638a03e4b" id="r_aeba09ff854e6237422ef9d0638a03e4b"><td class="memItemLeft" align="right" valign="top"><a id="aeba09ff854e6237422ef9d0638a03e4b" name="aeba09ff854e6237422ef9d0638a03e4b"></a>
@@ -210,28 +175,28 @@ This interface was intended to be a more runtime-efficient, reliable, and powerf
 <tr class="memitem:ace75a5937fba13a24bef9d8846be73fa" id="r_ace75a5937fba13a24bef9d8846be73fa"><td class="memItemLeft" align="right" valign="top">typedef uint_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#ace75a5937fba13a24bef9d8846be73fa">gpio_pin_t</a></td></tr>
 <tr class="memdesc:ace75a5937fba13a24bef9d8846be73fa"><td class="mdescLeft">&#160;</td><td class="mdescRight">An identifier for MCU pins.  <br /></td></tr>
 <tr class="separator:ace75a5937fba13a24bef9d8846be73fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:added1a0cc5128a1b53186bf9441eacba" id="r_added1a0cc5128a1b53186bf9441eacba"><td class="memItemLeft" align="right" valign="top"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#added1a0cc5128a1b53186bf9441eacba">gpio_set_mode</a> (<a class="el" href="gpio_8h.html#ace75a5937fba13a24bef9d8846be73fa">gpio_pin_t</a> pin, <a class="el" href="gpio_8h.html#a491a2cbfb4e94f2afcc0d5bdef2dc454">gpio_mode_t</a> mode, <a class="el" href="gpio_8h.html#a2ff5468d5ab752db6fa1fb95363392a6">gpio_state_t</a> istate)</td></tr>
+<tr class="memitem:added1a0cc5128a1b53186bf9441eacba" id="r_added1a0cc5128a1b53186bf9441eacba"><td class="memItemLeft" align="right" valign="top">err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#added1a0cc5128a1b53186bf9441eacba">gpio_set_mode</a> (<a class="el" href="gpio_8h.html#ace75a5937fba13a24bef9d8846be73fa">gpio_pin_t</a> pin, <a class="el" href="gpio_8h.html#a491a2cbfb4e94f2afcc0d5bdef2dc454">gpio_mode_t</a> mode, <a class="el" href="gpio_8h.html#a2ff5468d5ab752db6fa1fb95363392a6">gpio_state_t</a> istate)</td></tr>
 <tr class="memdesc:added1a0cc5128a1b53186bf9441eacba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the operating mode of a pin.  <br /></td></tr>
 <tr class="separator:added1a0cc5128a1b53186bf9441eacba"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a53db9f01a5a497e0a07ea30878cf68a9" id="r_a53db9f01a5a497e0a07ea30878cf68a9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="gpio_8h.html#a491a2cbfb4e94f2afcc0d5bdef2dc454">gpio_mode_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#a53db9f01a5a497e0a07ea30878cf68a9">gpio_get_mode</a> (<a class="el" href="gpio_8h.html#ace75a5937fba13a24bef9d8846be73fa">gpio_pin_t</a> pin)</td></tr>
 <tr class="memdesc:a53db9f01a5a497e0a07ea30878cf68a9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the operating mode of a pin.  <br /></td></tr>
 <tr class="separator:a53db9f01a5a497e0a07ea30878cf68a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae659fbd5fcb6df69fb0faaf75f9a04ae" id="r_ae659fbd5fcb6df69fb0faaf75f9a04ae"><td class="memItemLeft" align="right" valign="top"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#ae659fbd5fcb6df69fb0faaf75f9a04ae">gpio_set_state</a> (<a class="el" href="gpio_8h.html#ace75a5937fba13a24bef9d8846be73fa">gpio_pin_t</a> pin, <a class="el" href="gpio_8h.html#a2ff5468d5ab752db6fa1fb95363392a6">gpio_state_t</a> new_state)</td></tr>
+<tr class="memitem:ae659fbd5fcb6df69fb0faaf75f9a04ae" id="r_ae659fbd5fcb6df69fb0faaf75f9a04ae"><td class="memItemLeft" align="right" valign="top">err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#ae659fbd5fcb6df69fb0faaf75f9a04ae">gpio_set_state</a> (<a class="el" href="gpio_8h.html#ace75a5937fba13a24bef9d8846be73fa">gpio_pin_t</a> pin, <a class="el" href="gpio_8h.html#a2ff5468d5ab752db6fa1fb95363392a6">gpio_state_t</a> new_state)</td></tr>
 <tr class="memdesc:ae659fbd5fcb6df69fb0faaf75f9a04ae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the state of a pin, auto-detecting mode.  <br /></td></tr>
 <tr class="separator:ae659fbd5fcb6df69fb0faaf75f9a04ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a92f4f7f3864cdb3f2bf9f35ff1aee4ae" id="r_a92f4f7f3864cdb3f2bf9f35ff1aee4ae"><td class="memItemLeft" align="right" valign="top"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#a92f4f7f3864cdb3f2bf9f35ff1aee4ae">gpio_set_input_state</a> (<a class="el" href="gpio_8h.html#ace75a5937fba13a24bef9d8846be73fa">gpio_pin_t</a> pin, <a class="el" href="gpio_8h.html#a2ff5468d5ab752db6fa1fb95363392a6">gpio_state_t</a> new_state)</td></tr>
+<tr class="memitem:a92f4f7f3864cdb3f2bf9f35ff1aee4ae" id="r_a92f4f7f3864cdb3f2bf9f35ff1aee4ae"><td class="memItemLeft" align="right" valign="top">err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#a92f4f7f3864cdb3f2bf9f35ff1aee4ae">gpio_set_input_state</a> (<a class="el" href="gpio_8h.html#ace75a5937fba13a24bef9d8846be73fa">gpio_pin_t</a> pin, <a class="el" href="gpio_8h.html#a2ff5468d5ab752db6fa1fb95363392a6">gpio_state_t</a> new_state)</td></tr>
 <tr class="memdesc:a92f4f7f3864cdb3f2bf9f35ff1aee4ae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the state of an input pin.  <br /></td></tr>
 <tr class="separator:a92f4f7f3864cdb3f2bf9f35ff1aee4ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adf3fa9a382be371ea270f57cfa36f809" id="r_adf3fa9a382be371ea270f57cfa36f809"><td class="memItemLeft" align="right" valign="top"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#adf3fa9a382be371ea270f57cfa36f809">gpio_set_output_state</a> (<a class="el" href="gpio_8h.html#ace75a5937fba13a24bef9d8846be73fa">gpio_pin_t</a> pin, <a class="el" href="gpio_8h.html#a2ff5468d5ab752db6fa1fb95363392a6">gpio_state_t</a> new_state)</td></tr>
+<tr class="memitem:adf3fa9a382be371ea270f57cfa36f809" id="r_adf3fa9a382be371ea270f57cfa36f809"><td class="memItemLeft" align="right" valign="top">err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#adf3fa9a382be371ea270f57cfa36f809">gpio_set_output_state</a> (<a class="el" href="gpio_8h.html#ace75a5937fba13a24bef9d8846be73fa">gpio_pin_t</a> pin, <a class="el" href="gpio_8h.html#a2ff5468d5ab752db6fa1fb95363392a6">gpio_state_t</a> new_state)</td></tr>
 <tr class="memdesc:adf3fa9a382be371ea270f57cfa36f809"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the state of an output pin.  <br /></td></tr>
 <tr class="separator:adf3fa9a382be371ea270f57cfa36f809"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7dad70bb61dc16586547d5370bbf4b7a" id="r_a7dad70bb61dc16586547d5370bbf4b7a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#a7dad70bb61dc16586547d5370bbf4b7a">gpio_toggle_state</a> (<a class="el" href="gpio_8h.html#ace75a5937fba13a24bef9d8846be73fa">gpio_pin_t</a> pin)</td></tr>
+<tr class="memitem:a7dad70bb61dc16586547d5370bbf4b7a" id="r_a7dad70bb61dc16586547d5370bbf4b7a"><td class="memItemLeft" align="right" valign="top">err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#a7dad70bb61dc16586547d5370bbf4b7a">gpio_toggle_state</a> (<a class="el" href="gpio_8h.html#ace75a5937fba13a24bef9d8846be73fa">gpio_pin_t</a> pin)</td></tr>
 <tr class="memdesc:a7dad70bb61dc16586547d5370bbf4b7a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Toggle the state of a pin, auto-detecting mode.  <br /></td></tr>
 <tr class="separator:a7dad70bb61dc16586547d5370bbf4b7a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a963b0655aaadf24e093dd5fadcfb6e7d" id="r_a963b0655aaadf24e093dd5fadcfb6e7d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#a963b0655aaadf24e093dd5fadcfb6e7d">gpio_toggle_input_state</a> (<a class="el" href="gpio_8h.html#ace75a5937fba13a24bef9d8846be73fa">gpio_pin_t</a> pin)</td></tr>
+<tr class="memitem:a963b0655aaadf24e093dd5fadcfb6e7d" id="r_a963b0655aaadf24e093dd5fadcfb6e7d"><td class="memItemLeft" align="right" valign="top">err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#a963b0655aaadf24e093dd5fadcfb6e7d">gpio_toggle_input_state</a> (<a class="el" href="gpio_8h.html#ace75a5937fba13a24bef9d8846be73fa">gpio_pin_t</a> pin)</td></tr>
 <tr class="memdesc:a963b0655aaadf24e093dd5fadcfb6e7d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Toggle the state of an input pin.  <br /></td></tr>
 <tr class="separator:a963b0655aaadf24e093dd5fadcfb6e7d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2ee06ba02631a828fc6f7ae5af132a9f" id="r_a2ee06ba02631a828fc6f7ae5af132a9f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#a2ee06ba02631a828fc6f7ae5af132a9f">gpio_toggle_output_state</a> (<a class="el" href="gpio_8h.html#ace75a5937fba13a24bef9d8846be73fa">gpio_pin_t</a> pin)</td></tr>
+<tr class="memitem:a2ee06ba02631a828fc6f7ae5af132a9f" id="r_a2ee06ba02631a828fc6f7ae5af132a9f"><td class="memItemLeft" align="right" valign="top">err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#a2ee06ba02631a828fc6f7ae5af132a9f">gpio_toggle_output_state</a> (<a class="el" href="gpio_8h.html#ace75a5937fba13a24bef9d8846be73fa">gpio_pin_t</a> pin)</td></tr>
 <tr class="memdesc:a2ee06ba02631a828fc6f7ae5af132a9f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Toggle the state of an output pin.  <br /></td></tr>
 <tr class="separator:a2ee06ba02631a828fc6f7ae5af132a9f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2250d26e52179706ae46162a726860e7" id="r_a2250d26e52179706ae46162a726860e7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="gpio_8h.html#a2ff5468d5ab752db6fa1fb95363392a6">gpio_state_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#a2250d26e52179706ae46162a726860e7">gpio_get_state</a> (<a class="el" href="gpio_8h.html#ace75a5937fba13a24bef9d8846be73fa">gpio_pin_t</a> pin)</td></tr>
@@ -299,34 +264,37 @@ This interface was intended to be a more runtime-efficient, reliable, and powerf
 <tr class="memitem:abc57ea9271029190084ac561b89e004c" id="r_abc57ea9271029190084ac561b89e004c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#abc57ea9271029190084ac561b89e004c">GPIO_GET_CTRL</a>(_pin_)</td></tr>
 <tr class="memdesc:abc57ea9271029190084ac561b89e004c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Derive the pin control mask from a given <code>gpio_pin_t</code>.  <br /></td></tr>
 <tr class="separator:abc57ea9271029190084ac561b89e004c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4eb449855b47167fe27470b181761340" id="r_a4eb449855b47167fe27470b181761340"><td class="memItemLeft" align="right" valign="top"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#a4eb449855b47167fe27470b181761340">input_pin_on</a> (<a class="el" href="gpio_8h.html#ace75a5937fba13a24bef9d8846be73fa">gpio_pin_t</a> pin)</td></tr>
+<tr class="memitem:a4eb449855b47167fe27470b181761340" id="r_a4eb449855b47167fe27470b181761340"><td class="memItemLeft" align="right" valign="top">err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#a4eb449855b47167fe27470b181761340">input_pin_on</a> (<a class="el" href="gpio_8h.html#ace75a5937fba13a24bef9d8846be73fa">gpio_pin_t</a> pin)</td></tr>
 <tr class="memdesc:a4eb449855b47167fe27470b181761340"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set an input pin ON based on it's control mask.  <br /></td></tr>
 <tr class="separator:a4eb449855b47167fe27470b181761340"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a381b0d0ec68805b1cdc55af49c48b880" id="r_a381b0d0ec68805b1cdc55af49c48b880"><td class="memItemLeft" align="right" valign="top"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#a381b0d0ec68805b1cdc55af49c48b880">input_pin_off</a> (<a class="el" href="gpio_8h.html#ace75a5937fba13a24bef9d8846be73fa">gpio_pin_t</a> pin)</td></tr>
+<tr class="memitem:a381b0d0ec68805b1cdc55af49c48b880" id="r_a381b0d0ec68805b1cdc55af49c48b880"><td class="memItemLeft" align="right" valign="top">err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#a381b0d0ec68805b1cdc55af49c48b880">input_pin_off</a> (<a class="el" href="gpio_8h.html#ace75a5937fba13a24bef9d8846be73fa">gpio_pin_t</a> pin)</td></tr>
 <tr class="memdesc:a381b0d0ec68805b1cdc55af49c48b880"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set an input pin OFF based on it's control mask.  <br /></td></tr>
 <tr class="separator:a381b0d0ec68805b1cdc55af49c48b880"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae2e5a2d4315640fec150f7aeb9e5134e" id="r_ae2e5a2d4315640fec150f7aeb9e5134e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#ae2e5a2d4315640fec150f7aeb9e5134e">input_pin_toggle</a> (<a class="el" href="gpio_8h.html#ace75a5937fba13a24bef9d8846be73fa">gpio_pin_t</a> pin)</td></tr>
+<tr class="memitem:ae2e5a2d4315640fec150f7aeb9e5134e" id="r_ae2e5a2d4315640fec150f7aeb9e5134e"><td class="memItemLeft" align="right" valign="top">err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#ae2e5a2d4315640fec150f7aeb9e5134e">input_pin_toggle</a> (<a class="el" href="gpio_8h.html#ace75a5937fba13a24bef9d8846be73fa">gpio_pin_t</a> pin)</td></tr>
 <tr class="memdesc:ae2e5a2d4315640fec150f7aeb9e5134e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Toggle an input pin's state.  <br /></td></tr>
 <tr class="separator:ae2e5a2d4315640fec150f7aeb9e5134e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5ec9ddca0e1af7ccc55e18d653bf1b11" id="r_a5ec9ddca0e1af7ccc55e18d653bf1b11"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#a5ec9ddca0e1af7ccc55e18d653bf1b11">input_pin_is_on</a> (<a class="el" href="gpio_8h.html#ace75a5937fba13a24bef9d8846be73fa">gpio_pin_t</a> pin)</td></tr>
 <tr class="memdesc:a5ec9ddca0e1af7ccc55e18d653bf1b11"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read a pin's state based on it's control mask.  <br /></td></tr>
 <tr class="separator:a5ec9ddca0e1af7ccc55e18d653bf1b11"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac027163b28d85ff8e921792a648aad4e" id="r_ac027163b28d85ff8e921792a648aad4e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#ac027163b28d85ff8e921792a648aad4e">output_pin_on</a> (<a class="el" href="gpio_8h.html#ace75a5937fba13a24bef9d8846be73fa">gpio_pin_t</a> pin)</td></tr>
+<tr class="memitem:ac027163b28d85ff8e921792a648aad4e" id="r_ac027163b28d85ff8e921792a648aad4e"><td class="memItemLeft" align="right" valign="top">err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#ac027163b28d85ff8e921792a648aad4e">output_pin_on</a> (<a class="el" href="gpio_8h.html#ace75a5937fba13a24bef9d8846be73fa">gpio_pin_t</a> pin)</td></tr>
 <tr class="memdesc:ac027163b28d85ff8e921792a648aad4e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set an output pin's state ON based on it's control mask.  <br /></td></tr>
 <tr class="separator:ac027163b28d85ff8e921792a648aad4e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8ed071a735270d0dd40a55c798c48ab6" id="r_a8ed071a735270d0dd40a55c798c48ab6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#a8ed071a735270d0dd40a55c798c48ab6">output_pin_off</a> (<a class="el" href="gpio_8h.html#ace75a5937fba13a24bef9d8846be73fa">gpio_pin_t</a> pin)</td></tr>
+<tr class="memitem:a8ed071a735270d0dd40a55c798c48ab6" id="r_a8ed071a735270d0dd40a55c798c48ab6"><td class="memItemLeft" align="right" valign="top">err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#a8ed071a735270d0dd40a55c798c48ab6">output_pin_off</a> (<a class="el" href="gpio_8h.html#ace75a5937fba13a24bef9d8846be73fa">gpio_pin_t</a> pin)</td></tr>
 <tr class="memdesc:a8ed071a735270d0dd40a55c798c48ab6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set an output pin's state OFF based on it's control mask.  <br /></td></tr>
 <tr class="separator:a8ed071a735270d0dd40a55c798c48ab6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a07244c329c01ce9371bdcdcc7d13449d" id="r_a07244c329c01ce9371bdcdcc7d13449d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#a07244c329c01ce9371bdcdcc7d13449d">output_pin_toggle</a> (<a class="el" href="gpio_8h.html#ace75a5937fba13a24bef9d8846be73fa">gpio_pin_t</a> pin)</td></tr>
+<tr class="memitem:a07244c329c01ce9371bdcdcc7d13449d" id="r_a07244c329c01ce9371bdcdcc7d13449d"><td class="memItemLeft" align="right" valign="top">err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#a07244c329c01ce9371bdcdcc7d13449d">output_pin_toggle</a> (<a class="el" href="gpio_8h.html#ace75a5937fba13a24bef9d8846be73fa">gpio_pin_t</a> pin)</td></tr>
 <tr class="memdesc:a07244c329c01ce9371bdcdcc7d13449d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Toggle an output pin's state.  <br /></td></tr>
 <tr class="separator:a07244c329c01ce9371bdcdcc7d13449d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a06eac9575268594950b7db164bbf4c7b" id="r_a06eac9575268594950b7db164bbf4c7b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#a06eac9575268594950b7db164bbf4c7b">input_pin_listen_init</a> (gpio_listen_t *handle, <a class="el" href="gpio_8h.html#ace75a5937fba13a24bef9d8846be73fa">gpio_pin_t</a> pin)</td></tr>
+<tr class="memitem:a0916ee9f339eb359b8858f5b74274bd1" id="r_a0916ee9f339eb359b8858f5b74274bd1"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#a0916ee9f339eb359b8858f5b74274bd1">output_pin_is_on</a> (<a class="el" href="gpio_8h.html#ace75a5937fba13a24bef9d8846be73fa">gpio_pin_t</a> pin)</td></tr>
+<tr class="memdesc:a0916ee9f339eb359b8858f5b74274bd1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if an output pin is turned on.  <br /></td></tr>
+<tr class="separator:a0916ee9f339eb359b8858f5b74274bd1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a06eac9575268594950b7db164bbf4c7b" id="r_a06eac9575268594950b7db164bbf4c7b"><td class="memItemLeft" align="right" valign="top">err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#a06eac9575268594950b7db164bbf4c7b">input_pin_listen_init</a> (gpio_listen_t *handle, <a class="el" href="gpio_8h.html#ace75a5937fba13a24bef9d8846be73fa">gpio_pin_t</a> pin)</td></tr>
 <tr class="memdesc:a06eac9575268594950b7db164bbf4c7b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prepare a pin interrupt trigger based on it's control mask.  <br /></td></tr>
 <tr class="separator:a06eac9575268594950b7db164bbf4c7b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af2b9031ed5520418487655942ccb5586" id="r_af2b9031ed5520418487655942ccb5586"><td class="memItemLeft" align="right" valign="top"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#af2b9031ed5520418487655942ccb5586">input_pin_listen_on</a> (gpio_listen_t *handle)</td></tr>
+<tr class="memitem:af2b9031ed5520418487655942ccb5586" id="r_af2b9031ed5520418487655942ccb5586"><td class="memItemLeft" align="right" valign="top">err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#af2b9031ed5520418487655942ccb5586">input_pin_listen_on</a> (gpio_listen_t *handle)</td></tr>
 <tr class="memdesc:af2b9031ed5520418487655942ccb5586"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enable the interrupt for a pin.  <br /></td></tr>
 <tr class="separator:af2b9031ed5520418487655942ccb5586"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad9b22227111d68faab2547a1d2bec378" id="r_ad9b22227111d68faab2547a1d2bec378"><td class="memItemLeft" align="right" valign="top"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#ad9b22227111d68faab2547a1d2bec378">input_pin_listen_off</a> (gpio_listen_t *handle)</td></tr>
+<tr class="memitem:ad9b22227111d68faab2547a1d2bec378" id="r_ad9b22227111d68faab2547a1d2bec378"><td class="memItemLeft" align="right" valign="top">err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#ad9b22227111d68faab2547a1d2bec378">input_pin_listen_off</a> (gpio_listen_t *handle)</td></tr>
 <tr class="memdesc:ad9b22227111d68faab2547a1d2bec378"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disable the interrupt for a pin.  <br /></td></tr>
 <tr class="separator:ad9b22227111d68faab2547a1d2bec378"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -347,7 +315,7 @@ This interface was intended to be a more runtime-efficient, reliable, and powerf
 typedef struct <a class="el" href="gpio_8h.html#afc03cb9e9630374bbb8287ca6c0ae04f">gpio_quick_t</a>&#160;</td><td class="memItemRight" valign="bottom"><b>gpio_quick_t</b></td></tr>
 <tr class="memdesc:afc03cb9e9630374bbb8287ca6c0ae04f"><td class="mdescLeft">&#160;</td><td class="mdescRight">The handle used to manage low-latency GPIO actions. <br /></td></tr>
 <tr class="separator:afc03cb9e9630374bbb8287ca6c0ae04f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a84421f4169175f33c1a9eec89ff9d289" id="r_a84421f4169175f33c1a9eec89ff9d289"><td class="memItemLeft" align="right" valign="top"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#a84421f4169175f33c1a9eec89ff9d289">gpio_quickread_prepare</a> (<a class="el" href="gpio_8h.html#afc03cb9e9630374bbb8287ca6c0ae04f">gpio_quick_t</a> *qpin, <a class="el" href="gpio_8h.html#ace75a5937fba13a24bef9d8846be73fa">gpio_pin_t</a> pin)</td></tr>
+<tr class="memitem:a84421f4169175f33c1a9eec89ff9d289" id="r_a84421f4169175f33c1a9eec89ff9d289"><td class="memItemLeft" align="right" valign="top">err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#a84421f4169175f33c1a9eec89ff9d289">gpio_quickread_prepare</a> (<a class="el" href="gpio_8h.html#afc03cb9e9630374bbb8287ca6c0ae04f">gpio_quick_t</a> *qpin, <a class="el" href="gpio_8h.html#ace75a5937fba13a24bef9d8846be73fa">gpio_pin_t</a> pin)</td></tr>
 <tr class="memdesc:a84421f4169175f33c1a9eec89ff9d289"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prepare to read the state of a pin quickly.  <br /></td></tr>
 <tr class="separator:a84421f4169175f33c1a9eec89ff9d289"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -360,22 +328,58 @@ typedef struct <a class="el" href="gpio_8h.html#afc03cb9e9630374bbb8287ca6c0ae04
  }</td></tr>
 <tr class="memdesc:a00a198f180da5979f191824a56098db9"><td class="mdescLeft">&#160;</td><td class="mdescRight">The type used to specify GPIO IRQ triggers.  <a href="gpio_8h.html#a00a198f180da5979f191824a56098db9">More...</a><br /></td></tr>
 <tr class="separator:a00a198f180da5979f191824a56098db9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9a6968d9f8368c67b8bb20fffb51f7fb" id="r_a9a6968d9f8368c67b8bb20fffb51f7fb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#a9a6968d9f8368c67b8bb20fffb51f7fb">gpio_listen_init</a> (gpio_listen_t *handle, const <a class="el" href="gpio_8h.html#structgpio__listen__cfg__t">gpio_listen_cfg_t</a> *conf)</td></tr>
+<tr class="memitem:a9a6968d9f8368c67b8bb20fffb51f7fb" id="r_a9a6968d9f8368c67b8bb20fffb51f7fb"><td class="memItemLeft" align="right" valign="top">err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#a9a6968d9f8368c67b8bb20fffb51f7fb">gpio_listen_init</a> (gpio_listen_t *handle, const <a class="el" href="gpio_8h.html#structgpio__listen__cfg__t">gpio_listen_cfg_t</a> *conf)</td></tr>
 <tr class="memdesc:a9a6968d9f8368c67b8bb20fffb51f7fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prepare a pin for interrupt triggering.  <br /></td></tr>
 <tr class="separator:a9a6968d9f8368c67b8bb20fffb51f7fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3a1ba017ea08d39d405b1c7b1620b70d" id="r_a3a1ba017ea08d39d405b1c7b1620b70d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#a3a1ba017ea08d39d405b1c7b1620b70d">gpio_listen_on</a> (gpio_listen_t *handle)</td></tr>
+<tr class="memitem:a3a1ba017ea08d39d405b1c7b1620b70d" id="r_a3a1ba017ea08d39d405b1c7b1620b70d"><td class="memItemLeft" align="right" valign="top">err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#a3a1ba017ea08d39d405b1c7b1620b70d">gpio_listen_on</a> (gpio_listen_t *handle)</td></tr>
 <tr class="memdesc:a3a1ba017ea08d39d405b1c7b1620b70d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enable the interrupt for a pin.  <br /></td></tr>
 <tr class="separator:a3a1ba017ea08d39d405b1c7b1620b70d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4b18298c90b31393885352f02cee83fe" id="r_a4b18298c90b31393885352f02cee83fe"><td class="memItemLeft" align="right" valign="top"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#a4b18298c90b31393885352f02cee83fe">gpio_listen_off</a> (gpio_listen_t *handle)</td></tr>
+<tr class="memitem:a4b18298c90b31393885352f02cee83fe" id="r_a4b18298c90b31393885352f02cee83fe"><td class="memItemLeft" align="right" valign="top">err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#a4b18298c90b31393885352f02cee83fe">gpio_listen_off</a> (gpio_listen_t *handle)</td></tr>
 <tr class="memdesc:a4b18298c90b31393885352f02cee83fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disable the interrupt for a pin.  <br /></td></tr>
 <tr class="separator:a4b18298c90b31393885352f02cee83fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4e1aea8e896e2830a9c72f82d028dd30" id="r_a4e1aea8e896e2830a9c72f82d028dd30"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#a4e1aea8e896e2830a9c72f82d028dd30">gpio_is_listening</a> (<a class="el" href="gpio_8h.html#ace75a5937fba13a24bef9d8846be73fa">gpio_pin_t</a> pin)</td></tr>
 <tr class="memdesc:a4e1aea8e896e2830a9c72f82d028dd30"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if a pin's interrupt is enabled.  <br /></td></tr>
 <tr class="separator:a4e1aea8e896e2830a9c72f82d028dd30"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader">Experimental GPIO High-Level Digital Interface</h2></td></tr>
+<tr><td class="ititle" colspan="2"><dl class="section attention"><dt>Attention</dt><dd>This interface should not be mixed with the mode or state setting functions of other GPIO interfaces because it tracks state. Calling <code><a class="el" href="gpio_8h.html#a4d3a62ffb95c196feb734390547be6e4" title="Initialize a pinctrl_handle_t based on a pinctrl_cfg_t struct.">pinctrl_init()</a></code> will put it back in order again if needed.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This interface was intended to be a more runtime-efficient, reliable, and powerful replacement for the other high-level interface but seems to produce notably larger code at least in small test programs and requires a lot more overhead in configuring, so it's relegated to EXPERMENTAL status until it can be tested and refined further. </dd></dl>
+</td></tr>
+<tr class="memitem:a4165b4410e648b3b4f82fb7935213a06" id="r_a4165b4410e648b3b4f82fb7935213a06"><td class="memItemLeft" align="right" valign="top"><a id="a4165b4410e648b3b4f82fb7935213a06" name="a4165b4410e648b3b4f82fb7935213a06"></a>
+typedef struct <a class="el" href="gpio_8h.html#a4165b4410e648b3b4f82fb7935213a06">pinctrl_handle_t</a>&#160;</td><td class="memItemRight" valign="bottom"><b>pinctrl_handle_t</b></td></tr>
+<tr class="memdesc:a4165b4410e648b3b4f82fb7935213a06"><td class="mdescLeft">&#160;</td><td class="mdescRight">The handle used to manage a GPIO pin. <br /></td></tr>
+<tr class="separator:a4165b4410e648b3b4f82fb7935213a06"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4d3a62ffb95c196feb734390547be6e4" id="r_a4d3a62ffb95c196feb734390547be6e4"><td class="memItemLeft" align="right" valign="top">err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#a4d3a62ffb95c196feb734390547be6e4">pinctrl_init</a> (<a class="el" href="gpio_8h.html#a4165b4410e648b3b4f82fb7935213a06">pinctrl_handle_t</a> *handle, const <a class="el" href="gpio_8h.html#structpinctrl__cfg__t">pinctrl_cfg_t</a> *cfg)</td></tr>
+<tr class="memdesc:a4d3a62ffb95c196feb734390547be6e4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize a <code>pinctrl_handle_t</code> based on a <code><a class="el" href="gpio_8h.html#structpinctrl__cfg__t" title="A structure used to configure a GPIO pin.">pinctrl_cfg_t</a></code> struct.  <br /></td></tr>
+<tr class="separator:a4d3a62ffb95c196feb734390547be6e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a30e0ecf537479a79aa6d932d884c5064" id="r_a30e0ecf537479a79aa6d932d884c5064"><td class="memItemLeft" align="right" valign="top">err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#a30e0ecf537479a79aa6d932d884c5064">pinctrl_init2_input</a> (<a class="el" href="gpio_8h.html#a4165b4410e648b3b4f82fb7935213a06">pinctrl_handle_t</a> *handle, <a class="el" href="gpio_8h.html#ace75a5937fba13a24bef9d8846be73fa">gpio_pin_t</a> pin)</td></tr>
+<tr class="memdesc:a30e0ecf537479a79aa6d932d884c5064"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize a <code>pinctrl_handle_t</code> based on an input pin's control bits.  <br /></td></tr>
+<tr class="separator:a30e0ecf537479a79aa6d932d884c5064"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a08c3a80c8562f0aafcef9e02cfe4d72f" id="r_a08c3a80c8562f0aafcef9e02cfe4d72f"><td class="memItemLeft" align="right" valign="top">err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#a08c3a80c8562f0aafcef9e02cfe4d72f">pinctrl_init2_output</a> (<a class="el" href="gpio_8h.html#a4165b4410e648b3b4f82fb7935213a06">pinctrl_handle_t</a> *handle, <a class="el" href="gpio_8h.html#ace75a5937fba13a24bef9d8846be73fa">gpio_pin_t</a> pin)</td></tr>
+<tr class="memdesc:a08c3a80c8562f0aafcef9e02cfe4d72f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize a <code>pinctrl_handle_t</code> based on an output pin's control bits.  <br /></td></tr>
+<tr class="separator:a08c3a80c8562f0aafcef9e02cfe4d72f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af928c52b6b782003d489678ddebf0650" id="r_af928c52b6b782003d489678ddebf0650"><td class="memItemLeft" align="right" valign="top">err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#af928c52b6b782003d489678ddebf0650">pinctrl_on</a> (<a class="el" href="gpio_8h.html#a4165b4410e648b3b4f82fb7935213a06">pinctrl_handle_t</a> *handle)</td></tr>
+<tr class="memdesc:af928c52b6b782003d489678ddebf0650"><td class="mdescLeft">&#160;</td><td class="mdescRight">Turn a pin ON.  <br /></td></tr>
+<tr class="separator:af928c52b6b782003d489678ddebf0650"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa47f2356d89ec8ddc642cfb85ee57095" id="r_aa47f2356d89ec8ddc642cfb85ee57095"><td class="memItemLeft" align="right" valign="top">err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#aa47f2356d89ec8ddc642cfb85ee57095">pinctrl_off</a> (<a class="el" href="gpio_8h.html#a4165b4410e648b3b4f82fb7935213a06">pinctrl_handle_t</a> *handle)</td></tr>
+<tr class="memdesc:aa47f2356d89ec8ddc642cfb85ee57095"><td class="mdescLeft">&#160;</td><td class="mdescRight">Turn a pin OFF.  <br /></td></tr>
+<tr class="separator:aa47f2356d89ec8ddc642cfb85ee57095"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae7f69ad0b1b0355976e8edf850dd21c2" id="r_ae7f69ad0b1b0355976e8edf850dd21c2"><td class="memItemLeft" align="right" valign="top">err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#ae7f69ad0b1b0355976e8edf850dd21c2">pinctrl_toggle</a> (<a class="el" href="gpio_8h.html#a4165b4410e648b3b4f82fb7935213a06">pinctrl_handle_t</a> *handle)</td></tr>
+<tr class="memdesc:ae7f69ad0b1b0355976e8edf850dd21c2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Toggle the state of a pin.  <br /></td></tr>
+<tr class="separator:ae7f69ad0b1b0355976e8edf850dd21c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac7494b7af071dd5724339d06b85c83a4" id="r_ac7494b7af071dd5724339d06b85c83a4"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#ac7494b7af071dd5724339d06b85c83a4">pinctrl_is_on</a> (<a class="el" href="gpio_8h.html#a4165b4410e648b3b4f82fb7935213a06">pinctrl_handle_t</a> *handle)</td></tr>
+<tr class="memdesc:ac7494b7af071dd5724339d06b85c83a4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read the state of a pin.  <br /></td></tr>
+<tr class="separator:ac7494b7af071dd5724339d06b85c83a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a260e7b925f47f181c67845a34d485d81" id="r_a260e7b925f47f181c67845a34d485d81"><td class="memItemLeft" align="right" valign="top">err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#a260e7b925f47f181c67845a34d485d81">pinctrl_suspend</a> (<a class="el" href="gpio_8h.html#a4165b4410e648b3b4f82fb7935213a06">pinctrl_handle_t</a> *handle)</td></tr>
+<tr class="memdesc:a260e7b925f47f181c67845a34d485d81"><td class="mdescLeft">&#160;</td><td class="mdescRight">Put a pin in low-power mode.  <br /></td></tr>
+<tr class="separator:a260e7b925f47f181c67845a34d485d81"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac148cdd840db1c61b419cb2863b896b0" id="r_ac148cdd840db1c61b419cb2863b896b0"><td class="memItemLeft" align="right" valign="top">err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gpio_8h.html#ac148cdd840db1c61b419cb2863b896b0">pinctrl_resume</a> (<a class="el" href="gpio_8h.html#a4165b4410e648b3b4f82fb7935213a06">pinctrl_handle_t</a> *handle)</td></tr>
+<tr class="memdesc:ac148cdd840db1c61b419cb2863b896b0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return a pin to it's previous state from low-power mode.  <br /></td></tr>
+<tr class="separator:ac148cdd840db1c61b419cb2863b896b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>General-Purpose Input/Output Interface. </p>
-<dl class="section attention"><dt>Attention</dt><dd>This file should only be included by <a class="el" href="interface_8h.html" title="Interface between the frontend and backend code.">interface.h</a>. </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This file should only be included by <a class="el" href="interface_8h.html" title="Interface between the frontend and backend code.">interface.h</a>. </dd></dl>
 </div><hr/><h2 class="groupheader">Data Structure Documentation</h2>
 <a name="structgpio__listen__cfg__t" id="structgpio__listen__cfg__t"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#structgpio__listen__cfg__t">&#9670;&#160;</a></span>gpio_listen_cfg_t</h2>
@@ -419,7 +423,7 @@ The condition under which the IRQ should be generated. <p>This may be multiple t
         </tr>
       </table>
 </div><div class="memdoc">
-<div class="textblock"><p>The structure used to configure a GPIO pin. </p>
+<div class="textblock"><p>A structure used to configure a GPIO pin. </p>
 </div><table class="fieldtable">
 <tr><th colspan="3">Data Fields</th></tr>
 <tr><td class="fieldtype">
@@ -616,9 +620,8 @@ If <code>true</code>, turn the pin ON when initialized. </td></tr>
 </div><div class="memdoc">
 
 <p>Read an input pin (kind of) quickly. </p>
-<dl class="section attention"><dt>Attention</dt><dd>The pin must be properly configured for digital input before calling.</dd>
-<dd>
-There are no safety checks with this macro.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>The pin must be properly configured for digital input before calling.</dd></dl>
+<dl class="section attention"><dt>Attention</dt><dd>There are no safety checks with this macro.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">_pin_</td><td>The <code>gpio_pin_t</code> pin to read.</td></tr>
@@ -646,7 +649,7 @@ There are no safety checks with this macro.</dd></dl>
 </div><div class="memdoc">
 
 <p>Read a pin quickly. </p>
-<dl class="section attention"><dt>Attention</dt><dd><code>_qpin_</code> must be prepared with <code>gpio_quick_read_prepare()</code> prior to use.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd><code>_qpin_</code> must be prepared with <code>gpio_quick_read_prepare()</code> prior to use.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">_qpin_</td><td>The <code>gpio_quick_t</code> handle to read.</td></tr>
@@ -701,9 +704,8 @@ There are no safety checks with this macro.</dd></dl>
 </div><div class="memdoc">
 
 <p>Set an output pin HIGH (kind of) quickly. </p>
-<dl class="section attention"><dt>Attention</dt><dd>The pin must be properly configured for digital output before calling.</dd>
-<dd>
-There are no safety checks with this macro.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>The pin must be properly configured for digital output before calling.</dd></dl>
+<dl class="section attention"><dt>Attention</dt><dd>There are no safety checks with this macro.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">_pin_</td><td>The <code>gpio_pin_t</code> pin to set. </td></tr>
@@ -730,9 +732,8 @@ There are no safety checks with this macro.</dd></dl>
 </div><div class="memdoc">
 
 <p>Set an output pin LOW (kind of) quickly. </p>
-<dl class="section attention"><dt>Attention</dt><dd>The pin must be properly configured for digital output before calling.</dd>
-<dd>
-There are no safety checks with this macro.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>The pin must be properly configured for digital output before calling.</dd></dl>
+<dl class="section attention"><dt>Attention</dt><dd>There are no safety checks with this macro.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">_pin_</td><td>The <code>gpio_pin_t</code> pin to set. </td></tr>
@@ -756,7 +757,7 @@ There are no safety checks with this macro.</dd></dl>
 </div><div class="memdoc">
 
 <p>An identifier for MCU pins. </p>
-<dl class="section attention"><dt>Attention</dt><dd>The actual definition is in the device platform header file.</dd>
+<dl class="section note"><dt>Note</dt><dd>The actual definition is in the device platform header file.</dd>
 <dd>
 <code>0</code> is reserved for unassigned pins. </dd></dl>
 
@@ -776,9 +777,8 @@ There are no safety checks with this macro.</dd></dl>
 </div><div class="memdoc">
 
 <p>Define the operation mode of a GPIO pin. </p>
-<dl class="section attention"><dt>Attention</dt><dd>Some modes may be absent or aliased to other modes depending on the platform. Whether a mode exists can be determined by checking if it's name is defined.</dd>
-<dd>
-There may be additional modes on some platforms.</dd>
+<dl class="section attention"><dt>Attention</dt><dd>Some modes may be absent or aliased to other modes depending on the platform. Whether a mode exists can be determined by checking if it's name is defined.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>There may be additional modes on some platforms.</dd>
 <dd>
 The actual definition is in the device platform header file. </dd></dl>
 <table class="fieldtable">
@@ -815,7 +815,7 @@ The actual definition is in the device platform header file. </dd></dl>
 </div><div class="memdoc">
 
 <p>Define the state of a GPIO pin. </p>
-<dl class="section attention"><dt>Attention</dt><dd><code>GPIO_LOW</code> will always be '0U' and <code>GPIO_HIGH</code> will always be '1U'; any other values can't have assumptions made about them. </dd></dl>
+<dl class="section note"><dt>Note</dt><dd><code>GPIO_LOW</code> will always be '0U' and <code>GPIO_HIGH</code> will always be '1U'; any other values can't have assumptions made about them. </dd></dl>
 <table class="fieldtable">
 <tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a2ff5468d5ab752db6fa1fb95363392a6ad41cdd897d9b8714ef45ed6e9eba0dfa" name="a2ff5468d5ab752db6fa1fb95363392a6ad41cdd897d9b8714ef45ed6e9eba0dfa"></a>GPIO_LOW&#160;</td><td class="fielddoc"><p>State HIGH. </p>
 </td></tr>
@@ -1003,7 +1003,7 @@ The desired state of digital outputs (so e.g. an open-drain pin thats pulled low
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a> gpio_listen_init </td>
+          <td class="memname">err_t gpio_listen_init </td>
           <td>(</td>
           <td class="paramtype">gpio_listen_t *&#160;</td>
           <td class="paramname"><em>handle</em>, </td>
@@ -1025,7 +1025,7 @@ The desired state of digital outputs (so e.g. an open-drain pin thats pulled low
 <p>Prepare a pin for interrupt triggering. </p>
 <dl class="section attention"><dt>Attention</dt><dd>While this sets up the trigger, the actual IRQ will need to be handled by the calling code. How that's done will vary by platform but usually just means determining which interrupt handler is involved for a given pin and defining it. </dd>
 <dd>
-Multiple pins may share a handler or interfere with each other, that also varies by platform. Check the reference manual.</dd></dl>
+Multiple pins may share a handler or interfere with each other, this varies by platform. Check the reference manual.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">handle</td><td>The handle used to manage the pin. Must not be NULL. </td></tr>
@@ -1044,7 +1044,7 @@ Multiple pins may share a handler or interfere with each other, that also varies
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a> gpio_listen_off </td>
+          <td class="memname">err_t gpio_listen_off </td>
           <td>(</td>
           <td class="paramtype">gpio_listen_t *&#160;</td>
           <td class="paramname"><em>handle</em></td><td>)</td>
@@ -1072,7 +1072,7 @@ Multiple pins may share a handler or interfere with each other, that also varies
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a> gpio_listen_on </td>
+          <td class="memname">err_t gpio_listen_on </td>
           <td>(</td>
           <td class="paramtype">gpio_listen_t *&#160;</td>
           <td class="paramname"><em>handle</em></td><td>)</td>
@@ -1100,7 +1100,7 @@ Multiple pins may share a handler or interfere with each other, that also varies
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a> gpio_quickread_prepare </td>
+          <td class="memname">err_t gpio_quickread_prepare </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="gpio_8h.html#afc03cb9e9630374bbb8287ca6c0ae04f">gpio_quick_t</a> *&#160;</td>
           <td class="paramname"><em>qpin</em>, </td>
@@ -1138,7 +1138,7 @@ Multiple pins may share a handler or interfere with each other, that also varies
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a> gpio_set_input_state </td>
+          <td class="memname">err_t gpio_set_input_state </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="gpio_8h.html#ace75a5937fba13a24bef9d8846be73fa">gpio_pin_t</a>&#160;</td>
           <td class="paramname"><em>pin</em>, </td>
@@ -1176,7 +1176,7 @@ Multiple pins may share a handler or interfere with each other, that also varies
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a> gpio_set_mode </td>
+          <td class="memname">err_t gpio_set_mode </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="gpio_8h.html#ace75a5937fba13a24bef9d8846be73fa">gpio_pin_t</a>&#160;</td>
           <td class="paramname"><em>pin</em>, </td>
@@ -1221,7 +1221,7 @@ Multiple pins may share a handler or interfere with each other, that also varies
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a> gpio_set_output_state </td>
+          <td class="memname">err_t gpio_set_output_state </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="gpio_8h.html#ace75a5937fba13a24bef9d8846be73fa">gpio_pin_t</a>&#160;</td>
           <td class="paramname"><em>pin</em>, </td>
@@ -1259,7 +1259,7 @@ Multiple pins may share a handler or interfere with each other, that also varies
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a> gpio_set_state </td>
+          <td class="memname">err_t gpio_set_state </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="gpio_8h.html#ace75a5937fba13a24bef9d8846be73fa">gpio_pin_t</a>&#160;</td>
           <td class="paramname"><em>pin</em>, </td>
@@ -1297,7 +1297,7 @@ Multiple pins may share a handler or interfere with each other, that also varies
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a> gpio_toggle_input_state </td>
+          <td class="memname">err_t gpio_toggle_input_state </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="gpio_8h.html#ace75a5937fba13a24bef9d8846be73fa">gpio_pin_t</a>&#160;</td>
           <td class="paramname"><em>pin</em></td><td>)</td>
@@ -1324,7 +1324,7 @@ Multiple pins may share a handler or interfere with each other, that also varies
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a> gpio_toggle_output_state </td>
+          <td class="memname">err_t gpio_toggle_output_state </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="gpio_8h.html#ace75a5937fba13a24bef9d8846be73fa">gpio_pin_t</a>&#160;</td>
           <td class="paramname"><em>pin</em></td><td>)</td>
@@ -1351,7 +1351,7 @@ Multiple pins may share a handler or interfere with each other, that also varies
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a> gpio_toggle_state </td>
+          <td class="memname">err_t gpio_toggle_state </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="gpio_8h.html#ace75a5937fba13a24bef9d8846be73fa">gpio_pin_t</a>&#160;</td>
           <td class="paramname"><em>pin</em></td><td>)</td>
@@ -1406,7 +1406,7 @@ Multiple pins may share a handler or interfere with each other, that also varies
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a> input_pin_listen_init </td>
+          <td class="memname">err_t input_pin_listen_init </td>
           <td>(</td>
           <td class="paramtype">gpio_listen_t *&#160;</td>
           <td class="paramname"><em>handle</em>, </td>
@@ -1429,7 +1429,7 @@ Multiple pins may share a handler or interfere with each other, that also varies
 <p>Inputs biased HIGH are set to trigger on a falling edge. Inputs biased LOW are set to trigger on a falling edge. Unbiased inputs are set to trigger on either edge.</p>
 <dl class="section attention"><dt>Attention</dt><dd>While this sets up the trigger, the actual IRQ will need to be handled by the calling code. How that's done will vary by platform but usually just means determining which interrupt handler is involved for a given pin and defining it. </dd>
 <dd>
-Multiple pins may share a handler or interfere with each other, that also varies by platform. Check the reference manual.</dd></dl>
+Multiple pins may share a handler or interfere with each other, this varies by platform. Check the reference manual.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">handle</td><td>The handle used to manage the pin. Must not be NULL. </td></tr>
@@ -1448,7 +1448,7 @@ Multiple pins may share a handler or interfere with each other, that also varies
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a> input_pin_listen_off </td>
+          <td class="memname">err_t input_pin_listen_off </td>
           <td>(</td>
           <td class="paramtype">gpio_listen_t *&#160;</td>
           <td class="paramname"><em>handle</em></td><td>)</td>
@@ -1476,7 +1476,7 @@ Multiple pins may share a handler or interfere with each other, that also varies
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a> input_pin_listen_on </td>
+          <td class="memname">err_t input_pin_listen_on </td>
           <td>(</td>
           <td class="paramtype">gpio_listen_t *&#160;</td>
           <td class="paramname"><em>handle</em></td><td>)</td>
@@ -1505,7 +1505,7 @@ Multiple pins may share a handler or interfere with each other, that also varies
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a> input_pin_off </td>
+          <td class="memname">err_t input_pin_off </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="gpio_8h.html#ace75a5937fba13a24bef9d8846be73fa">gpio_pin_t</a>&#160;</td>
           <td class="paramname"><em>pin</em></td><td>)</td>
@@ -1532,7 +1532,7 @@ Multiple pins may share a handler or interfere with each other, that also varies
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a> input_pin_on </td>
+          <td class="memname">err_t input_pin_on </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="gpio_8h.html#ace75a5937fba13a24bef9d8846be73fa">gpio_pin_t</a>&#160;</td>
           <td class="paramname"><em>pin</em></td><td>)</td>
@@ -1559,7 +1559,7 @@ Multiple pins may share a handler or interfere with each other, that also varies
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a> input_pin_toggle </td>
+          <td class="memname">err_t input_pin_toggle </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="gpio_8h.html#ace75a5937fba13a24bef9d8846be73fa">gpio_pin_t</a>&#160;</td>
           <td class="paramname"><em>pin</em></td><td>)</td>
@@ -1579,6 +1579,33 @@ Multiple pins may share a handler or interfere with each other, that also varies
 
 </div>
 </div>
+<a id="a0916ee9f339eb359b8858f5b74274bd1" name="a0916ee9f339eb359b8858f5b74274bd1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0916ee9f339eb359b8858f5b74274bd1">&#9670;&#160;</a></span>output_pin_is_on()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool output_pin_is_on </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="gpio_8h.html#ace75a5937fba13a24bef9d8846be73fa">gpio_pin_t</a>&#160;</td>
+          <td class="paramname"><em>pin</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Check if an output pin is turned on. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">pin</td><td>The pin to examine.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><code>true</code> if the output pin is turned on.or <code>false</code> if it's turned off or there was an error. </dd></dl>
+
+</div>
+</div>
 <a id="a8ed071a735270d0dd40a55c798c48ab6" name="a8ed071a735270d0dd40a55c798c48ab6"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a8ed071a735270d0dd40a55c798c48ab6">&#9670;&#160;</a></span>output_pin_off()</h2>
 
@@ -1586,7 +1613,7 @@ Multiple pins may share a handler or interfere with each other, that also varies
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a> output_pin_off </td>
+          <td class="memname">err_t output_pin_off </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="gpio_8h.html#ace75a5937fba13a24bef9d8846be73fa">gpio_pin_t</a>&#160;</td>
           <td class="paramname"><em>pin</em></td><td>)</td>
@@ -1613,7 +1640,7 @@ Multiple pins may share a handler or interfere with each other, that also varies
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a> output_pin_on </td>
+          <td class="memname">err_t output_pin_on </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="gpio_8h.html#ace75a5937fba13a24bef9d8846be73fa">gpio_pin_t</a>&#160;</td>
           <td class="paramname"><em>pin</em></td><td>)</td>
@@ -1640,7 +1667,7 @@ Multiple pins may share a handler or interfere with each other, that also varies
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a> output_pin_toggle </td>
+          <td class="memname">err_t output_pin_toggle </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="gpio_8h.html#ace75a5937fba13a24bef9d8846be73fa">gpio_pin_t</a>&#160;</td>
           <td class="paramname"><em>pin</em></td><td>)</td>
@@ -1667,9 +1694,9 @@ Multiple pins may share a handler or interfere with each other, that also varies
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a> pinctrl_init </td>
+          <td class="memname">err_t pinctrl_init </td>
           <td>(</td>
-          <td class="paramtype">pinctrl_handle_t *&#160;</td>
+          <td class="paramtype"><a class="el" href="gpio_8h.html#a4165b4410e648b3b4f82fb7935213a06">pinctrl_handle_t</a> *&#160;</td>
           <td class="paramname"><em>handle</em>, </td>
         </tr>
         <tr>
@@ -1686,7 +1713,7 @@ Multiple pins may share a handler or interfere with each other, that also varies
       </table>
 </div><div class="memdoc">
 
-<p>Initialize a <code>pinctrl_handle_t</code> based on a <code><a class="el" href="gpio_8h.html#structpinctrl__cfg__t" title="The structure used to configure a GPIO pin.">pinctrl_cfg_t</a></code> struct. </p>
+<p>Initialize a <code>pinctrl_handle_t</code> based on a <code><a class="el" href="gpio_8h.html#structpinctrl__cfg__t" title="A structure used to configure a GPIO pin.">pinctrl_cfg_t</a></code> struct. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">handle</td><td>The handle to initialize. </td></tr>
@@ -1705,9 +1732,9 @@ Multiple pins may share a handler or interfere with each other, that also varies
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a> pinctrl_init2_input </td>
+          <td class="memname">err_t pinctrl_init2_input </td>
           <td>(</td>
-          <td class="paramtype">pinctrl_handle_t *&#160;</td>
+          <td class="paramtype"><a class="el" href="gpio_8h.html#a4165b4410e648b3b4f82fb7935213a06">pinctrl_handle_t</a> *&#160;</td>
           <td class="paramname"><em>handle</em>, </td>
         </tr>
         <tr>
@@ -1743,9 +1770,9 @@ Multiple pins may share a handler or interfere with each other, that also varies
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a> pinctrl_init2_output </td>
+          <td class="memname">err_t pinctrl_init2_output </td>
           <td>(</td>
-          <td class="paramtype">pinctrl_handle_t *&#160;</td>
+          <td class="paramtype"><a class="el" href="gpio_8h.html#a4165b4410e648b3b4f82fb7935213a06">pinctrl_handle_t</a> *&#160;</td>
           <td class="paramname"><em>handle</em>, </td>
         </tr>
         <tr>
@@ -1783,7 +1810,7 @@ Multiple pins may share a handler or interfere with each other, that also varies
         <tr>
           <td class="memname">bool pinctrl_is_on </td>
           <td>(</td>
-          <td class="paramtype">pinctrl_handle_t *&#160;</td>
+          <td class="paramtype"><a class="el" href="gpio_8h.html#a4165b4410e648b3b4f82fb7935213a06">pinctrl_handle_t</a> *&#160;</td>
           <td class="paramname"><em>handle</em></td><td>)</td>
           <td></td>
         </tr>
@@ -1808,9 +1835,9 @@ Multiple pins may share a handler or interfere with each other, that also varies
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a> pinctrl_off </td>
+          <td class="memname">err_t pinctrl_off </td>
           <td>(</td>
-          <td class="paramtype">pinctrl_handle_t *&#160;</td>
+          <td class="paramtype"><a class="el" href="gpio_8h.html#a4165b4410e648b3b4f82fb7935213a06">pinctrl_handle_t</a> *&#160;</td>
           <td class="paramname"><em>handle</em></td><td>)</td>
           <td></td>
         </tr>
@@ -1835,9 +1862,9 @@ Multiple pins may share a handler or interfere with each other, that also varies
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a> pinctrl_on </td>
+          <td class="memname">err_t pinctrl_on </td>
           <td>(</td>
-          <td class="paramtype">pinctrl_handle_t *&#160;</td>
+          <td class="paramtype"><a class="el" href="gpio_8h.html#a4165b4410e648b3b4f82fb7935213a06">pinctrl_handle_t</a> *&#160;</td>
           <td class="paramname"><em>handle</em></td><td>)</td>
           <td></td>
         </tr>
@@ -1862,9 +1889,9 @@ Multiple pins may share a handler or interfere with each other, that also varies
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a> pinctrl_resume </td>
+          <td class="memname">err_t pinctrl_resume </td>
           <td>(</td>
-          <td class="paramtype">pinctrl_handle_t *&#160;</td>
+          <td class="paramtype"><a class="el" href="gpio_8h.html#a4165b4410e648b3b4f82fb7935213a06">pinctrl_handle_t</a> *&#160;</td>
           <td class="paramname"><em>handle</em></td><td>)</td>
           <td></td>
         </tr>
@@ -1889,9 +1916,9 @@ Multiple pins may share a handler or interfere with each other, that also varies
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a> pinctrl_suspend </td>
+          <td class="memname">err_t pinctrl_suspend </td>
           <td>(</td>
-          <td class="paramtype">pinctrl_handle_t *&#160;</td>
+          <td class="paramtype"><a class="el" href="gpio_8h.html#a4165b4410e648b3b4f82fb7935213a06">pinctrl_handle_t</a> *&#160;</td>
           <td class="paramname"><em>handle</em></td><td>)</td>
           <td></td>
         </tr>
@@ -1916,9 +1943,9 @@ Multiple pins may share a handler or interfere with each other, that also varies
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a> pinctrl_toggle </td>
+          <td class="memname">err_t pinctrl_toggle </td>
           <td>(</td>
-          <td class="paramtype">pinctrl_handle_t *&#160;</td>
+          <td class="paramtype"><a class="el" href="gpio_8h.html#a4165b4410e648b3b4f82fb7935213a06">pinctrl_handle_t</a> *&#160;</td>
           <td class="paramname"><em>handle</em></td><td>)</td>
           <td></td>
         </tr>

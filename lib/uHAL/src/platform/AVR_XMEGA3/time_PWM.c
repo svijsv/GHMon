@@ -36,9 +36,9 @@
 err_t pwm_set(pwm_output_t *output, uint_fast16_t duty_cycle) {
 	gpio_pin_t pin;
 
-	assert(output != NULL);
-	assert(PINID(output->pin) != 0);
-	assert(duty_cycle <= PWM_DUTY_CYCLE_SCALE);
+	uHAL_assert(output != NULL);
+	uHAL_assert(PINID(output->pin) != 0);
+	uHAL_assert(duty_cycle <= PWM_DUTY_CYCLE_SCALE);
 
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
 	if (output == NULL || PINID(output->pin) == 0) {
@@ -108,8 +108,8 @@ err_t pwm_on(pwm_output_t *output, gpio_pin_t pin, uint_fast16_t duty_cycle) {
 		pin = output->pin;
 	}
 
-	assert(output != NULL);
-	assert(duty_cycle <= PWM_DUTY_CYCLE_SCALE);
+	uHAL_assert(output != NULL);
+	uHAL_assert(duty_cycle <= PWM_DUTY_CYCLE_SCALE);
 
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
 	if (output == NULL) {
@@ -189,8 +189,8 @@ err_t pwm_on(pwm_output_t *output, gpio_pin_t pin, uint_fast16_t duty_cycle) {
 err_t pwm_off(pwm_output_t *output) {
 	gpio_pin_t pin;
 
-	assert(output != NULL);
-	assert(PINID(output->pin) != 0);
+	uHAL_assert(output != NULL);
+	uHAL_assert(PINID(output->pin) != 0);
 
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
 	if (output == NULL || PINID(output->pin) == 0) {

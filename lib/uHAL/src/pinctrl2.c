@@ -60,8 +60,8 @@ err_t pinctrl_init(pinctrl_handle_t *handle, const pinctrl_cfg_t *cfg) {
 		.on_state = 0,
 	};
 
-	assert(handle != NULL);
-	assert(verify_cfg(cfg));
+	uHAL_assert(handle != NULL);
+	uHAL_assert(verify_cfg(cfg));
 
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
 	if (!verify_cfg(cfg) || handle == NULL) {
@@ -190,7 +190,7 @@ err_t pinctrl_init2_output(pinctrl_handle_t *handle, gpio_pin_t pin) {
 bool pinctrl_is_on(pinctrl_handle_t *handle) {
 	gpio_state_t state = GPIO_FLOAT;
 
-	assert(verify_handle(handle));
+	uHAL_assert(verify_handle(handle));
 	if (!verify_handle(handle)) {
 		return false;
 	}
@@ -214,7 +214,7 @@ static err_t _pinctrl_on(pinctrl_handle_t *handle) {
 	return gpio_set_state(handle->pin, handle->on_gpio_state);
 }
 err_t pinctrl_on(pinctrl_handle_t *handle) {
-	assert(verify_handle(handle));
+	uHAL_assert(verify_handle(handle));
 	if (!verify_handle(handle)) {
 		return ERR_BADARG;
 	}
@@ -230,7 +230,7 @@ static err_t _pinctrl_off(pinctrl_handle_t *handle) {
 	return gpio_set_state(handle->pin, handle->off_gpio_state);
 }
 err_t pinctrl_off(pinctrl_handle_t *handle) {
-	assert(verify_handle(handle));
+	uHAL_assert(verify_handle(handle));
 	if (!verify_handle(handle)) {
 		return ERR_BADARG;
 	}
@@ -239,7 +239,7 @@ err_t pinctrl_off(pinctrl_handle_t *handle) {
 }
 
 err_t pinctrl_toggle(pinctrl_handle_t *handle) {
-	assert(verify_handle(handle));
+	uHAL_assert(verify_handle(handle));
 	if (!verify_handle(handle)) {
 		return ERR_BADARG;
 	}
@@ -248,7 +248,7 @@ err_t pinctrl_toggle(pinctrl_handle_t *handle) {
 }
 
 err_t pinctrl_suspend(pinctrl_handle_t *handle) {
-	assert(verify_handle(handle));
+	uHAL_assert(verify_handle(handle));
 	if (!verify_handle(handle)) {
 		return ERR_BADARG;
 	}
@@ -256,7 +256,7 @@ err_t pinctrl_suspend(pinctrl_handle_t *handle) {
 	return gpio_set_mode(handle->pin, GPIO_MODE_RESET, GPIO_FLOAT);
 }
 err_t pinctrl_resume(pinctrl_handle_t *handle) {
-	assert(verify_handle(handle));
+	uHAL_assert(verify_handle(handle));
 	if (!verify_handle(handle)) {
 		return ERR_BADARG;
 	}

@@ -242,8 +242,8 @@ static const ssd1306_font_t *font_default = &_font_default;
 
 #define CHECK_STD_ARGS(_handle_) \
 	do { \
-		assert(VALID_INIT(_handle_)); \
-		assert(VALID_CFG((_handle_)->cfg)); \
+		uHAL_assert(VALID_INIT(_handle_)); \
+		uHAL_assert(VALID_CFG((_handle_)->cfg)); \
 		CHECK_INVALID_ARGS(_handle_); \
 		CHECK_INVALID_INIT(_handle_); \
 	} while (0);
@@ -282,7 +282,7 @@ err_t ssd1306_init(ssd1306_handle_t *handle, const ssd1306_cfg_t *cfg) {
 		//
 		// Stuff that doesn't really need to be set because it's not usually
 		// changed
-#if uHAL_USE_SMALL_CODE < 1
+#if SSD1306_FULL_INIT
 		SSD1306_CMD_SCROLL_OFF,
 		SSD1306_CMD_DISPLAY_START_LINE_DEFAULT,
 		/*
@@ -314,8 +314,8 @@ err_t ssd1306_init(ssd1306_handle_t *handle, const ssd1306_cfg_t *cfg) {
 		SSD1306_CMD_CHARGE_PUMP_ON,
 	};
 
-	assert(handle != NULL);
-	assert(VALID_CFG(cfg));
+	uHAL_assert(handle != NULL);
+	uHAL_assert(VALID_CFG(cfg));
 #if ! uHAL_SKIP_INIT_CHECKS
 #endif
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
@@ -327,7 +327,7 @@ err_t ssd1306_init(ssd1306_handle_t *handle, const ssd1306_cfg_t *cfg) {
 	handle->cfg = cfg;
 
 	if (BIT_IS_SET(cfg->flags, SSD1306_CFG_FLAG_I2C)) {
-		assert(i2c_is_on());
+		uHAL_assert(i2c_is_on());
 #if ! uHAL_SKIP_OTHER_CHECKS
 		if (!i2c_is_on()) {
 			i2c_on();
@@ -367,7 +367,7 @@ err_t ssd1306_init(ssd1306_handle_t *handle, const ssd1306_cfg_t *cfg) {
 			goto I2C_END;
 		}
 
-#if SSD1306_INIT_COMMANDS_COUNT
+#if SSD1306_INIT_COMMANDS_COUNT > 0
 		if ((res = i2c_transmit_block_continue(cfg->init_cmds, SSD1306_INIT_COMMANDS_COUNT, I2C_TIMEOUT)) != ERR_OK) {
 			goto I2C_END;
 		}
@@ -611,7 +611,7 @@ static err_t _ssd1306_draw_text_scaled(ssd1306_handle_t *handle, const ssd1306_f
 	max_x = (handle->cfg->width / GLYPH_WIDTH(font));
 	max_y = (handle->cfg->height / ROWS_PER_PAGE);
 
-	assert((scale_y == 1) || (scale_y == 2) || (scale_y == 4));
+	uHAL_assert((scale_y == 1) || (scale_y == 2) || (scale_y == 4));
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
 	if (!((scale_y == 1) || (scale_y == 2) || (scale_y == 4))) {
 		return ERR_BADARG;
@@ -710,8 +710,8 @@ err_t ssd1306_draw_text_scaled(ssd1306_handle_t *handle, const ssd1306_font_t *f
 	}
 
 	CHECK_STD_ARGS(handle);
-	assert(VALID_FONT(font));
-	assert(text != NULL);
+	uHAL_assert(VALID_FONT(font));
+	uHAL_assert(text != NULL);
 
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
 	if (!VALID_FONT(font) || (text == NULL)) {
@@ -741,8 +741,8 @@ err_t ssd1306_draw_text(ssd1306_handle_t *handle, const ssd1306_font_t *font, ui
 		font = font_default;
 	}
 
-	assert(VALID_FONT(font));
-	assert(text != NULL);
+	uHAL_assert(VALID_FONT(font));
+	uHAL_assert(text != NULL);
 	CHECK_STD_ARGS(handle);
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
 	if (!VALID_FONT(font) || (text == NULL)) {
@@ -750,14 +750,8 @@ err_t ssd1306_draw_text(ssd1306_handle_t *handle, const ssd1306_font_t *font, ui
 	}
 #endif
 
-#if SSD1306_FONT_AUTOSCALE && uHAL_USE_SMALL_CODE > 1
-	uint8_t x = (font->scale_x > 0) ? font->scale_x : 1;
-	uint8_t y = (font->scale_y > 0) ? font->scale_y : 1;
-
-	return _ssd1306_draw_text_scaled(handle, font, x, y, xt, yt, text);
-
-#elif SSD1306_FONT_AUTOSCALE
-	if ((font->scale_x > 1) || (font->scale_y > 1)) {
+#if SSD1306_FONT_AUTOSCALE
+	if (!SSD1306_AUTOSCALE_COEXIST || ((font->scale_x > 1) || (font->scale_y > 1))) {
 		uint8_t x = (font->scale_x > 0) ? font->scale_x : 1;
 		uint8_t y = (font->scale_y > 0) ? font->scale_y : 1;
 

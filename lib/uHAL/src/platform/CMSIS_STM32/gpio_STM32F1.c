@@ -233,7 +233,7 @@ static void port_reset(GPIO_TypeDef *port) {
 	return;
 }
 void gpio_set_AF(gpio_pin_t pin, gpio_af_t af) {
-	assert(GPIO_PIN_IS_VALID(pin));
+	uHAL_assert(GPIO_PIN_IS_VALID(pin));
 
 	UNUSED(af);
 
@@ -244,7 +244,7 @@ void gpio_set_AF(gpio_pin_t pin, gpio_af_t af) {
 // There should be no case where this would be useful, enabling it could cause
 // confusion if someone doesn't know it's meaningless on F1s.
 gpio_af_t gpio_get_AF(gpio_pin_t pin) {
-	assert(GPIO_PIN_IS_VALID(pin));
+	uHAL_assert(GPIO_PIN_IS_VALID(pin));
 
 	UNUSED(af);
 
@@ -314,7 +314,7 @@ err_t gpio_set_mode(gpio_pin_t pin, gpio_mode_t mode, gpio_state_t istate) {
 	GPIO_TypeDef* port;
 	uint32_t pinmask, pinno, mpinno;
 
-	assert(GPIO_PIN_IS_VALID(pin));
+	uHAL_assert(GPIO_PIN_IS_VALID(pin));
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
 	if (!GPIO_PIN_IS_VALID(pin)) {
 		return ERR_BADARG;
@@ -469,7 +469,7 @@ gpio_mode_t gpio_get_mode(gpio_pin_t pin) {
 	GPIO_TypeDef* port;
 	uint32_t pinno, mpinno;
 
-	assert(GPIO_PIN_IS_VALID(pin));
+	uHAL_assert(GPIO_PIN_IS_VALID(pin));
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
 	if (!GPIO_PIN_IS_VALID(pin)) {
 		return GPIO_MODE_RESET;
@@ -521,7 +521,7 @@ err_t gpio_set_state(gpio_pin_t pin, gpio_state_t new_state) {
 	GPIO_TypeDef* port;
 	uint32_t pinmask, pinno, modemask, mpinno;
 
-	assert(GPIO_PIN_IS_VALID(pin));
+	uHAL_assert(GPIO_PIN_IS_VALID(pin));
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
 	if (!GPIO_PIN_IS_VALID(pin)) {
 		return ERR_BADARG;
@@ -613,7 +613,7 @@ err_t gpio_set_input_state(gpio_pin_t pin, gpio_state_t new_state) {
 	GPIO_TypeDef* port;
 	uint32_t modemask, pinmask, pinno, mpinno, nmask;
 
-	assert(GPIO_PIN_IS_VALID(pin));
+	uHAL_assert(GPIO_PIN_IS_VALID(pin));
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
 	if (!GPIO_PIN_IS_VALID(pin)) {
 		return ERR_BADARG;
@@ -686,7 +686,7 @@ err_t gpio_set_output_state(gpio_pin_t pin, gpio_state_t new_state) {
 	GPIO_TypeDef* port;
 	uint32_t pinmask;
 
-	assert(GPIO_PIN_IS_VALID(pin));
+	uHAL_assert(GPIO_PIN_IS_VALID(pin));
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
 	if (!GPIO_PIN_IS_VALID(pin)) {
 		return ERR_BADARG;
@@ -754,7 +754,7 @@ err_t gpio_toggle_state(gpio_pin_t pin) {
 	GPIO_TypeDef* port;
 	uint32_t pinmask;
 
-	assert(GPIO_PIN_IS_VALID(pin));
+	uHAL_assert(GPIO_PIN_IS_VALID(pin));
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
 	if (!GPIO_PIN_IS_VALID(pin)) {
 		return ERR_BADARG;
@@ -793,7 +793,7 @@ gpio_state_t gpio_get_state(gpio_pin_t pin) {
 	uint32_t pinmask, pinno, modemask, mpinno;
 	uint_fast16_t check;
 
-	assert(GPIO_PIN_IS_VALID(pin));
+	uHAL_assert(GPIO_PIN_IS_VALID(pin));
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
 	if (!GPIO_PIN_IS_VALID(pin)) {
 		return GPIO_FLOAT;
@@ -841,7 +841,7 @@ gpio_state_t gpio_get_input_state(gpio_pin_t pin) {
 	GPIO_TypeDef* port;
 	uint32_t pinmask;
 
-	assert(GPIO_PIN_IS_VALID(pin));
+	uHAL_assert(GPIO_PIN_IS_VALID(pin));
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
 	if (!GPIO_PIN_IS_VALID(pin)) {
 		return GPIO_FLOAT;
@@ -893,7 +893,7 @@ gpio_state_t gpio_get_output_state(gpio_pin_t pin) {
 	GPIO_TypeDef* port;
 	uint32_t pinmask;
 
-	assert(GPIO_PIN_IS_VALID(pin));
+	uHAL_assert(GPIO_PIN_IS_VALID(pin));
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
 	if (!GPIO_PIN_IS_VALID(pin)) {
 		return GPIO_FLOAT;

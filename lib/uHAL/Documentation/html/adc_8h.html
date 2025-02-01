@@ -121,10 +121,10 @@ Typedefs</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a762f51da7b4ef810e6ede240a7b3c2ef" id="r_a762f51da7b4ef810e6ede240a7b3c2ef"><td class="memItemLeft" align="right" valign="top"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="adc_8h.html#a762f51da7b4ef810e6ede240a7b3c2ef">adc_on</a> (void)</td></tr>
+<tr class="memitem:a762f51da7b4ef810e6ede240a7b3c2ef" id="r_a762f51da7b4ef810e6ede240a7b3c2ef"><td class="memItemLeft" align="right" valign="top">err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="adc_8h.html#a762f51da7b4ef810e6ede240a7b3c2ef">adc_on</a> (void)</td></tr>
 <tr class="memdesc:a762f51da7b4ef810e6ede240a7b3c2ef"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enable the ADC peripheral.  <br /></td></tr>
 <tr class="separator:a762f51da7b4ef810e6ede240a7b3c2ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a19061053fcec529093c4a4b20224e3a7" id="r_a19061053fcec529093c4a4b20224e3a7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="adc_8h.html#a19061053fcec529093c4a4b20224e3a7">adc_off</a> (void)</td></tr>
+<tr class="memitem:a19061053fcec529093c4a4b20224e3a7" id="r_a19061053fcec529093c4a4b20224e3a7"><td class="memItemLeft" align="right" valign="top">err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="adc_8h.html#a19061053fcec529093c4a4b20224e3a7">adc_off</a> (void)</td></tr>
 <tr class="memdesc:a19061053fcec529093c4a4b20224e3a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disable the ADC peripheral.  <br /></td></tr>
 <tr class="separator:a19061053fcec529093c4a4b20224e3a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abfca09e4c6988bd8603aebc5af199164" id="r_abfca09e4c6988bd8603aebc5af199164"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="adc_8h.html#abfca09e4c6988bd8603aebc5af199164">adc_is_on</a> (void)</td></tr>
@@ -142,7 +142,7 @@ Functions</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Analog to Digital Converter Interface. </p>
-<dl class="section attention"><dt>Attention</dt><dd>This file should only be included by <a class="el" href="interface_8h.html" title="Interface between the frontend and backend code.">interface.h</a>. </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This file should only be included by <a class="el" href="interface_8h.html" title="Interface between the frontend and backend code.">interface.h</a>. </dd></dl>
 </div><h2 class="groupheader">Typedef Documentation</h2>
 <a id="a0306696495c40f2c621bf297375028c9" name="a0306696495c40f2c621bf297375028c9"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a0306696495c40f2c621bf297375028c9">&#9670;&#160;</a></span>adc_t</h2>
@@ -157,7 +157,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Type used to hold the value read by an ADC. </p>
-<dl class="section attention"><dt>Attention</dt><dd>The actual definition will vary based on the value of ADC_MAX. </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>The actual definition will vary based on the value of ADC_MAX. </dd></dl>
 
 </div>
 </div>
@@ -175,7 +175,7 @@ Functions</h2></td></tr>
 
 <p>Type used to perform mathematical functions with ADC readings. </p>
 <p>This is needed for operations which may overflow adc_t such as multiplication or those which may involve negative values.</p>
-<dl class="section attention"><dt>Attention</dt><dd>The actual definition will vary based on the value of ADC_MAX. </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>The actual definition will vary based on the value of ADC_MAX. </dd></dl>
 
 </div>
 </div>
@@ -214,7 +214,7 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a> adc_off </td>
+          <td class="memname">err_t adc_off </td>
           <td>(</td>
           <td class="paramtype">void&#160;</td>
           <td class="paramname"></td><td>)</td>
@@ -235,7 +235,7 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a> adc_on </td>
+          <td class="memname">err_t adc_on </td>
           <td>(</td>
           <td class="paramtype">void&#160;</td>
           <td class="paramname"></td><td>)</td>

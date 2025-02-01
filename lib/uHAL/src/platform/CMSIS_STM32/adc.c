@@ -132,6 +132,9 @@ err_t adc_on(void) {
 }
 err_t adc_off(void) {
 	CLEAR_BIT(ADCx->CR2, ADC_CR2_ADON);
+	while (BIT_IS_SET(ADCx->CR2, ADC_CR2_ADON)) {
+		// Nothing to do here
+	}
 	clock_disable(ADCx_CLOCKEN);
 
 	return ERR_OK;
@@ -178,7 +181,7 @@ static uint8_t pin_to_channel(gpio_pin_t pin) {
 	return 0xFFU;
 }
 adc_t adc_read_pin(gpio_pin_t pin) {
-	assert(GPIO_PIN_IS_VALID(pin));
+	uHAL_assert(GPIO_PIN_IS_VALID(pin));
 
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
 	if (!GPIO_PIN_IS_VALID(pin)) {
@@ -309,7 +312,7 @@ adc_t adc_read_ac_amplitude(gpio_pin_t pin, uint_fast32_t period_ms, adc_t *min,
 	adc_t adc, adc_min, adc_max;
 	utime_t timeout;
 
-	assert(GPIO_PIN_IS_VALID(pin));
+	uHAL_assert(GPIO_PIN_IS_VALID(pin));
 
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
 	if (!GPIO_PIN_IS_VALID(pin)) {

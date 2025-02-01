@@ -85,6 +85,13 @@
 // is set
 #define HIBERNATE_MAX_S ((24U * SECONDS_PER_HOUR) - 60U)
 
+#ifndef uHAL_USE_UPTIME_EMULATION
+# if uHAL_USE_RTC && uHAL_USE_UPTIME
+#  define uHAL_USE_UPTIME_EMULATION 1
+# else
+#  define uHAL_USE_UPTIME_EMULATION 0
+# endif
+#endif
 
 //
 // Oscillator frequencies

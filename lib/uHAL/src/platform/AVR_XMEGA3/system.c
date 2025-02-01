@@ -122,6 +122,10 @@ DEBUG_CPP_MACRO(F_OSC / F_CORE);
 
 	time_init();
 
+#if uHAL_USE_UPTIME
+	init_uptime();
+#endif
+
 #if uHAL_USE_UART_COMM
 	const uart_port_cfg_t uart_cfg = {
 		.rx_pin = UART_COMM_RX_PIN,
@@ -172,6 +176,16 @@ DEBUG_CPP_MACRO(F_OSC / F_CORE);
 void platform_reset(void) {
 	pre_reset_hook();
 	_PROTECTED_WRITE(RSTCTRL.SWRR, RSTCTRL_SWRE_bm);
+}
+
+static sleep_mode_t limit_hibernation_depth(sleep_mode_t sleep_mode) {
+	if (uHAL_CHECK_STATUS(uHAL_FLAG_INHIBIT_HIBERNATION)) {
+		sleep_mode = HIBERNATE_LIGHT;
+	} else if (uHAL_HIBERNATE_LIMIT != 0 && sleep_mode > uHAL_HIBERNATE_LIMIT) {
+		sleep_mode = uHAL_HIBERNATE_LIMIT;
+	}
+
+	return sleep_mode;
 }
 
 #if uHAL_USE_HIBERNATE
@@ -241,15 +255,6 @@ void sleep_ms(utime_t ms) {
 	return;
 }
 
-static sleep_mode_t limit_hibernation_depth(sleep_mode_t sleep_mode) {
-	if (uHAL_CHECK_STATUS(uHAL_FLAG_INHIBIT_HIBERNATION)) {
-		sleep_mode = HIBERNATE_LIGHT;
-	} else if (uHAL_HIBERNATE_LIMIT != 0 && sleep_mode > uHAL_HIBERNATE_LIMIT) {
-		sleep_mode = uHAL_HIBERNATE_LIMIT;
-	}
-
-	return sleep_mode;
-}
 void hibernate_s(utime_t s, sleep_mode_t sleep_mode, uHAL_flags_t flags) {
 	uint8_t set_mode;
 	uint_t wakeups;

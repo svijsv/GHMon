@@ -133,7 +133,7 @@ bool spi_is_on(void) {
 err_t spi_exchange_byte(uint8_t tx, uint8_t *rx, utime_t timeout) {
 	err_t res;
 
-	assert(rx != NULL);
+	uHAL_assert(rx != NULL);
 
 #if ! uHAL_SKIP_INIT_CHECKS
 	if (!BIT_IS_SET(SPIx.CTRLA, SPI_ENABLE_bm) || !BIT_IS_SET(SPIx.CTRLA, SPI_MASTER_bm)) {
@@ -170,8 +170,8 @@ err_t spi_receive_block(uint8_t *rx_buffer, txsize_t rx_size, uint8_t tx, utime_
 	err_t res;
 	txsize_t i;
 
-	assert(rx_buffer != NULL);
-	assert(rx_size > 0);
+	uHAL_assert(rx_buffer != NULL);
+	uHAL_assert(rx_size > 0);
 
 #if ! uHAL_SKIP_INIT_CHECKS
 	if (!BIT_IS_SET(SPIx.CTRLA, SPI_ENABLE_bm) || !BIT_IS_SET(SPIx.CTRLA, SPI_MASTER_bm)) {
@@ -212,8 +212,8 @@ err_t spi_transmit_block(const uint8_t *tx_buffer, txsize_t tx_size, utime_t tim
 	uint8_t rx;
 	txsize_t i;
 
-	assert(tx_buffer != NULL);
-	assert(tx_size > 0);
+	uHAL_assert(tx_buffer != NULL);
+	uHAL_assert(tx_size > 0);
 
 #if ! uHAL_SKIP_INIT_CHECKS
 	if (!BIT_IS_SET(SPIx.CTRLA, SPI_ENABLE_bm) || !BIT_IS_SET(SPIx.CTRLA, SPI_MASTER_bm)) {

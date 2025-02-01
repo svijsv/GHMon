@@ -55,8 +55,8 @@ DEBUG_CPP_MACRO(UART_INPUT_BUFFER_BYTES)
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
 # define VERIFY_PORT(_p_) \
 	do { \
-		assert(p != NULL); \
-		assert(p->uartx != NULL); \
+		uHAL_assert(p != NULL); \
+		uHAL_assert(p->uartx != NULL); \
 		if (p == NULL) { \
 			return ERR_BADARG; \
 		} \
@@ -67,8 +67,8 @@ DEBUG_CPP_MACRO(UART_INPUT_BUFFER_BYTES)
 #else
 # define VERIFY_PORT(_p_) \
 	do { \
-		assert(p != NULL); \
-		assert(p->uartx != NULL); \
+		uHAL_assert(p != NULL); \
+		uHAL_assert(p->uartx != NULL); \
 	} while (0)
 #endif
 
@@ -78,8 +78,8 @@ DEBUG_CPP_MACRO(UART_INPUT_BUFFER_BYTES)
 err_t uart_init_port(uart_port_t *p, const uart_port_cfg_t *conf) {
 	SET_DEFAULT_PORT(p);
 
-	assert(conf != NULL);
-	assert(p != NULL);
+	uHAL_assert(conf != NULL);
+	uHAL_assert(p != NULL);
 
 # if ! uHAL_SKIP_INVALID_ARG_CHECKS
 	if ((conf == NULL) || (p == NULL)) {
@@ -219,7 +219,7 @@ err_t uart_transmit_block(uart_port_t *p, const uint8_t *buffer, txsize_t size, 
 	SET_DEFAULT_PORT(p);
 	VERIFY_PORT(p);
 
-	assert(BUFFER_OK(buffer, size));
+	uHAL_assert(BUFFER_OK(buffer, size));
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
 	if (!BUFFER_OK(buffer, size)) {
 		return ERR_BADARG;
@@ -259,7 +259,7 @@ err_t uart_receive_block(uart_port_t *p, uint8_t *buffer, txsize_t size, utime_t
 	SET_DEFAULT_PORT(p);
 	VERIFY_PORT(p);
 
-	assert(BUFFER_OK(buffer, size));
+	uHAL_assert(BUFFER_OK(buffer, size));
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
 	if (!BUFFER_OK(buffer, size)) {
 		return ERR_BADARG;

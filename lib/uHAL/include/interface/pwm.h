@@ -19,9 +19,18 @@
 ***********************************************************************/
 /// @file
 /// @brief Pulse-Width Modulation Interface
-/// @attention
+/// @note
 ///    This file should only be included by interface.h.
 ///
+
+//
+// This is defined in the device platform.h, it's included here for
+// documentation purposes.
+#if __HAVE_DOXYGEN__
+///
+/// The handle used to manage a PWM output.
+typedef struct pwm_output_t pwm_output_t;
+#endif // __HAVE_DOXYGEN__
 
 ///
 /// Enable hardware PWM output on an IO pin.
@@ -40,7 +49,7 @@ err_t pwm_on(pwm_output_t *output, gpio_pin_t pin, uint_fast16_t duty_cycle);
 /// Disable hardware PWM output on an IO pin.
 ///
 /// @attention
-/// The pin may be set to HiZ mode when turned off.
+/// The pin may be set to HiZ or Reset mode when turned off.
 ///
 /// @param output The handle used to manage the pin. Must not be NULL.
 ///

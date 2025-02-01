@@ -65,8 +65,8 @@ err_t uart_init_port(uart_port_t *p, const uart_port_cfg_t *conf) {
 
 	SET_DEFAULT_PORT(p);
 
-	assert(conf != NULL);
-	assert(p != NULL);
+	uHAL_assert(conf != NULL);
+	uHAL_assert(p != NULL);
 
 # if ! uHAL_SKIP_INVALID_ARG_CHECKS
 	if ((conf == NULL) || (p == NULL)) {
@@ -224,8 +224,8 @@ static void pins_off(const uart_port_t *p) {
 err_t uart_on(const uart_port_t *p) {
 	SET_DEFAULT_PORT(p);
 
-	assert(p != NULL);
-	assert(p->uartx != NULL);
+	uHAL_assert(p != NULL);
+	uHAL_assert(p->uartx != NULL);
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
 	if (p == NULL) {
 		return ERR_BADARG;
@@ -238,14 +238,17 @@ err_t uart_on(const uart_port_t *p) {
 	clock_enable(p->clocken);
 	pins_on(p);
 	SET_BIT(p->uartx->CR1, USART_CR1_UE);
+	while (!BIT_IS_SET(p->uartx->CR1, USART_CR1_UE)) {
+		// Nothing to do here
+	}
 
 	return ERR_OK;
 }
 err_t uart_off(const uart_port_t *p) {
 	SET_DEFAULT_PORT(p);
 
-	assert(p != NULL);
-	assert(p->uartx != NULL);
+	uHAL_assert(p != NULL);
+	uHAL_assert(p->uartx != NULL);
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
 	if (p == NULL) {
 		return ERR_BADARG;
@@ -256,6 +259,9 @@ err_t uart_off(const uart_port_t *p) {
 #endif
 
 	CLEAR_BIT(p->uartx->CR1, USART_CR1_UE);
+	while (BIT_IS_SET(p->uartx->CR1, USART_CR1_UE)) {
+		// Nothing to do here
+	}
 	pins_off(p);
 	clock_disable(p->clocken);
 
@@ -264,8 +270,8 @@ err_t uart_off(const uart_port_t *p) {
 bool uart_is_on(const uart_port_t *p) {
 	SET_DEFAULT_PORT(p);
 
-	assert(p != NULL);
-	assert(p->uartx != NULL);
+	uHAL_assert(p != NULL);
+	uHAL_assert(p->uartx != NULL);
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
 	if (p == NULL) {
 		return false;
@@ -282,8 +288,8 @@ bool uart_is_on(const uart_port_t *p) {
 err_t uart_listen_on(const uart_port_t *p) {
 	SET_DEFAULT_PORT(p);
 
-	assert(p != NULL);
-	assert(p->uartx != NULL);
+	uHAL_assert(p != NULL);
+	uHAL_assert(p->uartx != NULL);
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
 	if (p == NULL) {
 		return ERR_BADARG;
@@ -301,8 +307,8 @@ err_t uart_listen_on(const uart_port_t *p) {
 err_t uart_listen_off(const uart_port_t *p) {
 	SET_DEFAULT_PORT(p);
 
-	assert(p != NULL);
-	assert(p->uartx != NULL);
+	uHAL_assert(p != NULL);
+	uHAL_assert(p->uartx != NULL);
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
 	if (p == NULL) {
 		return ERR_BADARG;
@@ -320,8 +326,8 @@ err_t uart_listen_off(const uart_port_t *p) {
 bool uart_is_listening(const uart_port_t *p) {
 	SET_DEFAULT_PORT(p);
 
-	assert(p != NULL);
-	assert(p->uartx != NULL);
+	uHAL_assert(p != NULL);
+	uHAL_assert(p->uartx != NULL);
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
 	if (p == NULL) {
 		return ERR_BADARG;
@@ -349,9 +355,9 @@ err_t uart_transmit_block(uart_port_t *p, const uint8_t *buffer, txsize_t size, 
 
 	SET_DEFAULT_PORT(p);
 
-	assert(p != NULL);
-	assert(p->uartx != NULL);
-	assert(buffer != NULL);
+	uHAL_assert(p != NULL);
+	uHAL_assert(p->uartx != NULL);
+	uHAL_assert(buffer != NULL);
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
 	if (p == NULL || buffer == NULL) {
 		return ERR_BADARG;
@@ -388,9 +394,9 @@ err_t uart_receive_block(uart_port_t *p, uint8_t *buffer, txsize_t size, utime_t
 
 	SET_DEFAULT_PORT(p);
 
-	assert(p != NULL);
-	assert(p->uartx != NULL);
-	assert(buffer != NULL);
+	uHAL_assert(p != NULL);
+	uHAL_assert(p->uartx != NULL);
+	uHAL_assert(buffer != NULL);
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
 	if (p == NULL || buffer == NULL) {
 		return ERR_BADARG;
@@ -436,8 +442,8 @@ END:
 static uint16_t calculate_baud_div(uint32_t baud, uint32_t busfreq) {
 	uint32_t tmp;
 
-	assert(baud != 0);
-	assert(busfreq != 0);
+	uHAL_assert(baud != 0);
+	uHAL_assert(busfreq != 0);
 
 	// From section 27.3.4 of the STM32F1 reference manual:
 	//   baud = pclk/(16*div)

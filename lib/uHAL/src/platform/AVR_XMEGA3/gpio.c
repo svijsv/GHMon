@@ -236,7 +236,7 @@ err_t gpio_set_state(gpio_pin_t pin, gpio_state_t new_state) {
 	uint8_t pinmask;
 	PORT_t *PORTx;
 
-	assert(GPIO_PIN_IS_VALID(pin));
+	uHAL_assert(GPIO_PIN_IS_VALID(pin));
 	if (!uHAL_SKIP_INVALID_ARG_CHECKS) {
 		if (!GPIO_PIN_IS_VALID(pin)) {
 			return ERR_BADARG;
@@ -285,7 +285,7 @@ err_t gpio_set_input_state(gpio_pin_t pin, gpio_state_t new_state) {
 	uint8_t pinno;
 	PORT_t *PORTx;
 
-	assert(GPIO_PIN_IS_VALID(pin));
+	uHAL_assert(GPIO_PIN_IS_VALID(pin));
 	if (!uHAL_SKIP_INVALID_ARG_CHECKS) {
 		if (!GPIO_PIN_IS_VALID(pin)) {
 			return ERR_BADARG;
@@ -324,7 +324,7 @@ err_t gpio_set_output_state(gpio_pin_t pin, gpio_state_t new_state) {
 	uint8_t pinmask;
 	PORT_t *PORTx;
 
-	assert(GPIO_PIN_IS_VALID(pin));
+	uHAL_assert(GPIO_PIN_IS_VALID(pin));
 	if (!uHAL_SKIP_INVALID_ARG_CHECKS) {
 		if (!GPIO_PIN_IS_VALID(pin)) {
 			return ERR_BADARG;
@@ -365,7 +365,7 @@ err_t gpio_toggle_state(gpio_pin_t pin) {
 	uint8_t pinmask;
 	PORT_t *PORTx;
 
-	assert(GPIO_PIN_IS_VALID(pin));
+	uHAL_assert(GPIO_PIN_IS_VALID(pin));
 	if (!uHAL_SKIP_INVALID_ARG_CHECKS) {
 		if (!GPIO_PIN_IS_VALID(pin)) {
 			return ERR_BADARG;
@@ -392,7 +392,7 @@ err_t gpio_toggle_input_state(gpio_pin_t pin) {
 	uint8_t pinno;
 	PORT_t *PORTx;
 
-	assert(GPIO_PIN_IS_VALID(pin));
+	uHAL_assert(GPIO_PIN_IS_VALID(pin));
 	if (!uHAL_SKIP_INVALID_ARG_CHECKS) {
 		if (!GPIO_PIN_IS_VALID(pin)) {
 			return ERR_BADARG;
@@ -422,7 +422,7 @@ err_t gpio_toggle_output_state(gpio_pin_t pin) {
 	uint8_t pinmask;
 	PORT_t *PORTx;
 
-	assert(GPIO_PIN_IS_VALID(pin));
+	uHAL_assert(GPIO_PIN_IS_VALID(pin));
 	if (!uHAL_SKIP_INVALID_ARG_CHECKS) {
 		if (!GPIO_PIN_IS_VALID(pin)) {
 			return ERR_BADARG;
@@ -451,7 +451,7 @@ gpio_state_t gpio_get_state(gpio_pin_t pin) {
 	uint8_t pinmask;
 	PORT_t *PORTx;
 
-	assert(GPIO_PIN_IS_VALID(pin));
+	uHAL_assert(GPIO_PIN_IS_VALID(pin));
 	if (!uHAL_SKIP_INVALID_ARG_CHECKS) {
 		if (!GPIO_PIN_IS_VALID(pin)) {
 			return GPIO_FLOAT;
@@ -481,7 +481,7 @@ gpio_state_t gpio_get_input_state(gpio_pin_t pin) {
 	uint8_t pinmask, tmp;
 	PORT_t *PORTx;
 
-	assert(GPIO_PIN_IS_VALID(pin));
+	uHAL_assert(GPIO_PIN_IS_VALID(pin));
 	if (!uHAL_SKIP_INVALID_ARG_CHECKS) {
 		if (!GPIO_PIN_IS_VALID(pin)) {
 			return GPIO_FLOAT;
@@ -512,7 +512,7 @@ gpio_state_t gpio_get_output_state(gpio_pin_t pin) {
 	uint8_t pinmask;
 	PORT_t *PORTx;
 
-	assert(GPIO_PIN_IS_VALID(pin));
+	uHAL_assert(GPIO_PIN_IS_VALID(pin));
 	if (!uHAL_SKIP_INVALID_ARG_CHECKS) {
 		if (!GPIO_PIN_IS_VALID(pin)) {
 			return GPIO_FLOAT;
@@ -538,8 +538,8 @@ gpio_state_t gpio_get_output_state(gpio_pin_t pin) {
 err_t gpio_quickread_prepare(gpio_quick_t *qpin, gpio_pin_t pin) {
 	PORT_t *PORTx;
 
-	assert(qpin != NULL);
-	assert(GPIO_PIN_IS_VALID(pin));
+	uHAL_assert(qpin != NULL);
+	uHAL_assert(GPIO_PIN_IS_VALID(pin));
 	if (!uHAL_SKIP_INVALID_ARG_CHECKS) {
 		if ((!GPIO_PIN_IS_VALID(pin)) || (qpin == NULL)) {
 			return ERR_BADARG;
@@ -563,7 +563,7 @@ err_t gpio_set_mode(gpio_pin_t pin, gpio_mode_t mode, gpio_state_t istate) {
 	uint8_t pinmask, pinno, reg;
 	PORT_t *PORTx;
 
-	assert(GPIO_PIN_IS_VALID(pin));
+	uHAL_assert(GPIO_PIN_IS_VALID(pin));
 	if (!uHAL_SKIP_INVALID_ARG_CHECKS) {
 		if (!GPIO_PIN_IS_VALID(pin)) {
 			return ERR_BADARG;
@@ -620,7 +620,7 @@ gpio_mode_t gpio_get_mode(gpio_pin_t pin) {
 	uint8_t pinmask, pinno;
 	PORT_t *PORTx;
 
-	assert(GPIO_PIN_IS_VALID(pin));
+	uHAL_assert(GPIO_PIN_IS_VALID(pin));
 	if (!uHAL_SKIP_INVALID_ARG_CHECKS) {
 		if (!GPIO_PIN_IS_VALID(pin)) {
 			return GPIO_MODE_RESET;
@@ -650,9 +650,9 @@ err_t gpio_listen_init(gpio_listen_t *handle, const gpio_listen_cfg_t *conf) {
 	PORT_t *portx;
 	gpio_pin_t pin;
 
-	assert(handle != NULL);
-	assert(conf != NULL);
-	assert(GPIO_PIN_IS_VALID(conf->pin));
+	uHAL_assert(handle != NULL);
+	uHAL_assert(conf != NULL);
+	uHAL_assert(GPIO_PIN_IS_VALID(conf->pin));
 
 	if (!uHAL_SKIP_INVALID_ARG_CHECKS) {
 		if (handle == NULL || conf == NULL || !GPIO_PIN_IS_VALID(conf->pin)) {
@@ -689,8 +689,8 @@ err_t gpio_listen_init(gpio_listen_t *handle, const gpio_listen_cfg_t *conf) {
 	return ERR_OK;
 }
 err_t gpio_listen_on(gpio_listen_t *handle) {
-	assert(handle != NULL);
-	assert(handle->pinctrl != NULL);
+	uHAL_assert(handle != NULL);
+	uHAL_assert(handle->pinctrl != NULL);
 
 	if (!uHAL_SKIP_INVALID_ARG_CHECKS) {
 		if (handle == NULL) {
@@ -705,8 +705,8 @@ err_t gpio_listen_on(gpio_listen_t *handle) {
 	return ERR_OK;
 }
 err_t gpio_listen_off(gpio_listen_t *handle) {
-	assert(handle != NULL);
-	assert(handle->pinctrl != NULL);
+	uHAL_assert(handle != NULL);
+	uHAL_assert(handle->pinctrl != NULL);
 
 	if (!uHAL_SKIP_INVALID_ARG_CHECKS) {
 		if (handle == NULL) {
@@ -723,7 +723,7 @@ err_t gpio_listen_off(gpio_listen_t *handle) {
 bool gpio_is_listening(gpio_pin_t pin) {
 	PORT_t *portx;
 
-	assert(GPIO_PIN_IS_VALID(pin));
+	uHAL_assert(GPIO_PIN_IS_VALID(pin));
 
 	portx = gpio_get_port(pin);
 	if (!uHAL_SKIP_INVALID_ARG_CHECKS) {

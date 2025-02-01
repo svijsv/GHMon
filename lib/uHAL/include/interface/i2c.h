@@ -19,7 +19,7 @@
 ***********************************************************************/
 /// @file
 /// @brief Two-Wire / Inter-Integrated Circuit Interface
-/// @attention
+/// @note
 ///    This file should only be included by interface.h.
 ///
 

@@ -79,5 +79,7 @@
 #define PWR_CR_SLOW_WAKE_MASK (PWR_CR_LPDS|PWR_CR_FPDS)
 #define PWR_CR_SLOW_WAKE_BITS ((1U << PWR_CR_LPDS_Pos) | (1U << PWR_CR_FPDS_Pos))
 
+// Use RTC_BKP0R to store the 100s and 1000s place of the current date
+#define RTC_BKP_DATE_REG BKP0R
 
 #endif // _uHAL_PLATFORM_CMSIS_STM32F4_H

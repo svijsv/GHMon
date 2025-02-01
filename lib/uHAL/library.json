@@ -9,7 +9,7 @@
 	"build": {
 		"srcDir": "./src",
 		"includeDir": "./include",
-		"flags": "-I../.. -I.",
+		"flags": "-I.",
 		"extraScript": "tools/platformio/find_platform.py"
 	}
 }

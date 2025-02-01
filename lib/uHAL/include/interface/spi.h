@@ -19,7 +19,7 @@
 ***********************************************************************/
 /// @file
 /// @brief Serial Peripheral Interface... Interface
-/// @attention
+/// @note
 ///    This file should only be included by interface.h.
 ///
 
