@@ -170,3 +170,11 @@ void ulib_assert_failed(const char *file_path, uint32_t lineno, const char *func
 
 	return;
 }
+//
+// Panic handler
+__attribute__((weak))
+void ulib_panic_abort(const char *file_path, uint32_t lineno, const char *func_name, const char *expr) {
+	error_state(file_path, lineno, func_name, expr);
+
+	return;
+}
