@@ -99,6 +99,19 @@ utime_t time_to_seconds(const datetime_t *datetime);
 void seconds_to_datetime(utime_t seconds, datetime_t *ret_datetime);
 void seconds_to_date(utime_t seconds, datetime_t *ret_datetime);
 void seconds_to_time(utime_t seconds, datetime_t *ret_datetime);
+//
+// Print a time duration to a string in the format [DDDDd][HHh][MMm]SSs
+// buf_size must be >= 12.
+// Returns A pointer to the start of the string within buf if successful
+//  or an empty string otherwise.
+const char* print_duration(char *buf, uint_fast8_t buf_size, utime_t seconds);
+//
+// Print a datetime_t to a string in the format YYYY.MM.DD_HH:mm:ss
+// buf_size must be >= 20.
+// Returns A pointer to the start of the string within buf if successful
+//  or an empty string otherwise.
+const char* print_datetime(char *buf, uint_fast8_t buf_size, datetime_t *datetime);
+
 
 /*
 * Timers

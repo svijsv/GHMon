@@ -14,7 +14,6 @@ var time_8h =
     [ "get_RTC_seconds", "time_8h.html#a6d11761096f44bb99533ee2adc82ea48", null ],
     [ "get_uptime", "time_8h.html#a8e8384bce1b89f636facd7dc35d14d9f", null ],
     [ "init_uptime", "time_8h.html#a151e0c3ba3ba65de875e040c07189087", null ],
-    [ "print_uptime", "time_8h.html#a53010e90df55e81dbcc3e1a1aeefaa65", null ],
     [ "set_RTC_datetime", "time_8h.html#a48c9f79ab84e3f2223606d58415a56aa", null ],
     [ "set_RTC_seconds", "time_8h.html#ac0157d972d076b858e21460870852615", null ],
     [ "set_uptime", "time_8h.html#a8c99248f539a2a79a541cc87cfedc334", null ],
