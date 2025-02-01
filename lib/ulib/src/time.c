@@ -28,116 +28,116 @@
 #include "debug.h"
 
 
-#define MAX_YEARS (((utime_t )-1) / SECONDS_PER_YEAR)
+#define MAX_YEARS ((UTIME_MAX / SECONDS_PER_YEAR))
 
+FMEM_STORAGE const uint_fast8_t days_per_month[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
-FMEM_STORAGE const uint8_t days_per_month[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+/*
+static bool IS_LEAP_YEAR(time_year_t year) {
+	time_year_t check = year;
 
-// This will return the number of matching years between TIME_YEAR_0 and year
-// excluding TIME_YEAR_0 and year themselves
-uint8_t GET_LEAPS(uint8_t year, uint16_t factor) {
-	uint16_t check;
-	uint8_t count;
+	return (((year % 4) == 0) && ((year % 100) != 0)) || ((year % 400) == 0);
+}
+*/
+#define IS_LEAP_YEAR(_year_) (((((_year_) % 4) == 0) && (((_year_) % 100) != 0)) || (((_year_) % 400) == 0))
 
-	check = factor - (TIME_YEAR_0 % factor);
-	for (count = 0; check < year; check += factor) {
-		++count;
+// Count the number of leap years between TIME_YEAR_0 and end_year, inclusive
+static uint_fast8_t count_leap_years(time_year_t end_year) {
+	uint_fast8_t count = 0;
+
+	// Leap years are years that are divisible by 4 but not by 100, or years
+	// that are divisible by 400
+	if (end_year >= TIME_YEAR_0) {
+		// Count from the first leap year not following year 0
+		// If I understand correctly, (X/Y)*Y can only be optimized into the expected
+		// outcome from the normal division operations, not to X.
+		time_year_t period = (time_year_t )(end_year - ((TIME_YEAR_0 / 4) * 4));
+		count = (uint_fast8_t )(period / 4);
+
+		period = (time_year_t )(end_year - ((TIME_YEAR_0 / 100) * 100));
+		count -= (uint_fast8_t )(period / 100);
+
+		period = (time_year_t )(end_year - ((TIME_YEAR_0 / 400) * 400));
+		count += (uint_fast8_t )(period / 400);
+
+		if (IS_LEAP_YEAR(TIME_YEAR_0)) {
+			++count;
+		}
 	}
 
 	return count;
 }
-bool IS_LEAP_YEAR(uint16_t year) {
-	uint16_t check = TIME_YEAR_0 + year;
 
-	return (((check % 4) == 0) && ((check % 100) != 0)) || ((check % 400) == 0);
-}
+utime_t date_to_seconds(const datetime_t *datetime) {
+	uint_fast16_t days;
+	uint_fast8_t leap_days;
+	time_year_t year;
 
-utime_t date_to_seconds(uint8_t year, uint8_t month, uint8_t day) {
-	utime_t days;
-	uint8_t year_4s, year_100s, year_400s, leap_days;
+	ulib_assert(datetime != NULL);
+	//ulib_assert(year >= TIME_YEAR_0 && (year - TIME_YEAR_0) <= MAX_YEARS);
+	ulib_assert(IS_IN_RANGE_INCL(datetime->month, 1, 12));
+	ulib_assert(IS_IN_RANGE_INCL(datetime->day, 1, 31));
 
-	// This is always true because year is only 8 bits
-	/*
-	ulib_assert(year <= MAX_YEARS);
-	*/
-	ulib_assert(IS_IN_RANGE_INCL(month, 1, 12));
-	ulib_assert(IS_IN_RANGE_INCL(day, 1, 31));
+	// Handle un-set RTCs
+	year = (datetime->year < TIME_YEAR_0) ? datetime->year + TIME_YEAR_0 : datetime->year;
 
 #if DO_TIME_SAFETY_CHECKS
-	// This is always false because year is only 8 bits
-	/*
-	if (year > MAX_YEARS) {
-		year = 0;
+	if (datetime == NULL) {
+		return 0;
 	}
-	*/
-	if (!IS_IN_RANGE_INCL(month, 1, 12)) {
-		month = 1;
+	if (year < TIME_YEAR_0 || (year - TIME_YEAR_0) > MAX_YEARS) {
+		return 0;
 	}
-	if (!IS_IN_RANGE_INCL(day, 1, 31)) {
-		day = 1;
+	if (!IS_IN_RANGE_INCL(datetime->month, 1, 12)) {
+		return 0;
+	}
+	if (!IS_IN_RANGE_INCL(datetime->day, 1, 31)) {
+		return 0;
 	}
 #endif
 
 	// Dates are 1-indexed, but they're counted in a 0-indexed manner
-	days = day - 1;
+	days = datetime->day - 1;
 
 	// Find the number of days in all previous months
-	for (uiter_t i = 1; i < month; ++i) {
+	for (uiter_t i = 1; i < datetime->month; ++i) {
 		days += days_per_month[i-1];
 	}
 
-	// Leap years are years that are divisible by 4 but not by 100, or years
-	// that are divisible by 400
-	year_4s   = GET_LEAPS(year, 4);
-	year_100s = GET_LEAPS(year, 100);
-	year_400s = GET_LEAPS(year, 400);
-	leap_days = (uint8_t )(year_4s - year_100s) + year_400s;
-	if ((year != 0) && IS_LEAP_YEAR(0)) {
-		++leap_days;
-	}
-	if (IS_LEAP_YEAR(year)) {
-		if (month > 2) {
-			++leap_days;
-		}
+	leap_days = count_leap_years(year);
+	if (IS_LEAP_YEAR(year) && (datetime->month <= 2)) {
+		--leap_days;
 	}
 	days += leap_days;
 
-	return (utime_t )((utime_t )year * (utime_t )SECONDS_PER_YEAR) + (utime_t )((utime_t )days * (utime_t )SECONDS_PER_DAY);
+	return (utime_t )((utime_t )(year - TIME_YEAR_0) * (utime_t )SECONDS_PER_YEAR) + (utime_t )((utime_t )days * (utime_t )SECONDS_PER_DAY);
 }
-void seconds_to_date(utime_t seconds, uint8_t *restrict ret_year, uint8_t *restrict ret_month, uint8_t *restrict ret_day) {
-	uint8_t tmp_month;
-	uint16_t tmp_year, tmp_day, leap_days = 0;
 
-	ulib_assert(ret_year != NULL);
-	ulib_assert(ret_month != NULL);
-	ulib_assert(ret_day != NULL);
+void seconds_to_date(utime_t seconds, datetime_t *ret_datetime) {
+	uint_fast8_t tmp_month, leap_days = 0;
+	uint_fast16_t tmp_day;
+	time_year_t tmp_year;
 
-	tmp_year = (uint16_t )(seconds / SECONDS_PER_YEAR);
-	tmp_day = (uint16_t )((seconds % SECONDS_PER_YEAR) / SECONDS_PER_DAY);
-
-	// Leap years are years that are divisible by 4 but not by 100, or years
-	// that are divisible by 400
-	// Exclude the current year from the calculation to simplify things later
-	// on
-	if (tmp_year > 0) {
-		uint8_t year_4s, year_100s, year_400s;
-
-		year_4s   = GET_LEAPS((uint8_t)(tmp_year-1), 4);
-		year_100s = GET_LEAPS((uint8_t)(tmp_year-1), 100);
-		year_400s = GET_LEAPS((uint8_t)(tmp_year-1), 400);
-		leap_days = (uint8_t )(year_4s - year_100s) + year_400s;
+	ulib_assert(ret_datetime != NULL);
+#if DO_TIME_SAFETY_CHECKS
+	if (ret_datetime == NULL) {
+		return;
 	}
-	if ((tmp_year != 0) && (IS_LEAP_YEAR(0))) {
-		++leap_days;
-	}
+#endif
+
+	tmp_year = (time_year_t )(seconds / SECONDS_PER_YEAR) + TIME_YEAR_0;
+	tmp_day = (uint_fast16_t )((seconds % SECONDS_PER_YEAR) / SECONDS_PER_DAY);
+
+	// Don't count the current year to make it easier to handle the stuff below
+	leap_days = count_leap_years(tmp_year-1);
+
 	// FIXME: Handle leap_days > 365?
 	if (leap_days > tmp_day) {
-		// FIXME: Handle tmp_year == 0? Don't know how we'd get that with so
-		// many leap days though
+		// FIXME: Handle tmp_year == 0? Don't know how we'd ever get that though.
 		--tmp_year;
 		// Day 1 of one year is the same as day 366 of the previous year
 		// We're still 0-indexed so we use 365 instead of 366
-		tmp_day = 365 - (uint16_t )(leap_days - tmp_day);
+		tmp_day = 365 - (uint_fast16_t )(leap_days - tmp_day);
 	} else {
 		tmp_day -= leap_days;
 	}
@@ -159,58 +159,35 @@ void seconds_to_date(utime_t seconds, uint8_t *restrict ret_year, uint8_t *restr
 			if (tmp_month == 2) {
 				tmp_day = 29;
 			} else {
-				//tmp_day = days_per_month[tmp_month-1];
-				tmp_day = 31;
+				tmp_day = days_per_month[tmp_month-1];
 			}
 		}
 	}
 
-#if DO_TIME_SAFETY_CHECKS
-	if (ret_year != NULL) {
-		*ret_year  = (uint8_t )tmp_year;
-	}
-	if (ret_month != NULL) {
-		*ret_month = (uint8_t )tmp_month;
-	}
-	if (ret_day != NULL) {
-		*ret_day = (uint8_t )tmp_day;
-	}
-#else
-	*ret_year  = (uint8_t )tmp_year;
-	*ret_month = (uint8_t )tmp_month;
-	*ret_day   = (uint8_t )tmp_day;
-#endif
+	ret_datetime->year  = tmp_year;
+	ret_datetime->month = tmp_month;
+	ret_datetime->day   = (uint_fast8_t )tmp_day;
 
 	return;
 }
 
-void seconds_to_time(utime_t seconds, uint8_t *restrict ret_hour, uint8_t *restrict ret_minute, uint8_t *restrict ret_second) {
-	ulib_assert(ret_hour != NULL);
-	ulib_assert(ret_minute != NULL);
-	ulib_assert(ret_second != NULL);
+utime_t time_to_seconds(const datetime_t *datetime) {
+	uint_fast8_t hour, minute, second;
+
+	ulib_assert(datetime != NULL);
+	ulib_assert(datetime->hour < 24);
+	ulib_assert(datetime->minute < 60);
+	ulib_assert(datetime->second < 60);
 
 #if DO_TIME_SAFETY_CHECKS
-	if (ret_hour != NULL) {
-		*ret_hour   = (uint8_t )((seconds % SECONDS_PER_DAY) / SECONDS_PER_HOUR);
+	if (datetime == NULL) {
+		return 0;
 	}
-	if (ret_minute != NULL) {
-		*ret_minute = (uint8_t )((seconds % SECONDS_PER_HOUR) / SECONDS_PER_MINUTE);
-	}
-	if (ret_second != NULL) {
-		*ret_second = (uint8_t )((seconds % SECONDS_PER_MINUTE));
-	}
-#else
-	*ret_hour   = (uint8_t )((seconds % SECONDS_PER_DAY) / SECONDS_PER_HOUR);
-	*ret_minute = (uint8_t )((seconds % SECONDS_PER_HOUR) / SECONDS_PER_MINUTE);
-	*ret_second = (uint8_t )((seconds % SECONDS_PER_MINUTE));
 #endif
 
-	return;
-}
-utime_t time_to_seconds(uint8_t hour, uint8_t minute, uint8_t second) {
-	ulib_assert(hour < 24);
-	ulib_assert(minute < 60);
-	ulib_assert(second < 60);
+	hour = datetime->hour;
+	minute = datetime->minute;
+	second = datetime->second;
 
 #if DO_TIME_SAFETY_CHECKS
 	if (hour >= 24) {
@@ -224,9 +201,32 @@ utime_t time_to_seconds(uint8_t hour, uint8_t minute, uint8_t second) {
 	}
 #endif
 
-	return ((utime_t )hour * (utime_t )SECONDS_PER_HOUR) + ((utime_t )minute * (utime_t )SECONDS_PER_MINUTE) + (utime_t )second;
+	return (hour * SECONDS_PER_HOUR) + (minute * SECONDS_PER_MINUTE) + second;
+}
+void seconds_to_time(utime_t seconds, datetime_t *ret_datetime) {
+	ulib_assert(ret_datetime != NULL);
+
+#if DO_TIME_SAFETY_CHECKS
+	if (ret_datetime == NULL) {
+		return;
+	}
+#endif
+	ret_datetime->hour   = (uint8_t )((seconds % SECONDS_PER_DAY) / SECONDS_PER_HOUR);
+	ret_datetime->minute = (uint8_t )((seconds % SECONDS_PER_HOUR) / SECONDS_PER_MINUTE);
+	ret_datetime->second = (uint8_t )((seconds % SECONDS_PER_MINUTE));
+
+	return;
 }
 
+utime_t datetime_to_seconds(const datetime_t *datetime) {
+	return date_to_seconds(datetime) + time_to_seconds(datetime);
+}
+void seconds_to_datetime(utime_t seconds, datetime_t *ret_datetime) {
+	seconds_to_date(seconds, ret_datetime);
+	seconds_to_time(seconds, ret_datetime);
+
+	return;
+}
 
 #else
 	// ISO C forbids empty translation units, this makes it happy.

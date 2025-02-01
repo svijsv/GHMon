@@ -89,14 +89,17 @@ void* halloc(size_t size) {
 			uintptr_t stack_ptr = ulib_get_stack_pointer_addr();
 
 			if ((block_end + HALLOC_STACK_MARGIN) >= stack_ptr) {
+				ulib_panic("Heap overran stack");
 				return NULL;
 			}
 		} else if (block_end > HALLOC_REAL_HEAP_END_ADDR) {
+			ulib_panic("Heap overrun");
 			return NULL;
 		}
 	}
 	if (!canary_is_valid()) {
-		ulib_panic("Heap canary has been violated!");
+		ulib_panic("Heap canary has been violated");
+		return NULL;
 	}
 	if (HALLOC_MEM_INIT_VALUE >= 0) {
 		mem_init((void *)next_addr, HALLOC_MEM_INIT_VALUE, size);

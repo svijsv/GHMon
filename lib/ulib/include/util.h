@@ -74,63 +74,87 @@ void mem_init(void *mem, uint8_t value, size_t size);
 #define CLIP_UMUL(a, b, max) (((a) == 0 || (b) == 0) ? 0 : ((a) < (max) / (b)) ? ((a) * (b)) : (max))
 
 //
-// Copy an integer composed of smaller integers
-#define READ_SPLIT_U16(combined, high, low) \
+// Read an integer composed of smaller integers
+#define READ_SPLIT16(combined, high, low) \
 	do { \
-		((combined) = (uint16_t )((((uint16_t )(high)) << 8U) | (((uint16_t )(low)) & 0xFFU))); \
+		((combined) = (uint16_t )((((uint16_t )(high)) << 8U) | ((uint16_t )(low)))); \
 	} while (0);
-#define READ_SPLIT_S16(combined, high, low) \
+#define READ_SPLIT32(combined, high, low) \
 	do { \
-		((combined) = (int16_t )((((int16_t )(high)) << 8U) | (((int16_t )(low)) & 0xFFU))); \
+		((combined) = (uint32_t )((((uint32_t )(high)) << 16U) | ((uint32_t )(low)))); \
 	} while (0);
 //
-// Copy a split register while making sure the low half doesn't overflow into
-// high in the process
-#define READ_SPLITREG32(combined, high, low) \
+// Read an integer composed of smaller integers where the low half may overflow
+// into the high half during the read, e.g. for asynchronous timers
+#ifndef READ_SPLIT16_ASYNC
+# define READ_SPLIT16_ASYNC(combined, high, low) \
 	do { \
-		((combined) = (((uint32_t )(high)) << 16U) | (((uint32_t )(low)) & 0xFFFFU)); \
-	} while ((((combined) >> 16U) & 0xFFFFU) != (high));
-#define READ_SPLITREG16(combined, high, low) \
+		((combined) = (uint16_t )((((uint16_t )(high)) << 8U) | ((uint16_t )(low)))); \
+	} while ((uint8_t )(((combined) >> 8U) & 0xFFU) != (uint8_t )(high))
+#endif
+#ifndef READ_SPLIT32_ASYNC
+# define READ_SPLIT32_ASYNC(combined, high, low) \
 	do { \
-		((combined) = (((uint16_t )(high)) << 8U) | (((uint16_t )(low)) & 0xFFU)); \
-	} while ((((combined) >> 8U) & 0xFFU) != (high));
+		((combined) = (uint32_t )((((uint32_t )(high)) << 16U) | ((uint32_t )(low)))); \
+	} while ((uint16_t )(((combined) >> 16U) & 0xFFFFU) != (uint16_t )(high))
+#endif
+
 //
-// Write to a split register
-// Certain registers (like the RTC counter on the STM32) aren't updated
-// immediately and so trying to check the writes on those will cause an
-// infinite loop; there aren't really any places where overflow during write
-// is possible, so just skip the check
-#define WRITE_SPLITREG32(combined, high, low) \
+// Write an integer composed of smaller integers
+#define WRITE_SPLIT16(high, low, combined) \
 	do { \
-		(high) = (uint16_t )((combined) >> 16U); \
-		(low)  = (uint16_t )((combined) & 0xFFFFU); \
+		(low ) = (uint16_t )(combined) & 0xFFU; \
+		(high) = (uint16_t )(combined) >> 8U; \
 	} while (0);
-	//} while ((((combined) >> 16) & 0xFFFFU) != (high));
-#define WRITE_SPLITREG16(combined, high, low) \
+#define WRITE_SPLIT32(high, low, combined) \
 	do { \
-		(high) = (uint8_t )((combined) >> 8U); \
-		(low)  = (uint8_t )((combined) & 0xFFU); \
+		(low ) = (uint32_t )(combined) & 0xFFFFU; \
+		(high) = (uint32_t )(combined) >> 16U; \
 	} while (0);
-	//} while ((((combined) >> 8) & 0xFFU) != (high));
+//
+// Write an integer composed of smaller integers where the low half may overflow
+// into the high half during the write
+// This should probably never be used because an actually asynchronous register
+// probably won't be updated right away, meaning this will get stuck in the loop
+// waiting for the high half to match the new value.
+#ifndef WRITE_SPLIT16_ASYNC
+# define WRITE_SPLIT16_ASYNC(high, low, combined) \
+	do { \
+		(low ) = (uint16_t )(combined) & 0xFFU; \
+		(high) = (uint16_t )(combined) >> 8U; \
+	} while ((uint8_t )(((combined) >> 8U) & 0xFFU) != (uint8_t )(high))
+#endif
+#ifndef WRITE_SPLIT32_ASYNC
+# define WRITE_SPLIT32_ASYNC(high, low, combined) \
+	do { \
+		(low ) = (uint32_t )(combined) & 0xFFFFU; \
+		(high) = (uint32_t )(combined) >> 16U; \
+	} while ((uint16_t )(((combined) >> 16U) & 0xFFFFU) != (uint16_t )(high))
+#endif
+
 //
 // Write a volatile variable without atomic access; this doesn't protect
 // anything trying to read it during the write
-#define WRITE_VOLATILE(set, get) \
+#ifndef WRITE_VOLATILE
+# define WRITE_VOLATILE(set, get) \
 	do { \
 		(set) = (get); \
 	} while ((set) != (get));
+#endif
 //
 // Read a volatile variable without atomic access
 // For now it's identical to WRITE_VOLATILE() except the volatile variable
 // is 'get' instead of 'set'.
-#define READ_VOLATILE(set, get) \
+#ifndef READ_VOLATILE
+# define READ_VOLATILE(set, get) \
 	do { \
 		(set) = (get); \
 	} while ((set) != (get));
+#endif
 
 //
 // Optimize a specific function independent of compiler flags.
-#if !DEBUG
+#if !defined(DEBUG) || !DEBUG
 # define OPTIMIZE_FUNCTION __attribute__((optimize("O2")))
 #else
 # define OPTIMIZE_FUNCTION

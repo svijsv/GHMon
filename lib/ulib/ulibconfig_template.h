@@ -264,6 +264,20 @@
 
 
 /*
+* Error code handling module
+*/
+// Enable this module
+#ifndef ULIB_ENABLE_ERROR
+# define ULIB_ENABLE_ERROR ULIB_ENABLE_DEFAULT
+#endif
+//
+// Enable translation of error codes to strings and to/from errno codes
+#ifndef ULIB_ENABLE_ERROR_TRANSLATION
+# define ULIB_ENABLE_ERROR_TRANSLATION ULIB_ENABLE_DEFAULT
+#endif
+
+
+/*
 * File module configuration
 */
 // Enable this module
@@ -292,6 +306,44 @@
 #ifndef DO_FILE_EXTRA_SAFETY_CHECKS
 # define DO_FILE_EXTRA_SAFETY_CHECKS ULIB_DO_SAFETY_CHECKS
 #endif
+
+
+/*
+* Fixed-point number module configuration
+*/
+// Enable this module
+#ifndef ULIB_ENABLE_FIXED_POINT
+# define ULIB_ENABLE_FIXED_POINT ULIB_ENABLE_DEFAULT
+#endif
+//
+// The number of bits used in fixed-point representations. This includes the
+// sign bit.
+#ifndef FIXED_POINT_BITS
+# define FIXED_POINT_BITS 32U
+#endif
+//
+// The number of bits of a fixed-point representation devoted to the fraction.
+#ifndef FIXED_POINT_FRACT_BITS
+# define FIXED_POINT_FRACT_BITS 8U
+#endif
+//
+// If 1, replace fixed-point operations with float operations. If > 1, replace
+// with doubles.
+// This requires linking libm.
+#ifndef FIXED_POINT_REPLACE_WITH_FLOAT
+# define FIXED_POINT_REPLACE_WITH_FLOAT 0
+#endif
+//
+// If non-zero, perform additional checks to handle common problems like
+// division by 0.
+#ifndef DO_FIXED_POINT_SAFETY_CHECKS
+# define DO_FIXED_POINT_SAFETY_CHECKS ULIB_DO_SAFETY_CHECKS
+#endif
+//
+// If set, override the macro used to divide fixed-point integers. Useful
+// because a certain platform doesn't have native support for 64 bit division
+// and using libc adds a full Kb to the .data section of the binary...
+//#define _FIXED_POINT_DIV_PRIM(_n, _d) (div_s64_s64((_n), (_d)))
 
 
 /*
@@ -391,27 +443,11 @@
 # define ULIB_ENABLE_MATH ULIB_ENABLE_DEFAULT
 #endif
 //
-// The number of bits used in fixed-point representations. This includes the
-// sign bit.
-#ifndef FIXED_PNT_BITS
-# define FIXED_PNT_BITS 32U
-#endif
-//
-// The number of bits of a fixed-point representation devoted to the fraction.
-#ifndef FIXED_PNT_FRACT_BITS
-# define FIXED_PNT_FRACT_BITS 8U
-#endif
-//
 // If non-zero, perform additional checks to handle common problems like
 // division by 0.
 #ifndef DO_MATH_SAFETY_CHECKS
 # define DO_MATH_SAFETY_CHECKS ULIB_DO_SAFETY_CHECKS
 #endif
-//
-// If set, override the macro used to divide fixed-point integers. Useful
-// because a certain platform doesn't have native support for 64 bit division
-// and using libc adds a full Kb to the .data section of the binary...
-//#define _FIXED_PNT_DIV_PRIM(_n, _d) (div_s64_s64((_n), (_d)))
 
 
 /*
