@@ -77,7 +77,12 @@ DEBUG_CPP_MACRO(USCOUNTER_IRQHandler)
 
 void time_init(void) {
 	systick_init();
+#if NEED_RTC
 	RTC_init();
+#endif
+#if uHAL_USE_UPTIME
+	init_uptime();
+#endif
 #if uHAL_USE_PWM
 	pwm_init();
 #endif

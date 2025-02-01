@@ -101,7 +101,7 @@ void sleep_alarm_timer_init(void) {
 }
 
 uint32_t set_sleep_alarm(uint32_t ms) {
-	assert(ms != 0);
+	uHAL_assert(ms != 0);
 	if (ms > SLEEP_TIM_MAX_MS) {
 		ms = SLEEP_TIM_MAX_MS;
 	}
@@ -151,6 +151,9 @@ void stop_sleep_alarm(void) {
 	// Clear all event flags
 	SLEEP_ALARM_TIM->SR = 0;
 
+	while (BIT_IS_SET(SLEEP_ALARM_TIM->CR1, TIM_CR1_CEN)) {
+		// Nothing to do here
+	}
 	clock_disable(SLEEP_ALARM_CLOCKEN);
 
 	return;

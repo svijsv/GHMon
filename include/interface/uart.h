@@ -19,7 +19,7 @@
 ***********************************************************************/
 /// @file
 /// @brief Universal Asynchronous Receiver and Transmitter Interface
-/// @attention
+/// @note
 ///    This file should only be included by interface.h.
 ///
 
@@ -52,7 +52,7 @@ extern uart_port_t uHAL_uart_comm_port;
 ///
 /// Initialize a UART peripheral.
 ///
-/// @attention
+/// @note
 /// The interface is always configured as 8 data bits with 1 stop bit and no
 /// parity bit.
 ///
@@ -137,7 +137,7 @@ err_t uart_transmit_block(uart_port_t *port, const uint8_t *buffer, txsize_t siz
 ///
 /// Turn the UART receive interrupt on.
 ///
-/// @attention
+/// @note
 /// The interrupt is defined internally so that the received input can be placed
 /// in the rx buffer, but the hook @c uart_rx_irq_hook() is called afterward.
 ///
@@ -186,7 +186,7 @@ bool uart_rx_is_available(const uart_port_t *port);
 /// Overrideable hook called by UART ISRs when receiving data.
 /// The default function does nothing.
 ///
-/// @attention
+/// @note
 /// This function is overrideable.
 ///
 /// @param port The handle used to manage the port.

@@ -36,13 +36,13 @@ typedef struct {
 	uint8_t char_sub;   ///< Substitute this glyph for absent characters
 #if SSD1306_FONT_AUTOSCALE || __HAVE_DOXYGEN__
 	uint8_t scale_x;    ///< Scale font on the x axis.
-	                    ///< @attention This member is only present when @c SSD1306_FONT_AUTOSCALE is set.
+	                    ///< @note This member is only present when @c SSD1306_FONT_AUTOSCALE is set.
 	uint8_t scale_y;    ///< Scale font on the y axis - must be 0, 1, 2, or 4
-	                    ///< @attention This member is only present when @c SSD1306_FONT_AUTOSCALE is set.
+	                    ///< @note This member is only present when @c SSD1306_FONT_AUTOSCALE is set.
 #endif
 #if SSD1306_FONT_WIDTH <= 0 || __HAVE_DOXYGEN__
 	uint8_t glyph_width; ///< The width in pixels of glyphs in the font
-	                    ///< @attention This member is only present when @c SSD1306_FONT_WIDTH is <= 0.
+	                    ///< @note This member is only present when @c SSD1306_FONT_WIDTH is <= 0.
 #endif
 	const uint8_t *glyphs; ///< The array of glyphs
 } ssd1306_font_t;
@@ -69,9 +69,9 @@ typedef struct {
 	uint8_t height; ///< Height of display in pixels
 	uint8_t width;  ///< Width of display in pixels
 	uint8_t flags;  ///< Configuration flags (see the @c SSD1306_CFG_FLAG_* macros)
-#if SSD1306_INIT_COMMANDS_COUNT || uHAL_USE_SMALL_CODE < 1 || __HAVE_DOXYGEN__
+#if SSD1306_INIT_COMMANDS_COUNT > 0 || __HAVE_DOXYGEN__
 	/// Additional initialization commands, see ssd1306.c for definitions
-	/// @attention This member is only present when @c SSD1306_INIT_COMMANDS_COUNT is set or @c uHAL_USE_SMALL_CODE is < 1.
+	/// @note This member is only present when @c SSD1306_INIT_COMMANDS_COUNT is > 0.
 	uint8_t init_cmds[SSD1306_INIT_COMMANDS_COUNT];
 #endif
 } ssd1306_cfg_t;
@@ -202,7 +202,7 @@ err_t ssd1306_adj_contrast(ssd1306_handle_t *handle, int_t incr);
 ///
 /// Fill a section the screen with a bit pattern
 ///
-/// @attention
+/// @note
 /// The coordinates are in pixels, but the y coordinates are adjusted to use
 /// the native 8-bit-tall sections
 ///

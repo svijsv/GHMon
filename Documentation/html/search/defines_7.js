@@ -1,11 +1,7 @@
 var searchData=
 [
-  ['set_5fgpio_5foutput_5fhigh_0',['SET_GPIO_OUTPUT_HIGH',['../gpio_8h.html#af06ae2f30d0e14ea500286d80de4bae5',1,'gpio.h']]],
-  ['set_5fgpio_5foutput_5flow_1',['SET_GPIO_OUTPUT_LOW',['../gpio_8h.html#a4e3444a86aca5ff660451df70137011b',1,'gpio.h']]],
-  ['ssd1306_5fcfg_5fflag_5fhflip_2',['SSD1306_CFG_FLAG_HFLIP',['../ssd1306_8h.html#a9e9aed9a90fe5796a23c4da5726c72cb',1,'ssd1306.h']]],
-  ['ssd1306_5fcfg_5fflag_5fi2c_3',['SSD1306_CFG_FLAG_I2C',['../ssd1306_8h.html#ae78d864272881527bc47173279bbb6a0',1,'ssd1306.h']]],
-  ['ssd1306_5fcfg_5fflag_5fvflip_4',['SSD1306_CFG_FLAG_VFLIP',['../ssd1306_8h.html#a78f9181bff542267f177cf1ae8b1c9fe',1,'ssd1306.h']]],
-  ['ssd1306_5fstatus_5fflag_5fdisplay_5fon_5',['SSD1306_STATUS_FLAG_DISPLAY_ON',['../ssd1306_8h.html#a06f31704b20adcb666ee8568eaf35ec3',1,'ssd1306.h']]],
-  ['ssd1306_5fstatus_5fflag_5finitialized_6',['SSD1306_STATUS_FLAG_INITIALIZED',['../ssd1306_8h.html#ae118c2a9e7a93583dbd46701654814b8',1,'ssd1306.h']]],
-  ['ssd1306_5fstatus_5fflag_5finverted_7',['SSD1306_STATUS_FLAG_INVERTED',['../ssd1306_8h.html#ac4b6656c18e2b2b253034d5a49162614',1,'ssd1306.h']]]
+  ['uart_5fcomm_5fport_0',['UART_COMM_PORT',['../uart_8h.html#a19508dad7ab6adcf1b14f2735ad8bf19',1,'uart.h']]],
+  ['uhal_5fcheck_5fstatus_1',['uHAL_CHECK_STATUS',['../system_8h.html#a98e5ac5270c8177fe0e63fdf5caaa70b',1,'system.h']]],
+  ['uhal_5fclear_5fstatus_2',['uHAL_CLEAR_STATUS',['../system_8h.html#a9e327d9ff20e7bf94990a79fc51f138b',1,'system.h']]],
+  ['uhal_5fset_5fstatus_3',['uHAL_SET_STATUS',['../system_8h.html#a7303f1f3423cd2a37d0bb7e406dffdf5',1,'system.h']]]
 ];

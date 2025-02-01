@@ -129,8 +129,8 @@ void gpio_set_AF(gpio_pin_t pin, gpio_af_t af) {
 	uint_fast8_t pos;
 	uint32_t mask, naf;
 
-	assert(GPIO_PIN_IS_VALID(pin));
-	assert((af & 0b1111U) == af);
+	uHAL_assert(GPIO_PIN_IS_VALID(pin));
+	uHAL_assert((af & 0b1111U) == af);
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
 	if (!GPIO_PIN_IS_VALID(pin) || (af & 0x0FU) != af) {
 		return;
@@ -185,7 +185,7 @@ gpio_af_t gpio_get_AF(gpio_pin_t pin) {
 	uint32_t mask;
 	gpio_af_t af;
 
-	assert(GPIO_PIN_IS_VALID(pin));
+	uHAL_assert(GPIO_PIN_IS_VALID(pin));
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
 	if (!GPIO_PIN_IS_VALID(pin)) {
 		return 0;
@@ -239,7 +239,7 @@ err_t gpio_set_mode(gpio_pin_t pin, gpio_mode_t mode, gpio_state_t istate) {
 	uint32_t pinmask, mask2, bsrr = 0;
 	uint32_t cfg, otype = 0, pull;
 
-	assert(GPIO_PIN_IS_VALID(pin));
+	uHAL_assert(GPIO_PIN_IS_VALID(pin));
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
 	if (!GPIO_PIN_IS_VALID(pin)) {
 		return ERR_BADARG;
@@ -345,7 +345,7 @@ gpio_mode_t gpio_get_mode(gpio_pin_t pin) {
 	uint32_t pinno;
 	uint_fast8_t mode, otype, pos2;
 
-	assert(GPIO_PIN_IS_VALID(pin));
+	uHAL_assert(GPIO_PIN_IS_VALID(pin));
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
 	if (!GPIO_PIN_IS_VALID(pin)) {
 		return GPIO_MODE_RESET;
@@ -403,7 +403,7 @@ err_t gpio_set_state(gpio_pin_t pin, gpio_state_t new_state) {
 	uint_fast8_t mode, pos2;
 	uint32_t reg = 0;
 
-	assert(GPIO_PIN_IS_VALID(pin));
+	uHAL_assert(GPIO_PIN_IS_VALID(pin));
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
 	if (!GPIO_PIN_IS_VALID(pin)) {
 		return ERR_BADARG;
@@ -470,7 +470,7 @@ err_t gpio_set_input_state(gpio_pin_t pin, gpio_state_t new_state) {
 	uint_fast8_t pos2;
 	uint32_t reg = 0;
 
-	assert(GPIO_PIN_IS_VALID(pin));
+	uHAL_assert(GPIO_PIN_IS_VALID(pin));
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
 	if (!GPIO_PIN_IS_VALID(pin)) {
 		return ERR_BADARG;
@@ -520,7 +520,7 @@ err_t gpio_set_output_state(gpio_pin_t pin, gpio_state_t new_state) {
 	uint32_t pinmask;
 	uint32_t reg = 0;
 
-	assert(GPIO_PIN_IS_VALID(pin));
+	uHAL_assert(GPIO_PIN_IS_VALID(pin));
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
 	if (!GPIO_PIN_IS_VALID(pin)) {
 		return ERR_BADARG;
@@ -573,7 +573,7 @@ err_t gpio_toggle_state(gpio_pin_t pin) {
 	uint_fast8_t mode, pos2;
 	uint32_t reg = 0;
 
-	assert(GPIO_PIN_IS_VALID(pin));
+	uHAL_assert(GPIO_PIN_IS_VALID(pin));
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
 	if (!GPIO_PIN_IS_VALID(pin)) {
 		return ERR_BADARG;
@@ -626,7 +626,7 @@ err_t gpio_toggle_input_state(gpio_pin_t pin) {
 	uint_fast8_t pos2;
 	uint32_t reg = 0;
 
-	assert(GPIO_PIN_IS_VALID(pin));
+	uHAL_assert(GPIO_PIN_IS_VALID(pin));
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
 	if (!GPIO_PIN_IS_VALID(pin)) {
 		return ERR_BADARG;
@@ -672,7 +672,7 @@ err_t gpio_toggle_output_state(gpio_pin_t pin) {
 	GPIO_TypeDef* port;
 	uint32_t pinmask;
 
-	assert(GPIO_PIN_IS_VALID(pin));
+	uHAL_assert(GPIO_PIN_IS_VALID(pin));
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
 	if (!GPIO_PIN_IS_VALID(pin)) {
 		return ERR_BADARG;
@@ -709,7 +709,7 @@ gpio_state_t gpio_get_state(gpio_pin_t pin) {
 	uint_fast8_t mode, pos2;
 	uint32_t check;
 
-	assert(GPIO_PIN_IS_VALID(pin));
+	uHAL_assert(GPIO_PIN_IS_VALID(pin));
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
 	if (!GPIO_PIN_IS_VALID(pin)) {
 		return GPIO_FLOAT;
@@ -748,7 +748,7 @@ gpio_state_t gpio_get_input_state(gpio_pin_t pin) {
 	GPIO_TypeDef* port;
 	uint32_t pinmask;
 
-	assert(GPIO_PIN_IS_VALID(pin));
+	uHAL_assert(GPIO_PIN_IS_VALID(pin));
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
 	if (!GPIO_PIN_IS_VALID(pin)) {
 		return GPIO_FLOAT;
@@ -782,7 +782,7 @@ gpio_state_t gpio_get_output_state(gpio_pin_t pin) {
 	GPIO_TypeDef* port;
 	uint32_t pinmask;
 
-	assert(GPIO_PIN_IS_VALID(pin));
+	uHAL_assert(GPIO_PIN_IS_VALID(pin));
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
 	if (!GPIO_PIN_IS_VALID(pin)) {
 		return GPIO_FLOAT;

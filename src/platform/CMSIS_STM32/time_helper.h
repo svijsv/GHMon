@@ -294,7 +294,7 @@ HELPER_STORAGE bool is_pwm_tim(uint_fast8_t tim_id) {
 HELPER_STORAGE uint16_t calculate_TIM_prescaler(rcc_periph_t tim_bus, uint32_t hz) {
 	uint32_t psc;
 
-	assert(hz != 0);
+	uHAL_assert(hz != 0);
 	if (hz == 0) {
 		hz = 1;
 	}
@@ -308,12 +308,12 @@ HELPER_STORAGE uint16_t calculate_TIM_prescaler(rcc_periph_t tim_bus, uint32_t h
 		break;
 	default:
 		// Shouldn't reach this point
-		assert(false);
+		uHAL_assert(false);
 		return 0;
 	}
 	psc /= hz;
-	assert(psc > 0);
-	assert(psc <= TIM_MAX_PSC+1UL);
+	uHAL_assert(psc > 0);
+	uHAL_assert(psc <= TIM_MAX_PSC+1UL);
 	if (psc > 0) {
 		--psc;
 	}
@@ -327,14 +327,14 @@ HELPER_STORAGE uint16_t calculate_TIM_prescaler(rcc_periph_t tim_bus, uint32_t h
 HELPER_STORAGE uint16_t calculate_TIM_prescaler(uint_fast8_t timid, uint32_t hz) {
 	uint32_t psc;
 
-	assert(hz != 0);
+	uHAL_assert(hz != 0);
 
 	//psc = (is_apb1_tim(timid) ? TIM_APB1_MAX_HZ/hz :  TIM_APB2_MAX_HZ/hz);
 	psc = (is_apb1_tim(timid) ? TIM_APB1_MAX_HZ :  TIM_APB2_MAX_HZ);
 	psc /= hz;
 
-	assert(psc > 0);
-	assert(psc <= TIM_MAX_PSC+1UL);
+	uHAL_assert(psc > 0);
+	uHAL_assert(psc <= TIM_MAX_PSC+1UL);
 	if (psc > 0) {
 		--psc;
 	}

@@ -91,8 +91,7 @@ $(document).ready(function(){initNavTree('interface_8h.html',''); initResizable(
 
 <div class="header">
   <div class="summary">
-<a href="#typedef-members">Typedefs</a> &#124;
-<a href="#enum-members">Enumerations</a>  </div>
+<a href="#typedef-members">Typedefs</a>  </div>
   <div class="headertitle"><div class="title">interface.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
@@ -100,6 +99,7 @@ $(document).ready(function(){initNavTree('interface_8h.html',''); initResizable(
 <p>Interface between the frontend and backend code.  
 <a href="#details">More...</a></p>
 <div class="textblock"><code>#include &quot;ulib/include/bits.h&quot;</code><br />
+<code>#include &quot;ulib/include/error.h&quot;</code><br />
 <code>#include &quot;ulib/include/types.h&quot;</code><br />
 <code>#include &quot;ulib/include/util.h&quot;</code><br />
 <code>#include &quot;<a class="el" href="gpio_8h_source.html">interface/gpio.h</a>&quot;</code><br />
@@ -120,91 +120,13 @@ Typedefs</h2></td></tr>
 typedef uint_fast16_t&#160;</td><td class="memItemRight" valign="bottom"><b>txsize_t</b></td></tr>
 <tr class="memdesc:af6be0541d47610a3a197da22071af4bb"><td class="mdescLeft">&#160;</td><td class="mdescRight">The type used to track byte counts during data transmissions. <br /></td></tr>
 <tr class="separator:af6be0541d47610a3a197da22071af4bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="enum-members" name="enum-members"></a>
-Enumerations</h2></td></tr>
-<tr class="memitem:a5edd7aad54ac059bf561cf2f92017698" id="r_a5edd7aad54ac059bf561cf2f92017698"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a> { <br />
-&#160;&#160;<a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698aa26c163b80b1f6786ca81dadc14b00fb">ERR_OK</a>
-, <br />
-&#160;&#160;<a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698a9eb68cc7ab1f3422e6186103f721cd90">ERR_BADARG</a>
-, <br />
-&#160;&#160;<a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698ad64d9c982833860d10f54b846f9c5e46">ERR_INIT</a>
-, <br />
-&#160;&#160;<a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698a9a5eb2b9fa0b669459608e18789cee0d">ERR_IO</a>
-, <br />
-&#160;&#160;<a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698a7a6e122f75a120bc0ca203dbf2388088">ERR_NODEV</a>
-, <br />
-&#160;&#160;<a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698af3d046d91fdb3e7362fa79e7cdc586ef">ERR_NOMEM</a>
-, <br />
-&#160;&#160;<a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698a29af99bfedeecf69662058eb795c3d03">ERR_NOTSUP</a>
-, <br />
-&#160;&#160;<a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698a00c82fa860fd000cb6fee6c00532e78d">ERR_IMPOSSIBLE</a>
-, <br />
-&#160;&#160;<a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698a5c120377f7948dd0a72f30afa7600505">ERR_RETRY</a>
-, <br />
-&#160;&#160;<a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698adc4095208bca12b2ab191130c582bf89">ERR_PERM</a>
-, <br />
-&#160;&#160;<a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698ac568baeb6407ef5e2630084ccbc34be8">ERR_TIMEOUT</a>
-, <br />
-&#160;&#160;<a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698a9632559b41865d4cb29eae67924cfa2b">ERR_INTERRUPT</a>
-, <br />
-&#160;&#160;<a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698a5c708decdcbd7d8c9fddd8d9e75828a1">ERR_UNKNOWN</a>
-<br />
- }</td></tr>
-<tr class="memdesc:a5edd7aad54ac059bf561cf2f92017698"><td class="mdescLeft">&#160;</td><td class="mdescRight">Error status return values.  <a href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">More...</a><br /></td></tr>
-<tr class="separator:a5edd7aad54ac059bf561cf2f92017698"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Interface between the frontend and backend code. </p>
 <dl class="section attention"><dt>Attention</dt><dd>Backend-specific interface components and overrides are defined in platform.h in the individual backend directories</dd>
 <dd>
 Some platforms may not implement the full interface because I haven't gotten around to it yet. </dd></dl>
-</div><h2 class="groupheader">Enumeration Type Documentation</h2>
-<a id="a5edd7aad54ac059bf561cf2f92017698" name="a5edd7aad54ac059bf561cf2f92017698"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5edd7aad54ac059bf561cf2f92017698">&#9670;&#160;</a></span>err_t</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">enum <a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Error status return values. </p>
-<table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a5edd7aad54ac059bf561cf2f92017698aa26c163b80b1f6786ca81dadc14b00fb" name="a5edd7aad54ac059bf561cf2f92017698aa26c163b80b1f6786ca81dadc14b00fb"></a>ERR_OK&#160;</td><td class="fielddoc"><p>No error. </p>
-</td></tr>
-<tr><td class="fieldname"><a id="a5edd7aad54ac059bf561cf2f92017698a9eb68cc7ab1f3422e6186103f721cd90" name="a5edd7aad54ac059bf561cf2f92017698a9eb68cc7ab1f3422e6186103f721cd90"></a>ERR_BADARG&#160;</td><td class="fielddoc"><p>Function passed a bad argument. </p>
-</td></tr>
-<tr><td class="fieldname"><a id="a5edd7aad54ac059bf561cf2f92017698ad64d9c982833860d10f54b846f9c5e46" name="a5edd7aad54ac059bf561cf2f92017698ad64d9c982833860d10f54b846f9c5e46"></a>ERR_INIT&#160;</td><td class="fielddoc"><p>Structure or peripheral not initialized. </p>
-</td></tr>
-<tr><td class="fieldname"><a id="a5edd7aad54ac059bf561cf2f92017698a9a5eb2b9fa0b669459608e18789cee0d" name="a5edd7aad54ac059bf561cf2f92017698a9a5eb2b9fa0b669459608e18789cee0d"></a>ERR_IO&#160;</td><td class="fielddoc"><p>Input/output error. </p>
-</td></tr>
-<tr><td class="fieldname"><a id="a5edd7aad54ac059bf561cf2f92017698a7a6e122f75a120bc0ca203dbf2388088" name="a5edd7aad54ac059bf561cf2f92017698a7a6e122f75a120bc0ca203dbf2388088"></a>ERR_NODEV&#160;</td><td class="fielddoc"><p>No such device. </p>
-</td></tr>
-<tr><td class="fieldname"><a id="a5edd7aad54ac059bf561cf2f92017698af3d046d91fdb3e7362fa79e7cdc586ef" name="a5edd7aad54ac059bf561cf2f92017698af3d046d91fdb3e7362fa79e7cdc586ef"></a>ERR_NOMEM&#160;</td><td class="fielddoc"><p>Not enough memory. </p>
-</td></tr>
-<tr><td class="fieldname"><a id="a5edd7aad54ac059bf561cf2f92017698a29af99bfedeecf69662058eb795c3d03" name="a5edd7aad54ac059bf561cf2f92017698a29af99bfedeecf69662058eb795c3d03"></a>ERR_NOTSUP&#160;</td><td class="fielddoc"><p>Operation not supported. </p>
-</td></tr>
-<tr><td class="fieldname"><a id="a5edd7aad54ac059bf561cf2f92017698a00c82fa860fd000cb6fee6c00532e78d" name="a5edd7aad54ac059bf561cf2f92017698a00c82fa860fd000cb6fee6c00532e78d"></a>ERR_IMPOSSIBLE&#160;</td><td class="fielddoc"><p>Operation not possible. </p>
-</td></tr>
-<tr><td class="fieldname"><a id="a5edd7aad54ac059bf561cf2f92017698a5c120377f7948dd0a72f30afa7600505" name="a5edd7aad54ac059bf561cf2f92017698a5c120377f7948dd0a72f30afa7600505"></a>ERR_RETRY&#160;</td><td class="fielddoc"><p>Device or resource temporarily unavailable. </p>
-</td></tr>
-<tr><td class="fieldname"><a id="a5edd7aad54ac059bf561cf2f92017698adc4095208bca12b2ab191130c582bf89" name="a5edd7aad54ac059bf561cf2f92017698adc4095208bca12b2ab191130c582bf89"></a>ERR_PERM&#160;</td><td class="fielddoc"><p>Operation not permitted. </p>
-</td></tr>
-<tr><td class="fieldname"><a id="a5edd7aad54ac059bf561cf2f92017698ac568baeb6407ef5e2630084ccbc34be8" name="a5edd7aad54ac059bf561cf2f92017698ac568baeb6407ef5e2630084ccbc34be8"></a>ERR_TIMEOUT&#160;</td><td class="fielddoc"><p>Operation timed out. </p>
-</td></tr>
-<tr><td class="fieldname"><a id="a5edd7aad54ac059bf561cf2f92017698a9632559b41865d4cb29eae67924cfa2b" name="a5edd7aad54ac059bf561cf2f92017698a9632559b41865d4cb29eae67924cfa2b"></a>ERR_INTERRUPT&#160;</td><td class="fielddoc"><p>Operation interrupted. </p>
-</td></tr>
-<tr><td class="fieldname"><a id="a5edd7aad54ac059bf561cf2f92017698a5c708decdcbd7d8c9fddd8d9e75828a1" name="a5edd7aad54ac059bf561cf2f92017698a5c708decdcbd7d8c9fddd8d9e75828a1"></a>ERR_UNKNOWN&#160;</td><td class="fielddoc"><p>Unknown error. </p>
-</td></tr>
-</table>
-
-</div>
-</div>
-</div><!-- contents -->
+</div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->

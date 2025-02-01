@@ -19,7 +19,7 @@
 ***********************************************************************/
 /// @file
 /// @brief User Serial Communication Interface
-/// @attention
+/// @note
 ///    This file should only be included by interface.h.
 ///
 
@@ -120,7 +120,7 @@ void terminal(void);
 ///
 /// Convenience macro for @c logger().
 ///
-/// @attention
+/// @note
 /// This macro uses the @c F1() macro on systems with separate namespaces.
 ///
 /// @param fmt A @c printf()-style format string.
@@ -148,7 +148,7 @@ void terminal(void);
 ///
 /// Convenience macro for @c serial_printf().
 ///
-/// @attention
+/// @note
 /// This macro uses the @c F1() macro on systems with separate namespaces.
 ///
 /// @param fmt A @c printf()-style format string.
@@ -164,7 +164,7 @@ void terminal(void);
 ///
 /// Convenience macro for @c serial_print().
 ///
-/// @attention
+/// @note
 /// This macro uses the @c F1() macro on systems with separate namespaces.
 ///
 /// @param msg The string to print.

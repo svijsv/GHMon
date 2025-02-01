@@ -287,10 +287,10 @@ err_t gpio_listen_init(gpio_listen_t *handle, const gpio_listen_cfg_t *conf) {
 	__IO uint32_t *exticr = NULL;
 	bool redisable_clock;
 
-	assert(handle != NULL);
-	assert(conf != NULL);
-	assert(GPIO_PIN_IS_VALID(conf->pin));
-	assert(BIT_IS_SET(conf->trigger, GPIO_TRIGGER_RISING|GPIO_TRIGGER_FALLING));
+	uHAL_assert(handle != NULL);
+	uHAL_assert(conf != NULL);
+	uHAL_assert(GPIO_PIN_IS_VALID(conf->pin));
+	uHAL_assert(BIT_IS_SET(conf->trigger, GPIO_TRIGGER_RISING|GPIO_TRIGGER_FALLING));
 
 #if ! uHAL_SKIP_INIT_CHECKS
 #endif
@@ -388,7 +388,7 @@ err_t gpio_listen_on(gpio_listen_t *handle) {
 	gpio_pin_t pin;
 	uint32_t irqn;
 
-	assert(LISTEN_HANDLE_IS_OK(handle));
+	uHAL_assert(LISTEN_HANDLE_IS_OK(handle));
 #if ! uHAL_SKIP_INIT_CHECKS
 #endif
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
@@ -409,7 +409,7 @@ err_t gpio_listen_on(gpio_listen_t *handle) {
 	return ERR_OK;
 }
 err_t gpio_listen_off(gpio_listen_t *handle) {
-	assert(LISTEN_HANDLE_IS_OK(handle));
+	uHAL_assert(LISTEN_HANDLE_IS_OK(handle));
 #if ! uHAL_SKIP_INIT_CHECKS
 #endif
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
@@ -423,7 +423,7 @@ err_t gpio_listen_off(gpio_listen_t *handle) {
 bool gpio_is_listening(gpio_pin_t pin) {
 	uint32_t irqn;
 
-	assert(GPIO_PIN_IS_VALID(pin));
+	uHAL_assert(GPIO_PIN_IS_VALID(pin));
 #if ! uHAL_SKIP_INIT_CHECKS
 #endif
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
@@ -438,8 +438,8 @@ bool gpio_is_listening(gpio_pin_t pin) {
 }
 
 err_t gpio_quickread_prepare(gpio_quick_t *qpin, gpio_pin_t pin) {
-	assert(qpin != NULL);
-	assert(GPIO_PIN_IS_VALID(pin));
+	uHAL_assert(qpin != NULL);
+	uHAL_assert(GPIO_PIN_IS_VALID(pin));
 
 #if ! uHAL_SKIP_INIT_CHECKS
 #endif

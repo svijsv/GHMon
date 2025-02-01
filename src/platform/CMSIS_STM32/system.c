@@ -249,9 +249,9 @@ void platform_init(void) {
 static void set_sysclock_src(uint32_t rcc_cfgr_sw, uint32_t rcc_cr_on, uint32_t rcc_cr_rdy) {
 	uint32_t sws;
 
-	assert((rcc_cfgr_sw == RCC_CFGR_SW_HSI) || (rcc_cfgr_sw == RCC_CFGR_SW_HSE) || (rcc_cfgr_sw == RCC_CFGR_SW_PLL));
-	assert((rcc_cr_on == RCC_CR_HSION) || (rcc_cr_on == RCC_CR_HSEON) || (rcc_cr_on == RCC_CR_PLLON));
-	assert((rcc_cr_rdy == RCC_CR_HSIRDY) || (rcc_cr_rdy == RCC_CR_HSERDY) || (rcc_cr_rdy == RCC_CR_PLLRDY));
+	uHAL_assert((rcc_cfgr_sw == RCC_CFGR_SW_HSI) || (rcc_cfgr_sw == RCC_CFGR_SW_HSE) || (rcc_cfgr_sw == RCC_CFGR_SW_PLL));
+	uHAL_assert((rcc_cr_on == RCC_CR_HSION) || (rcc_cr_on == RCC_CR_HSEON) || (rcc_cr_on == RCC_CR_PLLON));
+	uHAL_assert((rcc_cr_rdy == RCC_CR_HSIRDY) || (rcc_cr_rdy == RCC_CR_HSERDY) || (rcc_cr_rdy == RCC_CR_PLLRDY));
 
 	// Turn the new clock on
 	SET_BIT(RCC->CR, rcc_cr_on);
@@ -470,6 +470,16 @@ static void clocks_init(void) {
 	return;
 }
 
+static sleep_mode_t limit_hibernation_depth(sleep_mode_t sleep_mode) {
+	if (uHAL_CHECK_STATUS(uHAL_FLAG_INHIBIT_HIBERNATION)) {
+		sleep_mode = HIBERNATE_LIGHT;
+	} else if (uHAL_HIBERNATE_LIMIT != 0 && sleep_mode > uHAL_HIBERNATE_LIMIT) {
+		sleep_mode = uHAL_HIBERNATE_LIMIT;
+	}
+
+	return sleep_mode;
+}
+
 #if uHAL_USE_HIBERNATE
 static void light_sleep_ms(utime_t ms, uint_fast8_t flags, uint_t *wakeups) {
 	uint32_t period;
@@ -599,15 +609,6 @@ void sleep_ms(utime_t ms) {
 	return;
 }
 
-static sleep_mode_t limit_hibernation_depth(sleep_mode_t sleep_mode) {
-	if (uHAL_CHECK_STATUS(uHAL_FLAG_INHIBIT_HIBERNATION)) {
-		sleep_mode = HIBERNATE_LIGHT;
-	} else if (uHAL_HIBERNATE_LIMIT != 0 && sleep_mode > uHAL_HIBERNATE_LIMIT) {
-		sleep_mode = uHAL_HIBERNATE_LIMIT;
-	}
-
-	return sleep_mode;
-}
 void hibernate_s(utime_t s, sleep_mode_t sleep_mode, uHAL_flags_t flags) {
 	uint_t wu = 0;
 

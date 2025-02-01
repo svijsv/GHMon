@@ -14,6 +14,7 @@ var searchData=
   ['add_5frtc_5fmillis_11',['add_RTC_millis',['../time_8h.html#a527a959a902d36856fb40a72933157df',1,'time.h']]],
   ['address_12',['address',['../ssd1306_8h.html#a884d9804999fc47a3c2694e49ad2536a',1,'ssd1306_cfg_t.access']]],
   ['adj_5frtt_5fcalibration_13',['adj_RTT_calibration',['../avr__xmega3_8h.html#a8cda1b348105a0124d660b2a36c1db8a',1,'avr_xmega3.h']]],
-  ['as_5finput_14',['as_input',['../gpio_8h.html#a8e1bf681aeeb1612903d7edf8596d88a',1,'pinctrl_cfg_t']]],
-  ['avr_5fxmega3_2eh_15',['avr_xmega3.h',['../avr__xmega3_8h.html',1,'']]]
+  ['adj_5fuptime_14',['adj_uptime',['../time_8h.html#a5b79e9b097b075c1629a21f36cd770d8',1,'time.h']]],
+  ['as_5finput_15',['as_input',['../gpio_8h.html#a8e1bf681aeeb1612903d7edf8596d88a',1,'pinctrl_cfg_t']]],
+  ['avr_5fxmega3_2eh_16',['avr_xmega3.h',['../avr__xmega3_8h.html',1,'']]]
 ];

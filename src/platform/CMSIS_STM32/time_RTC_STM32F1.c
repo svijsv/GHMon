@@ -24,8 +24,13 @@
 //    much between the STM32F1 and the other lines that code can't really be
 //    reused
 //
+//    When writing to the RTC counter, trying to check the writes immediately
+//    will lead to an infinite loop because the registers aren't updated immediately
+//
+
 #include "common.h"
 
+#if NEED_RTC
 #if HAVE_STM32F1_RTC
 #include "time_RTC.h"
 #include "system.h"
@@ -46,6 +51,9 @@ bool RTC_alarm_is_set(void) {
 }
 #endif
 
+// This is defined in src/RTC.c
+utime_t RTC_datetime_to_second_counter(const datetime_t *datetime, utime_t now);
+
 // We need the internal RTC stuff to wake up from sleep so we only enable
 // the interface shims
 #if uHAL_USE_RTC
@@ -57,6 +65,19 @@ err_t set_RTC_seconds(utime_t s) {
 }
 utime_t get_RTC_seconds(void) {
 	return _get_RTC_seconds();
+}
+
+err_t set_RTC_datetime(const datetime_t *datetime) {
+	return _set_RTC_seconds(RTC_datetime_to_second_counter(datetime, get_RTC_seconds()));
+}
+err_t get_RTC_datetime(datetime_t *datetime) {
+	uHAL_assert(datetime != NULL);
+	if (!uHAL_SKIP_INVALID_ARG_CHECKS && datetime == NULL) {
+		return ERR_BADARG;
+	}
+
+	seconds_to_datetime(get_RTC_seconds(), datetime);
+	return ERR_OK;
 }
 #endif
 
@@ -163,7 +184,7 @@ void RTC_adj_clock(int32_t ppm) {
 void set_RTC_prediv(uint32_t psc) {
 	uint32_t cal_per_psc, adj_psc, adj_cal;
 
-	assert(psc <= RTC_PSC_MAX);
+	uHAL_assert(psc <= RTC_PSC_MAX);
 	if (psc > RTC_PSC_MAX) {
 		return;
 	}
@@ -181,7 +202,7 @@ void set_RTC_prediv(uint32_t psc) {
 	);
 
 	psc -= (1U + adj_psc);
-	WRITE_SPLITREG32(psc, RTC->PRLH, RTC->PRLL);
+	WRITE_SPLIT32(RTC->PRLH, RTC->PRLL, psc);
 
 	cfg_disable();
 
@@ -189,7 +210,7 @@ void set_RTC_prediv(uint32_t psc) {
 }
 */
 void set_RTC_prediv(uint32_t psc) {
-	assert(psc <= RTC_PSC_MAX);
+	uHAL_assert(psc <= RTC_PSC_MAX);
 	if (psc > RTC_PSC_MAX) {
 		return;
 	}
@@ -199,7 +220,7 @@ void set_RTC_prediv(uint32_t psc) {
 	if (psc > 0) {
 		psc -= 1U;
 	}
-	WRITE_SPLITREG32(psc, RTC->PRLH, RTC->PRLL);
+	WRITE_SPLIT32(RTC->PRLH, RTC->PRLL, psc);
 
 	cfg_disable();
 
@@ -231,13 +252,17 @@ static utime_t _get_RTC_seconds(void) {
 	uint32_t rtcs;
 
 	wait_for_sync();
-	READ_SPLITREG32(rtcs, RTC->CNTH, RTC->CNTL);
+	READ_SPLIT32(rtcs, RTC->CNTH, RTC->CNTL);
 
 	return rtcs;
 }
 static err_t _set_RTC_seconds(utime_t s) {
+#if uHAL_USE_UPTIME_EMULATION
+	fix_uptime(s, _get_RTC_seconds());
+#endif
+
 	cfg_enable();
-	WRITE_SPLITREG32(s, RTC->CNTH, RTC->CNTL);
+	WRITE_SPLIT32(RTC->CNTH, RTC->CNTL, s);
 	cfg_disable();
 
 	return ERR_OK;
@@ -251,7 +276,7 @@ void set_RTC_alarm(utime_t time) {
 
 	cfg_enable();
 	time = _get_RTC_seconds() + time;
-	WRITE_SPLITREG32(time, RTC->ALRH, RTC->ALRL);
+	WRITE_SPLIT32(RTC->ALRH, RTC->ALRL, time);
 
 	// Clear the alarm interrupt flag
 	CLEAR_BIT(RTC->CRL, RTC_CRL_ALRF);
@@ -292,5 +317,25 @@ void stop_RTC_alarm(void) {
 }
 #endif // uHAL_USE_HIBERNATE
 
+#if USE_RTC_UPTIME
+err_t init_uptime(void) {
+	cfg_enable();
+	WRITE_SPLIT32(RTC->CNTH, RTC->CNTL, 0);
+	cfg_disable();
+
+	return ERR_OK;
+}
+err_t set_uptime(utime_t uptime_seconds) {
+	return _set_RTC_seconds(uptime_seconds);
+}
+err_t adj_uptime(itime_t adjustment_seconds) {
+	return _set_RTC_seconds(_get_RTC_seconds() - adjustment_seconds);
+}
+utime_t get_uptime(void) {
+	return _get_RTC_seconds();
+}
+#endif
+
 
 #endif // HAVE_STM32F1_RTC
+#endif // NEED_RTC

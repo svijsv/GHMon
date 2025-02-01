@@ -11,11 +11,12 @@ var searchData=
   ['i2c_5ftransmit_5fblock_5fbegin_8',['i2c_transmit_block_begin',['../i2c_8h.html#a96cbb9a1c35b4a250b9cedb547985d2c',1,'i2c.h']]],
   ['i2c_5ftransmit_5fblock_5fcontinue_9',['i2c_transmit_block_continue',['../i2c_8h.html#a22635601827e86706b67babeb6141482',1,'i2c.h']]],
   ['i2c_5ftransmit_5fblock_5fend_10',['i2c_transmit_block_end',['../i2c_8h.html#a9ba079ea02a3fefcff376f8d5b25c2d4',1,'i2c.h']]],
-  ['input_5fpin_5fis_5fon_11',['input_pin_is_on',['../gpio_8h.html#a5ec9ddca0e1af7ccc55e18d653bf1b11',1,'gpio.h']]],
-  ['input_5fpin_5flisten_5finit_12',['input_pin_listen_init',['../gpio_8h.html#a06eac9575268594950b7db164bbf4c7b',1,'gpio.h']]],
-  ['input_5fpin_5flisten_5foff_13',['input_pin_listen_off',['../gpio_8h.html#ad9b22227111d68faab2547a1d2bec378',1,'gpio.h']]],
-  ['input_5fpin_5flisten_5fon_14',['input_pin_listen_on',['../gpio_8h.html#af2b9031ed5520418487655942ccb5586',1,'gpio.h']]],
-  ['input_5fpin_5foff_15',['input_pin_off',['../gpio_8h.html#a381b0d0ec68805b1cdc55af49c48b880',1,'gpio.h']]],
-  ['input_5fpin_5fon_16',['input_pin_on',['../gpio_8h.html#a4eb449855b47167fe27470b181761340',1,'gpio.h']]],
-  ['input_5fpin_5ftoggle_17',['input_pin_toggle',['../gpio_8h.html#ae2e5a2d4315640fec150f7aeb9e5134e',1,'gpio.h']]]
+  ['init_5fuptime_11',['init_uptime',['../time_8h.html#a151e0c3ba3ba65de875e040c07189087',1,'time.h']]],
+  ['input_5fpin_5fis_5fon_12',['input_pin_is_on',['../gpio_8h.html#a5ec9ddca0e1af7ccc55e18d653bf1b11',1,'gpio.h']]],
+  ['input_5fpin_5flisten_5finit_13',['input_pin_listen_init',['../gpio_8h.html#a06eac9575268594950b7db164bbf4c7b',1,'gpio.h']]],
+  ['input_5fpin_5flisten_5foff_14',['input_pin_listen_off',['../gpio_8h.html#ad9b22227111d68faab2547a1d2bec378',1,'gpio.h']]],
+  ['input_5fpin_5flisten_5fon_15',['input_pin_listen_on',['../gpio_8h.html#af2b9031ed5520418487655942ccb5586',1,'gpio.h']]],
+  ['input_5fpin_5foff_16',['input_pin_off',['../gpio_8h.html#a381b0d0ec68805b1cdc55af49c48b880',1,'gpio.h']]],
+  ['input_5fpin_5fon_17',['input_pin_on',['../gpio_8h.html#a4eb449855b47167fe27470b181761340',1,'gpio.h']]],
+  ['input_5fpin_5ftoggle_18',['input_pin_toggle',['../gpio_8h.html#ae2e5a2d4315640fec150f7aeb9e5134e',1,'gpio.h']]]
 ];

@@ -27,7 +27,7 @@
 err_t input_pin_on(gpio_pin_t pin) {
 	gpio_state_t bias = GPIO_FLOAT;
 
-	assert(GPIO_PIN_IS_VALID(pin));
+	uHAL_assert(GPIO_PIN_IS_VALID(pin));
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
 	if (!GPIO_PIN_IS_VALID(pin)) {
 		return ERR_BADARG;
@@ -45,7 +45,7 @@ err_t input_pin_on(gpio_pin_t pin) {
 	return gpio_set_mode(pin, GPIO_MODE_IN, bias);
 }
 err_t input_pin_off(gpio_pin_t pin) {
-	assert(GPIO_PIN_IS_VALID(pin));
+	uHAL_assert(GPIO_PIN_IS_VALID(pin));
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
 	if (!GPIO_PIN_IS_VALID(pin)) {
 		return ERR_BADARG;
@@ -55,7 +55,7 @@ err_t input_pin_off(gpio_pin_t pin) {
 	return gpio_set_mode(pin, GPIO_MODE_RESET, GPIO_FLOAT);
 }
 err_t input_pin_toggle(gpio_pin_t pin) {
-	assert(GPIO_PIN_IS_VALID(pin));
+	uHAL_assert(GPIO_PIN_IS_VALID(pin));
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
 	if (!GPIO_PIN_IS_VALID(pin)) {
 		return ERR_BADARG;
@@ -71,7 +71,7 @@ bool input_pin_is_on(gpio_pin_t pin) {
 	gpio_state_t state;
 	bool is_on = false;
 
-	assert(GPIO_PIN_IS_VALID(pin));
+	uHAL_assert(GPIO_PIN_IS_VALID(pin));
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
 	if (!GPIO_PIN_IS_VALID(pin)) {
 		return ERR_BADARG;
@@ -95,7 +95,7 @@ err_t output_pin_on(gpio_pin_t pin) {
 	gpio_state_t dir = GPIO_FLOAT;
 	gpio_mode_t mode = GPIO_MODE_RESET;
 
-	assert(GPIO_PIN_IS_VALID(pin));
+	uHAL_assert(GPIO_PIN_IS_VALID(pin));
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
 	if (!GPIO_PIN_IS_VALID(pin)) {
 		return ERR_BADARG;
@@ -120,7 +120,7 @@ err_t output_pin_off(gpio_pin_t pin) {
 	gpio_state_t dir = GPIO_FLOAT;
 	gpio_mode_t mode = GPIO_MODE_RESET;
 
-	assert(GPIO_PIN_IS_VALID(pin));
+	uHAL_assert(GPIO_PIN_IS_VALID(pin));
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
 	if (!GPIO_PIN_IS_VALID(pin)) {
 		return ERR_BADARG;
@@ -144,7 +144,7 @@ err_t output_pin_off(gpio_pin_t pin) {
 err_t output_pin_toggle(gpio_pin_t pin) {
 	bool is_on = false;
 
-	assert(GPIO_PIN_IS_VALID(pin));
+	uHAL_assert(GPIO_PIN_IS_VALID(pin));
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
 	if (!GPIO_PIN_IS_VALID(pin)) {
 		return ERR_BADARG;
@@ -181,7 +181,7 @@ err_t output_pin_toggle(gpio_pin_t pin) {
 bool output_pin_is_on(gpio_pin_t pin) {
 	bool is_on = false;
 
-	assert(GPIO_PIN_IS_VALID(pin));
+	uHAL_assert(GPIO_PIN_IS_VALID(pin));
 #if ! uHAL_SKIP_INVALID_ARG_CHECKS
 	if (!GPIO_PIN_IS_VALID(pin)) {
 		return false;

@@ -137,9 +137,9 @@ FMEM_STORAGE const terminal_cmd_t terminal_extra_cmds[] = {
 };
 FMEM_STORAGE const char terminal_extra_help[] =
 "   led_flash <N>              - Flash the LED <N> times\r\n"
-"   led_on\r\n"
-"   led_off\r\n"
-"   led_toggle\r\n"
+"   led_on                     - Turn on the LED\r\n"
+"   led_off                    - Turn off the LED\r\n"
+"   led_toggle                 - Toggle the LED\r\n"
 "   reset                      - Reset the device\r\n"
 //"   peek <size> <ADDR1 ADDRn>  - Display the <size> bytes of memory at location(s) <ADDR>\r\n"
 ;

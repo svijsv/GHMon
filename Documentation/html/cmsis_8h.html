@@ -100,7 +100,7 @@ $(document).ready(function(){initNavTree('cmsis_8h.html',''); initResizable(); }
 <p><a href="cmsis_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader">Clock Calibration</h2></td></tr>
-<tr><td class="ititle" colspan="2"><dl class="section attention"><dt>Attention</dt><dd>These are only available when Timer 5 is present. </dd></dl>
+<tr><td class="ititle" colspan="2"><dl class="section note"><dt>Note</dt><dd>These are only available when Timer 5 is present. </dd></dl>
 </td></tr>
 <tr class="memitem:aded986b0de54197e7b345f3a6493e09f" id="r_aded986b0de54197e7b345f3a6493e09f"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cmsis_8h.html#aded986b0de54197e7b345f3a6493e09f">osc_calib_t</a> { <br />
 &#160;&#160;<a class="el" href="cmsis_8h.html#aded986b0de54197e7b345f3a6493e09fa45dd5f1916d1b1abd5ba1aaa29995b6b">CALIB_LSI</a>
@@ -110,16 +110,16 @@ $(document).ready(function(){initNavTree('cmsis_8h.html',''); initResizable(); }
  }</td></tr>
 <tr class="memdesc:aded986b0de54197e7b345f3a6493e09f"><td class="mdescLeft">&#160;</td><td class="mdescRight">The type used to specify a low-speed oscillator source.  <a href="cmsis_8h.html#aded986b0de54197e7b345f3a6493e09f">More...</a><br /></td></tr>
 <tr class="separator:aded986b0de54197e7b345f3a6493e09f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aed4e9f5093f668e7b581dbbb8d91780c" id="r_aed4e9f5093f668e7b581dbbb8d91780c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cmsis_8h.html#aed4e9f5093f668e7b581dbbb8d91780c">tim5_oscillator_calibration</a> (<a class="el" href="cmsis_8h.html#aded986b0de54197e7b345f3a6493e09f">osc_calib_t</a> mode, uint32_t *LS_cycles, uint32_t *HS_cycles)</td></tr>
+<tr class="memitem:aed4e9f5093f668e7b581dbbb8d91780c" id="r_aed4e9f5093f668e7b581dbbb8d91780c"><td class="memItemLeft" align="right" valign="top">err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cmsis_8h.html#aed4e9f5093f668e7b581dbbb8d91780c">tim5_oscillator_calibration</a> (<a class="el" href="cmsis_8h.html#aded986b0de54197e7b345f3a6493e09f">osc_calib_t</a> mode, uint32_t *LS_cycles, uint32_t *HS_cycles)</td></tr>
 <tr class="memdesc:aed4e9f5093f668e7b581dbbb8d91780c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Measure a low-speed oscillator against a 1MHz signal derived from the high-speed oscillator.  <br /></td></tr>
 <tr class="separator:aed4e9f5093f668e7b581dbbb8d91780c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adb24c2b0c62a9952d233bc337443fcc0" id="r_adb24c2b0c62a9952d233bc337443fcc0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cmsis_8h.html#adb24c2b0c62a9952d233bc337443fcc0">calibrate_RTC_clock</a> (void)</td></tr>
+<tr class="memitem:adb24c2b0c62a9952d233bc337443fcc0" id="r_adb24c2b0c62a9952d233bc337443fcc0"><td class="memItemLeft" align="right" valign="top">err_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cmsis_8h.html#adb24c2b0c62a9952d233bc337443fcc0">calibrate_RTC_clock</a> (void)</td></tr>
 <tr class="memdesc:adb24c2b0c62a9952d233bc337443fcc0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calibrate the RTC clock against the high-speed oscillator.  <br /></td></tr>
 <tr class="separator:adb24c2b0c62a9952d233bc337443fcc0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Platform-specific features. </p>
-<dl class="section attention"><dt>Attention</dt><dd>This file should only be included by <a class="el" href="interface_8h.html" title="Interface between the frontend and backend code.">interface.h</a> </dd>
+<dl class="section note"><dt>Note</dt><dd>This file should only be included by <a class="el" href="interface_8h.html" title="Interface between the frontend and backend code.">interface.h</a> </dd>
 <dd>
 This file is only included when using the CMSIS platform </dd></dl>
 </div><h2 class="groupheader">Enumeration Type Documentation</h2>
@@ -153,7 +153,7 @@ This file is only included when using the CMSIS platform </dd></dl>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a> calibrate_RTC_clock </td>
+          <td class="memname">err_t calibrate_RTC_clock </td>
           <td>(</td>
           <td class="paramtype">void&#160;</td>
           <td class="paramname"></td><td>)</td>
@@ -163,7 +163,7 @@ This file is only included when using the CMSIS platform </dd></dl>
 </div><div class="memdoc">
 
 <p>Calibrate the RTC clock against the high-speed oscillator. </p>
-<dl class="section attention"><dt>Attention</dt><dd>This only does anything when <code>uHAL_USE_INTERNAL_LS_OSC</code> is set.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This only does anything when <code>uHAL_USE_INTERNAL_LS_OSC</code> is set.</dd></dl>
 <dl class="section return"><dt>Returns</dt><dd>ERR_OK if successful, otherwise an error code indicating the nature of the problem encountered. </dd></dl>
 
 </div>
@@ -175,7 +175,7 @@ This file is only included when using the CMSIS platform </dd></dl>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="interface_8h.html#a5edd7aad54ac059bf561cf2f92017698">err_t</a> tim5_oscillator_calibration </td>
+          <td class="memname">err_t tim5_oscillator_calibration </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="cmsis_8h.html#aded986b0de54197e7b345f3a6493e09f">osc_calib_t</a>&#160;</td>
           <td class="paramname"><em>mode</em>, </td>
@@ -201,9 +201,8 @@ This file is only included when using the CMSIS platform </dd></dl>
 </div><div class="memdoc">
 
 <p>Measure a low-speed oscillator against a 1MHz signal derived from the high-speed oscillator. </p>
-<dl class="section attention"><dt>Attention</dt><dd>It can take several seconds for the LSE to stabilize after being enabled, check the datasheet. </dd>
-<dd>
-STM32F1 devices don't support measuring the low-speed external oscillator.</dd></dl>
+<dl class="section attention"><dt>Attention</dt><dd>It can take several seconds for the LSE to stabilize after being enabled, check the datasheet. </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>STM32F1 devices don't support measuring the low-speed external oscillator.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">mode</td><td>The low-speed oscillator to measure. </td></tr>

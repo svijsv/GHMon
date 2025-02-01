@@ -71,8 +71,8 @@
 // TOP value plus 1, e.g. 4000000/(16*250) gives a TOP value of 249 to get
 // 1ms timer from a 4MHz clock
 void calc_TCA_split_1ms(uint16_t *top, uint8_t *psc) {
-	assert(top != NULL);
-	assert(psc != NULL);
+	uHAL_assert(top != NULL);
+	uHAL_assert(psc != NULL);
 
 	switch (G_freq_TCACLK) {
 	case 20000000:

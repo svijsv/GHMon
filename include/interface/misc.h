@@ -19,7 +19,7 @@
 ***********************************************************************/
 /// @file
 /// @brief Miscellaneous Interface
-/// @attention
+/// @note
 ///    This file should only be included by interface.h.
 ///
 
@@ -27,7 +27,7 @@
 ///
 /// Format an SD card.
 ///
-/// @attention
+/// @note
 ///  This function requires FatFS.
 ///
 /// @returns ERR_OK if successful, otherwise an error code indicating

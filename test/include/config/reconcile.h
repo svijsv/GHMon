@@ -113,9 +113,11 @@
 # undef uHAL_USE_UART
 # undef uHAL_USE_UART_COMM
 # undef uHAL_USE_TERMINAL
+# undef uHAL_USE_HIGH_LEVEL_GPIO
 # define uHAL_USE_UART 1
 # define uHAL_USE_UART_COMM 1
 # define uHAL_USE_TERMINAL 1
+# define uHAL_USE_HIGH_LEVEL_GPIO 1
 #endif
 
 #if TEST_SSD1306

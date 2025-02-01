@@ -269,7 +269,7 @@ void _print_platform_info(void (*printf_putc)(uint_fast8_t c)) {
 		uint32_t src, div;
 
 		src = GATHER_BITS(RCC->BDCR, 0b11U, RCC_BDCR_RTCSEL_Pos);
-		READ_SPLITREG32(div, RTC->PRLH, RTC->PRLL);
+		READ_SPLIT32(div, RTC->PRLH, RTC->PRLL);
 		printf_vv(printf_putc, "RTC Src: %s/%u\r\n",
 			(src == 0b00U) ? "None" :
 			(src == 0b01U) ? "LSE"  :

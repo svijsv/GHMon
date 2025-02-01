@@ -57,6 +57,11 @@
 //    j  : intmax_t
 //    z  : size_t
 //    t  : ptrdiff_t
+// The following non-standard modifiers are also supported:
+//    I8  : 8-bit integer
+//    I16 : 16-bit integer
+//    I32 : 32-bit integer
+//    I64 : 64-bit integer
 // The specific length modifiers which can be handled properly will depend on
 // the value of PRINTF_MAX_INT_BYTES.
 //

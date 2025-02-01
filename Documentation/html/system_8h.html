@@ -201,7 +201,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>platform_init</b> (vo
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Interface between the frontend and backend code. </p>
-<dl class="section attention"><dt>Attention</dt><dd>This file should only be included by <a class="el" href="interface_8h.html" title="Interface between the frontend and backend code.">interface.h</a> </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This file should only be included by <a class="el" href="interface_8h.html" title="Interface between the frontend and backend code.">interface.h</a> </dd></dl>
 </div><h2 class="groupheader">Macro Definition Documentation</h2>
 <a id="a5b0bc97dfc78c24259ed824601993848" name="a5b0bc97dfc78c24259ed824601993848"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a5b0bc97dfc78c24259ed824601993848">&#9670;&#160;</a></span>ERROR_STATE</h2>
@@ -220,7 +220,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>platform_init</b> (vo
 </div><div class="memdoc">
 
 <p>Convenience macro for <code><a class="el" href="system_8h.html#ac3e94d2f28df39dbc3f3b239d2a634de" title="Go to an endless error loop.">error_state()</a></code>. </p>
-<dl class="section attention"><dt>Attention</dt><dd>This macro uses the <code>F()</code> and <code>F1()</code> macros on systems with separate namespaces.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This macro uses the <code>F()</code> and <code>F1()</code> macros on systems with separate namespaces.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">msg</td><td>A message elaborating on the state of the error. </td></tr>
@@ -403,13 +403,14 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>platform_init</b> (vo
 <p>The container type for system status flags. </p>
 <table class="fieldtable">
 <tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ad0cedff9e4c1eebec74466d986179053a9ed602d7df47fa1d513e9288d86b341b" name="ad0cedff9e4c1eebec74466d986179053a9ed602d7df47fa1d513e9288d86b341b"></a>uHAL_FLAG_SERIAL_IS_UP&#160;</td><td class="fielddoc"><p>Serial communication is ready. </p>
-<dl class="section attention"><dt>Attention</dt><dd>Set by the backend <code><a class="el" href="system_8h.html#a760229807662fde444020422a81e937c" title="Initialize the platform hardware.">platform_init()</a></code> if/when the serial communication interface is available. </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Set by the backend <code><a class="el" href="system_8h.html#a760229807662fde444020422a81e937c" title="Initialize the platform hardware.">platform_init()</a></code> if/when the serial communication interface is available. Can be written by user code afterward to control serial output without disabling the peripheral. </dd></dl>
 </td></tr>
 <tr><td class="fieldname"><a id="ad0cedff9e4c1eebec74466d986179053a6814ea88736d4be8144ffeefbac39348" name="ad0cedff9e4c1eebec74466d986179053a6814ea88736d4be8144ffeefbac39348"></a>uHAL_FLAG_IRQ&#160;</td><td class="fielddoc"><p>A system interrupt is requested by the frontend. </p>
-<dl class="section attention"><dt>Attention</dt><dd>Set by user code when e.g. hibernation should be interrupted. Must be cleared by user code before entering interruptable hibernation to avoid immediately exiting. </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Set by user code when e.g. hibernation should be interrupted. </dd></dl>
+<dl class="section attention"><dt>Attention</dt><dd>Must be cleared by user code before entering interruptable hibernation to avoid immediately exiting. </dd></dl>
 </td></tr>
 <tr><td class="fieldname"><a id="ad0cedff9e4c1eebec74466d986179053a6d74ab67e0fb6e51031694a8900ce0db" name="ad0cedff9e4c1eebec74466d986179053a6d74ab67e0fb6e51031694a8900ce0db"></a>uHAL_FLAG_INHIBIT_HIBERNATION&#160;</td><td class="fielddoc"><p>Disallow sleep modes that may interfere with normal functionality by (for example) disabling outputs or interrupts. </p>
-<dl class="section attention"><dt>Attention</dt><dd>Set and cleared by user code. </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Set and cleared by user code. </dd></dl>
 </td></tr>
 </table>
 
@@ -456,7 +457,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>platform_init</b> (vo
 
 <p>Go to an endless error loop. </p>
 <p>If using serial communication and debugging is enabled, information about the location of the error is printed periodically. <code><a class="el" href="system_8h.html#a8fe86e3395443ddc90562aaa5066e715" title="This hook is executed periodically in the default error_state_crude() and error_state().">error_state_hook()</a></code> is executed periodically.</p>
-<dl class="section attention"><dt>Attention</dt><dd>This function is overrideable.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is overrideable.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">file_path</td><td>The path of the file where the error originated. </td></tr>
@@ -486,7 +487,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>platform_init</b> (vo
 </div><div class="memdoc">
 
 <p>Go to an endless error loop. </p>
-<p>No information is printed. <code><a class="el" href="system_8h.html#a8fe86e3395443ddc90562aaa5066e715" title="This hook is executed periodically in the default error_state_crude() and error_state().">error_state_hook()</a></code> is executed periodically. </p><dl class="section attention"><dt>Attention</dt><dd>This function is overrideable </dd></dl>
+<p>No information is printed. <code><a class="el" href="system_8h.html#a8fe86e3395443ddc90562aaa5066e715" title="This hook is executed periodically in the default error_state_crude() and error_state().">error_state_hook()</a></code> is executed periodically. </p><dl class="section note"><dt>Note</dt><dd>This function is overrideable </dd></dl>
 
 </div>
 </div>
@@ -508,7 +509,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>platform_init</b> (vo
 
 <p>This hook is executed periodically in the default <code><a class="el" href="system_8h.html#a2e3bf1141881ddb594472d67b82a7208" title="Go to an endless error loop.">error_state_crude()</a></code> and <code><a class="el" href="system_8h.html#ac3e94d2f28df39dbc3f3b239d2a634de" title="Go to an endless error loop.">error_state()</a></code>. </p>
 <p>By default this does nothing.</p>
-<dl class="section attention"><dt>Attention</dt><dd>This function is overrideable. </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is overrideable. </dd></dl>
 
 </div>
 </div>
@@ -650,7 +651,7 @@ On platforms that emulate an RTC, the system clock can not be updated during hib
 </div><div class="memdoc">
 
 <p>Post-hibernation hook. </p>
-<dl class="section attention"><dt>Attention</dt><dd>This function is overrideable.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is overrideable.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">s</td><td>Duration of sleep (seconds). If <code></code>(utime_t )-1, the hook was called by <code><a class="el" href="system_8h.html#a36d94c3a2de718c9dca48cf2f59ad5a8" title="Hibernate (lower-power mode) - Untimed.">hibernate()</a></code>. </td></tr>
@@ -695,7 +696,7 @@ On platforms that emulate an RTC, the system clock can not be updated during hib
 </div><div class="memdoc">
 
 <p>Pre-hibernation hook. </p>
-<dl class="section attention"><dt>Attention</dt><dd>This function is overrideable.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is overrideable.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">s</td><td>Duration of sleep (seconds). If NULL, the hook was called by <code><a class="el" href="system_8h.html#a36d94c3a2de718c9dca48cf2f59ad5a8" title="Hibernate (lower-power mode) - Untimed.">hibernate()</a></code>. If modified, <code><a class="el" href="system_8h.html#a8df27d0033784447d67efd1704b4c9bb" title="Hibernate (lower-power mode).">hibernate_s()</a></code> respects the new value. </td></tr>
@@ -724,7 +725,7 @@ On platforms that emulate an RTC, the system clock can not be updated during hib
 </div><div class="memdoc">
 
 <p>This hook is executed just prior to device reset. </p>
-<dl class="section attention"><dt>Attention</dt><dd>This function is overrideable. </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is overrideable. </dd></dl>
 
 </div>
 </div>

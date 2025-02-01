@@ -19,9 +19,9 @@
 ***********************************************************************/
 /// @file
 /// @brief Platform-specific features.
-/// @attention
+/// @note
 ///    This file should only be included by interface.h
-/// @attention
+/// @note
 ///    This file is only included when using the AVR_XMEGA3 platform
 ///
 
@@ -32,14 +32,14 @@
 /// The calibration value is the number of milliseconds expected to pass during
 /// @c RTT_CALIBRATE_CYCLES RTT source clock cycles (set in the configuration file).
 ///
-/// @attention
+/// @note
 /// These are only available when uHAL_USE_HIBERNATE is set.
 /// @{
 //
 ///
 /// Run the auto-calibration routine.
 ///
-/// @attention
+/// @note
 /// This is not available if the RTT is used for the system tick.
 void calibrate_RTT(void);
 ///

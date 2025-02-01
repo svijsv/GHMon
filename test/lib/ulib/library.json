@@ -10,6 +10,6 @@
 	"build": {
 		"srcDir": "./src",
 		"includeDir": "./include",
-		"flags": "-I../.. -I."
+		"flags": "-I."
 	}
 }

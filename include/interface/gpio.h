@@ -19,7 +19,7 @@
 ***********************************************************************/
 /// @file
 /// @brief General-Purpose Input/Output Interface
-/// @attention
+/// @note
 ///    This file should only be included by interface.h.
 ///
 
@@ -29,7 +29,7 @@
 //
 ///
 /// Define the state of a GPIO pin.
-/// @attention
+/// @note
 /// @c GPIO_LOW will always be '0U' and @c GPIO_HIGH will always be '1U'; any
 /// other values can't have assumptions made about them.
 typedef enum {
@@ -49,10 +49,10 @@ typedef enum {
 /// Some modes may be absent or aliased to other modes depending on the platform.
 /// Whether a mode exists can be determined by checking if it's name is defined.
 ///
-/// @attention
+/// @note
 /// There may be additional modes on some platforms.
 ///
-/// @attention
+/// @note
 /// The actual definition is in the device platform header file.
 typedef enum {
 	GPIO_MODE_RESET = 0U, ///< The reset state of the pin.
@@ -69,10 +69,10 @@ typedef enum {
 ///
 /// An identifier for MCU pins.
 ///
-/// @attention
+/// @note
 /// The actual definition is in the device platform header file.
 ///
-/// @attention
+/// @note
 /// @c 0 is reserved for unassigned pins.
 ///
 // Using an int is simpler than a struct because I don't need to define
@@ -238,10 +238,8 @@ typedef enum {
 	/// Trigger on falling edge.
 	GPIO_TRIGGER_FALLING = 0x02U,
 } irq_trigger_t;
-
 ///
 /// Define the configuration of a GPIO-generated interrupt.
-///
 typedef struct {
 	///
 	/// The pin that generates the IRQ.
@@ -251,7 +249,6 @@ typedef struct {
 	/// This may be multiple trigger states ORd together.
 	irq_trigger_t trigger;
 } gpio_listen_cfg_t;
-
 ///
 /// Prepare a pin for interrupt triggering.
 ///
@@ -261,8 +258,8 @@ typedef struct {
 /// means determining which interrupt handler is involved for a given pin and
 /// defining it.
 /// @attention
-/// Multiple pins may share a handler or interfere with each other, that also
-/// varies by platform. Check the reference manual.
+/// Multiple pins may share a handler or interfere with each other, this varies
+/// by platform. Check the reference manual.
 ///
 /// @param handle The handle used to manage the pin. Must not be NULL.
 /// @param conf The configuration of the interrupt. Must not be NULL.
@@ -462,8 +459,8 @@ bool output_pin_is_on(gpio_pin_t pin);
 /// means determining which interrupt handler is involved for a given pin and
 /// defining it.
 /// @attention
-/// Multiple pins may share a handler or interfere with each other, that also
-/// varies by platform. Check the reference manual.
+/// Multiple pins may share a handler or interfere with each other, this varies
+/// by platform. Check the reference manual.
 ///
 /// @param handle The handle used to manage the pin. Must not be NULL.
 /// @param pin The pin to set up.
@@ -502,23 +499,23 @@ err_t input_pin_listen_off(gpio_listen_t *handle);
 #if uHAL_USE_EXPERIMENTAL_GPIO_INTERFACE || __HAVE_DOXYGEN__
 ///
 /// @name Experimental GPIO High-Level Digital Interface
+/// @{
 ///
 /// @attention
 /// This interface should not be mixed with the mode or state setting functions of
 /// other GPIO interfaces because it tracks state. Calling @c pinctrl_init()  will
 /// put it back in order again if needed.
 ///
-/// @attention
+/// @note
 /// This interface was intended to be a more runtime-efficient, reliable, and powerful
 /// replacement for the other high-level interface but seems to produce notably
 /// larger code at least in small test programs and requires a lot more overhead
 /// in configuring, so it's relegated to EXPERMENTAL status until it can be tested
 /// and refined further.
 ///
-/// @{
 //
 ///
-/// The structure used to configure a GPIO pin.
+/// A structure used to configure a GPIO pin.
 typedef struct {
 	gpio_pin_t pin; ///< The GPIO pin controlled by the handle.
 
@@ -549,7 +546,7 @@ typedef struct {
 #else // ! __HAVE_DOXYGEN__
 ///
 /// The handle used to manage a GPIO pin.
-typedef struct pinctrl_handle_t;
+typedef struct pinctrl_handle_t pinctrl_handle_t;
 #endif
 ///
 /// Initialize a @c pinctrl_handle_t based on a @c pinctrl_cfg_t struct.
@@ -654,7 +651,7 @@ typedef struct gpio_quick_t gpio_quick_t;
 ///
 /// Read a pin quickly.
 ///
-/// @attention
+/// @note
 /// @c _qpin_ must be prepared with @c gpio_quick_read_prepare() prior to use.
 ///
 /// @param _qpin_ The @c gpio_quick_t handle to read.
@@ -665,7 +662,7 @@ typedef struct gpio_quick_t gpio_quick_t;
 ///
 /// Read an input pin (kind of) quickly.
 ///
-/// @attention
+/// @note
 /// The pin must be properly configured for digital input before calling.
 ///
 /// @attention
@@ -679,7 +676,7 @@ typedef struct gpio_quick_t gpio_quick_t;
 ///
 /// Set an output pin HIGH (kind of) quickly.
 ///
-/// @attention
+/// @note
 /// The pin must be properly configured for digital output before calling.
 ///
 /// @attention
@@ -691,7 +688,7 @@ typedef struct gpio_quick_t gpio_quick_t;
 ///
 /// Set an output pin LOW (kind of) quickly.
 ///
-/// @attention
+/// @note
 /// The pin must be properly configured for digital output before calling.
 ///
 /// @attention
