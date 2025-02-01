@@ -228,6 +228,106 @@ void seconds_to_datetime(utime_t seconds, datetime_t *ret_datetime) {
 	return;
 }
 
+
+#define PRINT_ALL_FIELDS 0
+
+const char* print_duration(char *buf, uint_fast8_t buf_size, utime_t seconds) {
+	uint_fast8_t i = buf_size;
+	uint_fast32_t tmp;
+
+	ulib_assert(buf != NULL);
+	// Make sure string is large enough to hold 'DdHHhMMmSSs' + NUL byte.
+	ulib_assert(buf_size >= 12);
+
+	if (DO_TIME_SAFETY_CHECKS) {
+		if (buf == NULL || buf_size < 12) {
+			return "";
+		}
+	}
+
+	// Prefix the decrement because we start 'i' just past the end of the array.
+	// This also means buf[i] is always our string start.
+	buf[--i] = 0;
+
+	tmp = seconds % SECONDS_PER_MINUTE;
+	buf[--i] = 's';
+	buf[--i] = (char )(tmp % 10) + '0';
+	buf[--i] = (char )(tmp / 10) + '0';
+
+	tmp = seconds / SECONDS_PER_MINUTE;
+	if (!PRINT_ALL_FIELDS && tmp == 0) {
+		goto END;
+	}
+	tmp %= MINUTES_PER_HOUR;
+	buf[--i] = 'm';
+	buf[--i] = (char )(tmp % 10) + '0';
+	buf[--i] = (char )(tmp / 10) + '0';
+
+	tmp = seconds / SECONDS_PER_HOUR;
+	if (!PRINT_ALL_FIELDS && tmp == 0) {
+		goto END;
+	}
+	tmp %= (MINUTES_PER_DAY / MINUTES_PER_HOUR);
+	buf[--i] = 'h';
+	buf[--i] = (char )(tmp % 10) + '0';
+	buf[--i] = (char )(tmp / 10) + '0';
+
+	tmp = seconds / SECONDS_PER_DAY;
+	if (!PRINT_ALL_FIELDS && tmp == 0) {
+		goto END;
+	}
+	buf[--i] = 'd';
+	do {
+		buf[--i] = (char )(tmp % 10) + '0';
+		tmp /= 10;
+	} while (tmp > 0 && i > 0);
+
+END:
+	return &buf[i];
+}
+
+const char* print_datetime(char *buf, uint_fast8_t buf_size, datetime_t *datetime) {
+	uint_fast8_t i;
+
+	ulib_assert(buf != NULL);
+	// Make sure string is large enough to hold 'YYYY.MM.DD_HH:mm:ss' + NUL byte.
+	ulib_assert(buf_size >= 20);
+	ulib_assert(datetime != NULL);
+	ulib_assert(datetime->year < 10000);
+
+	if (DO_TIME_SAFETY_CHECKS) {
+		if (buf == NULL || buf_size < 20 || datetime == NULL || datetime->year >= 10000) {
+			return "";
+		}
+	}
+
+	i = 0;
+	buf[i++] = (char )('0' + ((datetime->year / 1000)));
+	buf[i++] = (char )('0' + ((datetime->year % 1000) / 100));
+	buf[i++] = (char )('0' + ((datetime->year % 100 ) / 10));
+	buf[i++] = (char )('0' + ((datetime->year % 10  )));
+	buf[i++] = '.';
+	buf[i++] = (char )('0' + ((datetime->month / 10 )));
+	buf[i++] = (char )('0' + ((datetime->month % 10 )));
+	buf[i++] = '.';
+	buf[i++] = (char )('0' + ((datetime->day / 10 )));
+	buf[i++] = (char )('0' + ((datetime->day % 10 )));
+	buf[i++] = '_';
+	buf[i++] = (char )('0' + ((datetime->hour / 10 )));
+	buf[i++] = (char )('0' + ((datetime->hour % 10 )));
+	buf[i++] = ':';
+	buf[i++] = (char )('0' + ((datetime->minute / 10 )));
+	buf[i++] = (char )('0' + ((datetime->minute % 10 )));
+	buf[i++] = ':';
+	buf[i++] = (char )('0' + ((datetime->second / 10 )));
+	buf[i++] = (char )('0' + ((datetime->second % 10 )));
+
+	buf[i] = 0;
+
+	return buf;
+}
+
+
 #else
 	// ISO C forbids empty translation units, this makes it happy.
 	typedef int make_iso_compilers_happy;
