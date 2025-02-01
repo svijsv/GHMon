@@ -51,7 +51,8 @@ static err_t FRESULT_to_err_t(FRESULT fres) {
 }
 
 static void init_log_SD(void) {
-	output_pin_on(SPI_CS_SD_PIN);
+	//output_pin_on(SPI_CS_SD_PIN);
+	gpio_set_mode(SPI_CS_SD_PIN, GPIO_MODE_PP, GPIO_HIGH);
 	return;
 }
 

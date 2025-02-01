@@ -12,6 +12,8 @@
 // See src/sensors.h for details of the data structures involved.
 //
 
+#include "ulib/include/fixed_point.h"
+
 //
 // Sensors aren't currently used in this configuration so all of this is ignored
 // by the build.
@@ -31,9 +33,9 @@ INLINE uint32_t adc_to_resistance(uint32_t val, uint32_t R1) {
 	}
 	return (val * R1) / (ADC_MAX - val);
 }
-#define C_TO_K(_t_) ((_t_) + (FIXED_PNT_FROM_INT(27315U)/100U))
-#define K_TO_C(_t_) ((_t_) - (FIXED_PNT_FROM_INT(27315U)/100U))
-#define C_TO_F(_t_) (FIXED_PNT_MUL((_t_), (FIXED_PNT_FROM_INT(18U)/10U)) + FIXED_PNT_FROM_INT(32U))
+#define C_TO_K(_t_) ((_t_) + (FIXED_POINT_FROM_INT(27315U)/100U))
+#define K_TO_C(_t_) ((_t_) - (FIXED_POINT_FROM_INT(27315U)/100U))
+#define C_TO_F(_t_) (FIXED_POINT_MUL((_t_), (FIXED_POINT_FROM_INT(18U)/10U)) + FIXED_POINT_FROM_INT(32U))
 #define K_TO_F(_t_) (C_TO_F(K_TO_C(_t_)))
 
 //
@@ -41,11 +43,11 @@ INLINE uint32_t adc_to_resistance(uint32_t val, uint32_t R1) {
 //
 static void thermistor_read(sensor_reading_t *ret, gpio_pin_t pin) {
 	// The reference temperature is given in Celsius but the calculations use Kelvin
-	static const fixed_pnt_t B_div_T0 = FIXED_PNT_DIV(FIXED_PNT_FROM_INT(THERMISTOR_BETA_COEFFICIENT), C_TO_K(FIXED_PNT_FROM_INT(THERMISTOR_REFERENCE_VALUE)));
-	static fixed_pnt_t log_R0 = 0;
+	static const fixed_point_t B_div_T0 = FIXED_POINT_DIV(FIXED_POINT_FROM_INT(THERMISTOR_BETA_COEFFICIENT), C_TO_K(FIXED_POINT_FROM_INT(THERMISTOR_REFERENCE_VALUE)));
+	static fixed_point_t log_R0 = 0;
 
 	if (log_R0 == 0) {
-		log_R0 = log_fixed_pnt(fixed_pnt_from_int(THERMISTOR_REFERENCE_OHMS));
+		log_R0 = log_fixed_point(fixed_point_from_int(THERMISTOR_REFERENCE_OHMS));
 	}
 
 	bool enable_adc = (!adc_is_on());
@@ -68,7 +70,7 @@ static void thermistor_read(sensor_reading_t *ret, gpio_pin_t pin) {
 		adc_value = ADC_MAX - 1;
 	}
 
-	fixed_pnt_t therm_r = fixed_pnt_from_int(adc_to_resistance(adc_value, THERMISTOR_SERIES_OHMS));
+	fixed_point_t therm_r = fixed_point_from_int(adc_to_resistance(adc_value, THERMISTOR_SERIES_OHMS));
 
 	// Temperature here must be done using the Kelvin scale. Many hours of
 	// confusion will be prevented by remembering that.
@@ -87,14 +89,14 @@ static void thermistor_read(sensor_reading_t *ret, gpio_pin_t pin) {
 	//
 	// Step 1: (B/T0) + log(R1 / R0)
 	//     or: (B/T0) + (log(R) - log(R0))
-	fixed_pnt_t tmp = B_div_T0 + (log_fixed_pnt(therm_r) - log_R0);
+	fixed_point_t tmp = B_div_T0 + (log_fixed_point(therm_r) - log_R0);
 	//
 	// Step 2: B / (the above)
 	if (tmp == 0) {
 		// This is the smallest non-zero value our fixed-point number can be
 		tmp = 1;
 	}
-	tmp = fixed_pnt_div(fixed_pnt_from_int(THERMISTOR_BETA_COEFFICIENT), tmp);
+	tmp = fixed_point_div(fixed_point_from_int(THERMISTOR_BETA_COEFFICIENT), tmp);
 
 	if (USE_FAHRENHEIT) {
 		tmp = K_TO_F(tmp);
@@ -102,9 +104,9 @@ static void thermistor_read(sensor_reading_t *ret, gpio_pin_t pin) {
 		tmp = K_TO_C(tmp);
 	}
 	if (TEMPERATURE_SCALE > 1) {
-		tmp = fixed_pnt_mul_by_int(tmp, TEMPERATURE_SCALE);
+		tmp = fixed_point_mul_by_int(tmp, TEMPERATURE_SCALE);
 	}
-	ret->value = fixed_pnt_to_int_rounded(tmp);
+	ret->value = fixed_point_to_int_rounded(tmp);
 
 	return;
 }

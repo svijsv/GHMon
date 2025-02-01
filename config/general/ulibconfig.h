@@ -24,6 +24,8 @@
 # define DEBUG_CPP_MESSAGES DEBUG
 #endif
 
+#define ULIB_ENABLE_ERROR 1
+
 #define ULIB_ENABLE_FMEM 1
 //#define FMEM_STR_BYTES 96U
 

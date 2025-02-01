@@ -198,12 +198,14 @@ int main(void) {
 			break;
 
 		case 4: {
-			uint time_h = RESET_TIME_OFFSET_MINUTES / 60U;
-			uint time_m = RESET_TIME_OFFSET_MINUTES % 60U;
+			datetime_t dt = {
+				.hour   = RESET_TIME_OFFSET_MINUTES / 60,
+				.minute = RESET_TIME_OFFSET_MINUTES % 60,
+			};
 
 			led_flash(4, STATUS_LED_LONG_DELAY_MS);
-			LOGGER("Setting system time to %u:%02u:00", (uint )time_h, (uint )time_m);
-			set_time(time_h, time_m, 0);
+			LOGGER("Setting system time to %u:%02u:00", (uint )dt.hour, (uint )dt.minute);
+			set_RTC_datetime(&dt);
 			next_wakeup = set_alarms(true);
 			break;
 		}

@@ -194,8 +194,8 @@ static void buffer_status_line(void);
 static void lprintf_putc(uint_fast8_t c);
 static void lprintf(const char *format, ...)
 	__attribute__ ((format(printf, 1, 2)));
-static char* format_print_time(utime_t uptime, time_format_t format);
-static char* format_warnings(uint8_t warnings);
+static const char* format_print_time(utime_t uptime, time_format_t format);
+static const char* format_warnings(uint8_t warnings);
 static err_t open_log_storage(void);
 static err_t open_log_file(void);
 static void close_log_storage(void);
@@ -586,9 +586,10 @@ void write_log_to_storage(uint_fast8_t flags) {
 	return;
 }
 
-static char* format_print_time(utime_t uptime, time_format_t format) {
+static const char* format_print_time(utime_t uptime, time_format_t format) {
 	// 20 is enough to hold '2021.02.15 12:00:00' with a trailing NUL
 	static char timestr[20];
+	const char *ret = timestr;
 
 	if (format == TIME_FORMAT_AUTO) {
 		// Assume that if the year hasn't been set, this is an uptime not a date
@@ -605,65 +606,20 @@ static char* format_print_time(utime_t uptime, time_format_t format) {
 		cstring_from_uint(timestr, SIZEOF_ARRAY(timestr), uptime, 10);
 
 	} else if (format == TIME_FORMAT_DURATION) {
-		uint offset;
-		const uint len = SIZEOF_ARRAY(timestr);
-
 		// FIXME: Buffer overflow with days > 999999 (~2740 years)
-		// Days
-		offset = cstring_from_uint(timestr, len, (uptime / SECONDS_PER_DAY), 10);
-		timestr[offset] = 'd'; ++offset;
-
-		// Hours
-		uptime %= SECONDS_PER_DAY;
-		offset += cstring_from_uint(&timestr[offset], len - offset, (uptime / SECONDS_PER_HOUR), 10);
-		timestr[offset] = 'h'; ++offset;
-
-		// Minutes
-		uptime %= SECONDS_PER_HOUR;
-		offset += cstring_from_uint(&timestr[offset], len - offset, (uptime / SECONDS_PER_MINUTE), 10);
-		timestr[offset] = 'm'; ++offset;
-
-		// Seconds
-		offset += cstring_from_uint(&timestr[offset], len - offset, (uptime % SECONDS_PER_MINUTE), 10);
-		timestr[offset] = 's';
-		timestr[offset+1] = 0;
+		ret = print_duration(timestr, SIZEOF_ARRAY(timestr), uptime);
 
 	} else {
-		uiter_t i;
-		uint8_t year, month, day, hour, minute, second;
-		uint16_t ayear;
+		datetime_t dt;
 
-		seconds_to_date(uptime, &year, &month, &day);
-		seconds_to_time(uptime, &hour, &minute, &second);
-
-		i = 0;
-		ayear = year + TIME_YEAR_0;
-		timestr[i++] = '0' + ((ayear / 1000));
-		timestr[i++] = '0' + ((ayear % 1000) / 100);
-		timestr[i++] = '0' + ((ayear % 100 ) / 10);
-		timestr[i++] = '0' + ((ayear % 10  ));
-		timestr[i++] = '.';
-		timestr[i++] = '0' + ((month / 10 ));
-		timestr[i++] = '0' + ((month % 10 ));
-		timestr[i++] = '.';
-		timestr[i++] = '0' + ((day / 10 ));
-		timestr[i++] = '0' + ((day % 10 ));
-		timestr[i++] = '_';
-		timestr[i++] = '0' + ((hour / 10 ));
-		timestr[i++] = '0' + ((hour % 10 ));
-		timestr[i++] = ':';
-		timestr[i++] = '0' + ((minute / 10 ));
-		timestr[i++] = '0' + ((minute % 10 ));
-		timestr[i++] = ':';
-		timestr[i++] = '0' + ((second / 10 ));
-		timestr[i++] = '0' + ((second % 10 ));
-
-		timestr[i] = 0;
+		seconds_to_datetime(uptime, &dt);
+		ret = print_datetime(timestr, SIZEOF_ARRAY(timestr), &dt);
 	}
 
-	return timestr;
+	return ret;
 }
-static char* format_warnings(uint8_t warnings) {
+
+static const char* format_warnings(uint8_t warnings) {
 	// 10 is enough to hold eight warning bits + a leading '!' + a trailing NUL
 	static char wstr[10];
 	// The order of the symbols needs to correspond to the warning bits set in

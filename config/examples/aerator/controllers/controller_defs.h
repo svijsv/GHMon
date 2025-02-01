@@ -16,14 +16,14 @@
 // Section 0, helper functions
 //
 
-#include "ulib/include/math.h"
+#include "ulib/include/fixed_point.h"
 
 //
 // Conversions
 //
-#define C_TO_K(_t_) ((_t_) + (FIXED_PNT_FROM_INT(27315U)/100U))
-#define K_TO_C(_t_) ((_t_) - (FIXED_PNT_FROM_INT(27315U)/100U))
-#define C_TO_F(_t_) (FIXED_PNT_MUL((_t_), (FIXED_PNT_FROM_INT(18U)/10U)) + FIXED_PNT_FROM_INT(32U))
+#define C_TO_K(_t_) ((_t_) + (FIXED_POINT_FROM_INT(27315U)/100U))
+#define K_TO_C(_t_) ((_t_) - (FIXED_POINT_FROM_INT(27315U)/100U))
+#define C_TO_F(_t_) (FIXED_POINT_MUL((_t_), (FIXED_POINT_FROM_INT(18U)/10U)) + FIXED_POINT_FROM_INT(32U))
 #define K_TO_F(_t_) (C_TO_F(K_TO_C(_t_)))
 
 INLINE uint_fast16_t adc_to_voltage(uint32_t val, uint32_t vref) {
@@ -41,11 +41,11 @@ INLINE uint32_t adc_to_resistance(uint32_t val, uint32_t R1) {
 //
 static uint_fast16_t read_thermistor(gpio_pin_t pin) {
 	// The reference temperature is given in Celsius but the calculations use Kelvin
-	static const fixed_pnt_t B_div_T0 = FIXED_PNT_DIV(FIXED_PNT_FROM_INT(THERMISTOR_BETA_COEFFICIENT), C_TO_K(FIXED_PNT_FROM_INT(THERMISTOR_REFERENCE_VALUE)));
-	static fixed_pnt_t log_R0 = 0;
+	static const fixed_point_t B_div_T0 = FIXED_POINT_DIV(FIXED_POINT_FROM_INT(THERMISTOR_BETA_COEFFICIENT), C_TO_K(FIXED_POINT_FROM_INT(THERMISTOR_REFERENCE_VALUE)));
+	static fixed_point_t log_R0 = 0;
 
 	if (log_R0 == 0) {
-		log_R0 = log_fixed_pnt(fixed_pnt_from_int(THERMISTOR_REFERENCE_OHMS));
+		log_R0 = log_fixed_point(fixed_point_from_int(THERMISTOR_REFERENCE_OHMS));
 	}
 
 	adc_t adc_value = adc_read_pin(pin);
@@ -56,7 +56,7 @@ static uint_fast16_t read_thermistor(gpio_pin_t pin) {
 	if (!SERIES_R_IS_HIGH_SIDE) {
 		adc_value = ADC_MAX - adc_value;
 	}
-	fixed_pnt_t therm_r = fixed_pnt_from_int(adc_to_resistance(adc_value, THERMISTOR_SERIES_OHMS));
+	fixed_point_t therm_r = fixed_point_from_int(adc_to_resistance(adc_value, THERMISTOR_SERIES_OHMS));
 	// therm_r == 0 would cause a divide-by-0 in the log calculation
 	if (therm_r == 0) {
 		return 0;
@@ -79,7 +79,7 @@ static uint_fast16_t read_thermistor(gpio_pin_t pin) {
 	//
 	// Step 1: (B/T0) + log(R1 / R0)
 	//     or: (B/T0) + (log(R) - log(R0))
-	fixed_pnt_t tmp = B_div_T0 + (log_fixed_pnt(therm_r) - log_R0);
+	fixed_point_t tmp = B_div_T0 + (log_fixed_point(therm_r) - log_R0);
 
 	//
 	// Step 2: B / (the above)
@@ -87,7 +87,7 @@ static uint_fast16_t read_thermistor(gpio_pin_t pin) {
 		// This is the smallest non-zero value our fixed-point number can be
 		tmp = 1;
 	}
-	tmp = fixed_pnt_div(fixed_pnt_from_int(THERMISTOR_BETA_COEFFICIENT), tmp);
+	tmp = fixed_point_div(fixed_point_from_int(THERMISTOR_BETA_COEFFICIENT), tmp);
 
 	if (USE_FAHRENHEIT) {
 		tmp = K_TO_F(tmp);
@@ -95,10 +95,10 @@ static uint_fast16_t read_thermistor(gpio_pin_t pin) {
 		tmp = K_TO_C(tmp);
 	}
 	if (TEMPERATURE_SCALE > 1) {
-		tmp = fixed_pnt_mul_by_int(tmp, TEMPERATURE_SCALE);
+		tmp = fixed_point_mul_by_int(tmp, TEMPERATURE_SCALE);
 	}
 
-	return fixed_pnt_to_int_rounded(tmp);
+	return fixed_point_to_int_rounded(tmp);
 }
 
 //
