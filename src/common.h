@@ -60,6 +60,7 @@ void led_off(void);
 void led_toggle(void);
 void led_flash(uint8_t count, uint16_t ms);
 void issue_warning(void);
+err_t set_system_datetime(datetime_t *dt);
 
 #if USE_DELAY_INSTEAD_OF_SLEEP
 # define sleep_ms(_x_) delay_ms(_x_)

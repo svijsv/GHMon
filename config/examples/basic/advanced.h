@@ -113,11 +113,7 @@
 // The LED will flash when pressed and then every CTRL_PRESS milliseconds, and
 // the same number of times again when the button is released to indicate the
 // action being taken.
-// CTRL_PRESS x 0  : Take any actions with a check period of 0
-// CTRL_PRESS x 1  : Sync log data to file
-// CTRL_PRESS x 2  : Check device controllers
-// CTRL_PRESS x 3  : Set time of day to 00:00:00 + RESET_TIME_OFFSET_MINUTES
-// CTRL_PRESS x >=4: Cancel
+// The action taken is determined by ctrl_press_hook() in main_hooks.h.
 #define CTRL_PRESS_MS (1500)
 //
 // Delay this many milliseconds after the first button press is registered

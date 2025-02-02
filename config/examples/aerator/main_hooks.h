@@ -53,3 +53,10 @@ static void early_loop_hook(void) {
 static void late_loop_hook(void) {
 	return;
 }
+//
+// Hook executed when the UI button is pressed
+// The argument is the number of CTRL_PRESS_MS periods that the button was
+// held for.
+static void ctrl_button_hook(uint_fast8_t held_periods) {
+	return;
+}

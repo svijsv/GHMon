@@ -59,6 +59,7 @@ static utime_t log_alarm = 0;
 static utime_t status_alarm = 0;
 static utime_t deskew_alarm = 0;
 static utime_t fine_deskew_alarm = 0;
+static utime_t next_wakeup;
 
 static utime_t set_alarms(bool force);
 static void check_warnings(void);
@@ -80,8 +81,6 @@ static inline utime_t correct_deskew_alarm(const utime_t now, const utime_t alar
 // Program entry point
 //
 int main(void) {
-	utime_t next_wakeup;
-
 	platform_init();
 	early_init_hook();
 
@@ -162,61 +161,11 @@ int main(void) {
 		force_controllers = false;
 
 #if USE_CTRL_BUTTON
-		switch (ctrl_button_pressed) {
-		case 0:
-			break;
-
-		case 1:
-			led_flash(1, STATUS_LED_ACK_DELAY_MS);
-			if (CONTROLLER_CHECK_MINUTES == 0) {
-				do_controllers = true;
-				LOGGER("Running controllers");
-			}
-			if (USE_LOGGING && LOG_APPEND_MINUTES == 0) {
-				do_log = true;
-				LOGGER("Appending to log");
-			}
-			LOGGER("Updating status");
-			do_status = true;
-			break;
-
-		case 2:
-			led_flash(2, STATUS_LED_LONG_DELAY_MS);
-			if (USE_LOGGING) {
-				LOGGER("Forcing log sync");
-				force_sync = true;
-			} else {
-				LOGGER("No action taken, logging disabled");
-			}
-			break;
-
-		case 3:
-			led_flash(3, STATUS_LED_LONG_DELAY_MS);
-			LOGGER("Forcing controller run");
-			do_controllers = true;
-			force_controllers = true;
-			break;
-
-		case 4: {
-			datetime_t dt = {
-				.hour   = RESET_TIME_OFFSET_MINUTES / 60,
-				.minute = RESET_TIME_OFFSET_MINUTES % 60,
-			};
-
-			led_flash(4, STATUS_LED_LONG_DELAY_MS);
-			LOGGER("Setting system time to %u:%02u:00", (uint )dt.hour, (uint )dt.minute);
-			set_RTC_datetime(&dt);
-			next_wakeup = set_alarms(true);
-			break;
+		if (ctrl_button_pressed != 0) {
+			ctrl_button_hook(ctrl_button_pressed - 1);
+			ctrl_button_pressed = 0;
 		}
-
-		default:
-			led_flash(2, STATUS_LED_ACK_DELAY_MS);
-			LOGGER("No action taken");
-			break;
-		}
-		ctrl_button_pressed = 0;
-#endif // USE_CTRL_BUTTON
+#endif
 
 		early_loop_hook();
 
@@ -427,6 +376,15 @@ static void check_warnings(void) {
 	}
 
 	return;
+}
+
+err_t set_system_datetime(datetime_t *dt) {
+	err_t ret;
+
+	ret = set_RTC_datetime(dt);
+	next_wakeup = set_alarms(true);
+
+	return ret;
 }
 
 void error_state_hook(void) {
