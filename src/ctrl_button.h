@@ -27,6 +27,36 @@
 static uint_fast8_t ctrl_button_pressed = 0;
 static gpio_listen_t ctrl_button_listen_handle;
 
+// When not using high-level pin configuration assume the button is pulled down
+// to signal ON so that we can use the internal pullup on devices without pulldowns.
+#if ! uHAL_USE_HIGH_LEVEL_GPIO
+static void button_pin_on(gpio_pin_t pin) {
+	gpio_listen_cfg_t cfg = {
+		pin,
+		GPIO_TRIGGER_FALLING
+	};
+
+	gpio_set_mode(pin, GPIO_MODE_IN, GPIO_HIGH);
+	gpio_listen_init(&ctrl_button_listen_handle, &cfg);
+
+	return;
+}
+static bool button_pin_is_on(gpio_pin_t pin) {
+	return (gpio_get_input_state(pin) == GPIO_LOW);
+}
+
+#else
+static void button_pin_on(gpio_pin_t pin) {
+	input_pin_on(pin);
+	input_pin_listen_init(&ctrl_button_listen_handle, pin);
+
+	return;
+}
+static bool button_pin_is_on(gpio_pin_t pin) {
+	return input_pin_is_on(pin);
+}
+#endif
+
 #if HAVE_STM32
 # if GPIO_GET_PINNO(CTRL_BUTTON_PIN) == 0
 #  define CTRL_BUTTON_ISR EXTI0_IRQHandler
@@ -104,7 +134,7 @@ static void button_IRQHandler(void) {
 		// This must be delay_ms(), sleep_ms() pauses the systick timer which
 		// we need to detect timeouts.
 		delay_ms(10);
-	} while (input_pin_is_on(CTRL_BUTTON_PIN));
+	} while (button_pin_is_on(CTRL_BUTTON_PIN));
 
 	if (BUTTON_DEBOUNCE_MS) {
 		sleep_ms(BUTTON_DEBOUNCE_MS);

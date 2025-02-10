@@ -67,7 +67,8 @@ static err_t open_output_device(void) {
 	bool abort_logging = false;
 
 	if (LOG_POWER_PIN != 0) {
-		output_pin_on(LOG_POWER_PIN);
+		//output_pin_on(LOG_POWER_PIN);
+		gpio_set_output_state(LOG_POWER_PIN, GPIO_HIGH);
 		if (LOG_POWER_UP_DELAY_MS > 0) {
 			delay_ms(LOG_POWER_UP_DELAY_MS);
 		}
@@ -105,7 +106,8 @@ static err_t close_output_device(void) {
 		if (LOG_POWER_DOWN_DELAY_MS > 0) {
 			delay_ms(LOG_POWER_DOWN_DELAY_MS);
 		}
-		output_pin_off(LOG_POWER_PIN);
+		//output_pin_off(LOG_POWER_PIN);
+		gpio_set_output_state(LOG_POWER_PIN, GPIO_LOW);
 	}
 
 	return ERR_OK;

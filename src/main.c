@@ -84,9 +84,15 @@ int main(void) {
 	platform_init();
 	early_init_hook();
 
+#if USE_STATUS_LED
+# if uHAL_USE_HIGH_LEVEL_GPIO
+	output_pin_off(STATUS_LED_PIN);
+# else
+	gpio_set_mode(STATUS_LED_PIN, GPIO_MODE_PP, GPIO_LOW);
+# endif
+#endif
 #if USE_CTRL_BUTTON
-	input_pin_on(CTRL_BUTTON_PIN);
-	input_pin_listen_init(&ctrl_button_listen_handle, CTRL_BUTTON_PIN);
+	button_pin_on(CTRL_BUTTON_PIN);
 #endif
 #if USE_UART_TERMINAL
 	uart_listen_on(UART_COMM_PORT);
@@ -306,24 +312,50 @@ static void deskew_clock(int_fast16_t correction) {
 	return;
 }
 
-void led_on(void) {
 #if USE_STATUS_LED
+# if uHAL_USE_HIGH_LEVEL_GPIO
+static void led_pin_on(void) {
 	output_pin_on(STATUS_LED_PIN);
-#endif
+	return;
+}
+static void led_pin_off(void) {
+	output_pin_off(STATUS_LED_PIN);
+	return;
+}
+# else
+static void led_pin_on(void) {
+	gpio_set_output_state(STATUS_LED_PIN, GPIO_HIGH);
+	return;
+}
+static void led_pin_off(void) {
+	gpio_set_output_state(STATUS_LED_PIN, GPIO_LOW);
+	return;
+}
+# endif
+
+void led_on(void) {
+	output_pin_on(STATUS_LED_PIN);
 	return;
 }
 void led_off(void) {
-#if USE_STATUS_LED
 	output_pin_off(STATUS_LED_PIN);
-#endif
 	return;
 }
 void led_toggle(void) {
-#if USE_STATUS_LED
-	output_pin_toggle(STATUS_LED_PIN);
-#endif
+	gpio_toggle_output_state(STATUS_LED_PIN);
 	return;
 }
+#else
+void led_on(void) {
+	return;
+}
+void led_off(void) {
+	return;
+}
+void led_toggle(void) {
+	return;
+}
+#endif
 void led_flash(uint8_t count, uint16_t ms) {
 	if (USE_STATUS_LED) {
 		for (uiter_t i = 0; i < count; ++i) {
@@ -386,6 +418,7 @@ err_t set_system_datetime(datetime_t *dt) {
 
 	return ret;
 }
+
 
 void error_state_hook(void) {
 	led_toggle();

@@ -25,8 +25,6 @@
 #define UART_COMM_BUFFER_BYTES 16U
 #define TERMINAL_TIMEROUT_S 600U // 10 minutes
 
-#define uHAL_USE_HIGH_LEVEL_GPIO 1
-
 #define uHAL_USE_RTC 1
 
 //
