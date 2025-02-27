@@ -201,7 +201,7 @@
 #define ACTUATOR_CFG_STORAGE const FMEM_STORAGE
 
 //
-// The number of bytes used for the SD card write buffer
+// The number of bytes used for the log write buffer
 // FatFS has it's own 512-byte buffer so when the size of all the data to be
 // written is <= 512 bytes this just serves to minimize the number of write
 // calls that need to be made to the FatFS library.
