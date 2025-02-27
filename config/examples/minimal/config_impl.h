@@ -16,7 +16,7 @@
 //
 // If set, measure the ADC voltage reference instead of using REGULATED_VOLTAGE_mV
 // to facilitate unregulated power sources (e.g. batteries)
-#define CALIBRATE_VREF 1
+#define CALIBRATE_VREF 0
 
 //
 // Sensor configuration
