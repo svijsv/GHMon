@@ -88,8 +88,8 @@
 // buffered + the newest).
 // The log buffer is allocated at run-time so any RAM usage report offered by the
 // build system is going to be wrong. Generally you can expect 36 bytes per
-// buffered line on 32-bit devices with the default build settings or 26 bytes
-// for 8/16 bit devices.
+// device for each line on 32-bit devices with the default build settings or 26
+// bytes for 8/16 bit devices.
 // Set to 0 to disable buffering.
 #define LOG_LINE_BUFFER_COUNT 15 // 4h with 15m intervals
 //

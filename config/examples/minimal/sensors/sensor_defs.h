@@ -12,12 +12,12 @@
 // See src/sensors.h for details of the data structures involved.
 //
 
-#include "ulib/include/fixed_point.h"
-
 //
 // Sensors aren't currently used in this configuration so all of this is ignored
 // by the build.
 //
+
+#include "ulib/include/fixed_point.h"
 
 uint_fast16_t ADC_Vref_mV = REGULATED_VOLTAGE_mV;
 
