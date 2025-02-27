@@ -139,21 +139,6 @@
 #define RTC_FINE_CORRECTION_SECONDS 0
 
 //
-// If set to 1, measure the analog voltage reference on power-up to give
-// (hopefully) more accurate ADC readings
-// If set to 2, measure the analog voltage reference regularly to account for
-// variations
-// If set to 3, measure the analog voltage reference before each use of the ADC
-// This must be set to 2 to warn if the regulated voltage drops below the
-// warning threshold
-// The utility of this calibration depends on the accuracy of INTERNAL_VREF_mV
-#define CALIBRATE_VREF 1
-//
-// The minimum number of minutes between voltage reference measurements when
-// CALIBRATE_VREF is set to 2
-#define CALIBRATE_VREF_COOLDOWN_MINUTES 15
-
-//
 // Maximum length of sensor, controller, and actuator names
 // Increasing this will increase the ROM space used, but depending on struct
 // layout it may not be a direct relationship; typically rounding the number
