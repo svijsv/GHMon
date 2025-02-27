@@ -174,6 +174,13 @@ static err_t pump_run(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, controller_s
 
 	if (VIN_SENSE_PIN != 0) {
 		uint_fast16_t voltage;
+		uint32_t vref;
+
+		if (CALIBRATE_VREF) {
+			vref = adc_read_vref_mV();
+		} else {
+			vref = REGULATED_VOLTAGE_mV;
+		}
 
 		if (set_analog_mode) {
 			gpio_set_mode(VIN_SENSE_PIN, GPIO_MODE_AIN, GPIO_FLOAT);
@@ -181,7 +188,7 @@ static err_t pump_run(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, controller_s
 
 		adcm_t tmp = adc_read_pin(VIN_SENSE_PIN);
 		tmp = (tmp * (VIN_VDIV_HIGH_SIDE_OHMS + VIN_VDIV_LOW_SIDE_OHMS)) / VIN_VDIV_LOW_SIDE_OHMS;
-		voltage = adc_to_voltage(tmp, REGULATED_VOLTAGE_mV);
+		voltage = adc_to_voltage(tmp, vref);
 
 		if (set_analog_mode) {
 			gpio_set_mode(VIN_SENSE_PIN, GPIO_MODE_RESET, GPIO_FLOAT);

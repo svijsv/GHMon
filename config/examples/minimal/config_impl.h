@@ -13,6 +13,10 @@
 // If > 1, scale temperatures by this factor (e.g. by 10 in order to track by
 // tenths of a degree)
 #define TEMPERATURE_SCALE 1
+//
+// If set, measure the ADC voltage reference instead of using REGULATED_VOLTAGE_mV
+// to facilitate unregulated power sources (e.g. batteries)
+#define CALIBRATE_VREF 1
 
 //
 // Sensor configuration
