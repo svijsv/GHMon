@@ -100,11 +100,15 @@ sensor_reading_t* thermistor_read(SENSOR_CFG_STORAGE struct sensor_cfg_t *cfg, s
 	// Temperature here must be done using the Kelvin scale. Many hours of
 	// confusion will be prevented by remembering that.
 	//
-	// Using 1/T = 1/T0 + 1/B * log(R/R0)
-	// T = 1/(1/T0 + (log(R/R0)/B))
+	// The C log() function (and ulib's log_fixed_point()) returns the natural
+	// logarithm, which is more commonly abreviated as ln(). Remembering this
+	// will also help avoid confusion.
+	//
+	// Using 1/T = 1/T0 + 1/B * ln(R/R0)
+	// T = 1/(1/T0 + (ln(R/R0)/B))
 	//
 	// With a little work, this becomes:
-	// T = B / ((B/T0) + log(R1 / R0))
+	// T = B / ((B/T0) + ln(R1 / R0))
 	//
 	// ...thereby reducing the number of divisions by 1 AND reducing the
 	// required fixed-point precision from >=18 to >=4, meaning we can fit our
@@ -112,8 +116,8 @@ sensor_reading_t* thermistor_read(SENSOR_CFG_STORAGE struct sensor_cfg_t *cfg, s
 	// software 64-bit divisions. To further reduce runtime, (B/T0) and log(R0)
 	// can be cached at initialization.
 	//
-	// Step 1: (B/T0) + log(R1 / R0)
-	//     or: (B/T0) + (log(R) - log(R0))
+	// Step 1: (B/T0) + ln(R1 / R0)
+	//     or: (B/T0) + (ln(R) - ln(R0))
 	fixed_point_t tmp = B_div_T0 + (log_fixed_point(therm_r) - log_R0);
 	//
 	// Step 2: B / (the above)
