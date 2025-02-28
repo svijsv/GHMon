@@ -53,7 +53,8 @@
 // considered warm enough for pumping
 // If this is 0, calculate the temperature using the thermistor values defined
 // above and PUMP_MIN_WATER_TEMP below.
-#define WATER_TEMP_OK_OHMS 36850U // 7C, ~45F
+//#define WATER_TEMP_OK_OHMS 46850U // 7C, ~45F
+#define WATER_TEMP_OK_OHMS 40350U // 10C, 50F
 //#define WATER_TEMP_OK_OHMS 27500U // 18C, ~65F
 //
 // The minimum water reservoir temperature required to enable pumping
