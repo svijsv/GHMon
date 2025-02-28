@@ -293,6 +293,10 @@ static utime_t set_alarms(bool force) {
 
 	int diff = (next > now) ? (int )(next - now) : -((int )(now - next));
 	LOGGER("Next alarm in %d seconds: %s", diff, reason);
+	// Get rid of compiler warnings when LOGGER() isn't used
+	UNUSED(diff);
+	UNUSED(reason);
+
 	return next;
 }
 

@@ -126,6 +126,10 @@ void run_common_controllers(bool manual, bool force) {
 	CONTROLLER_CFG_STORAGE controller_cfg_t *cfg;
 	controller_status_t *status;
 
+	// Get rid of compiler warnings when features are disabled
+	UNUSED(manual);
+	UNUSED(force);
+
 	for (CONTROLLER_INDEX_T i = 0; i < CONTROLLER_COUNT; ++i) {
 		cfg = &CONTROLLERS[i];
 		status = &controllers[i];
@@ -228,6 +232,9 @@ END:
 	return ERR_OK;
 }
 void calculate_common_controller_alarms(bool force) {
+	// Get rid of compiler warning when scheduling isn't used
+	UNUSED(force);
+
 #if USE_CONTROLLER_SCHEDULE || USE_CONTROLLER_NEXTTIME
 	CONTROLLER_CFG_STORAGE controller_cfg_t *cfg;
 	controller_status_t *status;
@@ -245,10 +252,11 @@ void calculate_common_controller_alarms(bool force) {
 	return;
 }
 utime_t find_next_common_controller_alarm(void) {
-	controller_status_t *status;
 	utime_t next = 0;
 
 #if USE_CONTROLLER_SCHEDULE || USE_CONTROLLER_NEXTTIME
+	controller_status_t *status;
+
 	for (CONTROLLER_INDEX_T i = 0; i < CONTROLLER_COUNT; ++i) {
 		status = &controllers[i];
 

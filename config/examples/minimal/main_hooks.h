@@ -57,6 +57,9 @@ static void late_loop_hook(void) {
 // Hook executed when the UI button is pressed
 // The argument is the number of CTRL_PRESS_MS periods that the button was
 // held for.
+#if USE_CTRL_BUTTON
 static void ctrl_button_hook(uint_fast8_t held_periods) {
+	UNUSED(held_periods);
 	return;
 }
+#endif
