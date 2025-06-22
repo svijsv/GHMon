@@ -24,7 +24,8 @@ static bool do_status      = false;
 //
 // If > 0, set a wake alarm for this time (system time designated in seconds)
 // This variable is not reset ever, it's the responsibility of the hooks to disable
-// or update it as required.
+// or update it as required.. This alarm is a user-controlled alarm distinct from
+// those used for internal features like controller scheduling.
 static utime_t wake_alarm = 0;
 
 //
