@@ -23,8 +23,8 @@ General settings universal to all builds are located in `config/general`. This
 directory can mostly be ignored.
 
 Settings specific to a particular build are taken from an 'instance' directory
-defined in the environment variable `INSTANCE_DIR`, an example of which can be
-found at `config/instance`.
+defined in the environment variable `INSTANCE_DIR`, examples of which can be
+found at `config/examples`.
 * `config.h` and `advanced.h` contain general configuration details.
 * `sensors/sensor_defs.h` contains the implementation details of the sensors.
 * `actuators/actuator_defs.h` contains the implementation details of the actuators.
