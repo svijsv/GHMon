@@ -32,6 +32,8 @@
 
 #include GHMON_INCLUDE_CONFIG_HEADER(controllers/controller_defs.h)
 
+#define TRACK_GLOBAL_SCHEDULE ((!USE_CONTROLLER_SCHEDULE) && (CONTROLLER_CHECK_MINUTES > 0))
+
 // FIXME: This will give random-ish numbers for non-common controllers, but
 // they should stay the same in any given run and this is just for logging so
 // it's not a big deal
@@ -41,6 +43,10 @@ const CONTROLLER_INDEX_T CONTROLLER_COUNT = SIZEOF_ARRAY(CONTROLLERS);
 //#define CONTROLLER_COUNT SIZEOF_ARRAY(CONTROLLERS)
 
 controller_status_t controllers[SIZEOF_ARRAY(CONTROLLERS)];
+
+#if TRACK_GLOBAL_SCHEDULE
+static utime_t next_scheduled_run = 0;
+#endif
 
 controller_status_t* get_controller_status_by_index(CONTROLLER_INDEX_T i) {
 	assert(i >= 0 && i < CONTROLLER_COUNT);
@@ -122,26 +128,23 @@ err_t run_controller(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, controller_st
 
 	return ERR_OK;
 }
+
+#if USE_CONTROLLER_SCHEDULE || USE_CONTROLLER_NEXTTIME
 void run_common_controllers(bool manual, bool force) {
 	CONTROLLER_CFG_STORAGE controller_cfg_t *cfg;
 	controller_status_t *status;
-
-	// Get rid of compiler warnings when features are disabled
-	UNUSED(manual);
-	UNUSED(force);
 
 	for (CONTROLLER_INDEX_T i = 0; i < CONTROLLER_COUNT; ++i) {
 		cfg = &CONTROLLERS[i];
 		status = &controllers[i];
 
-#if USE_CONTROLLER_SCHEDULE || USE_CONTROLLER_NEXTTIME
 		if ((force && !BIT_IS_SET(cfg->cfg_flags, CONTROLLER_CFG_FLAG_IGNORE_FORCED_RUN)) ||
 		    (status->next_run_time != 0 && (NOW() >= status->next_run_time)) ||
-# if USE_CONTROLLER_SCHEDULE
+#if USE_CONTROLLER_SCHEDULE
 		    (manual && cfg->schedule_minutes == 0 && !BIT_IS_SET(cfg->cfg_flags, CONTROLLER_CFG_FLAG_USE_TIME_OF_DAY))
-# else
+#else
 		    (manual)
-# endif
+#endif
 		   ) {
 			run_controller(cfg, status);
 			// Update the next run time here instead of run_controller() so that
@@ -149,13 +152,42 @@ void run_common_controllers(bool manual, bool force) {
 			// schedule
 			calculate_controller_alarm(cfg, status);
 		}
-#else
-		run_controller(cfg, status);
-#endif
 	}
 
 	return;
 }
+#elif TRACK_GLOBAL_SCHEDULE
+void run_common_controllers(bool manual, bool force) {
+	CONTROLLER_CFG_STORAGE controller_cfg_t *cfg;
+	controller_status_t *status;
+
+	bool do_run = false;
+	if (CONTROLLER_CHECK_MINUTES == 0) {
+		do_run = manual;
+	} else {
+		const utime_t now = NOW();
+
+		if (now >= next_scheduled_run) {
+			do_run = true;
+			const utime_t tmp = CONTROLLER_CHECK_MINUTES * SECONDS_PER_MINUTE;
+			next_scheduled_run = SNAP_TO_FACTOR(now, tmp) + (CONTROLLER_CHECK_MINUTES * SECONDS_PER_MINUTE);
+		}
+	}
+
+	if (do_run || force) {
+		for (CONTROLLER_INDEX_T i = 0; i < CONTROLLER_COUNT; ++i) {
+			cfg = &CONTROLLERS[i];
+			status = &controllers[i];
+
+			if (do_run || !BIT_IS_SET(cfg->cfg_flags, CONTROLLER_CFG_FLAG_IGNORE_FORCED_RUN)) {
+				run_controller(cfg, status);
+			}
+		}
+	}
+
+	return;
+}
+#endif
 
 err_t calculate_controller_alarm(CONTROLLER_CFG_STORAGE controller_cfg_t *cfg, controller_status_t *status) {
 	assert(cfg != NULL);
@@ -247,6 +279,14 @@ void calculate_common_controller_alarms(bool force) {
 			calculate_controller_alarm(cfg, status);
 		}
 	}
+
+#elif TRACK_GLOBAL_SCHEDULE
+	if (force || next_scheduled_run == 0) {
+		const utime_t tmp = (CONTROLLER_CHECK_MINUTES * SECONDS_PER_MINUTE);
+		const utime_t n = NOW() + tmp;
+
+		next_scheduled_run = SNAP_TO_FACTOR(n, tmp);
+	}
 #endif
 
 	return;
@@ -265,17 +305,8 @@ utime_t find_next_common_controller_alarm(void) {
 		}
 	}
 #else
-	if (CONTROLLER_CHECK_MINUTES > 0) {
-		/*
-		const utime_t tmp = (CONTROLLER_CHECK_MINUTES * SECONDS_PER_MINUTE);
-		next = NOW() + tmp;
-		next = SNAP_TO_FACTOR(next, tmp);
-		*/
-
-		// I don't know why this version is smaller on the attiny402 but it is.
-		next = (NOW() / SECONDS_PER_MINUTE) + CONTROLLER_CHECK_MINUTES;
-		next = SNAP_TO_FACTOR(next, CONTROLLER_CHECK_MINUTES);
-		next *= SECONDS_PER_MINUTE;
+	if (TRACK_GLOBAL_SCHEDULE) {
+		next = next_scheduled_run;
 	}
 #endif
 
