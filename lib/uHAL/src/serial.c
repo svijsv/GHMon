@@ -171,7 +171,7 @@ void serial_printf(const char *fmt, ...) {
 	}
 
 	va_start(arp, fmt);
-	printf_va(serial_putc, fmt, arp);
+	ulib_vprintf(serial_putc, fmt, arp);
 	flush_printf_buffer();
 	va_end(arp);
 
@@ -250,9 +250,9 @@ void logger(const char *fmt, ...) {
 	va_start(arp, fmt);
 #if uHAL_USE_RTC
 	// Prefix message with system up time
-	printf_vv(logger_putc, "%04lu:  ", (long unsigned int )NOW());
+	ulib_printf(logger_putc, "%04lu:  ", (long unsigned int )NOW());
 #endif
-	printf_va(logger_putc, fmt, arp);
+	ulib_vprintf(logger_putc, fmt, arp);
 	// Append message with a newline
 	logger_putc('\r'); logger_putc('\n');
 	flush_printf_buffer();

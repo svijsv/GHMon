@@ -411,7 +411,7 @@ string_t* string_appendf_va(string_t *restrict s, const char *restrict format, v
 
 	bs = S_printf_string;
 	S_printf_string = s;
-	printf_va(string_putc, format, arp);
+	ulib_vprintf(string_putc, format, arp);
 	S_printf_string = bs;
 
 	return s;

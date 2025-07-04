@@ -81,18 +81,6 @@ uint8_t ascii_to_upper(uint8_t c);
 //
 // Convert 'c' from  the range 'A'-'Z' to 'a' - 'z'
 uint8_t ascii_to_lower(uint8_t c);
-//
-// Convert 'c' from the range '0'-'9' to 0-9
-uint8_t ascii_to_digit(uint8_t c);
-//
-// Convert 'c' from the range 0-9 to '0'-'9'
-uint8_t ascii_from_digit(uint8_t c);
-//
-// Convert 'c' from the range '0'-'F' (or '0'-'f') to 0x0-0xF
-uint8_t ascii_to_xdigit(uint8_t c);
-//
-// Convert 'c' from the range 0x0-0xF to '0'-'F'
-uint8_t ascii_from_xdigit(uint8_t c);
 
 #if ASCII_SUBSTITUTE_FOR_CTYPE
 #define isascii(_c_) ascii_is_valid(_c_)
@@ -133,6 +121,21 @@ uint8_t ascii_from_xdigit(uint8_t c);
 #define ascii_to_upper(_c_) toupper(_c_)
 #define ascii_to_lower(_c_) tolower(_c_)
 #endif // ! ASCII_SUBSTITUTE_WITH_CTYPE
+
+//
+// These don't have ctype equivalents
+//
+// Convert 'c' from the range '0'-'9' to 0-9
+uint8_t ascii_to_digit(uint8_t c);
+//
+// Convert 'c' from the range 0-9 to '0'-'9'
+uint8_t ascii_from_digit(uint8_t c);
+//
+// Convert 'c' from the range '0'-'F' (or '0'-'f') to 0x0-0xF
+uint8_t ascii_to_xdigit(uint8_t c);
+//
+// Convert 'c' from the range 0x0-0xF to '0'-'F'
+uint8_t ascii_from_xdigit(uint8_t c);
 
 #define ASCII_IS_VALID(_c_) ((_c_) < 0x80U)
 #define ASCII_IS_CNTRL(_c_) ((_c_) < 0x20U || (_c_) == 0x7FU)

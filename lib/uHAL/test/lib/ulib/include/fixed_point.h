@@ -116,6 +116,12 @@ INLINE fixed_point_t fixed_point_div_by_int(fixed_point_t f, fixed_point_t n) {
 //
 // Calculate the natural logarithm of a fixed-point number.
 fixed_point_t log_fixed_point(fixed_point_t x);
+INLINE fixed_point_t ln_fixed_point(fixed_point_t x) {
+	return log_fixed_point(x);
+}
+INLINE fixed_point_t logn_fixed_point(fixed_point_t x) {
+	return log_fixed_point(x);
+}
 //
 // Calculate the base 10 logarithm of a fixed-point number.
 fixed_point_t log10_fixed_point(fixed_point_t x);

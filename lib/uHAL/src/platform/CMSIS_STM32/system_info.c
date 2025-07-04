@@ -58,14 +58,14 @@ void _print_platform_info(void (*printf_putc)(uint_fast8_t c)) {
 
 	// Due to a bug in the hardware, the ID and revision are always 0 on the
 	// STM32F1
-	printf_vv(printf_putc, "Hardware ID 0x%03X Rev 0x%04X, UID 0x%08X%08X%08X\r\n",
+	ulib_printf(printf_putc, "Hardware ID 0x%03X Rev 0x%04X, UID 0x%08X%08X%08X\r\n",
 		(uint )GATHER_BITS(DBGMCU->IDCODE, 0x0FFFU, DBGMCU_IDCODE_DEV_ID_Pos),
 		(uint )GATHER_BITS(DBGMCU->IDCODE, 0xFFFFU, DBGMCU_IDCODE_REV_ID_Pos),
 		(uint )(((uint32_t *)UID_BASE)[0]),
 		(uint )(((uint32_t *)UID_BASE)[1]),
 		(uint )(((uint32_t *)UID_BASE)[2])
 		);
-	printf_vv(printf_putc, "CMSIS %s version 0x%08X\r\n",
+	ulib_printf(printf_putc, "CMSIS %s version 0x%08X\r\n",
 		CMSIS_NAME,
 		(uint )CMSIS_VERSION
 		);
@@ -210,20 +210,20 @@ void _print_platform_info(void (*printf_putc)(uint_fast8_t c)) {
 		}
 		adc_sps = ADC_SAMPLES_PER_S;
 
-		printf_vv(printf_putc, "ADC: %uHz, %u bits, %u samples/S\r\n",
+		ulib_printf(printf_putc, "ADC: %uHz, %u bits, %u samples/S\r\n",
 		(uint )adcclk,
 		(uint )adc_bits,
 		(uint )adc_sps
 		);
 #endif
 
-		printf_vv(printf_putc, "HCLK: %uHz, PCLK1: %uHz, PCLK2: %uHz\r\n",
+		ulib_printf(printf_putc, "HCLK: %uHz, PCLK1: %uHz, PCLK2: %uHz\r\n",
 		(uint )hclk,
 		(uint )pclk1,
 		(uint )pclk2
 		);
 	}
-	printf_vv(printf_putc, "Should be:\r\nHCLK: %uHz, PCLK1: %uHz, PCLK2: %uHz\r\n",
+	ulib_printf(printf_putc, "Should be:\r\nHCLK: %uHz, PCLK1: %uHz, PCLK2: %uHz\r\n",
 		(uint )G_freq_HCLK,
 		(uint )G_freq_PCLK1,
 		(uint )G_freq_PCLK2
@@ -231,7 +231,7 @@ void _print_platform_info(void (*printf_putc)(uint_fast8_t c)) {
 
 	{
 		uint32_t src = GATHER_BITS(RCC->CFGR, 0b11U, RCC_CFGR_SWS_Pos);
-		printf_vv(printf_putc, "SysCLK: %s, CSS: %s, HSE: %s, HSI: %s, PLL: %s, LSE: %s, LSI: %s\r\n",
+		ulib_printf(printf_putc, "SysCLK: %s, CSS: %s, HSE: %s, HSI: %s, PLL: %s, LSE: %s, LSI: %s\r\n",
 			(src == 0b00U) ? "HSI" : (src == 0b01U) ? "HSE" : "PLL",
 			(BIT_IS_SET(RCC->CR,   RCC_CR_CSSON  )) ? ON : OFF,
 			(BIT_IS_SET(RCC->CR,   RCC_CR_HSEON  )) ? ON : OFF,
@@ -242,13 +242,13 @@ void _print_platform_info(void (*printf_putc)(uint_fast8_t c)) {
 		);
 	}
 
-	printf_vv(printf_putc, "HSI Calibration: 0x%01X, Trim: 0x%01X\r\n",
+	ulib_printf(printf_putc, "HSI Calibration: 0x%01X, Trim: 0x%01X\r\n",
 		(uint )GATHER_BITS(RCC->CR, 0xFU,     RCC_CR_HSICAL_Pos),
 		(uint )GATHER_BITS(RCC->CR, 0b11111U, RCC_CR_HSITRIM_Pos)
 	);
 
 #if HAVE_STM32F1_PLL
-	printf_vv(printf_putc, "PLL Src: %s, Mult: %u\r\n",
+	ulib_printf(printf_putc, "PLL Src: %s, Mult: %u\r\n",
 		(BIT_IS_SET(RCC->CFGR, RCC_CFGR_PLLSRC)) ?
 			(BIT_IS_SET(RCC->CFGR, RCC_CFGR_PLLXTPRE)) ? "HSE/2" : "HSE"
 			: "HSI/2",
@@ -256,7 +256,7 @@ void _print_platform_info(void (*printf_putc)(uint_fast8_t c)) {
 		(uint )(GATHER_BITS(RCC->CFGR, 0xFU, RCC_CFGR_PLLMULL_Pos) + 2U)
 	);
 #else
-	printf_vv(printf_putc, "PLL Src: %s, DivM: %u, MulN: %u, DivP: %u \r\n",
+	ulib_printf(printf_putc, "PLL Src: %s, DivM: %u, MulN: %u, DivP: %u \r\n",
 		(BIT_IS_SET(RCC->PLLCFGR, RCC_PLLCFGR_PLLSRC)) ? "HSE" : "HSI",
 		(uint )( GATHER_BITS(RCC->PLLCFGR, 0x3FU,  RCC_PLLCFGR_PLLM_Pos)),
 		(uint )( GATHER_BITS(RCC->PLLCFGR, 0x1FFU, RCC_PLLCFGR_PLLN_Pos)),
@@ -270,7 +270,7 @@ void _print_platform_info(void (*printf_putc)(uint_fast8_t c)) {
 
 		src = GATHER_BITS(RCC->BDCR, 0b11U, RCC_BDCR_RTCSEL_Pos);
 		READ_SPLIT32(div, RTC->PRLH, RTC->PRLL);
-		printf_vv(printf_putc, "RTC Src: %s/%u\r\n",
+		ulib_printf(printf_putc, "RTC Src: %s/%u\r\n",
 			(src == 0b00U) ? "None" :
 			(src == 0b01U) ? "LSE"  :
 			(src == 0b10U) ? "LSI"  :
@@ -283,7 +283,7 @@ void _print_platform_info(void (*printf_putc)(uint_fast8_t c)) {
 		uint32_t src;
 
 		src = GATHER_BITS(RCC->BDCR, 0b11U, RCC_BDCR_RTCSEL_Pos);
-		printf_vv(printf_putc, "RTC Src: %s, DivA: %u, DivS: %u\r\n",
+		ulib_printf(printf_putc, "RTC Src: %s, DivA: %u, DivS: %u\r\n",
 			(src == 0b00U) ? "None" :
 			(src == 0b01U) ? "LSE"  :
 			(src == 0b10U) ? "LSI"  :
@@ -296,14 +296,14 @@ void _print_platform_info(void (*printf_putc)(uint_fast8_t c)) {
 
 	const uint flash_size_kb = *(uint16_t *)FLASHSIZE_BASE;
 #if HAVE_STM32F1_FLASH
-	printf_vv(printf_putc, "Flash Size: %uKB, Latency: %u, Prefetch: %s, Half-cycle access: %s\r\n",
+	ulib_printf(printf_putc, "Flash Size: %uKB, Latency: %u, Prefetch: %s, Half-cycle access: %s\r\n",
 		(uint )flash_size_kb,
 		(uint )GATHER_BITS(FLASH->ACR, 0b111U, FLASH_ACR_LATENCY_Pos),
 		BIT_IS_SET(FLASH->ACR, FLASH_ACR_PRFTBE) ? ON : OFF,
 		BIT_IS_SET(FLASH->ACR, FLASH_ACR_HLFCYA) ? ON : OFF
 	);
 #else
-	printf_vv(printf_putc, "Flash Size: %uKB, Latency: %u, Prefetch: %s\r\n",
+	ulib_printf(printf_putc, "Flash Size: %uKB, Latency: %u, Prefetch: %s\r\n",
 		(uint )flash_size_kb,
 		(uint )GATHER_BITS(FLASH->ACR, 0b1111U, FLASH_ACR_LATENCY_Pos),
 		BIT_IS_SET(FLASH->ACR, FLASH_ACR_PRFTEN) ? ON : OFF
@@ -316,7 +316,7 @@ void _print_platform_info(void (*printf_putc)(uint_fast8_t c)) {
 #if ULIB_ENABLE_HALLOC
 	heap_size = (int )halloc_total_allocated();
 #endif
-	printf_vv(printf_putc, "RAM used: %dB/%uB stack, %dB heap, %dB .data, %dB .bss\r\n", (int )stack_size, (uint )RAM_PRESENT, (int )heap_size, (int )(data_size), (int )(bss_size));
+	ulib_printf(printf_putc, "RAM used: %dB/%uB stack, %dB heap, %dB .data, %dB .bss\r\n", (int )stack_size, (uint )RAM_PRESENT, (int )heap_size, (int )(data_size), (int )(bss_size));
 
 	return;
 }

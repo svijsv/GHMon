@@ -37,8 +37,9 @@
 # define HALLOC_HEAP_START_ADDR (&HALLOC_HEAP_START_LINKER_VAR)
 #endif
 
-#if HALLOC_HEAP_END_ADDR > 0 && HALLOC_HEAP_CANARY != 0
-# define HALLOC_REAL_HEAP_END_ADDR (HALLOC_HEAP_END_ADDR - 1U)
+#if HALLOC_HEAP_CANARY != 0
+# define HALLOC_REAL_HEAP_END_ADDR (HALLOC_HEAP_END_ADDR - (sizeof(canary_value)))
+# define HALLOC_CANARY_END_ADDR (HALLOC_HEAP_END_ADDR)
 #else
 # define HALLOC_REAL_HEAP_END_ADDR (HALLOC_HEAP_END_ADDR)
 #endif
@@ -48,30 +49,48 @@
 # define HALLOC_ADDR_ALIGNMENT (sizeof(uintptr_t))
 #endif
 
+typedef uint8_t canary_t;
+
 static const uintptr_t base_addr = (uintptr_t )HALLOC_HEAP_START_ADDR;
 static       uintptr_t next_addr = (uintptr_t )HALLOC_HEAP_START_ADDR;
+static const canary_t  canary_value = HALLOC_HEAP_CANARY;
+
+static bool canary_addr_is_valid(uintptr_t addr) {
+	return (addr >= base_addr
+// Avoid -Wtype-limits by using a macro
+#if HALLOC_HEAP_END_ADDR > 0
+	    && (HALLOC_HEAP_END_ADDR > 0 && addr < HALLOC_CANARY_END_ADDR)
+#endif
+		);
+}
 
 static void write_canary(void) {
 	if (HALLOC_HEAP_CANARY != 0) {
-		uint8_t *canary_addr = (uint8_t *)next_addr;
-		canary_addr[0] = HALLOC_HEAP_CANARY;
+		canary_t *canary_addr = (uint8_t *)next_addr;
+		if (!DO_HALLOC_SAFETY_CHECKS || canary_addr_is_valid(next_addr)) {
+			*canary_addr = canary_value;
+		}
 	}
 	return;
 }
 static bool canary_is_valid(void) {
 	if (HALLOC_HEAP_CANARY != 0 && next_addr != base_addr) {
-		uint8_t *canary_addr = (uint8_t *)next_addr;
-		return (canary_addr[0] == HALLOC_HEAP_CANARY);
+		canary_t *canary_addr = (uint8_t *)next_addr;
+		if (!DO_HALLOC_SAFETY_CHECKS || canary_addr_is_valid(next_addr)) {
+			return (*canary_addr == canary_value);
+		} else {
+			return false;
+		}
 	}
 	return true;
 }
 
 __attribute__((weak))
-size_t ulib_get_stack_pointer_addr(void) {
+uintptr_t ulib_get_stack_pointer_addr(void) {
 	// To simplify things and keep this platform-agnostic C99, we take the
 	// address of the most recently-allocated stack variable to determine where
 	// the bottom of the stack is. This is imperfect, but OK for our purposes.
-	size_t stack_ptr = (size_t )&stack_ptr;
+	uintptr_t stack_ptr = (uintptr_t )&stack_ptr;
 
 	return stack_ptr;
 }
