@@ -94,7 +94,9 @@ utime_t get_RTC_seconds(void) {
 	utime_t msticks;
 
 	msticks = NOW_MS();
-	RTC_millis += (msticks - RTC_prev_msticks);
+	if (msticks > RTC_prev_msticks) {
+		RTC_millis += (msticks - RTC_prev_msticks);
+	}
 	RTC_prev_msticks = msticks;
 
 	// This should happen close enough to every second that repeated subtraction

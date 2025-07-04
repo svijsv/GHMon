@@ -243,7 +243,7 @@ typedef struct {
 	// recalculating each time
 	uint8_t irqn;
 
-#if UART_INPUT_BUFFER_BYTES > 0 && ENABLE_UART_LISTENING
+#if UART_INPUT_BUFFER_BYTES > 0
 	volatile uart_buffer_t rx_buf;
 #endif
 } uart_port_t;

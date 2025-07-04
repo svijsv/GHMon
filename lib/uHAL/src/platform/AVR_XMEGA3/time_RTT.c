@@ -203,7 +203,10 @@ ISR(RTC_CNT_vect) {
 
 	// The CNT is 0 (or thereabout) because it rolls over before the ISR is
 	// entered.
-	last_wakeup_CNT = read_reg16(&RTT.PER) + 1;
+	last_wakeup_CNT = read_reg16(&RTT.PER);
+	if (last_wakeup_CNT != RTT_PER_MAX) {
+		++last_wakeup_CNT;
+	}
 }
 
 //
@@ -383,7 +386,7 @@ uint16_t wakeup_alarm_ms_used(void) {
 	}
 	per = read_reg16(&RTT.PER);
 	cnt = last_wakeup_CNT;
-	wanted_ms = (uint32_t )((per + 1U) * (uint32_t )rtt_calibration) / RTT_CALIBRATE_CYCLES;
+	wanted_ms = (uint32_t )(((uint32_t )per + 1U) * (uint32_t )rtt_calibration) / RTT_CALIBRATE_CYCLES;
 
 	return (uint32_t )((uint32_t )cnt * (uint32_t )wanted_ms) / per;
 }
