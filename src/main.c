@@ -291,8 +291,8 @@ static utime_t set_alarms(bool force) {
 		reason = "Run controllers";
 	}
 
-	int diff = (next > now) ? (int )(next - now) : -((int )(now - next));
-	LOGGER("Next alarm in %d seconds: %s", diff, reason);
+	long diff = (next > now) ? (long )(next - now) : -((long )(now - next));
+	LOGGER("Next alarm in %ld seconds: %s", diff, reason);
 	// Get rid of compiler warnings when LOGGER() isn't used
 	UNUSED(diff);
 	UNUSED(reason);
