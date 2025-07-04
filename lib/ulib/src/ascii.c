@@ -31,6 +31,7 @@
 //
 #include "ascii.h"
 #if ULIB_ENABLE_ASCII
+#if ! ASCII_SUBSTITUTE_WITH_CTYPE
 
 #include "debug.h"
 
@@ -218,6 +219,8 @@ uint8_t ascii_to_lower(uint8_t c) {
 	return c | 0x20U;
 }
 
+#endif // ! ASCII_SUBSTITUTE_WITH_CTYPE
+
 uint8_t ascii_to_digit(uint8_t c) {
 #if DO_ASCII_SAFETY_CHECKS
 	if (c < '0' || c > '9') {
@@ -277,7 +280,6 @@ uint8_t ascii_to_xdigit(uint8_t c) {
 	return c;
 	*/
 }
-
 uint8_t ascii_from_xdigit(uint8_t c) {
 #if DO_ASCII_SAFETY_CHECKS
 	if (c > 0x0FU) {
