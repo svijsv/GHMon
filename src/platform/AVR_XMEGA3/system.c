@@ -233,12 +233,12 @@ static void _sleep_ms(utime_t ms, uint8_t flags, uint_t *wakeups) {
 					stop_wakeup_alarm();
 				}
 			}
-#if uHAL_USE_RTC && uHAL_USE_RTC_EMULATION
-			add_RTC_millis(wakeup_alarm_ms_used());
-#endif
 		}
 		stop_wakeup_alarm();
 		enable_systick();
+#if uHAL_USE_RTC && uHAL_USE_RTC_EMULATION
+		add_RTC_millis(wakeup_alarm_ms_used());
+#endif
 	}
 	RESTORE_INTERRUPTS(sreg);
 

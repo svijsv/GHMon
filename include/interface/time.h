@@ -143,7 +143,7 @@ void add_RTC_millis(uint_fast16_t ms);
 /// @note
 /// This only impacts emulated RTCs.
 ///
-/// @param ms The number of milliseconds to add to the RTC.
+/// @param ms The number of milliseconds to subtract from the RTC.
 void subtract_RTC_millis(uint_fast16_t ms);
 #endif // uHAL_USE_RTC_EMULATION
 /// @}
