@@ -79,9 +79,9 @@ DEBUG_CPP_MACRO(SYSTICKS_PER_S)
 
 // 'RTC' ticks, seconds
 static utime_t RTC_ticks = 0;
-static utime_t RTC_prev_msticks = 0;
+static utime_t RTC_prev_systicks = 0;
 // It would be easier in theory to add a millisecond to the RTC by subtracting
-// one from RTC_prev_msticks but the time spent sleeping is so much greater
+// one from RTC_prev_systicks but the time spent sleeping is so much greater
 // than the time spent awake that doing so would roll the counter over rather
 // quickly, so a separate counter is needed for that
 static int32_t RTC_millis = 0;
@@ -91,28 +91,35 @@ static int32_t RTC_millis = 0;
 // Manage the fake RTC system
 //
 utime_t get_RTC_seconds(void) {
-	utime_t msticks;
+	utime_t systicks, diff;
 
-	msticks = NOW_MS();
-	if (msticks > RTC_prev_msticks) {
-		RTC_millis += (msticks - RTC_prev_msticks);
+	systicks = NOW_MS();
+	if (systicks > RTC_prev_systicks) {
+		diff = systicks - RTC_prev_systicks;
+		while (diff >= (int32_t )SYSTICKS_PER_S) {
+			++RTC_ticks;
+			diff -= (int32_t )SYSTICKS_PER_S;
+		}
+		// We adjust systicks so we don't lose any left over ticks when we update
+		// RTC_prev_systicks below.
+		systicks -= diff;
 	}
-	RTC_prev_msticks = msticks;
+	RTC_prev_systicks = systicks;
 
 	// This should happen close enough to every second that repeated subtraction
 	// will be faster than division
-	while (RTC_millis >= (int32_t )SYSTICKS_PER_S) {
+	while (RTC_millis >= 1000) {
 		++RTC_ticks;
-		RTC_millis -= (int32_t )SYSTICKS_PER_S;
+		RTC_millis -= 1000;
 	}
 	// Without this block, the time will simply pause until it's > SYSTICKS_PER_S
 	// instead of reversing because reversing may cause issues with any code
 	// that expects time to always move forward
-	while (RTC_millis <= -(int32_t )SYSTICKS_PER_S) {
+	while (RTC_millis <= -1000) {
 		if (RTC_ticks != 0) {
 			--RTC_ticks;
 		}
-		RTC_millis += SYSTICKS_PER_S;
+		RTC_millis += 1000;
 	}
 
 	return RTC_ticks;
@@ -123,7 +130,7 @@ err_t set_RTC_seconds(utime_t s) {
 #endif
 
 	RTC_ticks = s;
-	RTC_prev_msticks = NOW_MS();
+	RTC_prev_systicks = NOW_MS();
 	RTC_millis = 0;
 
 	return ERR_OK;

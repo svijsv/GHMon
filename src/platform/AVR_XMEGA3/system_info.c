@@ -55,12 +55,12 @@ void _print_platform_info(void (*printf_putc)(uint_fast8_t c)) {
 	}
 #endif
 
-	printf_vv(printf_putc, F("Firmware signature: 0x%02X%02X%02X\r\n"),
+	ulib_printf(printf_putc, F("Firmware signature: 0x%02X%02X%02X\r\n"),
 		(uint )SIGNATURE_0,
 		(uint )SIGNATURE_1,
 		(uint )SIGNATURE_2
 		);
-	printf_vv(printf_putc, F("Device signature: 0x%02X%02X%02X\r\n"),
+	ulib_printf(printf_putc, F("Device signature: 0x%02X%02X%02X\r\n"),
 		(uint )signature[0],
 		(uint )signature[1],
 		(uint )signature[2]
@@ -136,7 +136,7 @@ void _print_platform_info(void (*printf_putc)(uint_fast8_t c)) {
 	uint32_t adcclk = 0;
 #endif
 
-	printf_vv(printf_putc, F("Osc: %luHz, Core: %luHz, Src: %s, ADC: %luHz\r\n"),
+	ulib_printf(printf_putc, F("Osc: %luHz, Core: %luHz, Src: %s, ADC: %luHz\r\n"),
 		(uint32_t )F_OSC,
 		(uint32_t )coreclk,
 		clksrc,
@@ -151,7 +151,7 @@ void _print_platform_info(void (*printf_putc)(uint_fast8_t c)) {
 #if ULIB_ENABLE_HALLOC
 	heap_size = (int )halloc_total_allocated();
 #endif
-	printf_vv(printf_putc, F("RAM used: %dB stack, %dB heap, %dB .data, %dB .bss\r\n"), (int )stack_size, (int )heap_size, (int )data_size, (int )bss_size);
+	ulib_printf(printf_putc, F("RAM used: %dB stack, %dB heap, %dB .data, %dB .bss\r\n"), (int )stack_size, (int )heap_size, (int )data_size, (int )bss_size);
 
 	return;
 }

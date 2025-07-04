@@ -34,8 +34,8 @@
 
 
 // Print printf-formatted strings one character at a time using pputc().
-// printf_vv() is comparable to printf() and printf_va() to vprintf().
-// printf_va() is defined weakly so that it can easily be replaced by another
+// ulib_printf() is comparable to printf() and ulib_vprintf() to vprintf().
+// ulib_vprintf() is defined weakly so that it can easily be replaced by another
 // implementation.
 //
 // Each printf() format string takes the form:
@@ -85,9 +85,9 @@
 //    At least one digit is always printed for integers instead of printing
 //    nothing for '0' when the precision is 0.
 //
-void printf_vv(void (*pputc)(uint_fast8_t c), const char *restrict fmt, ...)
+void ulib_printf(void (*pputc)(uint_fast8_t c), const char *restrict fmt, ...)
 	__attribute__ ((format(printf, 2, 3)));
-void printf_va(void (*pputc)(uint_fast8_t c), const char *restrict fmt, va_list arp);
+void ulib_vprintf(void (*pputc)(uint_fast8_t c), const char *restrict fmt, va_list arp);
 
 #endif // ULIB_ENABLE_PRINTF
 #endif // _ULIB_PRINTF_H
