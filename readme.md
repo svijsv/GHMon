@@ -26,11 +26,11 @@ To build only the shared library, run `make shared-[debug|release]`.
 To build only the static library, run `make static-[debug|release]`.
 
 The environment variables `CC`, `AR`, and `SIZE` can be set to the program
-to use instead of the default `cc`, `ar`, `size`.
+to use instead of the default `cc`, `ar`, and `size`.
 
-The environment variable `CFLAGS` can be set to pass addition C compiler options.
+The environment variable `CFLAGS` can be set to pass additional C compiler options.
 
-The environment variable `LDFLAGS` can be set to pass addition linker options.
+The environment variable `LDFLAGS` can be set to pass additional linker options.
 
 
 Usage

@@ -90,12 +90,15 @@ typedef enum {
 #if ULIB_ENABLE_ERROR_TRANSLATION
 //
 // Return a string describing the error code.
+// 'err' may be < 0, in which case the absolute value is used.
 const char* err_to_cstring(err_t err);
 //
 // Try to translate an err_t code into an errno code.
+// 'err' may be < 0, in which case the absolute value is used.
 int err_to_errno(err_t err);
 //
 // Try to translate an errno code into an err_t code.
+// 'err' may be < 0, in which case the absolute value is used.
 err_t errno_to_err(int en);
 
 #endif // ULIB_ENABLE_ERROR_TRANSLATION

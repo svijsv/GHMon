@@ -69,11 +69,11 @@
 #endif
 
 
-void printf_vv(void (*pputc)(uint_fast8_t c), const char *restrict fmt, ...) {
+void ulib_printf(void (*pputc)(uint_fast8_t c), const char *restrict fmt, ...) {
 	va_list arp;
 
 	va_start(arp, fmt);
-	printf_va(pputc, fmt, arp);
+	ulib_vprintf(pputc, fmt, arp);
 	va_end(arp);
 
 	return;
@@ -355,7 +355,7 @@ static void print_char(void(*pputc)(uint_fast8_t c), char c, const printf_opts_t
 }
 
 __attribute__((weak))
-void printf_va(void(*pputc)(uint_fast8_t c), const char *restrict fmt_s, va_list arp) {
+void ulib_vprintf(void(*pputc)(uint_fast8_t c), const char *restrict fmt_s, va_list arp) {
 	ulib_assert(pputc != NULL);
 	ulib_assert(fmt_s != NULL);
 

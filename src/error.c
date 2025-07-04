@@ -35,6 +35,10 @@
 #define EUNKNOWN 0xFF
 
 const char* err_to_cstring(err_t err) {
+	if (err < 0) {
+		err = -err;
+	}
+
 	switch (err) {
 	case ERR_OK:
 		return "OK";
