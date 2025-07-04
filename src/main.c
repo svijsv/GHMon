@@ -122,7 +122,14 @@ int main(void) {
 					led_on();
 				}
 			}
-			hibernate_s(next_wakeup - now, HIBERNATE_DEEP, uHAL_CFG_ALLOW_INTERRUPTS);
+			// Due to small innaccuracies in how uHAL RTC emulation and AVR timers work,
+			// we will often awaken just before we really want to and end up sleeping for
+			// a very short period to compensate. It's not a big problem, but just the
+			// same deliberately setting the wake alarm for 1 second later will mostly
+			// fix that at the cost of a few (~10?) bytes of program memory.
+			hibernate_s((next_wakeup - now), HIBERNATE_DEEP, uHAL_CFG_ALLOW_INTERRUPTS);
+			//hibernate_s((next_wakeup - now)+1, HIBERNATE_DEEP, uHAL_CFG_ALLOW_INTERRUPTS);
+
 			// Clear the status *after* hibernation so that we wake instantly if we
 			// recieved an interrupt while something besides sleep was happening
 			uHAL_CLEAR_STATUS(uHAL_FLAG_IRQ);
