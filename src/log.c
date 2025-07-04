@@ -698,7 +698,7 @@ static void lprintf(const char *format, ...) {
 	va_list arp;
 
 	va_start(arp, format);
-	printf_va(lprintf_putc, format, arp);
+	ulib_vprintf(lprintf_putc, format, arp);
 	va_end(arp);
 
 	return;
